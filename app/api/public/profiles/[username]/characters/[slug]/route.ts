@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { getPublicCharacter } from "@/lib/public-profiles";
 
 export async function GET(
-  _: Request,
-  context: { params: { username: string; slug: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ username: string; slug: string }> }
 ) {
-  const { username, slug } = context.params;
+  const { username, slug } = await context.params;
 
   const result = await getPublicCharacter(username, slug);
 
