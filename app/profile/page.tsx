@@ -1,6 +1,8 @@
 "use client";
 
+
 import { FormEvent, useEffect, useMemo, useState } from "react";
+
 
 const GAME_OPTIONS = [
   "Dungeons & Dragons",
@@ -14,7 +16,9 @@ const GAME_OPTIONS = [
 ];
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"] as const;
+
 type RoleOption = (typeof ROLE_OPTIONS)[number];
+
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -74,6 +78,7 @@ const sortAvailabilitySlots = (slots: string[]) =>
     (a, b) => TIME_SLOTS.indexOf(a) - TIME_SLOTS.indexOf(b)
   );
 
+
 export default function ProfilePage() {
   const [name, setName] = useState("");
   const [commonName, setCommonName] = useState("");
@@ -85,6 +90,7 @@ export default function ProfilePage() {
   const [availability, setAvailability] = useState<Record<string, string[]>>(
     () => createDefaultAvailability()
   );
+
   const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -138,6 +144,7 @@ export default function ProfilePage() {
     fetchProfile();
   }, []);
 
+
   const remainingBioCharacters = 2000 - bio.length;
 
   const toggleGame = (game: string) => {
@@ -175,7 +182,9 @@ export default function ProfilePage() {
 
       return {
         ...prev,
+
         [day]: sortAvailabilitySlots(updatedSlots),
+
       };
     });
   };
@@ -249,6 +258,7 @@ export default function ProfilePage() {
 
   const isSubmitDisabled = isSaving || isLoading;
 
+
   return (
     <section className="space-y-10">
       <header className="space-y-2">
@@ -260,7 +270,9 @@ export default function ProfilePage() {
         </p>
       </header>
 
+
       <form className="space-y-12" onSubmit={handleSubmit}>
+
         <section className="grid gap-6 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30 md:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium text-slate-200">
@@ -463,6 +475,7 @@ export default function ProfilePage() {
             ))}
           </div>
         </section>
+
         <div className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
           <button
             type="submit"
@@ -480,21 +493,10 @@ export default function ProfilePage() {
             ) : null}
           </div>
         </div>
+
       </form>
 
-      <section className="space-y-3 rounded-2xl border border-slate-800/60 bg-slate-950/60 p-6 shadow-inner shadow-slate-950/30">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-100">Profile Preview</h2>
-          <p className="text-sm text-slate-400">
-            Data from the form is shown below as it would be structured in the
-            profile object. This is a live preview of the resulting payload.
-          </p>
-        </div>
-
-        <pre className="overflow-x-auto rounded-xl bg-slate-950/80 p-4 text-xs text-slate-200">
-          {JSON.stringify(profilePreview, null, 2)}
-        </pre>
-      </section>
+     
     </section>
   );
 }
