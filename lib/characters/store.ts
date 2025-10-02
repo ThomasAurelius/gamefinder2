@@ -15,19 +15,25 @@ async function ensureDataFile(): Promise<void> {
     await fs.mkdir(DATA_DIRECTORY, { recursive: true });
   } catch (error) {
     console.error("Failed to create data directory", error);
+    throw error;
   }
 
   try {
     await fs.access(DATA_FILE);
   } catch {
-    await fs.writeFile(DATA_FILE, "[]", "utf8");
+    try {
+      await fs.writeFile(DATA_FILE, "[]", "utf8");
+    } catch (error) {
+      console.error("Failed to create data file", error);
+      throw error;
+    }
   }
 }
 
 async function readCharactersFile(): Promise<StoredCharacter[]> {
-  await ensureDataFile();
-
   try {
+    await ensureDataFile();
+
     const fileContents = await fs.readFile(DATA_FILE, "utf8");
 
     if (!fileContents.trim()) {
@@ -56,8 +62,13 @@ async function readCharactersFile(): Promise<StoredCharacter[]> {
 }
 
 async function writeCharactersFile(characters: StoredCharacter[]): Promise<void> {
-  await ensureDataFile();
-  await fs.writeFile(DATA_FILE, JSON.stringify(characters, null, 2), "utf8");
+  try {
+    await ensureDataFile();
+    await fs.writeFile(DATA_FILE, JSON.stringify(characters, null, 2), "utf8");
+  } catch (error) {
+    console.error("Failed to write characters file", error);
+    throw error;
+  }
 }
 
 export async function listCharacters(): Promise<StoredCharacter[]> {
