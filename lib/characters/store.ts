@@ -11,13 +11,17 @@ const DATA_DIRECTORY = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIRECTORY, "characters.json");
 
 async function ensureDataFile(): Promise<void> {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory", error);
+  }
 
-    try {
-      await fs.access(DATA_FILE);
-    } catch {
-      await fs.writeFile(DATA_FILE, "[]", "utf8");
-    }
+  try {
+    await fs.access(DATA_FILE);
+  } catch {
+    await fs.writeFile(DATA_FILE, "[]", "utf8");
+  }
 }
 
 async function readCharactersFile(): Promise<StoredCharacter[]> {

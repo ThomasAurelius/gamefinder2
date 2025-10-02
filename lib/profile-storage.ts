@@ -37,7 +37,11 @@ const DEFAULT_PROFILE: ProfileRecord = {
 };
 
 async function ensureDataDirectory() {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory", error);
+  }
 }
 
 export async function readProfile(): Promise<ProfileRecord> {
