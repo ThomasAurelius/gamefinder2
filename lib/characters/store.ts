@@ -42,8 +42,12 @@ async function readCharactersFile(): Promise<StoredCharacter[]> {
 
     return parsed.map((character) => ({
       ...character,
-      stats: character.stats.map((stat) => ({ ...stat })),
-      skills: character.skills.map((skill) => ({ ...skill })),
+      stats: Array.isArray(character.stats) 
+        ? character.stats.map((stat) => ({ ...stat }))
+        : [],
+      skills: Array.isArray(character.skills)
+        ? character.skills.map((skill) => ({ ...skill }))
+        : [],
     }));
   } catch (error) {
     console.error("Failed to read characters file", error);
