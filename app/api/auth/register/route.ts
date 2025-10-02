@@ -4,7 +4,7 @@ import { getDb } from "@/lib/mongodb";
 import { hashPassword } from "@/lib/password";
 
 type UserDocument = {
-  _id: ObjectId;
+  _id?: ObjectId;
   email: string;
   passwordHash: string;
   name: string;
