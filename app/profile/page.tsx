@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+
+import { FormEvent, useEffect, useMemo, useState } from "react";
+
 
 const GAME_OPTIONS = [
   "Dungeons & Dragons",
@@ -14,6 +16,9 @@ const GAME_OPTIONS = [
 ];
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"] as const;
+
+type RoleOption = (typeof ROLE_OPTIONS)[number];
+
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -56,6 +61,24 @@ const tagButtonClasses = (
   return [sizeClasses, baseClasses, activeClasses, disabledClasses].join(" ");
 };
 
+type ProfilePayload = {
+  name: string;
+  commonName: string;
+  location: string;
+  zipCode: string;
+  bio: string;
+  games: string[];
+  favoriteGames: string[];
+  availability: Record<string, string[]>;
+  primaryRole: RoleOption | "";
+};
+
+const sortAvailabilitySlots = (slots: string[]) =>
+  [...new Set(slots)].sort(
+    (a, b) => TIME_SLOTS.indexOf(a) - TIME_SLOTS.indexOf(b)
+  );
+
+
 export default function ProfilePage() {
   const [name, setName] = useState("");
   const [commonName, setCommonName] = useState("");
@@ -67,7 +90,60 @@ export default function ProfilePage() {
   const [availability, setAvailability] = useState<Record<string, string[]>>(
     () => createDefaultAvailability()
   );
-  const [primaryRole, setPrimaryRole] = useState<(typeof ROLE_OPTIONS)[number] | "">("");
+
+  const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch("/api/profile");
+        if (!response.ok) {
+          throw new Error("Failed to load profile");
+        }
+
+        const profile: ProfilePayload = await response.json();
+        const normalizedAvailability = createDefaultAvailability();
+
+        Object.entries(profile.availability ?? {}).forEach(([day, slots]) => {
+          if (Array.isArray(slots)) {
+            normalizedAvailability[day] = sortAvailabilitySlots(slots);
+          }
+        });
+
+        setName(profile.name ?? "");
+        setCommonName(profile.commonName ?? "");
+        setLocation(profile.location ?? "");
+        setZipCode(profile.zipCode ?? "");
+        setBio(profile.bio ?? "");
+        setSelectedGames(profile.games ?? []);
+        const normalizedGames = profile.games ?? [];
+        setFavoriteGames(
+          (profile.favoriteGames ?? []).filter((game) =>
+            normalizedGames.includes(game)
+          )
+        );
+        setAvailability(normalizedAvailability);
+        const normalizedRole = ROLE_OPTIONS.includes(
+          profile.primaryRole as RoleOption
+        )
+          ? (profile.primaryRole as RoleOption)
+          : "";
+        setPrimaryRole(normalizedRole);
+      } catch (error) {
+        console.error(error);
+        setSaveError("Unable to load profile data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
 
   const remainingBioCharacters = 2000 - bio.length;
 
@@ -106,7 +182,9 @@ export default function ProfilePage() {
 
       return {
         ...prev,
-        [day]: updatedSlots,
+
+        [day]: sortAvailabilitySlots(updatedSlots),
+
       };
     });
   };
@@ -136,6 +214,51 @@ export default function ProfilePage() {
     ]
   );
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
+
+    const payload: ProfilePayload = {
+      name,
+      commonName,
+      location,
+      zipCode,
+      bio,
+      games: selectedGames,
+      favoriteGames,
+      availability,
+      primaryRole,
+    };
+
+    try {
+      const response = await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || "Failed to save profile");
+      }
+
+      setSaveSuccess(true);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Unable to save profile"
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const isSubmitDisabled = isSaving || isLoading;
+
+
   return (
     <section className="space-y-10">
       <header className="space-y-2">
@@ -147,7 +270,9 @@ export default function ProfilePage() {
         </p>
       </header>
 
-      <form className="space-y-12">
+
+      <form className="space-y-12" onSubmit={handleSubmit}>
+
         <section className="grid gap-6 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30 md:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium text-slate-200">
@@ -350,21 +475,28 @@ export default function ProfilePage() {
             ))}
           </div>
         </section>
-      </form>
 
-      <section className="space-y-3 rounded-2xl border border-slate-800/60 bg-slate-950/60 p-6 shadow-inner shadow-slate-950/30">
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-slate-100">Profile Preview</h2>
-          <p className="text-sm text-slate-400">
-            Data from the form is shown below as it would be structured in the
-            profile object. This is a live preview of the resulting payload.
-          </p>
+        <div className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+          <button
+            type="submit"
+            className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={isSubmitDisabled}
+          >
+            {isLoading ? "Loading profile..." : isSaving ? "Saving..." : "Save Profile"}
+          </button>
+          <div aria-live="polite" className="text-sm">
+            {saveSuccess && !saveError ? (
+              <span className="text-emerald-400">Profile saved successfully.</span>
+            ) : null}
+            {saveError ? (
+              <span className="text-rose-400">{saveError}</span>
+            ) : null}
+          </div>
         </div>
 
-        <pre className="overflow-x-auto rounded-xl bg-slate-950/80 p-4 text-xs text-slate-200">
-          {JSON.stringify(profilePreview, null, 2)}
-        </pre>
-      </section>
+      </form>
+
+     
     </section>
   );
 }
