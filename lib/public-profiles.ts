@@ -116,7 +116,11 @@ function cloneProfiles(source: PublicProfileRecord[]): PublicProfileRecord[] {
 }
 
 async function ensureDataFile(): Promise<void> {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory", error);
+  }
 
   try {
     await fs.access(PUBLIC_PROFILE_FILE);
