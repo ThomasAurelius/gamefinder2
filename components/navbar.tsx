@@ -1,0 +1,184 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+type NavLink = {
+  href: string;
+  label: string;
+};
+
+const primaryLinks: NavLink[] = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/library", label: "Library" },
+  { href: "/find-game", label: "Find Game" },
+];
+
+const accountLinks: NavLink[] = [
+  { href: "/profile", label: "Profile" },
+  { href: "/settings", label: "Settings" },
+  { href: "/characters", label: "Characters" },
+  { href: "/auth/login", label: "Logout" },
+];
+
+function isActive(pathname: string, href: string) {
+  return pathname === href;
+}
+
+export function Navbar() {
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+
+  const toggleMenu = () => setMenuOpen((open) => !open);
+  const closeMenu = () => setMenuOpen(false);
+  const toggleAccount = () => setAccountOpen((open) => !open);
+
+  return (
+    <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-semibold text-white"
+          onClick={closeMenu}
+        >
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-base font-bold">
+            GF
+          </span>
+          <span className="hidden sm:inline">GameFinder</span>
+        </Link>
+        <nav className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
+          {primaryLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`rounded-md px-3 py-2 transition hover:bg-white/10 ${
+                isActive(pathname, link.href)
+                  ? "bg-white/10 text-white"
+                  : "text-slate-200"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="relative">
+            <button
+              type="button"
+              className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
+                accountOpen ? "bg-white/10 text-white" : ""
+              }`}
+              onClick={toggleAccount}
+              aria-haspopup="menu"
+              aria-expanded={accountOpen}
+            >
+              Account
+              <svg
+                aria-hidden
+                className={`h-4 w-4 transition-transform ${
+                  accountOpen ? "rotate-180" : ""
+                }`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
+              </svg>
+            </button>
+            {accountOpen ? (
+              <div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
+                {accountLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => {
+                      setAccountOpen(false);
+                      closeMenu();
+                    }}
+                    className={`block px-4 py-2 text-sm transition hover:bg-white/10 ${
+                      isActive(pathname, link.href)
+                        ? "bg-white/10 text-white"
+                        : "text-slate-200"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        </nav>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center rounded-md border border-white/10 p-2 text-slate-200 transition hover:bg-white/10 md:hidden"
+          onClick={toggleMenu}
+          aria-label="Toggle navigation"
+        >
+          {menuOpen ? (
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 6l12 12M6 18L18 6" />
+            </svg>
+          ) : (
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+      {menuOpen ? (
+        <div className="border-t border-white/10 bg-slate-950/90 md:hidden">
+          <div className="space-y-1 px-4 pb-4 pt-2 text-sm font-medium text-slate-200">
+            {primaryLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMenu}
+                className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+                  isActive(pathname, link.href)
+                    ? "bg-white/10 text-white"
+                    : "text-slate-200"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="border-t border-white/5 pt-2">
+              <p className="px-3 text-xs uppercase tracking-wide text-slate-400">
+                Account
+              </p>
+              {accountLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={closeMenu}
+                  className={`mt-1 block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+                    isActive(pathname, link.href)
+                      ? "bg-white/10 text-white"
+                      : "text-slate-200"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </header>
+  );
+}
