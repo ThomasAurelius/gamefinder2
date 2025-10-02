@@ -1,7 +1,7 @@
 "use client";
 
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 
 const GAME_OPTIONS = [
@@ -188,31 +188,6 @@ export default function ProfilePage() {
       };
     });
   };
-
-  const profilePreview = useMemo(
-    () => ({
-      name,
-      commonName,
-      location,
-      zipCode,
-      bio,
-      games: selectedGames,
-      favoriteGames,
-      availability,
-      primaryRole,
-    }),
-    [
-      name,
-      commonName,
-      location,
-      zipCode,
-      bio,
-      selectedGames,
-      favoriteGames,
-      availability,
-      primaryRole,
-    ]
-  );
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
