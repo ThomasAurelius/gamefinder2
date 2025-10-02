@@ -209,6 +209,7 @@ export default function ProfilePage() {
 		setSaveSuccess(false);
 
 		const payload: ProfilePayload = {
+			name,
 			commonName,
 			location,
 			zipCode,
