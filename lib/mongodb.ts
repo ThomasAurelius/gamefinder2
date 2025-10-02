@@ -1,30 +1,104 @@
-import { MongoClient, type Db } from "mongodb";
+import { MongoClient, type Db, type MongoClientOptions } from "mongodb";
 
-let client: MongoClient | null = null;
-let clientPromise: Promise<MongoClient> | null = null;
+type MongoCache = {
+  client: MongoClient | null;
+  promise: Promise<MongoClient> | null;
+};
+
+const globalForMongo = globalThis as typeof globalThis & {
+  __mongoCache?: MongoCache;
+};
+
+function getMongoCache(): MongoCache {
+  if (!globalForMongo.__mongoCache) {
+    globalForMongo.__mongoCache = { client: null, promise: null };
+  }
+
+  return globalForMongo.__mongoCache;
+}
+
+function resolveMongoUri(): string {
+  const uri =
+    process.env.MONGODB_URI ??
+    process.env.MONGODB_URL ??
+    process.env.MONGO_URI ??
+    process.env.MONGO_URL ??
+    process.env.DATABASE_URL;
+
+  if (uri && uri.trim().length > 0) {
+    return uri;
+  }
+
+  const host = process.env.MONGODB_HOST ?? process.env.MONGO_HOST;
+
+  if (!host) {
+    throw new Error(
+      "MongoDB connection details are not configured. Set MONGODB_URI or provide MONGODB_HOST.",
+    );
+  }
+
+  const protocol = process.env.MONGODB_PROTOCOL ?? process.env.MONGO_PROTOCOL ?? "mongodb+srv";
+  const port = process.env.MONGODB_PORT ?? process.env.MONGO_PORT;
+  const authority = port ? `${host}:${port}` : host;
+
+  return `${protocol}://${authority}`;
+}
+
+function resolveMongoOptions(): MongoClientOptions | undefined {
+  const username = process.env.MONGODB_USERNAME ?? process.env.MONGODB_USER;
+  const password = process.env.MONGODB_PASSWORD;
+  const authSource = process.env.MONGODB_AUTH_SOURCE ?? process.env.MONGO_AUTH_SOURCE;
+  const appName = process.env.MONGODB_APP_NAME ?? process.env.MONGODB_APPNAME;
+
+  const options: MongoClientOptions = {};
+
+  if (username || password) {
+    if (!username || password === undefined) {
+      throw new Error(
+        "Incomplete MongoDB credentials. Provide both MONGODB_USERNAME (or MONGODB_USER) and MONGODB_PASSWORD.",
+      );
+    }
+
+    options.auth = {
+      username,
+      password,
+    };
+  }
+
+  if (authSource) {
+    options.authSource = authSource;
+  }
+
+  if (appName) {
+    options.appName = appName;
+  }
+
+  return Object.keys(options).length > 0 ? options : undefined;
+}
 
 async function getClient(): Promise<MongoClient> {
-  const uri = process.env.MONGODB_URI;
+  const cache = getMongoCache();
 
-  if (!uri) {
-    throw new Error("MONGODB_URI is not defined in the environment");
+  if (cache.client) {
+    return cache.client;
   }
 
-  if (client) {
-    return client;
+  if (!cache.promise) {
+    const uri = resolveMongoUri();
+    const options = resolveMongoOptions();
+    const client = new MongoClient(uri, options);
+    cache.promise = client.connect().then((connectedClient) => {
+      cache.client = connectedClient;
+      return connectedClient;
+    });
   }
 
-  if (!clientPromise) {
-    client = new MongoClient(uri);
-    clientPromise = client.connect();
-  }
-
-  client = await clientPromise;
-  return client;
+  cache.client = await cache.promise;
+  return cache.client;
 }
 
 export async function getDb(): Promise<Db> {
-  const dbName = process.env.MONGODB_DB ?? "gamefinder";
+  const dbName = process.env.MONGODB_DB ?? process.env.MONGO_DB ?? "gamefinder";
   const mongoClient = await getClient();
   return mongoClient.db(dbName);
 }

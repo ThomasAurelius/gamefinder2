@@ -3,6 +3,15 @@ import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { hashPassword } from "@/lib/password";
 
+type UserDocument = {
+  _id?: ObjectId;
+  email: string;
+  passwordHash: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const { email, password, name } = await request.json();
@@ -25,7 +34,7 @@ export async function POST(request: NextRequest) {
     const displayName = typeof name === "string" && name.trim().length > 0 ? name.trim() : normalizedEmail.split("@")[0];
 
     const db = await getDb();
-    const usersCollection = db.collection<{ _id: ObjectId; email: string }>("users");
+    const usersCollection = db.collection<UserDocument>("users");
 
     const existingUser = await usersCollection.findOne({ email: normalizedEmail });
 
