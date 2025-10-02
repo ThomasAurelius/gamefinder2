@@ -64,7 +64,10 @@ export async function readProfile(): Promise<ProfileRecord> {
       return DEFAULT_PROFILE;
     }
 
-    throw error;
+    // Handle JSON parse errors or other file corruption issues
+    console.error("Failed to read or parse profile file", error);
+    await writeProfile(DEFAULT_PROFILE);
+    return DEFAULT_PROFILE;
   }
 }
 
