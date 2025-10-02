@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import {
   deleteCharacter,
@@ -55,11 +55,12 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
 }
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const character = await getCharacter(params.id);
+    const { id } = await context.params;
+    const character = await getCharacter(id);
 
     if (!character) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
@@ -76,8 +77,8 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const data = await request.json();
@@ -90,7 +91,8 @@ export async function PUT(
       );
     }
 
-    const updatedCharacter = await updateCharacter(params.id, payload);
+    const { id } = await context.params;
+    const updatedCharacter = await updateCharacter(id, payload);
 
     if (!updatedCharacter) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
@@ -107,11 +109,12 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const deleted = await deleteCharacter(params.id);
+    const { id } = await context.params;
+    const deleted = await deleteCharacter(id);
 
     if (!deleted) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
