@@ -22,6 +22,7 @@ export default function PostGamePage() {
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [description, setDescription] = useState("");
+  const [maxPlayers, setMaxPlayers] = useState(4);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,6 +51,7 @@ export default function PostGamePage() {
           date: selectedDate,
           times: selectedTimes,
           description: description,
+          maxPlayers: maxPlayers,
         }),
       });
 
@@ -64,6 +66,7 @@ export default function PostGamePage() {
       setSelectedTimes([]);
       setSelectedDate("");
       setDescription("");
+      setMaxPlayers(4);
       
       setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
@@ -138,6 +141,25 @@ export default function PostGamePage() {
           </div>
           <p className="text-xs text-slate-500">
             {selectedTimes.length} time slot(s) selected
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="maxPlayers" className="block text-sm font-medium text-slate-200">
+            Number of Players <span className="text-red-400">*</span>
+          </label>
+          <input
+            id="maxPlayers"
+            type="number"
+            min="1"
+            max="20"
+            value={maxPlayers}
+            onChange={(e) => setMaxPlayers(parseInt(e.target.value) || 1)}
+            required
+            className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          />
+          <p className="text-xs text-slate-500">
+            Maximum number of players that can join this session
           </p>
         </div>
 

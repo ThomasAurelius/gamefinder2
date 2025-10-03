@@ -18,7 +18,9 @@ function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
     typeof payload.game !== "string" ||
     typeof payload.date !== "string" ||
     !Array.isArray(payload.times) ||
-    payload.times.length === 0
+    payload.times.length === 0 ||
+    typeof payload.maxPlayers !== "number" ||
+    payload.maxPlayers < 1
   ) {
     return null;
   }
@@ -28,6 +30,7 @@ function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
     date: payload.date,
     times: payload.times.filter((t) => typeof t === "string"),
     description: typeof payload.description === "string" ? payload.description : "",
+    maxPlayers: payload.maxPlayers,
   };
 }
 

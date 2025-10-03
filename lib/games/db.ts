@@ -43,6 +43,9 @@ export async function listGameSessions(filters?: {
     date: session.date,
     times: [...session.times],
     description: session.description,
+    maxPlayers: session.maxPlayers || 4,
+    signedUpPlayers: session.signedUpPlayers || [],
+    waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
   }));
@@ -65,6 +68,9 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     date: session.date,
     times: [...session.times],
     description: session.description,
+    maxPlayers: session.maxPlayers || 4,
+    signedUpPlayers: session.signedUpPlayers || [],
+    waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
   };
@@ -86,6 +92,9 @@ export async function createGameSession(
     date: payload.date,
     times: [...payload.times],
     description: payload.description,
+    maxPlayers: payload.maxPlayers,
+    signedUpPlayers: [],
+    waitlist: [],
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -99,6 +108,9 @@ export async function createGameSession(
     date: newSession.date,
     times: newSession.times,
     description: newSession.description,
+    maxPlayers: newSession.maxPlayers,
+    signedUpPlayers: newSession.signedUpPlayers,
+    waitlist: newSession.waitlist,
     createdAt: newSession.createdAt,
     updatedAt: newSession.updatedAt,
   };
@@ -111,4 +123,68 @@ export async function deleteGameSession(userId: string, id: string): Promise<boo
   const result = await gamesCollection.deleteOne({ userId, id });
 
   return result.deletedCount > 0;
+}
+
+export async function joinGameSession(
+  sessionId: string,
+  userId: string
+): Promise<StoredGameSession | null> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+  
+  const session = await gamesCollection.findOne({ id: sessionId });
+  
+  if (!session) {
+    return null;
+  }
+  
+  // Check if user is already signed up or on waitlist
+  if (session.signedUpPlayers?.includes(userId) || session.waitlist?.includes(userId)) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  const maxPlayers = session.maxPlayers || 4;
+  const signedUpPlayers = session.signedUpPlayers || [];
+  
+  let result;
+  if (signedUpPlayers.length < maxPlayers) {
+    // Add to signed up players
+    result = await gamesCollection.findOneAndUpdate(
+      { id: sessionId },
+      {
+        $push: { signedUpPlayers: userId },
+        $set: { updatedAt: timestamp },
+      },
+      { returnDocument: "after" }
+    );
+  } else {
+    // Add to waitlist
+    result = await gamesCollection.findOneAndUpdate(
+      { id: sessionId },
+      {
+        $push: { waitlist: userId },
+        $set: { updatedAt: timestamp },
+      },
+      { returnDocument: "after" }
+    );
+  }
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    waitlist: result.waitlist || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+  };
 }
