@@ -72,6 +72,10 @@ The API routes accept an optional `userId` query parameter:
 
 If no `userId` is provided, the system defaults to `"demo-user-1"` for backwards compatibility.
 
+## Configuration Notes
+
+- By default the driver will build a connection string using the standard `mongodb://` protocol when only `MONGODB_HOST`/`MONGODB_PORT` are supplied. Set `MONGODB_PROTOCOL` (or `MONGO_PROTOCOL`) to override the protocol, for example to `mongodb+srv` when connecting to Atlas clusters.
+
 ## Migration Notes
 
 1. The old file-based storage systems (`lib/profile-storage.ts` and `lib/characters/store.ts`) are still present but no longer used.

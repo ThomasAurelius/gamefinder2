@@ -37,7 +37,8 @@ function resolveMongoUri(): string {
     );
   }
 
-  const protocol = process.env.MONGODB_PROTOCOL ?? process.env.MONGO_PROTOCOL ?? "mongodb+srv";
+  const protocol =
+    process.env.MONGODB_PROTOCOL ?? process.env.MONGO_PROTOCOL ?? "mongodb";
   const port = process.env.MONGODB_PORT ?? process.env.MONGO_PORT;
   const authority = port ? `${host}:${port}` : host;
 
