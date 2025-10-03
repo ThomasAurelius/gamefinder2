@@ -2,28 +2,39 @@ import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
 
+import { getDataDirectory } from "../storage-path";
 import {
   CharacterPayload,
   StoredCharacter,
 } from "./types";
 
-const DATA_DIRECTORY = path.join(process.cwd(), "data");
+const DATA_DIRECTORY = getDataDirectory();
 const DATA_FILE = path.join(DATA_DIRECTORY, "characters.json");
 
 async function ensureDataFile(): Promise<void> {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory", error);
+    throw error;
+  }
 
+  try {
+    await fs.access(DATA_FILE);
+  } catch {
     try {
-      await fs.access(DATA_FILE);
-    } catch {
       await fs.writeFile(DATA_FILE, "[]", "utf8");
+    } catch (error) {
+      console.error("Failed to create data file", error);
+      throw error;
     }
+  }
 }
 
 async function readCharactersFile(): Promise<StoredCharacter[]> {
-  await ensureDataFile();
-
   try {
+    await ensureDataFile();
+
     const fileContents = await fs.readFile(DATA_FILE, "utf8");
 
     if (!fileContents.trim()) {
@@ -38,8 +49,12 @@ async function readCharactersFile(): Promise<StoredCharacter[]> {
 
     return parsed.map((character) => ({
       ...character,
-      stats: character.stats.map((stat) => ({ ...stat })),
-      skills: character.skills.map((skill) => ({ ...skill })),
+      stats: Array.isArray(character.stats) 
+        ? character.stats.map((stat) => ({ ...stat }))
+        : [],
+      skills: Array.isArray(character.skills)
+        ? character.skills.map((skill) => ({ ...skill }))
+        : [],
     }));
   } catch (error) {
     console.error("Failed to read characters file", error);
@@ -48,8 +63,13 @@ async function readCharactersFile(): Promise<StoredCharacter[]> {
 }
 
 async function writeCharactersFile(characters: StoredCharacter[]): Promise<void> {
-  await ensureDataFile();
-  await fs.writeFile(DATA_FILE, JSON.stringify(characters, null, 2), "utf8");
+  try {
+    await ensureDataFile();
+    await fs.writeFile(DATA_FILE, JSON.stringify(characters, null, 2), "utf8");
+  } catch (error) {
+    console.error("Failed to write characters file", error);
+    throw error;
+  }
 }
 
 export async function listCharacters(): Promise<StoredCharacter[]> {

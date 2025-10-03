@@ -13,6 +13,7 @@ const primaryLinks: NavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/library", label: "Library" },
   { href: "/find-game", label: "Find Game" },
+  { href: "/messages", label: "Messages" },
 ];
 
 const accountLinks: NavLink[] = [

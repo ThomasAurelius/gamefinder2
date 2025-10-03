@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import { StoredCharacter } from "./characters/types";
+import { getDataDirectory } from "./storage-path";
 
 export type PublicProfileDetails = {
   displayName: string;
@@ -21,7 +22,7 @@ export type PublicProfileRecord = {
   characters: PublicCharacterRecord[];
 };
 
-const DATA_DIRECTORY = path.join(process.cwd(), "data");
+const DATA_DIRECTORY = getDataDirectory();
 const PUBLIC_PROFILE_FILE = path.join(DATA_DIRECTORY, "public-profiles.json");
 
 const FALLBACK_PROFILES: PublicProfileRecord[] = [
@@ -116,7 +117,12 @@ function cloneProfiles(source: PublicProfileRecord[]): PublicProfileRecord[] {
 }
 
 async function ensureDataFile(): Promise<void> {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory", error);
+    throw error;
+  }
 
   try {
     await fs.access(PUBLIC_PROFILE_FILE);

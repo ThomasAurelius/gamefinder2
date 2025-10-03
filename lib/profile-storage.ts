@@ -1,7 +1,9 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const DATA_DIRECTORY = path.join(process.cwd(), "data");
+import { getDataDirectory } from "./storage-path";
+
+const DATA_DIRECTORY = getDataDirectory();
 const PROFILE_FILE_PATH = path.join(DATA_DIRECTORY, "profile.json");
 
 export type ProfileRecord = {
@@ -37,7 +39,12 @@ const DEFAULT_PROFILE: ProfileRecord = {
 };
 
 async function ensureDataDirectory() {
-  await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIRECTORY, { recursive: true });
+  } catch (error) {
+    console.error("Failed to create data directory", error);
+    throw error;
+  }
 }
 
 export async function readProfile(): Promise<ProfileRecord> {
@@ -60,7 +67,10 @@ export async function readProfile(): Promise<ProfileRecord> {
       return DEFAULT_PROFILE;
     }
 
-    throw error;
+    // Handle JSON parse errors or other file corruption issues
+    console.error("Failed to read or parse profile file", error);
+    await writeProfile(DEFAULT_PROFILE);
+    return DEFAULT_PROFILE;
   }
 }
 
