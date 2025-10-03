@@ -58,7 +58,7 @@ export function formatDateInTimezone(dateStr: string, timezone: string): string 
 export function getBrowserTimezone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE;
-  } catch (error) {
+  } catch {
     return DEFAULT_TIMEZONE;
   }
 }
@@ -70,7 +70,7 @@ export function isValidTimezone(timezone: string): boolean {
   try {
     Intl.DateTimeFormat(undefined, { timeZone: timezone });
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
