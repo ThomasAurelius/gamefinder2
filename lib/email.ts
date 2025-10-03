@@ -36,10 +36,10 @@ export async function sendResetPasswordEmail(
     body: JSON.stringify({
       from,
       to: options.email,
-      subject: "Reset your GameFinder password",
+      subject: "Reset your The Gathering Call password",
       html: `
         <p>Hi there,</p>
-        <p>We received a request to reset your GameFinder password.</p>
+        <p>We received a request to reset your The Gathering Call password.</p>
         <p><a href="${resetUrl}">Click here to choose a new password</a>. This link will expire in 60 minutes.</p>
         <p>If you did not request a reset, feel free to ignore this email.</p>
       `,

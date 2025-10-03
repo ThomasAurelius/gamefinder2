@@ -3,7 +3,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "GameFinder",
+  title: "The Gathering Call",
   description: "Discover tabletop games and manage your sessions with ease.",
 };
 
