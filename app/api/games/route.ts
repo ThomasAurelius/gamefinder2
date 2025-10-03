@@ -31,6 +31,7 @@ function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
     times: payload.times.filter((t) => typeof t === "string"),
     description: typeof payload.description === "string" ? payload.description : "",
     maxPlayers: payload.maxPlayers,
+    imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined,
   };
 }
 
