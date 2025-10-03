@@ -17,7 +17,7 @@ export async function GET() {
     
     // Check profile completeness
     const profile = await readProfile(userId);
-    const hasIncompleteSettings = !profile.name || !profile.commonName || !profile.location || !profile.timezone;
+    const hasIncompleteSettings = !profile.name || !profile.commonName || !profile.location;
     
     // Get unread message count
     const unreadMessageCount = await getUnreadCount(userId);
