@@ -11,6 +11,7 @@ export type ProfileRecord = {
   favoriteGames: string[];
   availability: Record<string, string[]>;
   primaryRole: string;
+  timezone?: string;
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -31,6 +32,7 @@ const DEFAULT_PROFILE: ProfileRecord = {
     Sunday: [],
   },
   primaryRole: "",
+  timezone: "America/New_York",
 };
 
 export async function readProfile(userId: string): Promise<ProfileRecord> {
@@ -67,6 +69,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
       ...(profile.availability ?? {}),
     },
     primaryRole: profile.primaryRole ?? "",
+    timezone: profile.timezone ?? "America/New_York",
   };
 }
 
