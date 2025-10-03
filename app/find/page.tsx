@@ -32,6 +32,73 @@ const tagButtonClasses = (
   return [sizeClasses, baseClasses, activeClasses].join(" ");
 };
 
+function GameSessionCard({
+  session,
+  userTimezone,
+  joiningSessionId,
+  onJoin,
+}: {
+  session: GameSession;
+  userTimezone: string;
+  joiningSessionId: string | null;
+  onJoin: (sessionId: string) => void;
+}) {
+  const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
+  const isFull = availableSlots <= 0;
+
+  return (
+    <div
+      key={session.id}
+      className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <h3 className="font-medium text-slate-100">{session.game}</h3>
+          <div className="mt-2 space-y-1 text-sm text-slate-400">
+            <p>
+              <span className="text-slate-500">Date:</span>{" "}
+              {formatDateInTimezone(session.date, userTimezone)}
+            </p>
+            <p>
+              <span className="text-slate-500">Times:</span>{" "}
+              {session.times.join(", ")}
+            </p>
+            <p>
+              <span className="text-slate-500">Players:</span>{" "}
+              <span className={isFull ? "text-orange-400" : "text-green-400"}>
+                {session.signedUpPlayers.length}/{session.maxPlayers}
+              </span>
+              {isFull && (
+                <span className="ml-2 text-xs text-orange-400">
+                  (Full - Joining adds you to waitlist)
+                </span>
+              )}
+            </p>
+            {session.waitlist.length > 0 && (
+              <p>
+                <span className="text-slate-500">Waitlist:</span>{" "}
+                <span className="text-yellow-400">{session.waitlist.length}</span>
+              </p>
+            )}
+            {session.description && (
+              <p className="mt-2 text-slate-300">{session.description}</p>
+            )}
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          <button
+            onClick={() => onJoin(session.id)}
+            disabled={joiningSessionId === session.id}
+            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {joiningSessionId === session.id ? "Joining..." : "Join Game"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FindGamesPage() {
   const [selectedGame, setSelectedGame] = useState("");
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
@@ -42,6 +109,9 @@ export default function FindGamesPage() {
   const [joiningSessionId, setJoiningSessionId] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
+  const [isSearchFormOpen, setIsSearchFormOpen] = useState(true);
+  const [allEvents, setAllEvents] = useState<GameSession[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 
   useEffect(() => {
     const fetchTimezone = async () => {
@@ -56,7 +126,23 @@ export default function FindGamesPage() {
       }
     };
 
+    const fetchAllEvents = async () => {
+      setIsLoadingEvents(true);
+      try {
+        const response = await fetch("/api/games");
+        if (response.ok) {
+          const events = await response.json();
+          setAllEvents(events);
+        }
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setIsLoadingEvents(false);
+      }
+    };
+
     fetchTimezone();
+    fetchAllEvents();
   }, []);
 
   const toggleTime = (slot: string) => {
@@ -108,10 +194,17 @@ export default function FindGamesPage() {
 
       const updatedSession = await response.json();
       
-      // Update the session in the list
+      // Update the session in the search results list
       setGameSessions(prevSessions =>
         prevSessions.map(session =>
           session.id === sessionId ? updatedSession : session
+        )
+      );
+      
+      // Update the session in the all events list
+      setAllEvents(prevEvents =>
+        prevEvents.map(event =>
+          event.id === sessionId ? updatedSession : event
         )
       );
     } catch (error) {
@@ -130,71 +223,87 @@ export default function FindGamesPage() {
         </p>
       </div>
 
-      <div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
-        <div className="space-y-2">
-          <label htmlFor="game-select" className="block text-sm font-medium text-slate-200">
-            Select Game
-          </label>
-          <select
-            id="game-select"
-            value={selectedGame}
-            onChange={(e) => setSelectedGame(e.target.value)}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-          >
-            <option value="">Choose a game...</option>
-            {GAME_OPTIONS.map((game) => (
-              <option key={game} value={game}>
-                {game}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="date-select" className="block text-sm font-medium text-slate-200">
-            Game Date
-          </label>
-          <input
-            id="date-select"
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-slate-200">
-            Preferred Time
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {TIME_SLOTS.map((slot) => {
-              const active = selectedTimes.includes(slot);
-              return (
-                <button
-                  key={slot}
-                  type="button"
-                  onClick={() => toggleTime(slot)}
-                  className={tagButtonClasses(active, { size: "sm" })}
-                >
-                  {slot}
-                </button>
-              );
-            })}
-          </div>
-          <p className="text-xs text-slate-500">
-            {selectedTimes.length} time slot(s) selected
-          </p>
-        </div>
-
+      <div className="rounded-lg border border-slate-800 bg-slate-950/60">
         <button
           type="button"
-          onClick={handleSearch}
-          className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate || isLoading}
+          onClick={() => setIsSearchFormOpen(!isSearchFormOpen)}
+          className="flex w-full items-center justify-between gap-2 bg-slate-900/50 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:bg-slate-900/80"
         >
-          {isLoading ? "Searching..." : "Search Games"}
+          <span>
+            {isSearchFormOpen ? "Hide search filters" : "Show search filters"}
+          </span>
+          <span className="text-xs uppercase tracking-wide text-slate-400">
+            {isSearchFormOpen ? "Collapse" : "Expand"}
+          </span>
         </button>
+        {isSearchFormOpen && (
+          <div className="space-y-4 border-t border-slate-800 p-6">
+            <div className="space-y-2">
+              <label htmlFor="game-select" className="block text-sm font-medium text-slate-200">
+                Select Game
+              </label>
+              <select
+                id="game-select"
+                value={selectedGame}
+                onChange={(e) => setSelectedGame(e.target.value)}
+                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              >
+                <option value="">Choose a game...</option>
+                {GAME_OPTIONS.map((game) => (
+                  <option key={game} value={game}>
+                    {game}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="date-select" className="block text-sm font-medium text-slate-200">
+                Game Date
+              </label>
+              <input
+                id="date-select"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-200">
+                Preferred Time
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {TIME_SLOTS.map((slot) => {
+                  const active = selectedTimes.includes(slot);
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      onClick={() => toggleTime(slot)}
+                      className={tagButtonClasses(active, { size: "sm" })}
+                    >
+                      {slot}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500">
+                {selectedTimes.length} time slot(s) selected
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSearch}
+              className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate || isLoading}
+            >
+              {isLoading ? "Searching..." : "Search Games"}
+            </button>
+          </div>
+        )}
       </div>
 
       {joinError && (
@@ -228,62 +337,15 @@ export default function FindGamesPage() {
             <p className="mt-4 text-sm text-slate-500">Loading...</p>
           ) : gameSessions.length > 0 ? (
             <div className="mt-4 space-y-3">
-              {gameSessions.map((session) => {
-                const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
-                const isFull = availableSlots <= 0;
-                
-                return (
-                  <div
-                    key={session.id}
-                    className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-slate-100">{session.game}</h3>
-                        <div className="mt-2 space-y-1 text-sm text-slate-400">
-                          <p>
-                            <span className="text-slate-500">Date:</span>{" "}
-                            {formatDateInTimezone(session.date, userTimezone)}
-                          </p>
-                          <p>
-                            <span className="text-slate-500">Times:</span>{" "}
-                            {session.times.join(", ")}
-                          </p>
-                          <p>
-                            <span className="text-slate-500">Players:</span>{" "}
-                            <span className={isFull ? "text-orange-400" : "text-green-400"}>
-                              {session.signedUpPlayers.length}/{session.maxPlayers}
-                            </span>
-                            {isFull && (
-                              <span className="ml-2 text-xs text-orange-400">
-                                (Full - Joining adds you to waitlist)
-                              </span>
-                            )}
-                          </p>
-                          {session.waitlist.length > 0 && (
-                            <p>
-                              <span className="text-slate-500">Waitlist:</span>{" "}
-                              <span className="text-yellow-400">{session.waitlist.length}</span>
-                            </p>
-                          )}
-                          {session.description && (
-                            <p className="mt-2 text-slate-300">{session.description}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0">
-                        <button
-                          onClick={() => handleJoin(session.id)}
-                          disabled={joiningSessionId === session.id}
-                          className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {joiningSessionId === session.id ? "Joining..." : "Join Game"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {gameSessions.map((session) => (
+                <GameSessionCard
+                  key={session.id}
+                  session={session}
+                  userTimezone={userTimezone}
+                  joiningSessionId={joiningSessionId}
+                  onJoin={handleJoin}
+                />
+              ))}
             </div>
           ) : (
             <p className="mt-4 text-sm text-slate-500">
@@ -292,6 +354,34 @@ export default function FindGamesPage() {
           )}
         </div>
       )}
+
+      {/* All Events Feed */}
+      <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
+        <h2 className="text-lg font-semibold text-slate-100">All Upcoming Events</h2>
+        <p className="mt-2 text-sm text-slate-400">
+          Browse all game sessions in chronological order
+        </p>
+
+        {isLoadingEvents ? (
+          <p className="mt-4 text-sm text-slate-500">Loading events...</p>
+        ) : allEvents.length > 0 ? (
+          <div className="mt-4 space-y-3">
+            {allEvents.map((event) => (
+              <GameSessionCard
+                key={event.id}
+                session={event}
+                userTimezone={userTimezone}
+                joiningSessionId={joiningSessionId}
+                onJoin={handleJoin}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-slate-500">
+            No upcoming events available.
+          </p>
+        )}
+      </div>
     </section>
   );
 }
