@@ -67,7 +67,7 @@ export function Navbar() {
 		};
 
 		checkAuth();
-	}, []);
+	}, [pathname]);
 
 	const toggleMenu = () => setMenuOpen((open) => !open);
 	const closeMenu = () => setMenuOpen(false);
