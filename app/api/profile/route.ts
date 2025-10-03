@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-storage";
+import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
 
 const ROLE_OPTIONS = new Set(["Healer", "Damage", "Support", "DM", "Other", ""]);
 const MAX_BIO_LENGTH = 2000;
@@ -120,9 +120,12 @@ const validateProfile = (payload: unknown): ProfileRecord => {
   };
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const profile = await readProfile();
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId") || "demo-user-1";
+    
+    const profile = await readProfile(userId);
     return NextResponse.json(profile);
   } catch (error) {
     console.error(error);
@@ -132,9 +135,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId") || "demo-user-1";
+    
     const payload = await request.json();
     const profile = validateProfile(payload);
-    await writeProfile(profile);
+    await writeProfile(userId, profile);
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
