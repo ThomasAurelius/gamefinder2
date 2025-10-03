@@ -23,6 +23,8 @@ export default function PostGamePage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [description, setDescription] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleTime = (slot: string) => {
     setSelectedTimes((prev) =>
@@ -32,11 +34,43 @@ export default function PostGamePage() {
     );
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual submission logic
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/games", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          game: selectedGame,
+          date: selectedDate,
+          times: selectedTimes,
+          description: description,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to post game session");
+      }
+
+      setSubmitted(true);
+      // Reset form
+      setSelectedGame("");
+      setSelectedTimes([]);
+      setSelectedDate("");
+      setDescription("");
+      
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to post game session");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -124,10 +158,16 @@ export default function PostGamePage() {
         <button
           type="submit"
           className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate}
+          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate || isSubmitting}
         >
-          Post Game Session
+          {isSubmitting ? "Posting..." : "Post Game Session"}
         </button>
+
+        {error && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            {error}
+          </div>
+        )}
 
         {submitted && (
           <div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">

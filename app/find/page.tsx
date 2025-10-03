@@ -3,6 +3,17 @@
 import { useState } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 
+type GameSession = {
+  id: string;
+  userId: string;
+  game: string;
+  date: string;
+  times: string[];
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 const tagButtonClasses = (
   active: boolean,
   options?: { size?: "sm" | "md" }
@@ -21,6 +32,9 @@ export default function FindGamesPage() {
   const [selectedGame, setSelectedGame] = useState("");
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
+  const [gameSessions, setGameSessions] = useState<GameSession[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   const toggleTime = (slot: string) => {
     setSelectedTimes((prev) =>
@@ -28,6 +42,31 @@ export default function FindGamesPage() {
         ? prev.filter((item) => item !== slot)
         : [...prev, slot]
     );
+  };
+
+  const handleSearch = async () => {
+    setIsLoading(true);
+    setHasSearched(true);
+
+    try {
+      const params = new URLSearchParams();
+      if (selectedGame) params.append("game", selectedGame);
+      if (selectedDate) params.append("date", selectedDate);
+      if (selectedTimes.length > 0) params.append("times", selectedTimes.join(","));
+
+      const response = await fetch(`/api/games?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch game sessions");
+      }
+
+      const sessions = await response.json();
+      setGameSessions(sessions);
+    } catch (error) {
+      console.error("Failed to fetch game sessions", error);
+      setGameSessions([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -98,24 +137,70 @@ export default function FindGamesPage() {
 
         <button
           type="button"
+          onClick={handleSearch}
           className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate}
+          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate || isLoading}
         >
-          Search Games
+          {isLoading ? "Searching..." : "Search Games"}
         </button>
       </div>
 
-      {selectedGame && selectedTimes.length > 0 && selectedDate && (
+      {hasSearched && (
         <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
           <h2 className="text-lg font-semibold text-slate-100">Search Results</h2>
           <p className="mt-2 text-sm text-slate-400">
-            Searching for <span className="text-sky-400">{selectedGame}</span> games on{" "}
-            <span className="text-sky-400">{new Date(selectedDate).toLocaleDateString()}</span> at{" "}
-            <span className="text-sky-400">{selectedTimes.join(", ")}</span>...
+            {selectedGame && (
+              <>
+                Showing <span className="text-sky-400">{selectedGame}</span> games
+                {selectedDate && (
+                  <>
+                    {" "}on <span className="text-sky-400">{new Date(selectedDate).toLocaleDateString()}</span>
+                  </>
+                )}
+                {selectedTimes.length > 0 && (
+                  <>
+                    {" "}at <span className="text-sky-400">{selectedTimes.join(", ")}</span>
+                  </>
+                )}
+              </>
+            )}
           </p>
-          <p className="mt-4 text-sm text-slate-500">
-            No games found. Try adjusting your search criteria.
-          </p>
+
+          {isLoading ? (
+            <p className="mt-4 text-sm text-slate-500">Loading...</p>
+          ) : gameSessions.length > 0 ? (
+            <div className="mt-4 space-y-3">
+              {gameSessions.map((session) => (
+                <div
+                  key={session.id}
+                  className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-slate-100">{session.game}</h3>
+                      <div className="mt-2 space-y-1 text-sm text-slate-400">
+                        <p>
+                          <span className="text-slate-500">Date:</span>{" "}
+                          {new Date(session.date).toLocaleDateString()}
+                        </p>
+                        <p>
+                          <span className="text-slate-500">Times:</span>{" "}
+                          {session.times.join(", ")}
+                        </p>
+                        {session.description && (
+                          <p className="mt-2 text-slate-300">{session.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm text-slate-500">
+              No games found. Try adjusting your search criteria.
+            </p>
+          )}
         </div>
       )}
     </section>
