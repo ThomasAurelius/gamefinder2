@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import {
   deleteCharacter,
@@ -60,7 +61,8 @@ export async function GET(
 ) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "demo-user-1";
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
     
     const { id } = await context.params;
     const character = await getCharacter(userId, id);
@@ -85,7 +87,8 @@ export async function PUT(
 ) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "demo-user-1";
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
     
     const data = await request.json();
     const payload = parseCharacterPayload(data);
@@ -120,7 +123,8 @@ export async function DELETE(
 ) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "demo-user-1";
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
     
     const { id } = await context.params;
     const deleted = await deleteCharacter(userId, id);
