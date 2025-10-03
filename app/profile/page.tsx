@@ -5,11 +5,12 @@ import { FormEvent, useEffect, useState } from "react";
 const GAME_OPTIONS = [
 	"Dungeons & Dragons",
 	"Pathfinder",
+	"Starfinder",
+	"ShadowDark",
 	"Monster of the Week",
 	"Call of Cthulhu",
 	"Blades in the Dark",
 	"Vampire: The Masquerade",
-	"Starfinder",
 	"Shadowrun",
 	"Gloomhaven",
 	"Frosthaven",
