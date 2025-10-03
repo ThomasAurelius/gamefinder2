@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import {
   createCharacter,
   listCharacters,
-} from "@/lib/characters/store";
+} from "@/lib/characters/db";
 import {
   CharacterPayload,
   GameSystemKey,
@@ -56,9 +56,12 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const characters = await listCharacters();
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId") || "demo-user-1";
+    
+    const characters = await listCharacters(userId);
     return NextResponse.json(characters, { status: 200 });
   } catch (error) {
     console.error("Failed to list characters", error);
@@ -71,6 +74,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId") || "demo-user-1";
+    
     const data = await request.json();
     const payload = parseCharacterPayload(data);
 
@@ -81,7 +87,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const character = await createCharacter(payload);
+    const character = await createCharacter(userId, payload);
 
     return NextResponse.json(character, { status: 201 });
   } catch (error) {
