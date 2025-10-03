@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 
@@ -53,7 +54,9 @@ function GameSessionCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h3 className="font-medium text-slate-100">{session.game}</h3>
+          <Link href={`/games/${session.id}`} className="hover:text-sky-300 transition-colors">
+            <h3 className="font-medium text-slate-100">{session.game}</h3>
+          </Link>
           <div className="mt-2 space-y-1 text-sm text-slate-400">
             <p>
               <span className="text-slate-500">Date:</span>{" "}
