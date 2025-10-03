@@ -82,7 +82,7 @@ export function Navbar() {
 	useEffect(() => {
 		const fetchNotifications = async () => {
 			if (!isAuthenticated || authLoading) return;
-			
+
 			try {
 				const response = await fetch("/api/notifications");
 				if (response.ok) {
@@ -188,8 +188,8 @@ export function Navbar() {
 							);
 						}
 					})}
-					{!authLoading && (
-						isAuthenticated ? (
+					{!authLoading &&
+						(isAuthenticated ? (
 							<div className="relative">
 								<button
 									type="button"
@@ -229,12 +229,16 @@ export function Navbar() {
 												}`}
 											>
 												<span>{link.label}</span>
-												{link.href === "/messages" && unreadMessageCount > 0 && (
-													<NotificationBadge count={unreadMessageCount} />
-												)}
-												{link.href === "/settings" && hasIncompleteSettings && (
-													<NotificationBadge />
-												)}
+												{link.href === "/profile" &&
+													hasIncompleteSettings && (
+														<NotificationBadge />
+													)}
+												{link.href === "/messages" &&
+													unreadMessageCount > 0 && (
+														<NotificationBadge
+															count={unreadMessageCount}
+														/>
+													)}
 											</Link>
 										))}
 									</div>
@@ -251,8 +255,7 @@ export function Navbar() {
 							>
 								Login
 							</Link>
-						)
-					)}
+						))}
 				</nav>
 				<button
 					type="button"
@@ -330,8 +333,8 @@ export function Navbar() {
 								);
 							}
 						})}
-						{!authLoading && (
-							isAuthenticated ? (
+						{!authLoading &&
+							(isAuthenticated ? (
 								<div className="border-t border-white/5 pt-2">
 									<p className="px-3 text-xs uppercase tracking-wide text-slate-400">
 										Account
@@ -348,12 +351,16 @@ export function Navbar() {
 											}`}
 										>
 											<span>{link.label}</span>
-											{link.href === "/messages" && unreadMessageCount > 0 && (
-												<NotificationBadge count={unreadMessageCount} />
-											)}
-											{link.href === "/settings" && hasIncompleteSettings && (
-												<NotificationBadge />
-											)}
+											{link.href === "/messages" &&
+												unreadMessageCount > 0 && (
+													<NotificationBadge
+														count={unreadMessageCount}
+													/>
+												)}
+											{link.href === "/profile" &&
+												hasIncompleteSettings && (
+													<NotificationBadge />
+												)}
 										</Link>
 									))}
 								</div>
@@ -371,8 +378,7 @@ export function Navbar() {
 										Login
 									</Link>
 								</div>
-							)
-						)}
+							))}
 					</div>
 				</div>
 			) : null}
