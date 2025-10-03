@@ -5,9 +5,9 @@ This document describes the implementation of notification badges for the Settin
 
 ## Features Implemented
 
-### 1. Settings Notification Badge
-- Shows a red circle when required profile settings are incomplete
-- Required fields: name, commonName, location, timezone
+### 1. Profile Notification Badge
+- Shows a red circle on the Profile menu item when required profile settings are incomplete
+- Required fields: commonName, location, zipCode, bio, availability, games, primaryRole
 - Appears on both desktop and mobile menu views
 
 ### 2. Messages Notification Badge  
@@ -75,13 +75,13 @@ function NotificationBadge({ count }: { count?: number }) {
 ### Desktop View
 1. User opens the "Account" dropdown menu
 2. If there are unread messages, the Messages item shows a badge with the count
-3. If profile settings are incomplete, the Settings item shows a red circle
+3. If profile settings are incomplete, the Profile item shows a red circle
 4. Badges are visible immediately when the menu opens
 
 ### Mobile View  
 1. User taps the hamburger menu
 2. Scrolls to the Account section
-3. Badges appear next to Messages and Settings items
+3. Badges appear next to Messages and Profile items
 4. Same visual appearance as desktop view
 
 ## Integration Points
@@ -93,16 +93,19 @@ function NotificationBadge({ count }: { count?: number }) {
 
 ### Profile Fields Checked
 From `ProfileRecord` type in `lib/profile-db.ts`:
-- `name`: Full name
 - `commonName`: Display name
-- `location`: Location  
-- `timezone`: Timezone (defaults to "America/New_York")
+- `location`: Location
+- `zipCode`: Zip code
+- `bio`: Biography
+- `availability`: Weekly availability schedule
+- `games`: Selected games
+- `primaryRole`: Primary role preference
 
 ## Testing
 
 ### Manual Testing Steps
 1. Log in with a user that has incomplete profile settings
-2. Verify red circle appears on Settings menu item
+2. Verify red circle appears on Profile menu item
 3. Complete profile settings
 4. Verify red circle disappears
 5. Send yourself a message
