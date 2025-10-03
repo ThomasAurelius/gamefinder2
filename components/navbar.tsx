@@ -63,9 +63,11 @@ export function Navbar() {
 					className="flex items-center gap-2 text-lg font-semibold text-white"
 					onClick={closeMenu}
 				>
-					<span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-base font-bold">
-						TGC
-					</span>
+					<img
+						src="/icon.png"
+						alt="The Gathering Call Logo"
+						className="h-9 w-9"
+					/>
 					<span className="hidden sm:inline">The Gathering Call</span>
 				</Link>
 				<nav className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
