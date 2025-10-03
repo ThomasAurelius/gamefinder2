@@ -56,11 +56,17 @@ export async function POST(request: NextRequest) {
     });
 
     // Set userId cookie for authenticated requests
-    response.cookies.set("userId", user._id?.toString() || "", {
+    const userId = user._id?.toString();
+    if (!userId) {
+      throw new Error("User ID is missing");
+    }
+    
+    response.cookies.set("userId", userId, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
     });
 
     return response;
