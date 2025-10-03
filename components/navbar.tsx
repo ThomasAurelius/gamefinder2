@@ -64,9 +64,9 @@ export function Navbar() {
           onClick={closeMenu}
         >
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-base font-bold">
-            GF
+            TGC
           </span>
-          <span className="hidden sm:inline">GameFinder</span>
+          <span className="hidden sm:inline">The Gathering Call</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
           {primaryLinks.map((item) => {

@@ -2,7 +2,7 @@ export default function HomePage() {
   return (
     <div className="space-y-10">
       <section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
-        <h1 className="text-3xl font-bold sm:text-4xl">Welcome to GameFinder</h1>
+        <h1 className="text-3xl font-bold sm:text-4xl">Welcome to The Gathering Call</h1>
         <p className="mt-4 max-w-2xl text-base text-slate-300">
           Build your tabletop adventures, manage characters, and discover new
           games with ease. Use the navigation above to explore the dashboard,
