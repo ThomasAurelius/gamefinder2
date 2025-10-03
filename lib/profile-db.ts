@@ -81,7 +81,7 @@ export async function writeProfile(
 
   // Only update if userId is a valid ObjectId (authenticated user)
   if (ObjectId.isValid(userId)) {
-    await usersCollection.updateOne(
+    const result = await usersCollection.updateOne(
       { _id: new ObjectId(userId) },
       {
         $set: {
@@ -90,6 +90,10 @@ export async function writeProfile(
         },
       }
     );
+
+    if (result.matchedCount === 0) {
+      throw new Error("User not found");
+    }
   }
   // For demo users or invalid IDs, we just don't persist
 }
