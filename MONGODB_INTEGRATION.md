@@ -111,6 +111,10 @@ The API routes now support cookie-based authentication:
 
 If no `userId` is found in either the cookie or query parameter, the system defaults to `"demo-user-1"` for backwards compatibility.
 
+## Configuration Notes
+
+- Configure MongoDB access by setting `MONGODB_URI` with your full connection string, including credentials and any required query parameters. Specify the target database with `MONGODB_DB` (defaults to `gamefinder`). No other MongoDB-specific environment variables are read by the application.
+
 ## Migration Notes
 
 1. The old file-based storage systems (`lib/profile-storage.ts` and `lib/characters/store.ts`) are still present but no longer used.
