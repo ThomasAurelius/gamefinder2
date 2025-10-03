@@ -30,11 +30,11 @@ const primaryLinks: NavItem[] = [
 			{ href: "/post", label: "Post Game" },
 		],
 	},
-	{ href: "/messages", label: "Messages" },
 ];
 
 const accountLinks: NavLink[] = [
 	{ href: "/profile", label: "Profile" },
+	{ href: "/messages", label: "Messages" },
 	{ href: "/settings", label: "Settings" },
 	{ href: "/characters", label: "Characters" },
 	{ href: "/auth/login", label: "Logout" },
