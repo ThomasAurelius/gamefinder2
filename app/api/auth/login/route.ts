@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: "Login successful",
       user: {
         id: user._id?.toString(),
@@ -54,6 +54,16 @@ export async function POST(request: NextRequest) {
         name: user.name ?? normalizedEmail.split("@")[0],
       },
     });
+
+    // Set userId cookie for authenticated requests
+    response.cookies.set("userId", user._id?.toString() || "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return response;
   } catch (error) {
     console.error("Failed to authenticate user", error);
     const message =

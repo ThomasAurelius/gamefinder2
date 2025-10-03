@@ -17,13 +17,27 @@ This document explains the MongoDB integration for storing user profiles and cha
 - **File**: `lib/characters/db.ts` (new MongoDB implementation)
 
 ### 3. API Routes Updated
-- `app/api/profile/route.ts` - Now uses MongoDB storage
-- `app/api/characters/route.ts` - Now uses MongoDB storage
-- `app/api/characters/[id]/route.ts` - Now uses MongoDB storage
+- `app/api/profile/route.ts` - Now uses MongoDB storage with cookie-based auth
+- `app/api/characters/route.ts` - Now uses MongoDB storage with cookie-based auth
+- `app/api/characters/[id]/route.ts` - Now uses MongoDB storage with cookie-based auth
+- `app/api/auth/login/route.ts` - Sets secure HttpOnly userId cookie on login
+- `app/api/auth/logout/route.ts` - Clears userId cookie on logout (NEW)
 
 ## Database Schema
 
 ### Users Collection
+```typescript
+{
+  _id: ObjectId,           // MongoDB ObjectId used as userId
+  email: string,           // User's email (unique)
+  passwordHash: string,    // Hashed password
+  name: string,            // Display name
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+### Profiles Collection
 ```typescript
 {
   _id: ObjectId,
@@ -69,12 +83,33 @@ This document explains the MongoDB integration for storing user profiles and cha
 
 ## User Identification
 
-The API routes accept an optional `userId` query parameter:
-- **Profile API**: `GET/POST /api/profile?userId={userId}`
-- **Characters API**: `GET/POST /api/characters?userId={userId}`
-- **Character by ID**: `GET/PUT/DELETE /api/characters/{id}?userId={userId}`
+### Authentication Flow
 
-If no `userId` is provided, the system defaults to `"demo-user-1"` for backwards compatibility.
+1. **User Login**:
+   - User submits credentials to `/api/auth/login`
+   - Server validates credentials against MongoDB `users` collection
+   - On success, server sets an HttpOnly cookie named `userId` with the user's MongoDB `_id`
+   - Cookie is secure (HTTPS-only in production), has 7-day expiration, and sameSite: 'lax'
+
+2. **Authenticated Requests**:
+   - API routes (characters, profile) automatically read `userId` from the cookie
+   - If cookie exists, it's used to fetch user-specific data
+   - Query parameter `?userId={userId}` can still be used (for backward compatibility or admin purposes)
+
+3. **User Logout**:
+   - User calls `/api/auth/logout`
+   - Server clears the `userId` cookie
+
+### API Endpoint Access
+
+The API routes now support cookie-based authentication:
+- When a user logs in via `/api/auth/login`, a secure HttpOnly cookie containing the `userId` is set
+- API routes automatically read the `userId` from the cookie for authenticated requests
+- **Profile API**: `GET/POST /api/profile` (uses cookie by default, or optional `?userId={userId}` query param)
+- **Characters API**: `GET/POST /api/characters` (uses cookie by default, or optional `?userId={userId}` query param)
+- **Character by ID**: `GET/PUT/DELETE /api/characters/{id}` (uses cookie by default, or optional `?userId={userId}` query param)
+
+If no `userId` is found in either the cookie or query parameter, the system defaults to `"demo-user-1"` for backwards compatibility.
 
 ## Migration Notes
 
@@ -85,8 +120,9 @@ If no `userId` is provided, the system defaults to `"demo-user-1"` for backwards
 
 ## Future Enhancements
 
-To fully integrate with user authentication:
-1. Add session management (cookies/JWT)
-2. Extract `userId` from authenticated session instead of query parameters
+Additional improvements to consider:
+1. ✅ Add session management (cookies/JWT) - **COMPLETED**: HttpOnly cookies are now used for session management
+2. ✅ Extract `userId` from authenticated session - **COMPLETED**: userId is now extracted from cookies
 3. Add middleware to enforce authentication on protected routes
-4. Remove the fallback to "demo-user-1" when proper auth is in place
+4. Remove the fallback to "demo-user-1" when proper auth is fully enforced
+5. Add logout functionality to clear session cookies - **COMPLETED**: `/api/auth/logout` endpoint added

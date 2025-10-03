@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
 
@@ -123,7 +124,8 @@ const validateProfile = (payload: unknown): ProfileRecord => {
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "demo-user-1";
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
     
     const profile = await readProfile(userId);
     return NextResponse.json(profile);
@@ -136,7 +138,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "demo-user-1";
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
     
     const payload = await request.json();
     const profile = validateProfile(payload);
