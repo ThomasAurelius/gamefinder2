@@ -125,7 +125,14 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const profile = await readProfile(userId);
     return NextResponse.json(profile);
@@ -139,7 +146,14 @@ export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const payload = await request.json();
     const profile = validateProfile(payload);
