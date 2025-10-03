@@ -44,6 +44,14 @@ function isActive(pathname: string, href: string) {
 	return pathname === href;
 }
 
+function NotificationBadge({ count }: { count?: number }) {
+	return (
+		<span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-medium text-white">
+			{count !== undefined ? count : ""}
+		</span>
+	);
+}
+
 export function Navbar() {
 	const pathname = usePathname();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -51,6 +59,8 @@ export function Navbar() {
 	const [gamesOpen, setGamesOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [authLoading, setAuthLoading] = useState(true);
+	const [hasIncompleteSettings, setHasIncompleteSettings] = useState(false);
+	const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -68,6 +78,25 @@ export function Navbar() {
 
 		checkAuth();
 	}, [pathname]);
+
+	useEffect(() => {
+		const fetchNotifications = async () => {
+			if (!isAuthenticated || authLoading) return;
+			
+			try {
+				const response = await fetch("/api/notifications");
+				if (response.ok) {
+					const data = await response.json();
+					setHasIncompleteSettings(data.hasIncompleteSettings);
+					setUnreadMessageCount(data.unreadMessageCount);
+				}
+			} catch (error) {
+				console.error("Failed to fetch notifications:", error);
+			}
+		};
+
+		fetchNotifications();
+	}, [isAuthenticated, authLoading, pathname]);
 
 	const toggleMenu = () => setMenuOpen((open) => !open);
 	const closeMenu = () => setMenuOpen(false);
@@ -193,13 +222,19 @@ export function Navbar() {
 													setAccountOpen(false);
 													closeMenu();
 												}}
-												className={`block px-4 py-2 text-sm transition hover:bg-white/10 ${
+												className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
 													isActive(pathname, link.href)
 														? "bg-white/10 text-white"
 														: "text-slate-200"
 												}`}
 											>
-												{link.label}
+												<span>{link.label}</span>
+												{link.href === "/messages" && unreadMessageCount > 0 && (
+													<NotificationBadge count={unreadMessageCount} />
+												)}
+												{link.href === "/settings" && hasIncompleteSettings && (
+													<NotificationBadge />
+												)}
 											</Link>
 										))}
 									</div>
@@ -306,13 +341,19 @@ export function Navbar() {
 											key={link.href}
 											href={link.href}
 											onClick={closeMenu}
-											className={`mt-1 block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+											className={`mt-1 flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 												isActive(pathname, link.href)
 													? "bg-white/10 text-white"
 													: "text-slate-200"
 											}`}
 										>
-											{link.label}
+											<span>{link.label}</span>
+											{link.href === "/messages" && unreadMessageCount > 0 && (
+												<NotificationBadge count={unreadMessageCount} />
+											)}
+											{link.href === "/settings" && hasIncompleteSettings && (
+												<NotificationBadge />
+											)}
 										</Link>
 									))}
 								</div>
