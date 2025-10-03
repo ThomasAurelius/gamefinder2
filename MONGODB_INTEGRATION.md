@@ -7,9 +7,9 @@ This document explains the MongoDB integration for storing user profiles and cha
 ## Changes Made
 
 ### 1. Profile Storage
-- **Old System**: Profiles were stored in local files (`data/profile.json`)
-- **New System**: Profiles are stored in MongoDB `profiles` collection
-- **File**: `lib/profile-db.ts` (new MongoDB implementation)
+- **Old System**: Profiles were stored in local files (`data/profile.json`), then in separate `profiles` collection
+- **New System**: Profiles are now embedded in user documents in the `users` collection
+- **File**: `lib/profile-db.ts` (MongoDB implementation)
 
 ### 2. Character Storage
 - **Old System**: Characters were stored in local files (`data/characters.json`)
@@ -23,26 +23,30 @@ This document explains the MongoDB integration for storing user profiles and cha
 
 ## Database Schema
 
-### Profiles Collection
+### Users Collection
 ```typescript
 {
   _id: ObjectId,
-  userId: string,           // User identifier
+  email: string,
+  passwordHash: string,
   name: string,
-  commonName: string,
-  location: string,
-  zipCode: string,
-  bio: string,
-  games: string[],
-  favoriteGames: string[],
-  availability: {
-    Monday: string[],
-    Tuesday: string[],
-    // ... other days
-  },
-  primaryRole: string,
   createdAt: Date,
-  updatedAt: Date
+  updatedAt: Date,
+  profile?: {                 // Profile data embedded in user document
+    name: string,
+    commonName: string,
+    location: string,
+    zipCode: string,
+    bio: string,
+    games: string[],
+    favoriteGames: string[],
+    availability: {
+      Monday: string[],
+      Tuesday: string[],
+      // ... other days
+    },
+    primaryRole: string
+  }
 }
 ```
 
@@ -75,8 +79,9 @@ If no `userId` is provided, the system defaults to `"demo-user-1"` for backwards
 ## Migration Notes
 
 1. The old file-based storage systems (`lib/profile-storage.ts` and `lib/characters/store.ts`) are still present but no longer used.
-2. Data from local files will NOT be automatically migrated to MongoDB.
-3. Each user's profile and characters are isolated by their `userId`.
+2. Profile data is now stored as an embedded object within user documents in the `users` collection.
+3. Data from the old `profiles` collection will NOT be automatically migrated.
+4. Each user's profile and characters are isolated by their user ID.
 
 ## Future Enhancements
 
