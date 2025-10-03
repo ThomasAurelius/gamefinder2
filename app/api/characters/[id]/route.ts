@@ -62,7 +62,14 @@ export async function GET(
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const { id } = await context.params;
     const character = await getCharacter(userId, id);
@@ -88,7 +95,14 @@ export async function PUT(
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const data = await request.json();
     const payload = parseCharacterPayload(data);
@@ -124,7 +138,14 @@ export async function DELETE(
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const { id } = await context.params;
     const deleted = await deleteCharacter(userId, id);

@@ -61,7 +61,14 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const characters = await listCharacters(userId);
     return NextResponse.json(characters, { status: 200 });
@@ -78,7 +85,14 @@ export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const cookieStore = await cookies();
-    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value || "demo-user-1";
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
     
     const data = await request.json();
     const payload = parseCharacterPayload(data);
