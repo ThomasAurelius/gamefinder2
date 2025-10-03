@@ -1,4 +1,4 @@
-import type { ObjectId } from "mongodb";
+import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
 export type ProfileRecord = {
@@ -11,13 +11,6 @@ export type ProfileRecord = {
   favoriteGames: string[];
   availability: Record<string, string[]>;
   primaryRole: string;
-};
-
-type ProfileDocument = ProfileRecord & {
-  _id?: ObjectId;
-  userId: string;
-  createdAt: Date;
-  updatedAt: Date;
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -42,27 +35,38 @@ const DEFAULT_PROFILE: ProfileRecord = {
 
 export async function readProfile(userId: string): Promise<ProfileRecord> {
   const db = await getDb();
-  const profilesCollection = db.collection<ProfileDocument>("profiles");
+  const usersCollection = db.collection("users");
 
-  const profile = await profilesCollection.findOne({ userId });
-
-  if (!profile) {
+  // Try to find by ObjectId first (for authenticated users)
+  let user = null;
+  if (ObjectId.isValid(userId)) {
+    user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+  }
+  
+  // If not found and it's a demo user, return default profile
+  if (!user) {
     return DEFAULT_PROFILE;
   }
 
+  if (!user.profile) {
+    return DEFAULT_PROFILE;
+  }
+
+  const profile = user.profile as ProfileRecord;
+
   return {
-    name: profile.name,
-    commonName: profile.commonName,
-    location: profile.location,
-    zipCode: profile.zipCode,
-    bio: profile.bio,
-    games: profile.games,
-    favoriteGames: profile.favoriteGames,
+    name: profile.name ?? "",
+    commonName: profile.commonName ?? "",
+    location: profile.location ?? "",
+    zipCode: profile.zipCode ?? "",
+    bio: profile.bio ?? "",
+    games: profile.games ?? [],
+    favoriteGames: profile.favoriteGames ?? [],
     availability: {
       ...DEFAULT_PROFILE.availability,
       ...(profile.availability ?? {}),
     },
-    primaryRole: profile.primaryRole,
+    primaryRole: profile.primaryRole ?? "",
   };
 }
 
@@ -71,22 +75,21 @@ export async function writeProfile(
   profile: ProfileRecord
 ): Promise<void> {
   const db = await getDb();
-  const profilesCollection = db.collection<ProfileDocument>("profiles");
+  const usersCollection = db.collection("users");
 
   const now = new Date();
 
-  await profilesCollection.updateOne(
-    { userId },
-    {
-      $set: {
-        ...profile,
-        updatedAt: now,
-      },
-      $setOnInsert: {
-        userId,
-        createdAt: now,
-      },
-    },
-    { upsert: true }
-  );
+  // Only update if userId is a valid ObjectId (authenticated user)
+  if (ObjectId.isValid(userId)) {
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          profile,
+          updatedAt: now,
+        },
+      }
+    );
+  }
+  // For demo users or invalid IDs, we just don't persist
 }

@@ -1,35 +1,37 @@
 # Fix: Profile and Character MongoDB Persistence
 
 ## Problem
-Profile and Character data were being stored in local files instead of MongoDB database. Only user authentication data was being persisted to MongoDB.
+Profile data was being stored in a separate `profiles` collection instead of being embedded within user documents in the `users` collection.
 
 ## Solution
-Migrated profile and character storage from file-based system to MongoDB:
+Migrated profile storage to be embedded within user documents in the `users` collection:
 
 ### Changes Made
 
-1. **Created MongoDB Storage Modules**
-   - `lib/profile-db.ts` - MongoDB implementation for profile storage
-   - `lib/characters/db.ts` - MongoDB implementation for character storage
+1. **Created Shared User Type**
+   - `lib/user-types.ts` - Centralized UserDocument type definition with optional profile field
 
-2. **Updated API Routes**
-   - Modified `/api/profile` to use MongoDB storage
-   - Modified `/api/characters` to use MongoDB storage  
-   - Modified `/api/characters/[id]` to use MongoDB storage
+2. **Updated Profile Storage**
+   - Modified `lib/profile-db.ts` to read/write profiles from the `users` collection
+   - Profile data is now stored as an embedded object in the user document
 
-3. **Key Features**
-   - Profiles stored in `profiles` collection with userId association
-   - Characters stored in `characters` collection with userId association
-   - Supports optional `userId` query parameter (defaults to "demo-user-1")
+3. **Updated Registration**
+   - Modified `/api/auth/register` to initialize empty profile when creating new users
+   - Uses shared UserDocument type for consistency
+
+4. **Key Features**
+   - Profiles stored as embedded objects in `users` collection
+   - Handles both ObjectId (authenticated users) and string IDs (demo users)
    - Backward compatible with existing API interface
-   - Uses MongoDB upsert for profile updates
+   - Profile is initialized on user registration
    - Maintains data isolation per user
 
 ### Database Collections
 
-**Profiles Collection:**
-- Stores user profile data (name, bio, games, availability, etc.)
-- Uses `userId` for user association
+**Users Collection:**
+- Stores user authentication data (email, passwordHash, name)
+- Now includes embedded `profile` object with user profile data
+- Profile fields: name, commonName, location, zipCode, bio, games, favoriteGames, availability, primaryRole
 - Includes `createdAt` and `updatedAt` timestamps
 
 **Characters Collection:**
@@ -63,8 +65,9 @@ The changes have been:
 
 ## Migration Notes
 
-- Old file-based storage (`lib/profile-storage.ts` and `lib/characters/store.ts`) remain but are unused
-- Existing file data will NOT be automatically migrated
+- Old `profiles` collection is no longer used
+- Profile data is now embedded in user documents
+- Existing profile data in the `profiles` collection will NOT be automatically migrated
 - Each user's data is isolated by their `userId` in MongoDB
 
 ## Future Improvements
