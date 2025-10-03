@@ -9,10 +9,27 @@ type NavLink = {
 	label: string;
 };
 
-const primaryLinks: NavLink[] = [
+type NavLinkWithSubmenu = {
+	label: string;
+	submenu: NavLink[];
+};
+
+type NavItem = NavLink | NavLinkWithSubmenu;
+
+function isSubmenu(item: NavItem): item is NavLinkWithSubmenu {
+	return "submenu" in item;
+}
+
+const primaryLinks: NavItem[] = [
 	{ href: "/dashboard", label: "Dashboard" },
 	{ href: "/library", label: "Library" },
-	{ href: "/find-game", label: "Find Game" },
+	{
+		label: "Games",
+		submenu: [
+			{ href: "/find", label: "Find Games" },
+			{ href: "/post", label: "Post Game" },
+		],
+	},
 	{ href: "/messages", label: "Messages" },
 ];
 
@@ -31,10 +48,12 @@ export function Navbar() {
 	const pathname = usePathname();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
+	const [gamesOpen, setGamesOpen] = useState(false);
 
 	const toggleMenu = () => setMenuOpen((open) => !open);
 	const closeMenu = () => setMenuOpen(false);
 	const toggleAccount = () => setAccountOpen((open) => !open);
+	const toggleGames = () => setGamesOpen((open) => !open);
 
 	return (
 		<header className="border-b border-white/10 bg-slate-950/80 backdrop-blur">
@@ -44,30 +63,81 @@ export function Navbar() {
 					className="flex items-center gap-2 text-lg font-semibold text-white"
 					onClick={closeMenu}
 				>
-					<img
-						src="/icon.png"
-						alt="Logo"
-						width={32}
-						height={32}
-						className="h-8 w-8"
-					/>
-
-					<span className="hidden sm:inline">GameFinder</span>
+					<span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-indigo-500 text-base font-bold">
+						TGC
+					</span>
+					<span className="hidden sm:inline">The Gathering Call</span>
 				</Link>
 				<nav className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
-					{primaryLinks.map((link) => (
-						<Link
-							key={link.href}
-							href={link.href}
-							className={`rounded-md px-3 py-2 transition hover:bg-white/10 ${
+					{primaryLinks.map((item) => {
+						if (isSubmenu(item)) {
+							const isAnySubmenuActive = item.submenu.some((link) =>
 								isActive(pathname, link.href)
-									? "bg-white/10 text-white"
-									: "text-slate-200"
-							}`}
-						>
-							{link.label}
-						</Link>
-					))}
+							);
+							return (
+								<div key={item.label} className="relative">
+									<button
+										type="button"
+										className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
+											gamesOpen || isAnySubmenuActive
+												? "bg-white/10 text-white"
+												: ""
+										}`}
+										onClick={toggleGames}
+										aria-haspopup="menu"
+										aria-expanded={gamesOpen}
+									>
+										{item.label}
+										<svg
+											aria-hidden
+											className={`h-4 w-4 transition-transform ${
+												gamesOpen ? "rotate-180" : ""
+											}`}
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
+										</svg>
+									</button>
+									{gamesOpen ? (
+										<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
+											{item.submenu.map((link) => (
+												<Link
+													key={link.href}
+													href={link.href}
+													onClick={() => {
+														setGamesOpen(false);
+														closeMenu();
+													}}
+													className={`block px-4 py-2 text-sm transition hover:bg-white/10 ${
+														isActive(pathname, link.href)
+															? "bg-white/10 text-white"
+															: "text-slate-200"
+													}`}
+												>
+													{link.label}
+												</Link>
+											))}
+										</div>
+									) : null}
+								</div>
+							);
+						} else {
+							return (
+								<Link
+									key={item.href}
+									href={item.href}
+									className={`rounded-md px-3 py-2 transition hover:bg-white/10 ${
+										isActive(pathname, item.href)
+											? "bg-white/10 text-white"
+											: "text-slate-200"
+									}`}
+								>
+									{item.label}
+								</Link>
+							);
+						}
+					})}
 					<div className="relative">
 						<button
 							type="button"
@@ -149,20 +219,46 @@ export function Navbar() {
 			{menuOpen ? (
 				<div className="border-t border-white/10 bg-slate-950/90 md:hidden">
 					<div className="space-y-1 px-4 pb-4 pt-2 text-sm font-medium text-slate-200">
-						{primaryLinks.map((link) => (
-							<Link
-								key={link.href}
-								href={link.href}
-								onClick={closeMenu}
-								className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
-									isActive(pathname, link.href)
-										? "bg-white/10 text-white"
-										: "text-slate-200"
-								}`}
-							>
-								{link.label}
-							</Link>
-						))}
+						{primaryLinks.map((item) => {
+							if (isSubmenu(item)) {
+								return (
+									<div key={item.label}>
+										<p className="px-3 py-2 text-xs uppercase tracking-wide text-slate-400">
+											{item.label}
+										</p>
+										{item.submenu.map((link) => (
+											<Link
+												key={link.href}
+												href={link.href}
+												onClick={closeMenu}
+												className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+													isActive(pathname, link.href)
+														? "bg-white/10 text-white"
+														: "text-slate-200"
+												}`}
+											>
+												{link.label}
+											</Link>
+										))}
+									</div>
+								);
+							} else {
+								return (
+									<Link
+										key={item.href}
+										href={item.href}
+										onClick={closeMenu}
+										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+											isActive(pathname, item.href)
+												? "bg-white/10 text-white"
+												: "text-slate-200"
+										}`}
+									>
+										{item.label}
+									</Link>
+								);
+							}
+						})}
 						<div className="border-t border-white/5 pt-2">
 							<p className="px-3 text-xs uppercase tracking-wide text-slate-400">
 								Account

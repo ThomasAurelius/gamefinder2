@@ -1,16 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { hashPassword } from "@/lib/password";
-
-type UserDocument = {
-  _id?: ObjectId;
-  email: string;
-  passwordHash: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { UserDocument } from "@/lib/user-types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +45,25 @@ export async function POST(request: NextRequest) {
       name: displayName,
       createdAt: now,
       updatedAt: now,
+      profile: {
+        name: "",
+        commonName: "",
+        location: "",
+        zipCode: "",
+        bio: "",
+        games: [],
+        favoriteGames: [],
+        availability: {
+          Monday: [],
+          Tuesday: [],
+          Wednesday: [],
+          Thursday: [],
+          Friday: [],
+          Saturday: [],
+          Sunday: [],
+        },
+        primaryRole: "",
+      },
     });
 
     return NextResponse.json({

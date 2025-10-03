@@ -1,32 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-
-const GAME_OPTIONS = [
-	"Dungeons & Dragons",
-	"Pathfinder",
-	"Starfinder",
-	"ShadowDark",
-	"Monster of the Week",
-	"Call of Cthulhu",
-	"Blades in the Dark",
-	"Vampire: The Masquerade",
-	"Shadowrun",
-	"Gloomhaven",
-	"Frosthaven",
-	"Dragon Age RPG",
-	"Dune RPG",
-	"Cyberpunk RED",
-	"Warhammer 40K RPG",
-	"FATE",
-	"Savage Worlds",
-	"Numenera",
-	"The Witcher RPG",
-	"Star Wars RPG",
-	"Mutants & Masterminds",
-	"Legend of the Five Rings",
-	"Other",
-];
+import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"] as const;
 
@@ -50,12 +25,6 @@ const createDefaultAvailability = () =>
 		},
 		{} as Record<string, string[]>
 	);
-
-const TIME_SLOTS = Array.from({ length: 24 }, (_, index) => {
-	const hour = index % 12 || 12;
-	const suffix = index < 12 ? "AM" : "PM";
-	return `${hour}:00 ${suffix}`;
-});
 
 const tagButtonClasses = (
 	active: boolean,

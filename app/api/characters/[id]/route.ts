@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 import {
   deleteCharacter,
   getCharacter,
   updateCharacter,
-} from "@/lib/characters/store";
+} from "@/lib/characters/db";
 import { CharacterPayload } from "@/lib/characters/types";
 
 import type { GameSystemKey, StatField, SkillField } from "@/lib/characters/types";
@@ -55,12 +56,23 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { searchParams } = new URL(request.url);
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
+    
     const { id } = await context.params;
-    const character = await getCharacter(id);
+    const character = await getCharacter(userId, id);
 
     if (!character) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
@@ -81,6 +93,17 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { searchParams } = new URL(request.url);
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
+    
     const data = await request.json();
     const payload = parseCharacterPayload(data);
 
@@ -92,7 +115,7 @@ export async function PUT(
     }
 
     const { id } = await context.params;
-    const updatedCharacter = await updateCharacter(id, payload);
+    const updatedCharacter = await updateCharacter(userId, id, payload);
 
     if (!updatedCharacter) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });
@@ -109,12 +132,23 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { searchParams } = new URL(request.url);
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
+    
     const { id } = await context.params;
-    const deleted = await deleteCharacter(id);
+    const deleted = await deleteCharacter(userId, id);
 
     if (!deleted) {
       return NextResponse.json({ error: "Character not found" }, { status: 404 });

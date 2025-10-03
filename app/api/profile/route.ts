@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-storage";
+import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
 
 const ROLE_OPTIONS = new Set(["Healer", "Damage", "Support", "DM", "Other", ""]);
 const MAX_BIO_LENGTH = 2000;
@@ -120,9 +121,20 @@ const validateProfile = (payload: unknown): ProfileRecord => {
   };
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const profile = await readProfile();
+    const { searchParams } = new URL(request.url);
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
+    
+    const profile = await readProfile(userId);
     return NextResponse.json(profile);
   } catch (error) {
     console.error(error);
@@ -132,9 +144,20 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
+    
     const payload = await request.json();
     const profile = validateProfile(payload);
-    await writeProfile(profile);
+    await writeProfile(userId, profile);
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {

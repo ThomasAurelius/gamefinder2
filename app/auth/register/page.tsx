@@ -138,7 +138,7 @@ export default function RegisterPage() {
       <div>
         <h1 className="text-2xl font-semibold">Create an account</h1>
         <p className="mt-2 text-sm text-slate-300">
-          Join GameFinder to track campaigns and share adventures with friends.
+          Join The Gathering Call to track campaigns and share adventures with friends.
         </p>
       </div>
       <form className="space-y-4" onSubmit={handleSubmit}>

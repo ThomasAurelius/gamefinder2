@@ -1,6 +1,6 @@
 # Messaging Feature
 
-This directory contains the messaging functionality for GameFinder, allowing users to send and receive messages from each other.
+This directory contains the messaging functionality for The Gathering Call, allowing users to send and receive messages from each other.
 
 ## Features
 
