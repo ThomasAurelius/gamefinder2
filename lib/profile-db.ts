@@ -37,9 +37,18 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
   const db = await getDb();
   const usersCollection = db.collection("users");
 
-  const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+  // Try to find by ObjectId first (for authenticated users)
+  let user = null;
+  if (ObjectId.isValid(userId)) {
+    user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+  }
+  
+  // If not found and it's a demo user, return default profile
+  if (!user) {
+    return DEFAULT_PROFILE;
+  }
 
-  if (!user || !user.profile) {
+  if (!user.profile) {
     return DEFAULT_PROFILE;
   }
 
@@ -70,13 +79,17 @@ export async function writeProfile(
 
   const now = new Date();
 
-  await usersCollection.updateOne(
-    { _id: new ObjectId(userId) },
-    {
-      $set: {
-        profile,
-        updatedAt: now,
-      },
-    }
-  );
+  // Only update if userId is a valid ObjectId (authenticated user)
+  if (ObjectId.isValid(userId)) {
+    await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      {
+        $set: {
+          profile,
+          updatedAt: now,
+        },
+      }
+    );
+  }
+  // For demo users or invalid IDs, we just don't persist
 }
