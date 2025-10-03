@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
+import { isValidTimezone } from "@/lib/timezone";
 
 const ROLE_OPTIONS = new Set(["Healer", "Damage", "Support", "DM", "Other", ""]);
 const MAX_BIO_LENGTH = 2000;
@@ -60,6 +61,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     favoriteGames,
     availability,
     primaryRole,
+    timezone,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -98,6 +100,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     throw new Error("Primary role is invalid");
   }
 
+  // Validate timezone if provided
+  if (timezone !== undefined && (!isString(timezone) || !isValidTimezone(timezone))) {
+    throw new Error("Invalid timezone");
+  }
+
   const normalizedGames = dedupe(games);
   const normalizedFavorites = dedupe(favoriteGames);
 
@@ -118,6 +125,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     favoriteGames: normalizedFavorites,
     availability: normalizeAvailability(availability),
     primaryRole,
+    timezone: timezone || "America/New_York",
   };
 };
 

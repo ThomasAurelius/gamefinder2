@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
+import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"] as const;
 
@@ -53,6 +54,7 @@ type ProfilePayload = {
 	favoriteGames: string[];
 	availability: Record<string, string[]>;
 	primaryRole: RoleOption | "";
+	timezone?: string;
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -71,6 +73,7 @@ export default function ProfilePage() {
 	const [availability, setAvailability] = useState<Record<string, string[]>>(
 		() => createDefaultAvailability()
 	);
+	const [timezone, setTimezone] = useState<string>(DEFAULT_TIMEZONE);
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -103,6 +106,7 @@ export default function ProfilePage() {
 				setZipCode(profile.zipCode ?? "");
 				setBio(profile.bio ?? "");
 				setSelectedGames(profile.games ?? []);
+				setTimezone(profile.timezone ?? DEFAULT_TIMEZONE);
 				const normalizedGames = profile.games ?? [];
 				setFavoriteGames(
 					(profile.favoriteGames ?? []).filter((game) =>
@@ -188,6 +192,7 @@ export default function ProfilePage() {
 			favoriteGames,
 			availability,
 			primaryRole,
+			timezone,
 		};
 
 		try {
@@ -275,6 +280,30 @@ export default function ProfilePage() {
 							placeholder="Postal code"
 							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 						/>
+					</div>
+
+					<div className="space-y-2">
+						<label
+							htmlFor="timezone"
+							className="text-sm font-medium text-slate-200"
+						>
+							Timezone
+						</label>
+						<select
+							id="timezone"
+							value={timezone}
+							onChange={(event) => setTimezone(event.target.value)}
+							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						>
+							{TIMEZONE_OPTIONS.map((tz) => (
+								<option key={tz.value} value={tz.value}>
+									{tz.label}
+								</option>
+							))}
+						</select>
+						<p className="text-xs text-slate-400">
+							Select your timezone to ensure dates are displayed correctly.
+						</p>
 					</div>
 				</section>
 

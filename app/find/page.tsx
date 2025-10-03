@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
+import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 type GameSession = {
   id: string;
@@ -40,6 +41,23 @@ export default function FindGamesPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [joiningSessionId, setJoiningSessionId] = useState<string | null>(null);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
+
+  useEffect(() => {
+    const fetchTimezone = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setUserTimezone(data.timezone || DEFAULT_TIMEZONE);
+        }
+      } catch (error) {
+        console.error("Failed to fetch timezone:", error);
+      }
+    };
+
+    fetchTimezone();
+  }, []);
 
   const toggleTime = (slot: string) => {
     setSelectedTimes((prev) =>
@@ -194,7 +212,7 @@ export default function FindGamesPage() {
                 Showing <span className="text-sky-400">{selectedGame}</span> games
                 {selectedDate && (
                   <>
-                    {" "}on <span className="text-sky-400">{new Date(selectedDate).toLocaleDateString()}</span>
+                    {" "}on <span className="text-sky-400">{formatDateInTimezone(selectedDate, userTimezone)}</span>
                   </>
                 )}
                 {selectedTimes.length > 0 && (
@@ -225,7 +243,7 @@ export default function FindGamesPage() {
                         <div className="mt-2 space-y-1 text-sm text-slate-400">
                           <p>
                             <span className="text-slate-500">Date:</span>{" "}
-                            {new Date(session.date).toLocaleDateString()}
+                            {formatDateInTimezone(session.date, userTimezone)}
                           </p>
                           <p>
                             <span className="text-slate-500">Times:</span>{" "}
