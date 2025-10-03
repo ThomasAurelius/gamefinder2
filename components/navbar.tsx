@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type NavLink = {
 	href: string;
@@ -49,6 +49,25 @@ export function Navbar() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [gamesOpen, setGamesOpen] = useState(false);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [authLoading, setAuthLoading] = useState(true);
+
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const response = await fetch("/api/auth/status");
+				const data = await response.json();
+				setIsAuthenticated(data.isAuthenticated);
+			} catch (error) {
+				console.error("Failed to check auth status:", error);
+				setIsAuthenticated(false);
+			} finally {
+				setAuthLoading(false);
+			}
+		};
+
+		checkAuth();
+	}, []);
 
 	const toggleMenu = () => setMenuOpen((open) => !open);
 	const closeMenu = () => setMenuOpen(false);
@@ -140,50 +159,65 @@ export function Navbar() {
 							);
 						}
 					})}
-					<div className="relative">
-						<button
-							type="button"
-							className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
-								accountOpen ? "bg-white/10 text-white" : ""
-							}`}
-							onClick={toggleAccount}
-							aria-haspopup="menu"
-							aria-expanded={accountOpen}
-						>
-							Account
-							<svg
-								aria-hidden
-								className={`h-4 w-4 transition-transform ${
-									accountOpen ? "rotate-180" : ""
-								}`}
-								viewBox="0 0 20 20"
-								fill="currentColor"
-							>
-								<path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
-							</svg>
-						</button>
-						{accountOpen ? (
-							<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
-								{accountLinks.map((link) => (
-									<Link
-										key={link.href}
-										href={link.href}
-										onClick={() => {
-											setAccountOpen(false);
-											closeMenu();
-										}}
-										className={`block px-4 py-2 text-sm transition hover:bg-white/10 ${
-											isActive(pathname, link.href)
-												? "bg-white/10 text-white"
-												: "text-slate-200"
+					{!authLoading && (
+						isAuthenticated ? (
+							<div className="relative">
+								<button
+									type="button"
+									className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
+										accountOpen ? "bg-white/10 text-white" : ""
+									}`}
+									onClick={toggleAccount}
+									aria-haspopup="menu"
+									aria-expanded={accountOpen}
+								>
+									Account
+									<svg
+										aria-hidden
+										className={`h-4 w-4 transition-transform ${
+											accountOpen ? "rotate-180" : ""
 										}`}
+										viewBox="0 0 20 20"
+										fill="currentColor"
 									>
-										{link.label}
-									</Link>
-								))}
+										<path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
+									</svg>
+								</button>
+								{accountOpen ? (
+									<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
+										{accountLinks.map((link) => (
+											<Link
+												key={link.href}
+												href={link.href}
+												onClick={() => {
+													setAccountOpen(false);
+													closeMenu();
+												}}
+												className={`block px-4 py-2 text-sm transition hover:bg-white/10 ${
+													isActive(pathname, link.href)
+														? "bg-white/10 text-white"
+														: "text-slate-200"
+												}`}
+											>
+												{link.label}
+											</Link>
+										))}
+									</div>
+								) : null}
 							</div>
-						) : null}
-					</div>
+						) : (
+							<Link
+								href="/auth/login"
+								className={`rounded-md px-3 py-2 transition hover:bg-white/10 ${
+									isActive(pathname, "/auth/login")
+										? "bg-white/10 text-white"
+										: "text-slate-200"
+								}`}
+							>
+								Login
+							</Link>
+						)
+					)}
 				</nav>
 				<button
 					type="button"
@@ -261,25 +295,43 @@ export function Navbar() {
 								);
 							}
 						})}
-						<div className="border-t border-white/5 pt-2">
-							<p className="px-3 text-xs uppercase tracking-wide text-slate-400">
-								Account
-							</p>
-							{accountLinks.map((link) => (
-								<Link
-									key={link.href}
-									href={link.href}
-									onClick={closeMenu}
-									className={`mt-1 block rounded-md px-3 py-2 transition hover:bg-white/10 ${
-										isActive(pathname, link.href)
-											? "bg-white/10 text-white"
-											: "text-slate-200"
-									}`}
-								>
-									{link.label}
-								</Link>
-							))}
-						</div>
+						{!authLoading && (
+							isAuthenticated ? (
+								<div className="border-t border-white/5 pt-2">
+									<p className="px-3 text-xs uppercase tracking-wide text-slate-400">
+										Account
+									</p>
+									{accountLinks.map((link) => (
+										<Link
+											key={link.href}
+											href={link.href}
+											onClick={closeMenu}
+											className={`mt-1 block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+												isActive(pathname, link.href)
+													? "bg-white/10 text-white"
+													: "text-slate-200"
+											}`}
+										>
+											{link.label}
+										</Link>
+									))}
+								</div>
+							) : (
+								<div className="border-t border-white/5 pt-2">
+									<Link
+										href="/auth/login"
+										onClick={closeMenu}
+										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+											isActive(pathname, "/auth/login")
+												? "bg-white/10 text-white"
+												: "text-slate-200"
+										}`}
+									>
+										Login
+									</Link>
+								</div>
+							)
+						)}
 					</div>
 				</div>
 			) : null}
