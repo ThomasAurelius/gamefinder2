@@ -3,11 +3,34 @@
 import { useState, FormEvent } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 
+const tagButtonClasses = (
+  active: boolean,
+  options?: { size?: "sm" | "md" }
+) => {
+  const sizeClasses =
+    options?.size === "sm" ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm";
+  const baseClasses = "rounded-full border transition-colors";
+  const activeClasses = active
+    ? "border-sky-400 bg-sky-500/20 text-sky-100"
+    : "border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500";
+
+  return [sizeClasses, baseClasses, activeClasses].join(" ");
+};
+
 export default function PostGamePage() {
   const [selectedGame, setSelectedGame] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState("");
   const [description, setDescription] = useState("");
   const [submitted, setSubmitted] = useState(false);
+
+  const toggleTime = (slot: string) => {
+    setSelectedTimes((prev) =>
+      prev.includes(slot)
+        ? prev.filter((item) => item !== slot)
+        : [...prev, slot]
+    );
+  };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -47,23 +70,41 @@ export default function PostGamePage() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="time-select" className="block text-sm font-medium text-slate-200">
-            Game Time <span className="text-red-400">*</span>
+          <label htmlFor="date-select" className="block text-sm font-medium text-slate-200">
+            Game Date <span className="text-red-400">*</span>
           </label>
-          <select
-            id="time-select"
-            value={selectedTime}
-            onChange={(e) => setSelectedTime(e.target.value)}
+          <input
+            id="date-select"
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
             required
             className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-          >
-            <option value="">Choose a time...</option>
-            {TIME_SLOTS.map((slot) => (
-              <option key={slot} value={slot}>
-                {slot}
-              </option>
-            ))}
-          </select>
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-slate-200">
+            Game Time <span className="text-red-400">*</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {TIME_SLOTS.map((slot) => {
+              const active = selectedTimes.includes(slot);
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  onClick={() => toggleTime(slot)}
+                  className={tagButtonClasses(active, { size: "sm" })}
+                >
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-xs text-slate-500">
+            {selectedTimes.length} time slot(s) selected
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -83,7 +124,7 @@ export default function PostGamePage() {
         <button
           type="submit"
           className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!selectedGame || !selectedTime}
+          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate}
         >
           Post Game Session
         </button>
