@@ -5,6 +5,7 @@ export type UserBasicInfo = {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string;
 };
 
 /**
@@ -21,7 +22,7 @@ export async function getUserBasicInfo(userId: string): Promise<UserBasicInfo | 
     
     const user = await usersCollection.findOne(
       { _id: new ObjectId(userId) },
-      { projection: { _id: 1, name: 1, email: 1 } }
+      { projection: { _id: 1, name: 1, email: 1, "profile.avatarUrl": 1 } }
     );
     
     if (!user) {
@@ -32,6 +33,7 @@ export async function getUserBasicInfo(userId: string): Promise<UserBasicInfo | 
       id: user._id?.toString() || userId,
       name: user.name || user.email?.split("@")[0] || "Unknown User",
       email: user.email || "",
+      avatarUrl: user.profile?.avatarUrl || undefined,
     };
   } catch (error) {
     console.error("Failed to fetch user info:", error);
@@ -60,7 +62,7 @@ export async function getUsersBasicInfo(userIds: string[]): Promise<Map<string, 
     const users = await usersCollection
       .find(
         { _id: { $in: objectIds } },
-        { projection: { _id: 1, name: 1, email: 1 } }
+        { projection: { _id: 1, name: 1, email: 1, "profile.avatarUrl": 1 } }
       )
       .toArray();
     
@@ -71,6 +73,7 @@ export async function getUsersBasicInfo(userIds: string[]): Promise<Map<string, 
           id: userId,
           name: user.name || user.email?.split("@")[0] || "Unknown User",
           email: user.email || "",
+          avatarUrl: user.profile?.avatarUrl || undefined,
         });
       }
     }

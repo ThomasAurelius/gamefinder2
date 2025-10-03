@@ -48,6 +48,7 @@ export async function listGameSessions(filters?: {
     waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
   }));
 }
 
@@ -73,6 +74,7 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
   };
 }
 
@@ -97,6 +99,7 @@ export async function createGameSession(
     waitlist: [],
     createdAt: timestamp,
     updatedAt: timestamp,
+    imageUrl: payload.imageUrl,
   };
 
   await gamesCollection.insertOne(newSession);
@@ -113,6 +116,7 @@ export async function createGameSession(
     waitlist: newSession.waitlist,
     createdAt: newSession.createdAt,
     updatedAt: newSession.updatedAt,
+    imageUrl: newSession.imageUrl,
   };
 }
 
@@ -186,6 +190,7 @@ export async function joinGameSession(
     waitlist: result.waitlist || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
   };
 }
 
@@ -217,5 +222,6 @@ export async function listUserGameSessions(userId: string): Promise<StoredGameSe
     waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
   }));
 }

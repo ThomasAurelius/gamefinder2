@@ -26,6 +26,8 @@ export default function PostGamePage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const toggleTime = (slot: string) => {
     setSelectedTimes((prev) =>
@@ -33,6 +35,37 @@ export default function PostGamePage() {
         ? prev.filter((item) => item !== slot)
         : [...prev, slot]
     );
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "game");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to upload image");
+      }
+
+      const { url } = await response.json();
+      setImageUrl(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image");
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -52,6 +85,7 @@ export default function PostGamePage() {
           times: selectedTimes,
           description: description,
           maxPlayers: maxPlayers,
+          imageUrl: imageUrl,
         }),
       });
 
@@ -67,6 +101,7 @@ export default function PostGamePage() {
       setSelectedDate("");
       setDescription("");
       setMaxPlayers(4);
+      setImageUrl("");
       
       setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
@@ -161,6 +196,47 @@ export default function PostGamePage() {
           <p className="text-xs text-slate-500">
             Maximum number of players that can join this session
           </p>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="game-image" className="block text-sm font-medium text-slate-200">
+            Game Image
+          </label>
+          <div className="space-y-3">
+            {imageUrl && (
+              <div className="relative">
+                <img
+                  src={imageUrl}
+                  alt="Game session"
+                  className="h-48 w-full rounded-lg border border-slate-800 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  className="absolute right-2 top-2 rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-red-700"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+            <label
+              htmlFor="game-image"
+              className="inline-block cursor-pointer rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isUploadingImage ? "Uploading..." : imageUrl ? "Change Image" : "Upload Image"}
+            </label>
+            <input
+              id="game-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleImageUpload}
+              disabled={isUploadingImage}
+              className="hidden"
+            />
+            <p className="text-xs text-slate-500">
+              JPG, PNG, WebP or GIF. Max 5MB. Optional.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-2">

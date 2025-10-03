@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
           Sunday: [],
         },
         primaryRole: "",
+        avatarUrl: "",
       },
     });
 
