@@ -2,12 +2,13 @@ import { randomUUID } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
 
+import { getDataDirectory } from "../storage-path";
 import {
   CharacterPayload,
   StoredCharacter,
 } from "./types";
 
-const DATA_DIRECTORY = path.join(process.cwd(), "data");
+const DATA_DIRECTORY = getDataDirectory();
 const DATA_FILE = path.join(DATA_DIRECTORY, "characters.json");
 
 async function ensureDataFile(): Promise<void> {
