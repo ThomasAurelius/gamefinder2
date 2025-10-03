@@ -1,7 +1,9 @@
 import { promises as fs } from "fs";
 import path from "path";
 
-const DATA_DIRECTORY = path.join(process.cwd(), "data");
+import { getDataDirectory } from "./storage-path";
+
+const DATA_DIRECTORY = getDataDirectory();
 const PROFILE_FILE_PATH = path.join(DATA_DIRECTORY, "profile.json");
 
 export type ProfileRecord = {
@@ -41,6 +43,7 @@ async function ensureDataDirectory() {
     await fs.mkdir(DATA_DIRECTORY, { recursive: true });
   } catch (error) {
     console.error("Failed to create data directory", error);
+    throw error;
   }
 }
 
