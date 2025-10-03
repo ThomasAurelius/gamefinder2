@@ -74,7 +74,7 @@ If no `userId` is provided, the system defaults to `"demo-user-1"` for backwards
 
 ## Configuration Notes
 
-- By default the driver will build a connection string using the standard `mongodb://` protocol when only `MONGODB_HOST`/`MONGODB_PORT` are supplied. Set `MONGODB_PROTOCOL` (or `MONGO_PROTOCOL`) to override the protocol, for example to `mongodb+srv` when connecting to Atlas clusters.
+- By default the driver will build a connection string using the standard `mongodb://` protocol when only `MONGODB_HOST`/`MONGODB_PORT` are supplied. If `MONGODB_HOST` already contains a protocol (for example `mongodb://mongo:27017`) it will be used as-is. Set `MONGODB_PROTOCOL` (or `MONGO_PROTOCOL`) to override the protocol, for example to `mongodb+srv` when connecting to Atlas clusters.
 
 ## Migration Notes
 

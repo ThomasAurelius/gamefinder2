@@ -29,18 +29,26 @@ function resolveMongoUri(): string {
     return uri;
   }
 
-  const host = process.env.MONGODB_HOST ?? process.env.MONGO_HOST;
+  const hostValue = process.env.MONGODB_HOST ?? process.env.MONGO_HOST;
 
-  if (!host) {
+  if (!hostValue || hostValue.trim().length === 0) {
     throw new Error(
       "MongoDB connection details are not configured. Set MONGODB_URI or provide MONGODB_HOST.",
     );
   }
 
-  const protocol =
-    process.env.MONGODB_PROTOCOL ?? process.env.MONGO_PROTOCOL ?? "mongodb";
+  const host = hostValue.trim();
+
+  if (host.includes("://")) {
+    return host;
+  }
+
+  const protocolInput = process.env.MONGODB_PROTOCOL ?? process.env.MONGO_PROTOCOL;
+  const protocol = protocolInput ? protocolInput.replace(/:\/\//, "") : "mongodb";
+
   const port = process.env.MONGODB_PORT ?? process.env.MONGO_PORT;
-  const authority = port ? `${host}:${port}` : host;
+  const needsPort = Boolean(port) && !host.includes(":") && !host.endsWith("]");
+  const authority = needsPort ? `${host}:${port}` : host;
 
   return `${protocol}://${authority}`;
 }
