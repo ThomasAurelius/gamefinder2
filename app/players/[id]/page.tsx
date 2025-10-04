@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { readProfile } from "@/lib/profile-db";
 import { ObjectId } from "mongodb";
@@ -202,27 +203,46 @@ export default async function PlayerDetailPage({
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {publicCharacters.map((character) => (
-                <div
+                <Link
                   key={character.id}
-                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+                  href={`/players/${id}/characters/${character.id}`}
+                  className="group rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition hover:border-sky-500/60 hover:bg-slate-900"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-slate-100">
-                        {character.name}
-                      </h3>
-                      <p className="text-sm text-slate-400">
-                        Campaign: {character.campaign || "Unassigned"}
+                  <div className="flex items-start gap-4">
+                    {character.avatarUrl ? (
+                      <img
+                        src={character.avatarUrl}
+                        alt={character.name}
+                        className="h-16 w-16 rounded-full border-2 border-slate-700 object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-xl font-semibold text-slate-400 flex-shrink-0">
+                        {character.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-xl font-semibold text-slate-100 group-hover:text-sky-100">
+                            {character.name}
+                          </h3>
+                          <p className="text-sm text-slate-400">
+                            Campaign: {character.campaign || "Unassigned"}
+                          </p>
+                        </div>
+                        <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase tracking-wide text-slate-300 flex-shrink-0">
+                          {formatGameSystem(character.system)}
+                        </span>
+                      </div>
+                      <p className="mt-3 line-clamp-3 text-sm text-slate-300">
+                        {character.notes}
+                      </p>
+                      <p className="mt-4 text-sm font-medium text-sky-300">
+                        View details →
                       </p>
                     </div>
-                    <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase tracking-wide text-slate-300">
-                      {formatGameSystem(character.system)}
-                    </span>
                   </div>
-                  <p className="mt-3 line-clamp-3 text-sm text-slate-300">
-                    {character.notes}
-                  </p>
-                </div>
+                </Link>
               ))}
             </div>
           )}
