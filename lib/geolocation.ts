@@ -37,6 +37,15 @@ export type Coordinates = {
 };
 
 /**
+ * Check if a string looks like a US zip code (5 digits or 5+4 format)
+ */
+function isUSZipCode(location: string): boolean {
+  const trimmed = location.trim();
+  // Match 5 digits or 5+4 format (e.g., "78729" or "78729-1234")
+  return /^\d{5}(-\d{4})?$/.test(trimmed);
+}
+
+/**
  * Geocode a location string (address or zip code) to coordinates
  * Uses OpenStreetMap Nominatim API (free, no API key required)
  */
@@ -48,9 +57,15 @@ export async function geocodeLocation(
   }
 
   try {
+    // For US zip codes, add country context to improve geocoding accuracy
+    let searchQuery = location;
+    if (isUSZipCode(location)) {
+      searchQuery = `${location}, USA`;
+    }
+
     // Use Nominatim API with a proper user agent
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`,
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
       {
         headers: {
           "User-Agent": "GameFinder2-App/1.0",
