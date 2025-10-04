@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
 import { isValidTimezone } from "@/lib/timezone";
+import { geocodeLocation } from "@/lib/geolocation";
 
 const ROLE_OPTIONS = new Set(["Healer", "Damage", "Support", "DM", "Other", ""]);
 const MAX_BIO_LENGTH = 2000;
@@ -167,6 +168,23 @@ export async function POST(request: Request) {
     
     const payload = await request.json();
     const profile = validateProfile(payload);
+    
+    // Geocode the location to get coordinates
+    // Try zipCode first, then fall back to location
+    const locationToGeocode = profile.zipCode || profile.location;
+    if (locationToGeocode) {
+      try {
+        const coords = await geocodeLocation(locationToGeocode);
+        if (coords) {
+          profile.latitude = coords.latitude;
+          profile.longitude = coords.longitude;
+        }
+      } catch (error) {
+        // Log the error but don't fail the profile save
+        console.error("Failed to geocode location:", error);
+      }
+    }
+    
     await writeProfile(userId, profile);
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {

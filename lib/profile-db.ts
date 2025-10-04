@@ -14,6 +14,8 @@ export type ProfileRecord = {
   timezone?: string;
   avatarUrl?: string;
   userName?: string; // The user's name from the users collection
+  latitude?: number;
+  longitude?: number;
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -78,6 +80,8 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
     timezone: profile.timezone ?? "America/New_York",
     avatarUrl: profile.avatarUrl ?? "",
     userName: user.name || "",
+    latitude: profile.latitude,
+    longitude: profile.longitude,
   };
 }
 

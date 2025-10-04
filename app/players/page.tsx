@@ -13,6 +13,7 @@ type Player = {
   bio: string;
   favoriteGames: string[];
   avatarUrl?: string;
+  distance?: number;
 };
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"];
@@ -42,7 +43,14 @@ function PlayerCard({ player }: { player: Player }) {
             {displayName}
           </h3>
           {player.location && (
-            <p className="mt-1 text-sm text-slate-400">{player.location}</p>
+            <p className="mt-1 text-sm text-slate-400">
+              {player.location}
+              {player.distance !== undefined && (
+                <span className="ml-2 text-sky-400">
+                  ({player.distance.toFixed(1)} mi away)
+                </span>
+              )}
+            </p>
           )}
           {player.primaryRole && (
             <p className="mt-1 text-sm text-sky-400">
@@ -86,6 +94,8 @@ export default function PlayersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedGame, setSelectedGame] = useState("");
+  const [locationSearch, setLocationSearch] = useState("");
+  const [radiusMiles, setRadiusMiles] = useState("50");
 
   useEffect(() => {
     // Load all players on initial mount
@@ -121,6 +131,10 @@ export default function PlayersPage() {
       if (searchQuery) params.append("search", searchQuery);
       if (selectedRole) params.append("role", selectedRole);
       if (selectedGame) params.append("game", selectedGame);
+      if (locationSearch) {
+        params.append("location", locationSearch);
+        params.append("radius", radiusMiles);
+      }
 
       const response = await fetch(`/api/players?${params.toString()}`);
       if (!response.ok) {
@@ -142,7 +156,7 @@ export default function PlayersPage() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Find Players</h1>
         <p className="mt-2 text-sm text-slate-400">
-          Search for players by name, location, role, or favorite games.
+          Search for players by name, location, role, or favorite games. Use zip code or city to find players within a specific radius.
         </p>
       </div>
 
@@ -182,6 +196,51 @@ export default function PlayersPage() {
                 className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
               />
             </div>
+
+            {/* Location/Zip Code Search */}
+            <div>
+              <label
+                htmlFor="locationSearch"
+                className="mb-2 block text-sm font-medium text-slate-300"
+              >
+                Location or Zip Code
+              </label>
+              <input
+                type="text"
+                id="locationSearch"
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+                placeholder="Enter zip code or city..."
+                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Search for players within a radius of this location
+              </p>
+            </div>
+
+            {/* Radius Selection */}
+            {locationSearch && (
+              <div>
+                <label
+                  htmlFor="radius"
+                  className="mb-2 block text-sm font-medium text-slate-300"
+                >
+                  Search Radius
+                </label>
+                <select
+                  id="radius"
+                  value={radiusMiles}
+                  onChange={(e) => setRadiusMiles(e.target.value)}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+                >
+                  <option value="10">10 miles</option>
+                  <option value="25">25 miles</option>
+                  <option value="50">50 miles</option>
+                  <option value="100">100 miles</option>
+                  <option value="250">250 miles</option>
+                </select>
+              </div>
+            )}
 
             {/* Role Filter */}
             <div>
