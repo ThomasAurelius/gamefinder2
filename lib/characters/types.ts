@@ -16,6 +16,7 @@ export type CharacterDetails = {
   stats: StatField[];
   skills: SkillField[];
   notes: string;
+  avatarUrl?: string;
 };
 
 export type CharacterPayload = CharacterDetails & {

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const type = formData.get("type") as string; // "avatar" or "game"
+    const type = formData.get("type") as string; // "avatar", "game", or "character"
 
     if (!file) {
       return NextResponse.json(
@@ -51,9 +51,14 @@ export async function POST(request: NextRequest) {
     const filename = `${randomUUID()}.${ext}`;
     
     // Determine storage path based on type
-    const path = type === "avatar" 
-      ? `avatars/${userId}/${filename}`
-      : `games/${userId}/${filename}`;
+    let path: string;
+    if (type === "avatar") {
+      path = `avatars/${userId}/${filename}`;
+    } else if (type === "character") {
+      path = `characters/${userId}/${filename}`;
+    } else {
+      path = `games/${userId}/${filename}`;
+    }
 
     // Upload to Firebase
     const url = await uploadImageToFirebase(buffer, path, file.type);
