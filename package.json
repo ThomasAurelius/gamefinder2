@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.17.1",
     "@schedule-x/calendar": "^3.2.0",
     "@schedule-x/events-service": "^3.2.0",
     "@schedule-x/react": "^3.2.0",
