@@ -476,6 +476,7 @@ export default function CharactersPage() {
         setCharacter({
           name: savedCharacter.name,
           campaign: savedCharacter.campaign,
+          level: savedCharacter.level,
           stats: cloneFieldArray(savedCharacter.stats),
           skills: cloneFieldArray(savedCharacter.skills),
           notes: savedCharacter.notes,
