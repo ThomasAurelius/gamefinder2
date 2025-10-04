@@ -63,6 +63,7 @@ export async function GET(request: Request) {
       .toArray();
 
     const players: PlayerSearchResult[] = users.map((user) => ({
+      // ID is from the users collection _id, not from the profile subdocument
       id: user._id.toString(),
       name: user.name || "Unknown Player",
       commonName: user.profile?.commonName || "",
