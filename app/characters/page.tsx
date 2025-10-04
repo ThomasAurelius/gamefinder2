@@ -554,21 +554,34 @@ export default function CharactersPage() {
                 key={item.id}
                 className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
               >
-                <summary className="flex cursor-pointer flex-wrap items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
-                  <span className="text-base font-semibold text-slate-100">
-                    {item.name || "Untitled Character"}
-                  </span>
-                  <span className="rounded-full border border-indigo-500/60 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-200">
-                    {getSystemLabel(item.system)}
-                  </span>
-                  {item.level && (
-                    <span className="text-sm text-slate-300">
-                      Level: {item.level}
-                    </span>
+                <summary className="flex cursor-pointer items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
+                  {item.avatarUrl ? (
+                    <img
+                      src={item.avatarUrl}
+                      alt={item.name}
+                      className="h-12 w-12 rounded-full border-2 border-slate-700 object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-lg font-semibold text-slate-400 flex-shrink-0">
+                      {item.name ? item.name.charAt(0).toUpperCase() : "?"}
+                    </div>
                   )}
-                  <span className="text-sm text-slate-300">
-                    Campaign: {item.campaign || "Unassigned"}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
+                    <span className="text-base font-semibold text-slate-100">
+                      {item.name || "Untitled Character"}
+                    </span>
+                    <span className="rounded-full border border-indigo-500/60 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-200">
+                      {getSystemLabel(item.system)}
+                    </span>
+                    {item.level && (
+                      <span className="text-sm text-slate-300">
+                        Level: {item.level}
+                      </span>
+                    )}
+                    <span className="text-sm text-slate-300">
+                      Campaign: {item.campaign || "Unassigned"}
+                    </span>
+                  </div>
                 </summary>
                 <div className="space-y-4 border-t border-slate-800 bg-slate-950/40 px-4 py-4 text-sm text-slate-200">
                   <div className="flex flex-wrap justify-between gap-2">
