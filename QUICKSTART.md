@@ -102,6 +102,16 @@ For detailed information, see:
 - Verify the private key format includes `\n` characters
 - Make sure you're using the correct project ID
 
+**"invalid_grant: Invalid grant: account not found"**
+This means your service account credentials are invalid. To fix:
+1. Go to Firebase Console → Project Settings → Service Accounts
+2. Generate a **new** private key
+3. Update ALL environment variables with the new credentials
+4. Ensure the project ID matches the project where you generated the key
+5. Restart your application
+
+See `IMAGE_UPLOAD_SETUP.md` for detailed troubleshooting steps.
+
 **"Failed to upload image"**
 - Ensure you're logged in
 - Check file is under 5MB
