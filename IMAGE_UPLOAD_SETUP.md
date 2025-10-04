@@ -96,6 +96,35 @@ This configuration:
 - Verify the private key format (should have `\n` characters)
 - Ensure the service account has proper permissions
 
+### "invalid_grant: Invalid grant: account not found"
+This error means your Firebase service account credentials are invalid or the account doesn't exist.
+
+**Causes:**
+- The service account was deleted from the Firebase project
+- The private key or client email is incorrect
+- The credentials are from a different Firebase project
+- The project ID doesn't match the service account
+- The private key format is incorrect
+
+**Solution:**
+1. Go to [Firebase Console](https://console.firebase.google.com/) → Your Project
+2. Go to Project Settings (gear icon) → Service Accounts tab
+3. Click **"Generate New Private Key"** to create fresh credentials
+4. Download the JSON file
+5. Update ALL environment variables with values from the new JSON:
+   - `FIREBASE_PROJECT_ID` → `project_id` from JSON
+   - `FIREBASE_CLIENT_EMAIL` → `client_email` from JSON
+   - `FIREBASE_PRIVATE_KEY` → `private_key` from JSON (keep it as-is with `\n`)
+   - `FIREBASE_STORAGE_BUCKET` → usually `your-project-id.appspot.com`
+6. **Important:** Make sure the `FIREBASE_PROJECT_ID` matches the project where you generated the key
+7. Restart your application after updating the environment variables
+
+**Private Key Format:**
+The private key should be wrapped in quotes and contain `\n` for newlines:
+```bash
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBg...\n-----END PRIVATE KEY-----\n"
+```
+
 ### "Failed to upload image"
 - Check Firebase Storage is enabled in your project
 - Verify storage rules allow the upload
