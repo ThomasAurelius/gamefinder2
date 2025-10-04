@@ -41,6 +41,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
   const db = await getDb();
   const usersCollection = db.collection("users");
 
+  // userId is the user document's _id from the users collection, not an ID within the profile subdocument
   // Try to find by ObjectId first (for authenticated users)
   let user = null;
   if (ObjectId.isValid(userId)) {

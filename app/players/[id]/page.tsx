@@ -56,6 +56,7 @@ export default async function PlayerDetailPage({
   const { id } = await params;
 
   // Validate the ID format
+  // Note: id is the user document's _id from the users collection, not an ID from the profile subdocument
   if (!ObjectId.isValid(id)) {
     notFound();
   }
