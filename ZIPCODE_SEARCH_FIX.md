@@ -11,15 +11,20 @@ The Nominatim geocoding API (OpenStreetMap) does not reliably geocode bare US zi
 
 This caused a mismatch between the coordinates stored in the profile and the coordinates used during search, making distance calculations incorrect.
 
+## Additional Issue (Fixed)
+Even with the US zip code detection, the geocoding was failing because whitespace was not properly trimmed before appending ", USA". When a user entered " 78729 " (with spaces), the search query became " 78729 , USA" instead of "78729, USA", causing the Nominatim API to fail or return incorrect results.
+
 ## Solution
 Modified the `geocodeLocation()` function in `lib/geolocation.ts` to:
 1. Detect US zip codes (5-digit or 5+4 format like "78729" or "78729-1234")
-2. Automatically append ", USA" to US zip codes before geocoding
-3. Ensures consistent geocoding between profile saves and searches
+2. Trim whitespace from the location string before processing
+3. Automatically append ", USA" to the trimmed US zip codes before geocoding
+4. Ensures consistent geocoding between profile saves and searches
 
 ### Changes Made
 - Added `isUSZipCode()` helper function to detect US zip codes using regex: `/^\d{5}(-\d{4})?$/`
-- Modified `geocodeLocation()` to use "78729, USA" instead of just "78729" for US zip codes
+- Modified `geocodeLocation()` to trim the location string before checking if it's a US zip code
+- Use the trimmed location when constructing the search query to avoid issues like " 78729 , USA"
 - This fix automatically applies to:
   - Profile location geocoding (when users save their zipcode)
   - Player search by location
@@ -27,22 +32,26 @@ Modified the `geocodeLocation()` function in `lib/geolocation.ts` to:
 
 ## Testing
 The zipcode detection logic was tested with various inputs:
-- ✅ "78729" → Detected as US zip code
-- ✅ "78729-1234" → Detected as US zip code (5+4 format)
-- ✅ " 78729 " → Detected as US zip code (handles whitespace)
-- ✅ "Austin, TX" → Not detected (city/state format passes through unchanged)
+- ✅ "78729" → Detected as US zip code → Geocodes as "78729, USA"
+- ✅ "78729-1234" → Detected as US zip code (5+4 format) → Geocodes as "78729-1234, USA"
+- ✅ " 78729 " → Detected as US zip code (handles whitespace) → Geocodes as "78729, USA"
+- ✅ " 78729-1234 " → Detected as US zip code with whitespace → Geocodes as "78729-1234, USA"
+- ✅ "Austin, TX" → Not detected (city/state format passes through) → Geocodes as "Austin, TX"
+- ✅ " Austin, TX " → Whitespace trimmed → Geocodes as "Austin, TX"
 - ✅ Edge cases (too short, too long, non-numeric) correctly rejected
 
 ## Impact
 - Users with US zip codes in their profiles will now appear correctly in location-based searches
 - Both profile saving and searching use the same geocoding format
 - Distance calculations will now be accurate for US zip code searches
+- Whitespace in zip code inputs is now handled correctly
 - No breaking changes - existing profiles will work correctly when re-saved or when users update their profiles
 
 ## Files Modified
-- `lib/geolocation.ts` - Added US zip code detection and context appending
+- `lib/geolocation.ts` - Added US zip code detection, whitespace trimming, and country context appending
 
 ## Notes
 - The fix specifically targets US zip codes. International postal codes pass through unchanged.
-- If users enter full addresses like "Austin, TX" or "Seattle, WA", they are not modified and geocode normally.
+- If users enter full addresses like "Austin, TX" or "Seattle, WA", they are properly trimmed and geocode normally.
+- All location strings are trimmed before geocoding to ensure consistency.
 - The Nominatim API handles "78729, USA" much more reliably than just "78729".
