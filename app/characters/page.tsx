@@ -187,6 +187,7 @@ function createInitialCharacter(system: GameSystemKey): CharacterDetails {
     stats,
     skills,
     notes: "",
+    isPublic: false,
   };
 }
 
@@ -387,6 +388,7 @@ export default function CharactersPage() {
       skills: cloneFieldArray(record.skills),
       notes: record.notes,
       avatarUrl: record.avatarUrl,
+      isPublic: record.isPublic ?? false,
     });
     setSubmitError(null);
     setFeedbackMessage(null);
@@ -477,6 +479,7 @@ export default function CharactersPage() {
           skills: cloneFieldArray(savedCharacter.skills),
           notes: savedCharacter.notes,
           avatarUrl: savedCharacter.avatarUrl,
+          isPublic: savedCharacter.isPublic ?? false,
         });
       } else {
         resetForm();
@@ -723,6 +726,26 @@ export default function CharactersPage() {
                   />
                 </label>
               </div>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={character.isPublic ?? false}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      isPublic: event.target.checked,
+                    }))
+                  }
+                  className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-indigo-500 outline-none transition focus:ring-2 focus:ring-indigo-500/40"
+                />
+                <span className="text-sm text-slate-200">
+                  <span className="font-medium">Make this character public</span>
+                  <span className="block text-xs text-slate-400">
+                    Public characters will be visible on your player profile page
+                  </span>
+                </span>
+              </label>
             </div>
 
             {/* Avatar Upload Section */}

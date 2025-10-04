@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { readProfile } from "@/lib/profile-db";
 import { ObjectId } from "mongodb";
 import SendMessageButton from "@/components/SendMessageButton";
+import { listPublicCharacters } from "@/lib/characters/db";
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -12,6 +13,18 @@ const DAYS_OF_WEEK = [
   "Saturday",
   "Sunday",
 ];
+
+function formatGameSystem(system: string): string {
+  const systemMap: Record<string, string> = {
+    dnd: "D&D 5e",
+    pathfinder: "Pathfinder",
+    starfinder: "Starfinder",
+    shadowdark: "Shadowdark",
+    other: "Other",
+  };
+
+  return systemMap[system] || system;
+}
 
 function AvailabilityGrid({
   availability,
@@ -70,6 +83,9 @@ export default async function PlayerDetailPage({
     }
 
     const displayName = profile.commonName || profile.userName;
+    
+    // Fetch public characters for this user
+    const publicCharacters = await listPublicCharacters(id);
 
     return (
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
@@ -171,6 +187,46 @@ export default async function PlayerDetailPage({
             <p className="text-base text-slate-300">{profile.timezone}</p>
           </div>
         )}
+
+        {/* Characters Section */}
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-100">Characters</h2>
+            <p className="text-sm text-slate-400">
+              Public characters shared by {displayName}.
+            </p>
+          </div>
+
+          {publicCharacters.length === 0 ? (
+            <p className="text-slate-400">No public characters yet.</p>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {publicCharacters.map((character) => (
+                <div
+                  key={character.id}
+                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-slate-100">
+                        {character.name}
+                      </h3>
+                      <p className="text-sm text-slate-400">
+                        Campaign: {character.campaign || "Unassigned"}
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase tracking-wide text-slate-300">
+                      {formatGameSystem(character.system)}
+                    </span>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-sm text-slate-300">
+                    {character.notes}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   } catch (error) {

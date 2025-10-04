@@ -17,6 +17,7 @@ export type CharacterDetails = {
   skills: SkillField[];
   notes: string;
   avatarUrl?: string;
+  isPublic?: boolean;
 };
 
 export type CharacterPayload = CharacterDetails & {
