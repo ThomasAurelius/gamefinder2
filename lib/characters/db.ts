@@ -26,6 +26,31 @@ export async function listCharacters(userId: string): Promise<StoredCharacter[]>
     stats: char.stats.map((stat) => ({ ...stat })),
     skills: char.skills.map((skill) => ({ ...skill })),
     avatarUrl: char.avatarUrl,
+    isPublic: char.isPublic ?? false,
+    createdAt: char.createdAt,
+    updatedAt: char.updatedAt,
+  }));
+}
+
+export async function listPublicCharacters(userId: string): Promise<StoredCharacter[]> {
+  const db = await getDb();
+  const charactersCollection = db.collection<CharacterDocument>("characters");
+
+  const characters = await charactersCollection
+    .find({ userId, isPublic: true })
+    .sort({ updatedAt: -1 })
+    .toArray();
+
+  return characters.map((char) => ({
+    id: char.id,
+    system: char.system,
+    name: char.name,
+    campaign: char.campaign,
+    notes: char.notes,
+    stats: char.stats.map((stat) => ({ ...stat })),
+    skills: char.skills.map((skill) => ({ ...skill })),
+    avatarUrl: char.avatarUrl,
+    isPublic: char.isPublic ?? false,
     createdAt: char.createdAt,
     updatedAt: char.updatedAt,
   }));
@@ -53,6 +78,7 @@ export async function getCharacter(
     stats: character.stats.map((stat) => ({ ...stat })),
     skills: character.skills.map((skill) => ({ ...skill })),
     avatarUrl: character.avatarUrl,
+    isPublic: character.isPublic ?? false,
     createdAt: character.createdAt,
     updatedAt: character.updatedAt,
   };
@@ -88,6 +114,7 @@ export async function createCharacter(
     stats: newCharacter.stats,
     skills: newCharacter.skills,
     avatarUrl: newCharacter.avatarUrl,
+    isPublic: newCharacter.isPublic ?? false,
     createdAt: newCharacter.createdAt,
     updatedAt: newCharacter.updatedAt,
   };
@@ -129,6 +156,7 @@ export async function updateCharacter(
     stats: result.stats,
     skills: result.skills,
     avatarUrl: result.avatarUrl,
+    isPublic: result.isPublic ?? false,
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
   };
