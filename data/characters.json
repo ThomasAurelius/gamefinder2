@@ -1,0 +1,111 @@
+[
+  {
+    "id": "acc02650-7f0a-48e6-88ae-ef14ef36aa11",
+    "createdAt": "2025-10-02T19:19:58.338Z",
+    "updatedAt": "2025-10-02T19:19:58.338Z",
+    "system": "dnd",
+    "name": "Test",
+    "campaign": "Test",
+    "notes": "",
+    "stats": [
+      {
+        "name": "Strength",
+        "value": "1"
+      },
+      {
+        "name": "Dexterity",
+        "value": "2"
+      },
+      {
+        "name": "Constitution",
+        "value": "3"
+      },
+      {
+        "name": "Intelligence",
+        "value": "4"
+      },
+      {
+        "name": "Wisdom",
+        "value": "5"
+      },
+      {
+        "name": "Charisma",
+        "value": "6"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Acrobatics",
+        "value": ""
+      },
+      {
+        "name": "Animal Handling",
+        "value": ""
+      },
+      {
+        "name": "Arcana",
+        "value": ""
+      },
+      {
+        "name": "Athletics",
+        "value": ""
+      },
+      {
+        "name": "Deception",
+        "value": ""
+      },
+      {
+        "name": "History",
+        "value": ""
+      },
+      {
+        "name": "Insight",
+        "value": ""
+      },
+      {
+        "name": "Intimidation",
+        "value": ""
+      },
+      {
+        "name": "Investigation",
+        "value": ""
+      },
+      {
+        "name": "Medicine",
+        "value": ""
+      },
+      {
+        "name": "Nature",
+        "value": ""
+      },
+      {
+        "name": "Perception",
+        "value": ""
+      },
+      {
+        "name": "Performance",
+        "value": ""
+      },
+      {
+        "name": "Persuasion",
+        "value": ""
+      },
+      {
+        "name": "Religion",
+        "value": ""
+      },
+      {
+        "name": "Sleight of Hand",
+        "value": ""
+      },
+      {
+        "name": "Stealth",
+        "value": ""
+      },
+      {
+        "name": "Survival",
+        "value": ""
+      }
+    ]
+  }
+]

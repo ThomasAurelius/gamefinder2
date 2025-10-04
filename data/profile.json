@@ -1,0 +1,19 @@
+{
+  "name": "",
+  "commonName": "",
+  "location": "",
+  "zipCode": "",
+  "bio": "",
+  "games": [],
+  "favoriteGames": [],
+  "availability": {
+    "Monday": [],
+    "Tuesday": [],
+    "Wednesday": [],
+    "Thursday": [],
+    "Friday": [],
+    "Saturday": [],
+    "Sunday": []
+  },
+  "primaryRole": ""
+}
