@@ -27,8 +27,13 @@ function MessagesContent() {
     subject: "",
     content: "",
   });
+  const [replyMessage, setReplyMessage] = useState({
+    subject: "",
+    content: "",
+  });
   const [sendError, setSendError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [isReplyingSending, setIsReplyingSending] = useState(false);
 
   // Simulating user authentication - in a real app, this would come from auth context
   useEffect(() => {
@@ -189,6 +194,64 @@ function MessagesContent() {
       }
     } catch (err) {
       console.error("Failed to mark message as read", err);
+    }
+  };
+
+  const handleSendReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedConversation) return;
+
+    setSendError(null);
+    setIsReplyingSending(true);
+
+    try {
+      if (!replyMessage.subject.trim()) {
+        setSendError("Please enter a subject");
+        return;
+      }
+
+      if (!replyMessage.content.trim()) {
+        setSendError("Please enter message content");
+        return;
+      }
+
+      const selectedConv = conversations.find((c) => c.userId === selectedConversation);
+      if (!selectedConv) {
+        setSendError("Could not find conversation");
+        return;
+      }
+
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          senderId: currentUserId,
+          senderName: currentUserName,
+          recipientId: selectedConversation,
+          recipientName: selectedConv.userName,
+          subject: replyMessage.subject,
+          content: replyMessage.content,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send message");
+      }
+
+      // Reset reply form and refresh messages
+      setReplyMessage({
+        subject: "",
+        content: "",
+      });
+      await fetchMessages();
+    } catch (err) {
+      console.error("Failed to send reply", err);
+      setSendError(err instanceof Error ? err.message : "Failed to send message");
+    } finally {
+      setIsReplyingSending(false);
     }
   };
 
@@ -366,7 +429,7 @@ function MessagesContent() {
                 Conversation with{" "}
                 {conversations.find((c) => c.userId === selectedConversation)?.userName}
               </h2>
-              <div className="space-y-4">
+              <div className="space-y-4 mb-6">
                 {conversationMessages.length === 0 ? (
                   <p className="text-sm text-slate-400">No messages in this conversation</p>
                 ) : (
@@ -403,6 +466,59 @@ function MessagesContent() {
                     </div>
                   ))
                 )}
+              </div>
+
+              {/* Reply Form */}
+              <div className="rounded-lg border border-white/10 bg-slate-800 p-4">
+                <h3 className="mb-3 text-md font-semibold">Reply</h3>
+                <form onSubmit={handleSendReply} className="space-y-3">
+                  <div>
+                    <label htmlFor="replySubject" className="block text-sm font-medium text-slate-300 mb-1">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      id="replySubject"
+                      value={replyMessage.subject}
+                      onChange={(e) =>
+                        setReplyMessage({ ...replyMessage, subject: e.target.value })
+                      }
+                      className="w-full rounded-md border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                      placeholder={
+                        conversationMessages.length > 0
+                          ? `Re: ${conversationMessages[conversationMessages.length - 1].subject}`
+                          : "Enter subject"
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="replyContent" className="block text-sm font-medium text-slate-300 mb-1">
+                      Message
+                    </label>
+                    <textarea
+                      id="replyContent"
+                      value={replyMessage.content}
+                      onChange={(e) =>
+                        setReplyMessage({ ...replyMessage, content: e.target.value })
+                      }
+                      rows={4}
+                      className="w-full rounded-md border border-white/10 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                      placeholder="Type your reply here"
+                    />
+                  </div>
+                  {sendError && (
+                    <div className="rounded-md border border-red-500/20 bg-red-500/10 p-2">
+                      <p className="text-xs text-red-400">{sendError}</p>
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isReplyingSending}
+                    className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {isReplyingSending ? "Sending..." : "Send Reply"}
+                  </button>
+                </form>
               </div>
             </>
           ) : (
