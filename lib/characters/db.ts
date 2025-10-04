@@ -25,6 +25,7 @@ export async function listCharacters(userId: string): Promise<StoredCharacter[]>
     notes: char.notes,
     stats: char.stats.map((stat) => ({ ...stat })),
     skills: char.skills.map((skill) => ({ ...skill })),
+    avatarUrl: char.avatarUrl,
     createdAt: char.createdAt,
     updatedAt: char.updatedAt,
   }));
@@ -51,6 +52,7 @@ export async function getCharacter(
     notes: character.notes,
     stats: character.stats.map((stat) => ({ ...stat })),
     skills: character.skills.map((skill) => ({ ...skill })),
+    avatarUrl: character.avatarUrl,
     createdAt: character.createdAt,
     updatedAt: character.updatedAt,
   };
@@ -85,6 +87,7 @@ export async function createCharacter(
     notes: newCharacter.notes,
     stats: newCharacter.stats,
     skills: newCharacter.skills,
+    avatarUrl: newCharacter.avatarUrl,
     createdAt: newCharacter.createdAt,
     updatedAt: newCharacter.updatedAt,
   };
@@ -125,6 +128,7 @@ export async function updateCharacter(
     notes: result.notes,
     stats: result.stats,
     skills: result.skills,
+    avatarUrl: result.avatarUrl,
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
   };

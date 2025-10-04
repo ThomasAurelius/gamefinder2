@@ -53,6 +53,7 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
     notes: typeof payload.notes === "string" ? payload.notes : "",
     stats: normalizeFields<StatField>(payload.stats),
     skills: normalizeFields<SkillField>(payload.skills),
+    avatarUrl: typeof payload.avatarUrl === "string" ? payload.avatarUrl : undefined,
   };
 }
 
