@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import AvatarCropper from "@/components/AvatarCropper";
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"] as const;
 
@@ -77,6 +78,7 @@ export default function ProfilePage() {
 	const [timezone, setTimezone] = useState<string>(DEFAULT_TIMEZONE);
 	const [avatarUrl, setAvatarUrl] = useState("");
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+	const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -168,12 +170,25 @@ export default function ProfilePage() {
 		const file = event.target.files?.[0];
 		if (!file) return;
 
+		// Read the file and set it for cropping
+		const reader = new FileReader();
+		reader.onload = () => {
+			setImageToCrop(reader.result as string);
+		};
+		reader.readAsDataURL(file);
+		
+		// Clear the input so the same file can be selected again
+		event.target.value = "";
+	};
+
+	const handleCropComplete = async (croppedImageBlob: Blob) => {
 		setIsUploadingAvatar(true);
 		setSaveError(null);
+		setImageToCrop(null);
 
 		try {
 			const formData = new FormData();
-			formData.append("file", file);
+			formData.append("file", croppedImageBlob, "avatar.jpg");
 			formData.append("type", "avatar");
 
 			const response = await fetch("/api/upload", {
@@ -223,6 +238,10 @@ export default function ProfilePage() {
 		} finally {
 			setIsUploadingAvatar(false);
 		}
+	};
+
+	const handleCropCancel = () => {
+		setImageToCrop(null);
 	};
 
 	const toggleAvailability = (day: string, timeSlot: string) => {
@@ -289,6 +308,13 @@ export default function ProfilePage() {
 
 	return (
 		<section className="space-y-10">
+			{imageToCrop && (
+				<AvatarCropper
+					imageSrc={imageToCrop}
+					onCropComplete={handleCropComplete}
+					onCancel={handleCropCancel}
+				/>
+			)}
 			<header className="space-y-2">
 				<h1 className="text-3xl font-semibold tracking-tight">Profile</h1>
 				<p className="max-w-2xl text-sm text-slate-300">
