@@ -394,6 +394,7 @@ export default function CharactersPage() {
       name: record.name,
       campaign: record.campaign,
       level: record.level,
+      class: record.class,
       role: record.role,
       stats: cloneFieldArray(record.stats),
       skills: cloneFieldArray(record.skills),
@@ -588,6 +589,11 @@ export default function CharactersPage() {
                         Level: {item.level}
                       </span>
                     )}
+                    {item.class && (
+                      <span className="text-sm text-slate-300">
+                        Class: {item.class}
+                      </span>
+                    )}
                     {item.role && (
                       <span className="text-sm text-slate-300">
                         Role: {item.role}
@@ -776,6 +782,24 @@ export default function CharactersPage() {
                     }))
                   }
                   placeholder="5"
+                  className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-200">
+                  Class
+                </span>
+                <input
+                  type="text"
+                  value={character.class || ""}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      class: event.target.value,
+                    }))
+                  }
+                  placeholder="Wizard"
                   className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
                 />
               </label>

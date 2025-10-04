@@ -70,6 +70,9 @@ export default async function CharacterPage({
           {character.level ? (
             <span>Level: {character.level}</span>
           ) : null}
+          {character.class ? (
+            <span>Class: {character.class}</span>
+          ) : null}
           {character.role ? (
             <span>Role: {character.role}</span>
           ) : null}
