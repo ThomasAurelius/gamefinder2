@@ -127,6 +127,7 @@ export default function FindGamesPage() {
   const [isSearchFormOpen, setIsSearchFormOpen] = useState(true);
   const [allEvents, setAllEvents] = useState<GameSession[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 
   useEffect(() => {
     const fetchTimezone = async () => {
@@ -160,12 +161,42 @@ export default function FindGamesPage() {
     fetchAllEvents();
   }, []);
 
-  const toggleTime = (slot: string) => {
-    setSelectedTimes((prev) =>
-      prev.includes(slot)
+  const toggleTime = (slot: string, shiftKey: boolean = false) => {
+    setSelectedTimes((prev) => {
+      // Handle range selection with shift key
+      if (shiftKey && lastClickedSlot) {
+        const startIdx = TIME_SLOTS.indexOf(lastClickedSlot);
+        const endIdx = TIME_SLOTS.indexOf(slot);
+        
+        if (startIdx !== -1 && endIdx !== -1) {
+          const [minIdx, maxIdx] = [Math.min(startIdx, endIdx), Math.max(startIdx, endIdx)];
+          const slotsInRange = TIME_SLOTS.slice(minIdx, maxIdx + 1);
+          
+          // Check if all slots in range are already selected
+          const allSelected = slotsInRange.every(s => prev.includes(s));
+          
+          if (allSelected) {
+            // Deselect all slots in range
+            return prev.filter(s => !slotsInRange.includes(s));
+          } else {
+            // Select all slots in range
+            const newSlots = [...prev];
+            slotsInRange.forEach(s => {
+              if (!newSlots.includes(s)) {
+                newSlots.push(s);
+              }
+            });
+            return newSlots;
+          }
+        }
+      }
+      
+      // Normal toggle behavior
+      setLastClickedSlot(slot);
+      return prev.includes(slot)
         ? prev.filter((item) => item !== slot)
-        : [...prev, slot]
-    );
+        : [...prev, slot];
+    });
   };
 
   const handleSearch = async () => {
@@ -292,6 +323,9 @@ export default function FindGamesPage() {
               <label className="block text-sm font-medium text-slate-200">
                 Preferred Time
               </label>
+              <p className="text-xs text-slate-400">
+                Click to select individual times or hold Shift and click to select a range.
+              </p>
               <div className="flex flex-wrap gap-2">
                 {TIME_SLOTS.map((slot) => {
                   const active = selectedTimes.includes(slot);
@@ -299,7 +333,7 @@ export default function FindGamesPage() {
                     <button
                       key={slot}
                       type="button"
-                      onClick={() => toggleTime(slot)}
+                      onClick={(e) => toggleTime(slot, e.shiftKey)}
                       className={tagButtonClasses(active, { size: "sm" })}
                     >
                       {slot}

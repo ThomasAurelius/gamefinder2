@@ -244,17 +244,57 @@ export default function ProfilePage() {
 		setImageToCrop(null);
 	};
 
-	const toggleAvailability = (day: string, timeSlot: string) => {
+	const [lastClickedSlot, setLastClickedSlot] = useState<Record<string, string>>({});
+
+	const toggleAvailability = (day: string, timeSlot: string, shiftKey: boolean = false) => {
 		setAvailability((prev) => {
 			const daySlots = prev[day] ?? [];
+			
+			// Handle range selection with shift key
+			if (shiftKey && lastClickedSlot[day]) {
+				const startIdx = TIME_SLOTS.indexOf(lastClickedSlot[day]);
+				const endIdx = TIME_SLOTS.indexOf(timeSlot);
+				
+				if (startIdx !== -1 && endIdx !== -1) {
+					const [minIdx, maxIdx] = [Math.min(startIdx, endIdx), Math.max(startIdx, endIdx)];
+					const slotsInRange = TIME_SLOTS.slice(minIdx, maxIdx + 1);
+					
+					// Check if all slots in range are already selected
+					const allSelected = slotsInRange.every(slot => daySlots.includes(slot));
+					
+					let updatedSlots: string[];
+					if (allSelected) {
+						// Deselect all slots in range
+						updatedSlots = daySlots.filter(slot => !slotsInRange.includes(slot));
+					} else {
+						// Select all slots in range
+						const newSlots = [...daySlots];
+						slotsInRange.forEach(slot => {
+							if (!newSlots.includes(slot)) {
+								newSlots.push(slot);
+							}
+						});
+						updatedSlots = newSlots;
+					}
+					
+					return {
+						...prev,
+						[day]: sortAvailabilitySlots(updatedSlots),
+					};
+				}
+			}
+			
+			// Normal toggle behavior
 			const exists = daySlots.includes(timeSlot);
 			const updatedSlots = exists
 				? daySlots.filter((slot) => slot !== timeSlot)
 				: [...daySlots, timeSlot];
 
+			// Remember last clicked slot for range selection
+			setLastClickedSlot(prev => ({ ...prev, [day]: timeSlot }));
+
 			return {
 				...prev,
-
 				[day]: sortAvailabilitySlots(updatedSlots),
 			};
 		});
@@ -533,7 +573,7 @@ export default function ProfilePage() {
 						<p className="text-sm text-slate-400">
 							Toggle the hours you are open to play. Availability is
 							tracked per day with one-hour precision so groups can
-							coordinate easily.
+							coordinate easily. <span className="text-sky-400">Tip: Hold Shift and click to select a range of times.</span>
 						</p>
 					</div>
 
@@ -555,8 +595,8 @@ export default function ProfilePage() {
 											<button
 												key={slot}
 												type="button"
-												onClick={() =>
-													toggleAvailability(day, slot)
+												onClick={(e) =>
+													toggleAvailability(day, slot, e.shiftKey)
 												}
 												className={tagButtonClasses(active, {
 													size: "sm",
