@@ -115,6 +115,9 @@ export default async function CharacterDetailPage({
                 {character.level ? (
                   <span>Level: {character.level}</span>
                 ) : null}
+                {character.role ? (
+                  <span>Role: {character.role}</span>
+                ) : null}
                 {character.campaign ? (
                   <span>Campaign: {character.campaign}</span>
                 ) : null}

@@ -18,6 +18,15 @@ import {
 } from "@/lib/characters/types";
 import AvatarCropper from "@/components/AvatarCropper";
 
+const ROLE_OPTIONS = [
+  "Healer",
+  "Damage",
+  "Caster",
+  "Support",
+  "DM",
+  "Other",
+];
+
 type GameSystemConfig = {
   label: string;
   description: string;
@@ -385,6 +394,7 @@ export default function CharactersPage() {
       name: record.name,
       campaign: record.campaign,
       level: record.level,
+      role: record.role,
       stats: cloneFieldArray(record.stats),
       skills: cloneFieldArray(record.skills),
       notes: record.notes,
@@ -578,6 +588,11 @@ export default function CharactersPage() {
                         Level: {item.level}
                       </span>
                     )}
+                    {item.role && (
+                      <span className="text-sm text-slate-300">
+                        Role: {item.role}
+                      </span>
+                    )}
                     <span className="text-sm text-slate-300">
                       Campaign: {item.campaign || "Unassigned"}
                     </span>
@@ -763,6 +778,29 @@ export default function CharactersPage() {
                   placeholder="5"
                   className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
                 />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-200">
+                  Role
+                </span>
+                <select
+                  value={character.role || ""}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      role: event.target.value,
+                    }))
+                  }
+                  className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                >
+                  <option value="">Select a role</option>
+                  {ROLE_OPTIONS.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="flex items-center gap-3">
