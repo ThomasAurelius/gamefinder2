@@ -124,6 +124,29 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Survival",
     ],
   },
+  shadowdark: {
+    label: "Shadowdark",
+    description:
+      "Delve into the darkness with classic ability scores and a streamlined talent-based system.",
+    stats: [
+      "Strength",
+      "Dexterity",
+      "Constitution",
+      "Intelligence",
+      "Wisdom",
+      "Charisma",
+    ],
+    skills: [
+      "Backstab",
+      "Spellcasting",
+      "Weapon Mastery",
+      "Grit",
+      "Languages",
+      "Lore",
+      "Stealth",
+      "Thievery",
+    ],
+  },
   other: {
     label: "Other / Custom",
     description:

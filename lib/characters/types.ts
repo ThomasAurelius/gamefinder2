@@ -1,4 +1,4 @@
-export type GameSystemKey = "dnd" | "pathfinder" | "starfinder" | "other";
+export type GameSystemKey = "dnd" | "pathfinder" | "starfinder" | "shadowdark" | "other";
 
 export type StatField = {
   name: string;
