@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { readProfile } from "@/lib/profile-db";
 import { ObjectId } from "mongodb";
 import SendMessageButton from "@/components/SendMessageButton";
