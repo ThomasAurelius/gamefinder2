@@ -384,6 +384,7 @@ export default function CharactersPage() {
     setCharacter({
       name: record.name,
       campaign: record.campaign,
+      level: record.level,
       stats: cloneFieldArray(record.stats),
       skills: cloneFieldArray(record.skills),
       notes: record.notes,
@@ -559,6 +560,11 @@ export default function CharactersPage() {
                   <span className="rounded-full border border-indigo-500/60 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-200">
                     {getSystemLabel(item.system)}
                   </span>
+                  {item.level && (
+                    <span className="text-sm text-slate-300">
+                      Level: {item.level}
+                    </span>
+                  )}
                   <span className="text-sm text-slate-300">
                     Campaign: {item.campaign || "Unassigned"}
                   </span>
@@ -726,6 +732,24 @@ export default function CharactersPage() {
                   />
                 </label>
               </div>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-200">
+                  Level
+                </span>
+                <input
+                  type="text"
+                  value={character.level || ""}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      level: event.target.value,
+                    }))
+                  }
+                  placeholder="5"
+                  className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                />
+              </label>
 
               <label className="flex items-center gap-3">
                 <input

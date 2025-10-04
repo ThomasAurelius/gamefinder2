@@ -50,6 +50,7 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
     system: payload.system,
     name: typeof payload.name === "string" ? payload.name : "",
     campaign: typeof payload.campaign === "string" ? payload.campaign : "",
+    level: typeof payload.level === "string" ? payload.level : undefined,
     notes: typeof payload.notes === "string" ? payload.notes : "",
     stats: normalizeFields<StatField>(payload.stats),
     skills: normalizeFields<SkillField>(payload.skills),

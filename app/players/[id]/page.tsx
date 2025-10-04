@@ -229,6 +229,11 @@ export default async function PlayerDetailPage({
                           <p className="text-sm text-slate-400">
                             Campaign: {character.campaign || "Unassigned"}
                           </p>
+                          {character.level && (
+                            <p className="text-sm text-slate-400">
+                              Level: {character.level}
+                            </p>
+                          )}
                         </div>
                         <span className="rounded-full border border-slate-700 px-2 py-1 text-xs uppercase tracking-wide text-slate-300 flex-shrink-0">
                           {formatGameSystem(character.system)}
