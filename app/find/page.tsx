@@ -18,6 +18,11 @@ type GameSession = {
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;
+  location?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 };
 
 const tagButtonClasses = (
@@ -78,6 +83,17 @@ function GameSessionCard({
               <span className="text-slate-500">Times:</span>{" "}
               {session.times.join(", ")}
             </p>
+            {session.location && (
+              <p>
+                <span className="text-slate-500">Location:</span>{" "}
+                {session.location}
+                {session.distance !== undefined && (
+                  <span className="ml-2 text-sky-400">
+                    ({session.distance.toFixed(1)} mi away)
+                  </span>
+                )}
+              </p>
+            )}
             <p>
               <span className="text-slate-500">Players:</span>{" "}
               <span className={isFull ? "text-orange-400" : "text-green-400"}>
@@ -128,6 +144,8 @@ export default function FindGamesPage() {
   const [allEvents, setAllEvents] = useState<GameSession[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
+  const [locationSearch, setLocationSearch] = useState("");
+  const [radiusMiles, setRadiusMiles] = useState("50");
 
   useEffect(() => {
     const fetchTimezone = async () => {
@@ -208,6 +226,10 @@ export default function FindGamesPage() {
       if (selectedGame) params.append("game", selectedGame);
       if (selectedDate) params.append("date", selectedDate);
       if (selectedTimes.length > 0) params.append("times", selectedTimes.join(","));
+      if (locationSearch) {
+        params.append("location", locationSearch);
+        params.append("radius", radiusMiles);
+      }
 
       const response = await fetch(`/api/games?${params.toString()}`);
       if (!response.ok) {
@@ -320,6 +342,42 @@ export default function FindGamesPage() {
             </div>
 
             <div className="space-y-2">
+              <label htmlFor="location-search" className="block text-sm font-medium text-slate-200">
+                Location or Zip Code
+              </label>
+              <input
+                id="location-search"
+                type="text"
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+                placeholder="City, State or Zip Code"
+                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              />
+              {locationSearch && (
+                <div className="space-y-2">
+                  <label htmlFor="radius-select" className="block text-sm font-medium text-slate-200">
+                    Search Radius
+                  </label>
+                  <select
+                    id="radius-select"
+                    value={radiusMiles}
+                    onChange={(e) => setRadiusMiles(e.target.value)}
+                    className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  >
+                    <option value="10">10 miles</option>
+                    <option value="25">25 miles</option>
+                    <option value="50">50 miles</option>
+                    <option value="100">100 miles</option>
+                    <option value="250">250 miles</option>
+                  </select>
+                </div>
+              )}
+              <p className="text-xs text-slate-500">
+                Find games near a specific location
+              </p>
+            </div>
+
+            <div className="space-y-2">
               <label className="block text-sm font-medium text-slate-200">
                 Preferred Time
               </label>
@@ -350,7 +408,7 @@ export default function FindGamesPage() {
               type="button"
               onClick={handleSearch}
               className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={(!selectedGame && !selectedDate && selectedTimes.length === 0) || isLoading}
+              disabled={(!selectedGame && !selectedDate && selectedTimes.length === 0 && !locationSearch) || isLoading}
             >
               {isLoading ? "Searching..." : "Search Games"}
             </button>
@@ -368,7 +426,7 @@ export default function FindGamesPage() {
         <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
           <h2 className="text-lg font-semibold text-slate-100">Search Results</h2>
           <p className="mt-2 text-sm text-slate-400">
-            {(selectedGame || selectedDate || selectedTimes.length > 0) ? (
+            {(selectedGame || selectedDate || selectedTimes.length > 0 || locationSearch) ? (
               <>
                 Showing games
                 {selectedGame && (
@@ -384,6 +442,12 @@ export default function FindGamesPage() {
                 {selectedTimes.length > 0 && (
                   <>
                     {" "}at <span className="text-sky-400">{selectedTimes.join(", ")}</span>
+                  </>
+                )}
+                {locationSearch && (
+                  <>
+                    {" "}near <span className="text-sky-400">{locationSearch}</span>
+                    {" "}(within {radiusMiles} miles)
                   </>
                 )}
               </>

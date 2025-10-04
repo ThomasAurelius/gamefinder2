@@ -49,6 +49,10 @@ export async function listGameSessions(filters?: {
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
+    location: session.location,
+    zipCode: session.zipCode,
+    latitude: session.latitude,
+    longitude: session.longitude,
   }));
 }
 
@@ -75,6 +79,10 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
+    location: session.location,
+    zipCode: session.zipCode,
+    latitude: session.latitude,
+    longitude: session.longitude,
   };
 }
 
@@ -100,6 +108,10 @@ export async function createGameSession(
     createdAt: timestamp,
     updatedAt: timestamp,
     imageUrl: payload.imageUrl,
+    location: payload.location,
+    zipCode: payload.zipCode,
+    latitude: payload.latitude,
+    longitude: payload.longitude,
   };
 
   await gamesCollection.insertOne(newSession);
@@ -117,6 +129,10 @@ export async function createGameSession(
     createdAt: newSession.createdAt,
     updatedAt: newSession.updatedAt,
     imageUrl: newSession.imageUrl,
+    location: newSession.location,
+    zipCode: newSession.zipCode,
+    latitude: newSession.latitude,
+    longitude: newSession.longitude,
   };
 }
 
@@ -191,6 +207,10 @@ export async function joinGameSession(
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
     imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
   };
 }
 
@@ -223,5 +243,9 @@ export async function listUserGameSessions(userId: string): Promise<StoredGameSe
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
+    location: session.location,
+    zipCode: session.zipCode,
+    latitude: session.latitude,
+    longitude: session.longitude,
   }));
 }

@@ -5,6 +5,10 @@ export type GameSessionPayload = {
   description: string;
   maxPlayers: number;
   imageUrl?: string;
+  location?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type StoredGameSession = GameSessionPayload & {
