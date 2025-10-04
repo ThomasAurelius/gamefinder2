@@ -12,6 +12,7 @@ export type ProfileRecord = {
   availability: Record<string, string[]>;
   primaryRole: string;
   timezone?: string;
+  avatarUrl?: string;
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -33,6 +34,7 @@ const DEFAULT_PROFILE: ProfileRecord = {
   },
   primaryRole: "",
   timezone: "America/New_York",
+  avatarUrl: "",
 };
 
 export async function readProfile(userId: string): Promise<ProfileRecord> {
@@ -70,6 +72,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
     },
     primaryRole: profile.primaryRole ?? "",
     timezone: profile.timezone ?? "America/New_York",
+    avatarUrl: profile.avatarUrl ?? "",
   };
 }
 

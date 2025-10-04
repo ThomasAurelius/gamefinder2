@@ -62,6 +62,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     availability,
     primaryRole,
     timezone,
+    avatarUrl,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -126,6 +127,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     availability: normalizeAvailability(availability),
     primaryRole,
     timezone: timezone || "America/New_York",
+    avatarUrl: avatarUrl || "",
   };
 };
 

@@ -45,11 +45,14 @@ export default async function GameDetailPage({
 				← Back to Find Games
 			</Link>
 
-			{/* Image placeholder - hidden if no image */}
-			{/* TODO: Add image support in future */}
-			{false && (
+			{/* Game Image */}
+			{session.imageUrl && (
 				<div className="aspect-video w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-900/50">
-					{/* Image placeholder */}
+					<img
+						src={session.imageUrl}
+						alt={session.game}
+						className="h-full w-full object-cover"
+					/>
 				</div>
 			)}
 
@@ -114,9 +117,22 @@ export default async function GameDetailPage({
 					Game Master
 				</h2>
 				<div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
-					<p className="text-base text-slate-100">
-						{host ? host.name : "Unknown Host"}
-					</p>
+					<div className="flex items-center gap-4">
+						{host?.avatarUrl ? (
+							<img
+								src={host.avatarUrl}
+								alt={host.name}
+								className="h-12 w-12 rounded-full border-2 border-slate-700 object-cover"
+							/>
+						) : (
+							<div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-lg font-semibold text-slate-400">
+								{host ? host.name.charAt(0).toUpperCase() : "?"}
+							</div>
+						)}
+						<p className="text-base text-slate-100">
+							{host ? host.name : "Unknown Host"}
+						</p>
+					</div>
 				</div>
 			</section>
 

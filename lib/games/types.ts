@@ -4,6 +4,7 @@ export type GameSessionPayload = {
   times: string[];
   description: string;
   maxPlayers: number;
+  imageUrl?: string;
 };
 
 export type StoredGameSession = GameSessionPayload & {

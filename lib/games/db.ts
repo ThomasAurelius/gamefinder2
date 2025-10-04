@@ -48,6 +48,7 @@ export async function listGameSessions(filters?: {
     waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
   }));
 }
 
@@ -73,6 +74,7 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     waitlist: session.waitlist || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
   };
 }
 
@@ -97,6 +99,7 @@ export async function createGameSession(
     waitlist: [],
     createdAt: timestamp,
     updatedAt: timestamp,
+    imageUrl: payload.imageUrl,
   };
 
   await gamesCollection.insertOne(newSession);
@@ -113,6 +116,7 @@ export async function createGameSession(
     waitlist: newSession.waitlist,
     createdAt: newSession.createdAt,
     updatedAt: newSession.updatedAt,
+    imageUrl: newSession.imageUrl,
   };
 }
 
@@ -186,5 +190,38 @@ export async function joinGameSession(
     waitlist: result.waitlist || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
   };
+}
+
+export async function listUserGameSessions(userId: string): Promise<StoredGameSession[]> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+
+  // Find sessions where user is the host, signed up player, or on waitlist
+  const sessions = await gamesCollection
+    .find({
+      $or: [
+        { userId },
+        { signedUpPlayers: userId },
+        { waitlist: userId },
+      ],
+    })
+    .sort({ date: 1, createdAt: -1 })
+    .toArray();
+
+  return sessions.map((session) => ({
+    id: session.id,
+    userId: session.userId,
+    game: session.game,
+    date: session.date,
+    times: [...session.times],
+    description: session.description,
+    maxPlayers: session.maxPlayers || 4,
+    signedUpPlayers: session.signedUpPlayers || [],
+    waitlist: session.waitlist || [],
+    createdAt: session.createdAt,
+    updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
+  }));
 }

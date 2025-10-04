@@ -55,6 +55,7 @@ type ProfilePayload = {
 	availability: Record<string, string[]>;
 	primaryRole: RoleOption | "";
 	timezone?: string;
+	avatarUrl?: string;
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -74,6 +75,8 @@ export default function ProfilePage() {
 		() => createDefaultAvailability()
 	);
 	const [timezone, setTimezone] = useState<string>(DEFAULT_TIMEZONE);
+	const [avatarUrl, setAvatarUrl] = useState("");
+	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -107,6 +110,7 @@ export default function ProfilePage() {
 				setBio(profile.bio ?? "");
 				setSelectedGames(profile.games ?? []);
 				setTimezone(profile.timezone ?? DEFAULT_TIMEZONE);
+				setAvatarUrl(profile.avatarUrl ?? "");
 				const normalizedGames = profile.games ?? [];
 				setFavoriteGames(
 					(profile.favoriteGames ?? []).filter((game) =>
@@ -160,6 +164,37 @@ export default function ProfilePage() {
 		);
 	};
 
+	const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		setIsUploadingAvatar(true);
+		setSaveError(null);
+
+		try {
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("type", "avatar");
+
+			const response = await fetch("/api/upload", {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to upload image");
+			}
+
+			const { url } = await response.json();
+			setAvatarUrl(url);
+		} catch (error) {
+			setSaveError(error instanceof Error ? error.message : "Failed to upload avatar");
+		} finally {
+			setIsUploadingAvatar(false);
+		}
+	};
+
 	const toggleAvailability = (day: string, timeSlot: string) => {
 		setAvailability((prev) => {
 			const daySlots = prev[day] ?? [];
@@ -193,6 +228,7 @@ export default function ProfilePage() {
 			availability,
 			primaryRole,
 			timezone,
+			avatarUrl,
 		};
 
 		try {
@@ -233,6 +269,45 @@ export default function ProfilePage() {
 			</header>
 
 			<form className="space-y-12" onSubmit={handleSubmit}>
+				{/* Avatar Upload Section */}
+				<section className="rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+					<h2 className="mb-4 text-lg font-semibold text-slate-100">Avatar</h2>
+					<div className="flex items-center gap-6">
+						<div className="flex-shrink-0">
+							{avatarUrl ? (
+								<img
+									src={avatarUrl}
+									alt="Avatar"
+									className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
+								/>
+							) : (
+								<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
+									{commonName ? commonName.charAt(0).toUpperCase() : "?"}
+								</div>
+							)}
+						</div>
+						<div className="flex-1 space-y-2">
+							<label
+								htmlFor="avatar-upload"
+								className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								{isUploadingAvatar ? "Uploading..." : "Upload Avatar"}
+							</label>
+							<input
+								id="avatar-upload"
+								type="file"
+								accept="image/jpeg,image/png,image/webp,image/gif"
+								onChange={handleAvatarUpload}
+								disabled={isUploadingAvatar}
+								className="hidden"
+							/>
+							<p className="text-xs text-slate-400">
+								JPG, PNG, WebP or GIF. Max 5MB.
+							</p>
+						</div>
+					</div>
+				</section>
+
 				<section className="grid gap-6 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30 md:grid-cols-2">
 					<div className="space-y-2">
 						<label
