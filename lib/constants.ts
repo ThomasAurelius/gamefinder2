@@ -2,7 +2,7 @@ export const GAME_OPTIONS = [
 	"Dungeons & Dragons",
 	"Pathfinder",
 	"Starfinder",
-	"ShadowDark",
+	"Shadowdark",
 	"Other",
 ];
 
