@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
+import CityAutocomplete from "@/components/CityAutocomplete";
 
 const tagButtonClasses = (
   active: boolean,
@@ -196,12 +197,11 @@ export default function PostGamePage() {
           <label htmlFor="location" className="block text-sm font-medium text-slate-200">
             Location
           </label>
-          <input
+          <CityAutocomplete
             id="location"
-            type="text"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="City, State (e.g., Los Angeles, CA)"
+            onChange={setLocation}
+            placeholder="Search for a city (e.g., Los Angeles, CA)"
             className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
           />
           <p className="text-xs text-slate-500">

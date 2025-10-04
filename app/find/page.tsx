@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import CityAutocomplete from "@/components/CityAutocomplete";
 
 type GameSession = {
   id: string;
@@ -345,12 +346,11 @@ export default function FindGamesPage() {
               <label htmlFor="location-search" className="block text-sm font-medium text-slate-200">
                 Location or Zip Code
               </label>
-              <input
+              <CityAutocomplete
                 id="location-search"
-                type="text"
                 value={locationSearch}
-                onChange={(e) => setLocationSearch(e.target.value)}
-                placeholder="City, State or Zip Code"
+                onChange={setLocationSearch}
+                placeholder="Search for a city or enter zip code..."
                 className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
               />
               {locationSearch && (

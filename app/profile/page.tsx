@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import AvatarCropper from "@/components/AvatarCropper";
+import CityAutocomplete from "@/components/CityAutocomplete";
 
 const ROLE_OPTIONS = [
 	"Healer",
@@ -470,11 +471,11 @@ export default function ProfilePage() {
 						>
 							Location
 						</label>
-						<input
+						<CityAutocomplete
 							id="location"
 							value={location}
-							onChange={(event) => setLocation(event.target.value)}
-							placeholder="City, State/Province"
+							onChange={setLocation}
+							placeholder="Search for your city..."
 							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 						/>
 					</div>
