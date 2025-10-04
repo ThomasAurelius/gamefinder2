@@ -234,7 +234,7 @@ export default function FindGamesPage() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Find Games</h1>
         <p className="mt-2 text-sm text-slate-400">
-          Search for available game sessions by selecting a game and preferred time.
+          Search for available game sessions by game, date, time, or any combination.
         </p>
       </div>
 
@@ -253,6 +253,9 @@ export default function FindGamesPage() {
         </button>
         {isSearchFormOpen && (
           <div className="space-y-4 border-t border-slate-800 p-6">
+            <p className="text-xs text-slate-400">
+              Select any combination of filters to search. All filters are optional.
+            </p>
             <div className="space-y-2">
               <label htmlFor="game-select" className="block text-sm font-medium text-slate-200">
                 Select Game
@@ -313,7 +316,7 @@ export default function FindGamesPage() {
               type="button"
               onClick={handleSearch}
               className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate || isLoading}
+              disabled={(!selectedGame && !selectedDate && selectedTimes.length === 0) || isLoading}
             >
               {isLoading ? "Searching..." : "Search Games"}
             </button>
@@ -331,9 +334,14 @@ export default function FindGamesPage() {
         <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
           <h2 className="text-lg font-semibold text-slate-100">Search Results</h2>
           <p className="mt-2 text-sm text-slate-400">
-            {selectedGame && (
+            {(selectedGame || selectedDate || selectedTimes.length > 0) ? (
               <>
-                Showing <span className="text-sky-400">{selectedGame}</span> games
+                Showing games
+                {selectedGame && (
+                  <>
+                    {" "}for <span className="text-sky-400">{selectedGame}</span>
+                  </>
+                )}
                 {selectedDate && (
                   <>
                     {" "}on <span className="text-sky-400">{formatDateInTimezone(selectedDate, userTimezone)}</span>
@@ -345,6 +353,8 @@ export default function FindGamesPage() {
                   </>
                 )}
               </>
+            ) : (
+              <>Showing all games</>
             )}
           </p>
 
