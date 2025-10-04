@@ -187,6 +187,36 @@ export default function ProfilePage() {
 			}
 
 			const { url } = await response.json();
+
+			// Save the avatar URL to the user's profile in the database
+			const profilePayload: ProfilePayload = {
+				name,
+				commonName,
+				location,
+				zipCode,
+				bio,
+				games: selectedGames,
+				favoriteGames,
+				availability,
+				primaryRole,
+				timezone,
+				avatarUrl: url,
+			};
+
+			const saveResponse = await fetch("/api/profile", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(profilePayload),
+			});
+
+			if (!saveResponse.ok) {
+				const message = await saveResponse.text();
+				throw new Error(message || "Failed to save avatar to profile");
+			}
+
+			// Only update the UI state after successful save to DB
 			setAvatarUrl(url);
 		} catch (error) {
 			setSaveError(error instanceof Error ? error.message : "Failed to upload avatar");
