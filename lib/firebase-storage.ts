@@ -35,12 +35,32 @@ function ensureFirebaseInitialized(): void {
   }
 
   try {
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, "\n");
+    // Handle different private key formats
+    let privateKey = process.env.FIREBASE_PRIVATE_KEY!;
+    
+    // Remove any quotes that might wrap the key
+    privateKey = privateKey.replace(/^["']|["']$/g, '');
+    
+    // Replace escaped newlines with actual newlines if present
+    if (privateKey.includes('\\n')) {
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
+    
+    // Validate that the private key has the expected format
+    if (!privateKey.includes('BEGIN PRIVATE KEY') || !privateKey.includes('END PRIVATE KEY')) {
+      throw new Error('FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers.');
+    }
+    
+    // Validate client email format
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL!;
+    if (!clientEmail.includes('@') || !clientEmail.includes('.iam.gserviceaccount.com')) {
+      throw new Error('FIREBASE_CLIENT_EMAIL is malformed. It should be in the format: your-service-account@your-project-id.iam.gserviceaccount.com');
+    }
     
     firebaseApp = initializeApp({
       credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID!,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
+        clientEmail: clientEmail,
         privateKey: privateKey,
       }),
       storageBucket: process.env.FIREBASE_STORAGE_BUCKET!,
@@ -48,6 +68,25 @@ function ensureFirebaseInitialized(): void {
   } catch (error) {
     initializationError = error instanceof Error ? error : new Error("Unknown initialization error");
     console.error("Firebase admin initialization error:", initializationError);
+    
+    // Add more specific error messages for common issues
+    if (error instanceof Error) {
+      if (error.message.includes('invalid_grant') || error.message.includes('account not found')) {
+        console.error("\n⚠️  Firebase Authentication Error Detected:");
+        console.error("The service account credentials are invalid or the account doesn't exist.");
+        console.error("\nPossible causes:");
+        console.error("1. The service account was deleted from the Firebase project");
+        console.error("2. The private key or client email is incorrect");
+        console.error("3. The credentials are from a different Firebase project");
+        console.error("4. The service account doesn't have proper permissions");
+        console.error("\nTo fix this:");
+        console.error("1. Go to Firebase Console → Project Settings → Service Accounts");
+        console.error("2. Generate a new private key");
+        console.error("3. Update your environment variables with the new credentials");
+        console.error("4. Ensure FIREBASE_PROJECT_ID matches the project from the service account\n");
+      }
+    }
+    
     throw initializationError;
   }
 }

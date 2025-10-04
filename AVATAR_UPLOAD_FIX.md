@@ -44,9 +44,23 @@ Missing Firebase environment variables: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMA
 Firebase upload failed: [specific error message]
 ```
 
+### Invalid Grant / Account Not Found
+```
+Firebase upload failed: invalid_grant: Invalid grant: account not found
+```
+This means the service account credentials are invalid. See `IMAGE_UPLOAD_SETUP.md` for troubleshooting steps.
+
 ### Configuration Issues
 ```
 Firebase Storage bucket is not configured
+```
+
+```
+FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers.
+```
+
+```
+FIREBASE_CLIENT_EMAIL is malformed. It should be in the format: your-service-account@your-project-id.iam.gserviceaccount.com
 ```
 
 ## Setup Requirements
