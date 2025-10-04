@@ -13,6 +13,7 @@ export type SkillField = {
 export type CharacterDetails = {
   name: string;
   campaign: string;
+  level?: string;
   stats: StatField[];
   skills: SkillField[];
   notes: string;
