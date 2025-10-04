@@ -31,6 +31,7 @@ export async function GET(request: Request) {
     // Add search filter for name or location
     if (searchQuery) {
       filter.$or = [
+        { name: { $regex: searchQuery, $options: "i" } },
         { "profile.name": { $regex: searchQuery, $options: "i" } },
         { "profile.commonName": { $regex: searchQuery, $options: "i" } },
         { "profile.location": { $regex: searchQuery, $options: "i" } },
@@ -51,6 +52,7 @@ export async function GET(request: Request) {
       .find(filter, {
         projection: {
           _id: 1,
+          name: 1,
           "profile.name": 1,
           "profile.commonName": 1,
           "profile.location": 1,
@@ -64,7 +66,7 @@ export async function GET(request: Request) {
 
     const players: PlayerSearchResult[] = users.map((user) => ({
       id: user._id.toString(),
-      name: user.profile?.name || "Unknown Player",
+      name: user.profile?.name || user.name || "Unknown Player",
       commonName: user.profile?.commonName || "",
       location: user.profile?.location || "",
       primaryRole: user.profile?.primaryRole || "",
