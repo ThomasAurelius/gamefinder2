@@ -78,6 +78,8 @@ export default function ProfilePage() {
 	const [zipCode, setZipCode] = useState("");
 	const [bio, setBio] = useState("");
 	const [selectedGames, setSelectedGames] = useState<string[]>([]);
+	const [customGames, setCustomGames] = useState<string[]>([]);
+	const [customGameInput, setCustomGameInput] = useState("");
 	const [favoriteGames, setFavoriteGames] = useState<string[]>([]);
 	const [availability, setAvailability] = useState<Record<string, string[]>>(
 		() => createDefaultAvailability()
@@ -117,10 +119,14 @@ export default function ProfilePage() {
 				setLocation(profile.location ?? "");
 				setZipCode(profile.zipCode ?? "");
 				setBio(profile.bio ?? "");
-				setSelectedGames(profile.games ?? []);
+				const normalizedGames = profile.games ?? [];
+				// Separate preset games from custom games
+				const presetGames = normalizedGames.filter(game => GAME_OPTIONS.includes(game));
+				const customGames = normalizedGames.filter(game => !GAME_OPTIONS.includes(game));
+				setSelectedGames(presetGames);
+				setCustomGames(customGames);
 				setTimezone(profile.timezone ?? DEFAULT_TIMEZONE);
 				setAvatarUrl(profile.avatarUrl ?? "");
-				const normalizedGames = profile.games ?? [];
 				setFavoriteGames(
 					(profile.favoriteGames ?? []).filter((game) =>
 						normalizedGames.includes(game)
@@ -153,16 +159,33 @@ export default function ProfilePage() {
 				? prev.filter((item) => item !== game)
 				: [...prev, game];
 
+			// Clean up favorites when deselecting a game
+			const allGames = [...next, ...customGames];
 			setFavoriteGames((favorites) =>
-				favorites.filter((favoriteGame) => next.includes(favoriteGame))
+				favorites.filter((favoriteGame) => allGames.includes(favoriteGame))
 			);
 
 			return next;
 		});
 	};
 
+	const addCustomGame = () => {
+		const trimmedGame = customGameInput.trim();
+		if (trimmedGame && !customGames.includes(trimmedGame) && !GAME_OPTIONS.includes(trimmedGame)) {
+			setCustomGames((prev) => [...prev, trimmedGame]);
+			setCustomGameInput("");
+		}
+	};
+
+	const removeCustomGame = (game: string) => {
+		setCustomGames((prev) => prev.filter((item) => item !== game));
+		// Also remove from favorites if it was favorited
+		setFavoriteGames((prev) => prev.filter((item) => item !== game));
+	};
+
 	const toggleFavoriteGame = (game: string) => {
-		if (!selectedGames.includes(game)) {
+		const allGames = [...selectedGames, ...customGames];
+		if (!allGames.includes(game)) {
 			return;
 		}
 
@@ -213,13 +236,14 @@ export default function ProfilePage() {
 			const { url } = await response.json();
 
 			// Save the avatar URL to the user's profile in the database
+			const allGames = [...selectedGames, ...customGames];
 			const profilePayload: ProfilePayload = {
 				name,
 				commonName,
 				location,
 				zipCode,
 				bio,
-				games: selectedGames,
+				games: allGames,
 				favoriteGames,
 				availability,
 				primaryRole,
@@ -277,13 +301,16 @@ export default function ProfilePage() {
 		setSaveError(null);
 		setSaveSuccess(false);
 
+		// Combine preset and custom games
+		const allGames = [...selectedGames, ...customGames];
+
 		const payload: ProfilePayload = {
 			name,
 			commonName,
 			location,
 			zipCode,
 			bio,
-			games: selectedGames,
+			games: allGames,
 			favoriteGames,
 			availability,
 			primaryRole,
@@ -507,6 +534,53 @@ export default function ProfilePage() {
 							);
 						})}
 					</div>
+
+					{selectedGames.includes("Other") && (
+						<div className="space-y-3">
+							<div className="flex gap-2">
+								<input
+									type="text"
+									value={customGameInput}
+									onChange={(e) => setCustomGameInput(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === 'Enter') {
+											e.preventDefault();
+											addCustomGame();
+										}
+									}}
+									placeholder="Enter custom game name"
+									className="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+								/>
+								<button
+									type="button"
+									onClick={addCustomGame}
+									className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+								>
+									Add
+								</button>
+							</div>
+							{customGames.length > 0 && (
+								<div className="flex flex-wrap gap-2">
+									{customGames.map((game) => (
+										<div
+											key={game}
+											className="flex items-center gap-1 rounded-full border border-sky-400 bg-sky-500/20 px-3 py-1.5 text-sm text-sky-100"
+										>
+											<span>{game}</span>
+											<button
+												type="button"
+												onClick={() => removeCustomGame(game)}
+												className="ml-1 text-sky-200 hover:text-sky-100"
+												aria-label={`Remove ${game}`}
+											>
+												×
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
+					)}
 				</section>
 
 				<section className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
@@ -533,6 +607,19 @@ export default function ProfilePage() {
 									className={tagButtonClasses(active, {
 										disabled,
 									})}
+								>
+									{game}
+								</button>
+							);
+						})}
+						{customGames.map((game) => {
+							const active = favoriteGames.includes(game);
+							return (
+								<button
+									key={game}
+									type="button"
+									onClick={() => toggleFavoriteGame(game)}
+									className={tagButtonClasses(active)}
 								>
 									{game}
 								</button>
