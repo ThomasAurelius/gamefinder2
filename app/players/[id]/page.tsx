@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { readProfile } from "@/lib/profile-db";
 import { ObjectId } from "mongodb";
+import SendMessageButton from "@/components/SendMessageButton";
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -86,7 +87,13 @@ export default async function PlayerDetailPage({
             </div>
           )}
           <div className="space-y-2 flex-1">
-            <h1 className="text-3xl font-bold">{displayName}</h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-bold">{displayName}</h1>
+              <SendMessageButton
+                recipientId={id}
+                recipientName={displayName}
+              />
+            </div>
             {profile.location && (
               <p className="text-sm text-slate-400">{profile.location}</p>
             )}
