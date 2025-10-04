@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import type { ConversationMessage } from "@/lib/messages";
 
 type Conversation = {
@@ -10,7 +11,8 @@ type Conversation = {
   unreadCount: number;
 };
 
-export default function MessagesPage() {
+function MessagesContent() {
+  const searchParams = useSearchParams();
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [currentUserName, setCurrentUserName] = useState<string>("");
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
@@ -37,6 +39,22 @@ export default function MessagesPage() {
     setCurrentUserId(demoUserId);
     setCurrentUserName(demoUserName);
   }, []);
+
+  // Handle URL parameters for pre-filling compose form
+  useEffect(() => {
+    const recipientId = searchParams.get("recipientId");
+    const recipientName = searchParams.get("recipientName");
+    const compose = searchParams.get("compose");
+
+    if (compose === "true" && recipientId && recipientName) {
+      setIsComposing(true);
+      setNewMessage((prev) => ({
+        ...prev,
+        recipientId,
+        recipientName,
+      }));
+    }
+  }, [searchParams]);
 
   const fetchMessages = useCallback(async () => {
     if (!currentUserId) return;
@@ -410,5 +428,18 @@ export default function MessagesPage() {
         </div>
       )}
     </section>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <section className="space-y-4">
+        <h1 className="text-2xl font-semibold">Messages</h1>
+        <p className="text-slate-400">Loading messages...</p>
+      </section>
+    }>
+      <MessagesContent />
+    </Suspense>
   );
 }
