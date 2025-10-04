@@ -6,6 +6,7 @@ import {
   listGameSessions,
 } from "@/lib/games/db";
 import { GameSessionPayload } from "@/lib/games/types";
+import { geocodeLocation, calculateDistance } from "@/lib/geolocation";
 
 function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
   if (!data || typeof data !== "object") {
@@ -32,6 +33,10 @@ function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
     description: typeof payload.description === "string" ? payload.description : "",
     maxPlayers: payload.maxPlayers,
     imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined,
+    location: typeof payload.location === "string" ? payload.location : undefined,
+    zipCode: typeof payload.zipCode === "string" ? payload.zipCode : undefined,
+    latitude: typeof payload.latitude === "number" ? payload.latitude : undefined,
+    longitude: typeof payload.longitude === "number" ? payload.longitude : undefined,
   };
 }
 
@@ -44,8 +49,47 @@ export async function GET(request: Request) {
     const date = searchParams.get("date") || undefined;
     const timesParam = searchParams.get("times");
     const times = timesParam ? timesParam.split(",") : undefined;
+    const locationSearch = searchParams.get("location") || "";
+    const radiusMiles = parseFloat(searchParams.get("radius") || "50");
 
-    const sessions = await listGameSessions({ game, date, times });
+    let sessions = await listGameSessions({ game, date, times });
+
+    // If location search is provided, filter by distance
+    if (locationSearch) {
+      try {
+        const searchCoords = await geocodeLocation(locationSearch);
+        
+        if (searchCoords) {
+          // Calculate distances and filter by radius
+          const sessionsWithDistance: (typeof sessions[0] & { distance?: number })[] = [];
+          
+          for (const session of sessions) {
+            const lat = session.latitude;
+            const lon = session.longitude;
+            
+            if (lat !== undefined && lon !== undefined) {
+              const distance = calculateDistance(
+                searchCoords.latitude,
+                searchCoords.longitude,
+                lat,
+                lon
+              );
+              
+              if (distance <= radiusMiles) {
+                sessionsWithDistance.push({ ...session, distance });
+              }
+            }
+          }
+          
+          // Sort by distance
+          sessions = sessionsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        }
+      } catch (error) {
+        console.error("Failed to geocode search location:", error);
+        // Continue without location filtering
+      }
+    }
+
     return NextResponse.json(sessions, { status: 200 });
   } catch (error) {
     console.error("Failed to list game sessions", error);
@@ -76,6 +120,22 @@ export async function POST(request: Request) {
         { error: "Invalid game session data. Please ensure all required fields are filled." },
         { status: 400 }
       );
+    }
+
+    // Geocode the location to get coordinates
+    // Try zipCode first, then fall back to location
+    const locationToGeocode = payload.zipCode || payload.location;
+    if (locationToGeocode) {
+      try {
+        const coords = await geocodeLocation(locationToGeocode);
+        if (coords) {
+          payload.latitude = coords.latitude;
+          payload.longitude = coords.longitude;
+        }
+      } catch (error) {
+        // Log the error but don't fail the game session creation
+        console.error("Failed to geocode location:", error);
+      }
     }
 
     const session = await createGameSession(userId, payload);
