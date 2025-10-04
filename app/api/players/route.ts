@@ -23,8 +23,9 @@ export async function GET(request: Request) {
     const usersCollection = db.collection("users");
 
     // Build the filter query
+    // Only require that the profile object exists, not that profile.name is filled
     const filter: Record<string, unknown> = {
-      "profile.name": { $exists: true, $ne: "" },
+      profile: { $exists: true },
     };
 
     // Add search filter for name or location
