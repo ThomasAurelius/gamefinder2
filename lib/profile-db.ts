@@ -13,6 +13,7 @@ export type ProfileRecord = {
   primaryRole: string;
   timezone?: string;
   avatarUrl?: string;
+  userName?: string; // The user's name from the users collection
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -53,7 +54,10 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
   }
 
   if (!user.profile) {
-    return DEFAULT_PROFILE;
+    return {
+      ...DEFAULT_PROFILE,
+      userName: user.name || "",
+    };
   }
 
   const profile = user.profile as ProfileRecord;
@@ -73,6 +77,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
     primaryRole: profile.primaryRole ?? "",
     timezone: profile.timezone ?? "America/New_York",
     avatarUrl: profile.avatarUrl ?? "",
+    userName: user.name || "",
   };
 }
 

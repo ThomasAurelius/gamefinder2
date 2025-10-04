@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 
     const players: PlayerSearchResult[] = users.map((user) => ({
       id: user._id.toString(),
-      name: user.profile?.name || user.name || "Unknown Player",
+      name: user.name || "Unknown Player",
       commonName: user.profile?.commonName || "",
       location: user.profile?.location || "",
       primaryRole: user.profile?.primaryRole || "",

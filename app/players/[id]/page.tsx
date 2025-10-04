@@ -63,12 +63,12 @@ export default async function PlayerDetailPage({
   try {
     const profile = await readProfile(id);
 
-    // If profile is empty (no name), treat as not found
-    if (!profile.name) {
+    // If profile is empty (no userName), treat as not found
+    if (!profile.userName) {
       notFound();
     }
 
-    const displayName = profile.commonName || profile.name;
+    const displayName = profile.commonName || profile.userName;
 
     return (
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
