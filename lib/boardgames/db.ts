@@ -12,7 +12,24 @@ async function loadBoardGames(): Promise<BoardGame[]> {
   }
 
   try {
-    const fileContent = await fs.readFile(CSV_FILE_PATH, "utf-8");
+    let fileContent: string;
+    
+    // Check if a remote CSV URL is configured (for Vercel deployments)
+    const csvUrl = process.env.BOARDGAMES_CSV_URL;
+    
+    if (csvUrl) {
+      console.log("Loading board games CSV from URL:", csvUrl);
+      const response = await fetch(csvUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch CSV from URL: ${response.status} ${response.statusText}`);
+      }
+      fileContent = await response.text();
+    } else {
+      // Fall back to local file (for development)
+      console.log("Loading board games CSV from local file:", CSV_FILE_PATH);
+      fileContent = await fs.readFile(CSV_FILE_PATH, "utf-8");
+    }
+    
     const lines = fileContent.split("\n");
     
     // Skip header line
@@ -49,9 +66,11 @@ async function loadBoardGames(): Promise<BoardGame[]> {
     }
     
     cachedGames = games;
+    console.log(`Successfully loaded ${games.length} board games`);
     return games;
   } catch (error) {
     console.error("Failed to load board games CSV:", error);
+    console.error("Tried loading from:", process.env.BOARDGAMES_CSV_URL || CSV_FILE_PATH);
     return [];
   }
 }

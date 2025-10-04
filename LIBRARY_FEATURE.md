@@ -6,12 +6,34 @@ This feature allows users to search through 169,000+ board games and manage thei
 ## Setup Instructions
 
 ### CSV Data File
+
+#### Local Development
 The board games data comes from a CSV file that needs to be placed in the `data/` directory:
 
 1. Download the board games CSV file from: https://github.com/user-attachments/files/22702456/boardgames_ranks.csv
 2. Place it in the project: `data/boardgames_ranks.csv`
 
-**Note:** The `data/` directory is gitignored, so the CSV file won't be committed to the repository. Each developer/deployment needs to download and place the file manually.
+**Note:** The `data/` directory is gitignored, so the CSV file won't be committed to the repository. Each developer needs to download and place the file manually.
+
+#### Vercel Deployment
+For Vercel deployments (or other serverless platforms), the CSV file cannot be included in the deployment because:
+- The `data/` directory is gitignored
+- Serverless filesystems are typically read-only
+
+**Solution:** Host the CSV file externally and configure the URL via environment variable:
+
+1. Upload the CSV file to a publicly accessible location (e.g., GitHub Gist, Google Cloud Storage, AWS S3, or Vercel Blob Storage)
+2. Add the environment variable `BOARDGAMES_CSV_URL` in your Vercel project settings
+3. Set its value to the public URL of your CSV file
+
+Example:
+```
+BOARDGAMES_CSV_URL=https://your-storage-url.com/boardgames_ranks.csv
+```
+
+The application will automatically:
+- Use the remote URL when `BOARDGAMES_CSV_URL` is set (production)
+- Fall back to the local file when the variable is not set (development)
 
 ### CSV File Format
 The CSV file should have the following columns:
