@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
+import { geocodeLocation, calculateDistance } from "@/lib/geolocation";
 
 export type PlayerSearchResult = {
   id: string;
@@ -10,6 +11,7 @@ export type PlayerSearchResult = {
   bio: string;
   favoriteGames: string[];
   avatarUrl?: string;
+  distance?: number; // Distance in miles
 };
 
 export async function GET(request: Request) {
@@ -18,6 +20,8 @@ export async function GET(request: Request) {
     const searchQuery = searchParams.get("search") || "";
     const role = searchParams.get("role") || "";
     const game = searchParams.get("game") || "";
+    const locationSearch = searchParams.get("location") || "";
+    const radiusMiles = parseFloat(searchParams.get("radius") || "50");
 
     const db = await getDb();
     const usersCollection = db.collection("users");
@@ -58,11 +62,13 @@ export async function GET(request: Request) {
           "profile.bio": 1,
           "profile.favoriteGames": 1,
           "profile.avatarUrl": 1,
+          "profile.latitude": 1,
+          "profile.longitude": 1,
         },
       })
       .toArray();
 
-    const players: PlayerSearchResult[] = users.map((user) => ({
+    let players: PlayerSearchResult[] = users.map((user) => ({
       id: user._id.toString(),
       name: user.name || "Unknown Player",
       commonName: user.profile?.commonName || "",
@@ -71,7 +77,45 @@ export async function GET(request: Request) {
       bio: user.profile?.bio || "",
       favoriteGames: user.profile?.favoriteGames || [],
       avatarUrl: user.profile?.avatarUrl || undefined,
+      distance: undefined,
     }));
+
+    // If location search is provided, geocode it and filter by distance
+    if (locationSearch) {
+      try {
+        const searchCoords = await geocodeLocation(locationSearch);
+        
+        if (searchCoords) {
+          // Calculate distances and filter by radius
+          const playersWithDistance: PlayerSearchResult[] = [];
+          
+          for (const player of players) {
+            const user = users.find((u) => u._id.toString() === player.id);
+            const lat = user?.profile?.latitude;
+            const lon = user?.profile?.longitude;
+            
+            if (lat !== undefined && lon !== undefined) {
+              const distance = calculateDistance(
+                searchCoords.latitude,
+                searchCoords.longitude,
+                lat,
+                lon
+              );
+              
+              if (distance <= radiusMiles) {
+                playersWithDistance.push({ ...player, distance });
+              }
+            }
+          }
+          
+          // Sort by distance
+          players = playersWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+        }
+      } catch (error) {
+        console.error("Failed to geocode search location:", error);
+        // Continue without location filtering
+      }
+    }
 
     return NextResponse.json(players);
   } catch (error) {
