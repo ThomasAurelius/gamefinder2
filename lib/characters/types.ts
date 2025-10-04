@@ -14,6 +14,7 @@ export type CharacterDetails = {
   name: string;
   campaign: string;
   level?: string;
+  role?: string;
   stats: StatField[];
   skills: SkillField[];
   notes: string;

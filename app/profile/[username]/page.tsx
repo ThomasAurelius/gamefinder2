@@ -106,6 +106,8 @@ export default async function PublicProfilePage({
                       {character.name}
                     </h3>
                     <p className="text-sm text-slate-400">
+                      {character.level && <span>Level {character.level} • </span>}
+                      {character.role && <span>{character.role} • </span>}
                       Campaign: {character.campaign || "Unassigned"}
                     </p>
                   </div>

@@ -67,6 +67,12 @@ export default async function CharacterPage({
           <span className="rounded-full border border-slate-700 px-3 py-1 text-xs uppercase tracking-wide text-slate-300">
             {formatGameSystem(character.system)}
           </span>
+          {character.level ? (
+            <span>Level: {character.level}</span>
+          ) : null}
+          {character.role ? (
+            <span>Role: {character.role}</span>
+          ) : null}
           {character.campaign ? (
             <span>Campaign: {character.campaign}</span>
           ) : null}
