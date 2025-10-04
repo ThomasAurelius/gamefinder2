@@ -242,21 +242,14 @@ function MessagesContent() {
         <div className="rounded-lg border border-white/10 bg-slate-900 p-6">
           <h2 className="mb-4 text-xl font-semibold">Compose Message</h2>
           <form onSubmit={handleSendMessage} className="space-y-4">
-            <div>
-              <label htmlFor="recipientId" className="block text-sm font-medium text-slate-300">
-                Recipient User ID
-              </label>
-              <input
-                type="text"
-                id="recipientId"
-                value={newMessage.recipientId}
-                onChange={(e) =>
-                  setNewMessage({ ...newMessage, recipientId: e.target.value })
-                }
-                className="mt-1 w-full rounded-md border border-white/10 bg-slate-800 px-3 py-2 text-slate-100"
-                placeholder="Enter recipient user ID"
-              />
-            </div>
+            <input
+              type="hidden"
+              id="recipientId"
+              value={newMessage.recipientId}
+              onChange={(e) =>
+                setNewMessage({ ...newMessage, recipientId: e.target.value })
+              }
+            />
             <div>
               <label htmlFor="recipientName" className="block text-sm font-medium text-slate-300">
                 Recipient Name
