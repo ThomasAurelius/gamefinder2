@@ -57,10 +57,13 @@ export async function geocodeLocation(
   }
 
   try {
+    // Trim whitespace to ensure consistent geocoding
+    const trimmedLocation = location.trim();
+    
     // For US zip codes, add country context to improve geocoding accuracy
-    let searchQuery = location;
-    if (isUSZipCode(location)) {
-      searchQuery = `${location}, USA`;
+    let searchQuery = trimmedLocation;
+    if (isUSZipCode(trimmedLocation)) {
+      searchQuery = `${trimmedLocation}, USA`;
     }
 
     // Use Nominatim API with a proper user agent
