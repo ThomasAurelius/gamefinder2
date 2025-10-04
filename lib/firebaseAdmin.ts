@@ -10,6 +10,14 @@ import { initializeApp, cert, getApps, getApp } from "firebase-admin/app";
 import type { ServiceAccount, AppOptions } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
 
+// Type for raw JSON service account (snake_case properties from JSON file)
+interface RawServiceAccount {
+	project_id?: string;
+	private_key?: string;
+	client_email?: string;
+	[key: string]: unknown;
+}
+
 function tryParseJson(value: string, source: string): ServiceAccount {
 	try {
 		return JSON.parse(value);
@@ -85,12 +93,10 @@ export function getFirebaseAdminApp() {
 
 		// Validate that we have the essential fields
 		// Note: serviceAccount from JSON has project_id, but TypeScript ServiceAccount type uses projectId
-		const projectId =
-			(serviceAccount as any).project_id || serviceAccount.projectId;
-		const privateKey =
-			(serviceAccount as any).private_key || serviceAccount.privateKey;
-		const clientEmail =
-			(serviceAccount as any).client_email || serviceAccount.clientEmail;
+		const rawAccount = serviceAccount as ServiceAccount & RawServiceAccount;
+		const projectId = rawAccount.project_id || rawAccount.projectId;
+		const privateKey = rawAccount.private_key || rawAccount.privateKey;
+		const clientEmail = rawAccount.client_email || rawAccount.clientEmail;
 
 		if (!projectId) {
 			throw new Error(
@@ -121,7 +127,7 @@ export function getFirebaseAdminApp() {
 		}
 
 		const options: AppOptions = {
-			credential: cert(serviceAccount as any),
+			credential: cert(serviceAccount),
 		};
 
 		if (bucket) {
@@ -193,7 +199,6 @@ export async function deleteStorageByDownloadUrl(url: string) {
 export async function deleteManyStorageByUrls(urls: string[]) {
 	for (const u of urls) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			await deleteStorageByDownloadUrl(u);
 		} catch {
 			// ignore single-file failures
