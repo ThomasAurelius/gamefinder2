@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     const usersCollection = db.collection("users");
 
     // Build the filter query
-    // Only require that the profile object exists, not that profile.name is filled
+    // Only require that the profile object exists
     const filter: Record<string, unknown> = {
       profile: { $exists: true },
     };
@@ -32,7 +32,6 @@ export async function GET(request: Request) {
     if (searchQuery) {
       filter.$or = [
         { name: { $regex: searchQuery, $options: "i" } },
-        { "profile.name": { $regex: searchQuery, $options: "i" } },
         { "profile.commonName": { $regex: searchQuery, $options: "i" } },
         { "profile.location": { $regex: searchQuery, $options: "i" } },
       ];
@@ -53,7 +52,6 @@ export async function GET(request: Request) {
         projection: {
           _id: 1,
           name: 1,
-          "profile.name": 1,
           "profile.commonName": 1,
           "profile.location": 1,
           "profile.primaryRole": 1,
