@@ -5,7 +5,14 @@ import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import AvatarCropper from "@/components/AvatarCropper";
 
-const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"] as const;
+const ROLE_OPTIONS = [
+	"Healer",
+	"Damage",
+	"Caster",
+	"Support",
+	"DM",
+	"Other",
+] as const;
 
 type RoleOption = (typeof ROLE_OPTIONS)[number];
 
@@ -166,7 +173,9 @@ export default function ProfilePage() {
 		);
 	};
 
-	const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleAvatarUpload = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = event.target.files?.[0];
 		if (!file) return;
 
@@ -176,7 +185,7 @@ export default function ProfilePage() {
 			setImageToCrop(reader.result as string);
 		};
 		reader.readAsDataURL(file);
-		
+
 		// Clear the input so the same file can be selected again
 		event.target.value = "";
 	};
@@ -234,7 +243,9 @@ export default function ProfilePage() {
 			// Only update the UI state after successful save to DB
 			setAvatarUrl(url);
 		} catch (error) {
-			setSaveError(error instanceof Error ? error.message : "Failed to upload avatar");
+			setSaveError(
+				error instanceof Error ? error.message : "Failed to upload avatar"
+			);
 		} finally {
 			setIsUploadingAvatar(false);
 		}
@@ -327,7 +338,9 @@ export default function ProfilePage() {
 			<form className="space-y-12" onSubmit={handleSubmit}>
 				{/* Avatar Upload Section */}
 				<section className="rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
-					<h2 className="mb-4 text-lg font-semibold text-slate-100">Avatar</h2>
+					<h2 className="mb-4 text-lg font-semibold text-slate-100">
+						Avatar
+					</h2>
 					<div className="flex items-center gap-6">
 						<div className="flex-shrink-0">
 							{avatarUrl ? (
@@ -338,7 +351,9 @@ export default function ProfilePage() {
 								/>
 							) : (
 								<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
-									{commonName ? commonName.charAt(0).toUpperCase() : "?"}
+									{commonName
+										? commonName.charAt(0).toUpperCase()
+										: "?"}
 								</div>
 							)}
 						</div>
@@ -433,7 +448,8 @@ export default function ProfilePage() {
 							))}
 						</select>
 						<p className="text-xs text-slate-400">
-							Select your timezone to ensure dates are displayed correctly.
+							Select your timezone to ensure dates are displayed
+							correctly.
 						</p>
 					</div>
 				</section>
