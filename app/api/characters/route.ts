@@ -16,6 +16,7 @@ const VALID_SYSTEMS: GameSystemKey[] = [
   "dnd",
   "pathfinder",
   "starfinder",
+  "shadowdark",
   "other",
 ];
 

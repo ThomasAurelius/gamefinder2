@@ -202,6 +202,8 @@ export function formatGameSystem(system: string): string {
       return "Pathfinder";
     case "starfinder":
       return "Starfinder";
+    case "shadowdark":
+      return "Shadowdark";
     default:
       return "Homebrew / Other";
   }
