@@ -187,7 +187,6 @@ export default function ProfilePage() {
 			}
 
 			const { url } = await response.json();
-			setAvatarUrl(url);
 
 			// Save the avatar URL to the user's profile in the database
 			const profilePayload: ProfilePayload = {
@@ -216,6 +215,9 @@ export default function ProfilePage() {
 				const message = await saveResponse.text();
 				throw new Error(message || "Failed to save avatar to profile");
 			}
+
+			// Only update the UI state after successful save to DB
+			setAvatarUrl(url);
 		} catch (error) {
 			setSaveError(error instanceof Error ? error.message : "Failed to upload avatar");
 		} finally {
