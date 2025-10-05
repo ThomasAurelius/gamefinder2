@@ -119,18 +119,7 @@ function GameSessionCard({
             )}
           </div>
         </div>
-        {session.imageUrl && (
-          <div className="flex-shrink-0">
-            <Link href={`/games/${session.id}`}>
-              <img
-                src={session.imageUrl}
-                alt={session.game}
-                className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
-              />
-            </Link>
-          </div>
-        )}
-        <div className="flex-shrink-0">
+        <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <button
             onClick={() => onJoin(session.id)}
             disabled={joiningSessionId === session.id}
@@ -138,6 +127,15 @@ function GameSessionCard({
           >
             {joiningSessionId === session.id ? "Joining..." : "Join Game"}
           </button>
+          {session.imageUrl && (
+            <Link href={`/games/${session.id}`}>
+              <img
+                src={session.imageUrl}
+                alt={session.game}
+                className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
+              />
+            </Link>
+          )}
         </div>
       </div>
     </div>
