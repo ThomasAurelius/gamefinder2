@@ -347,7 +347,7 @@ export default function PostGamePage() {
 								<img
 									src={imageUrl}
 									alt="Game session"
-									className="h-48 w-auto rounded-lg border border-slate-800 object-cover"
+									className="h-66 w-auto rounded-lg border border-slate-800 object-cover"
 								/>
 								<button
 									type="button"
