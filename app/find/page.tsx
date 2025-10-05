@@ -84,10 +84,10 @@ function GameSessionCard({
               <span className="text-slate-500">Times:</span>{" "}
               {session.times.join(", ")}
             </p>
-            {session.location && (
+            {(session.location || session.zipCode) && (
               <p>
                 <span className="text-slate-500">Location:</span>{" "}
-                {session.location}
+                {session.location || session.zipCode}
                 {session.distance !== undefined && (
                   <span className="ml-2 text-sky-400">
                     ({session.distance.toFixed(1)} mi away)
@@ -146,7 +146,7 @@ export default function FindGamesPage() {
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
   const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
   const [locationSearch, setLocationSearch] = useState("");
-  const [radiusMiles, setRadiusMiles] = useState("50");
+  const [radiusMiles, setRadiusMiles] = useState("25");
 
   useEffect(() => {
     const fetchTimezone = async () => {
@@ -158,6 +158,21 @@ export default function FindGamesPage() {
         }
       } catch (error) {
         console.error("Failed to fetch timezone:", error);
+      }
+    };
+
+    const fetchUserProfile = async () => {
+      try {
+        const response = await fetch("/api/profile");
+        if (response.ok) {
+          const profile = await response.json();
+          // Auto-populate location with user's zip code
+          if (profile.zipCode) {
+            setLocationSearch(profile.zipCode);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
       }
     };
 
@@ -177,6 +192,7 @@ export default function FindGamesPage() {
     };
 
     fetchTimezone();
+    fetchUserProfile();
     fetchAllEvents();
   }, []);
 
