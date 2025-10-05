@@ -140,6 +140,30 @@ export default function LibraryPage() {
 		return library[type].some((entry) => entry.gameId === gameId);
 	};
 
+	const handleToggleFavorite = async (
+		gameId: string,
+		type: "owned" | "wishlist"
+	) => {
+		try {
+			const response = await fetch("/api/library", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "toggleFavorite",
+					gameId,
+					gameName: "",
+					type,
+				}),
+			});
+
+			if (response.ok) {
+				await loadLibrary();
+			}
+		} catch (error) {
+			console.error("Failed to toggle favorite:", error);
+		}
+	};
+
 	return (
 		<section className="space-y-6">
 			<div>
@@ -312,16 +336,34 @@ export default function LibraryPage() {
 									className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
 								>
 									<div className="flex items-center justify-between">
-										<div>
-											<h3 className="font-semibold text-slate-100">
-												{entry.gameName}
-											</h3>
-											<p className="text-sm text-slate-400">
-												Added:{" "}
-												{new Date(
-													entry.addedAt
-												).toLocaleDateString()}
-											</p>
+										<div className="flex items-center gap-3">
+											<button
+												onClick={() =>
+													handleToggleFavorite(
+														entry.gameId,
+														"owned"
+													)
+												}
+												className="text-2xl hover:scale-110 transition-transform"
+												title={
+													entry.isFavorite
+														? "Remove from favorites"
+														: "Add to favorites"
+												}
+											>
+												{entry.isFavorite ? "⭐" : "☆"}
+											</button>
+											<div>
+												<h3 className="font-semibold text-slate-100">
+													{entry.gameName}
+												</h3>
+												<p className="text-sm text-slate-400">
+													Added:{" "}
+													{new Date(
+														entry.addedAt
+													).toLocaleDateString()}
+												</p>
+											</div>
 										</div>
 										<div className="flex gap-2">
 											<button
@@ -376,16 +418,34 @@ export default function LibraryPage() {
 									className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
 								>
 									<div className="flex items-center justify-between">
-										<div>
-											<h3 className="font-semibold text-slate-100">
-												{entry.gameName}
-											</h3>
-											<p className="text-sm text-slate-400">
-												Added:{" "}
-												{new Date(
-													entry.addedAt
-												).toLocaleDateString()}
-											</p>
+										<div className="flex items-center gap-3">
+											<button
+												onClick={() =>
+													handleToggleFavorite(
+														entry.gameId,
+														"wishlist"
+													)
+												}
+												className="text-2xl hover:scale-110 transition-transform"
+												title={
+													entry.isFavorite
+														? "Remove from favorites"
+														: "Add to favorites"
+												}
+											>
+												{entry.isFavorite ? "⭐" : "☆"}
+											</button>
+											<div>
+												<h3 className="font-semibold text-slate-100">
+													{entry.gameName}
+												</h3>
+												<p className="text-sm text-slate-400">
+													Added:{" "}
+													{new Date(
+														entry.addedAt
+													).toLocaleDateString()}
+												</p>
+											</div>
 										</div>
 										<div className="flex gap-2">
 											<button

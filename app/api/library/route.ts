@@ -5,6 +5,7 @@ import {
   addToLibrary,
   removeFromLibrary,
   moveToLibrary,
+  toggleFavorite,
 } from "@/lib/boardgames/library";
 
 export async function GET() {
@@ -89,6 +90,16 @@ export async function POST(request: Request) {
           );
         }
         success = await moveToLibrary(userId, gameId, gameName, fromType, toType);
+        break;
+
+      case "toggleFavorite":
+        if (!type || (type !== "owned" && type !== "wishlist")) {
+          return NextResponse.json(
+            { error: "Invalid type" },
+            { status: 400 }
+          );
+        }
+        success = await toggleFavorite(userId, gameId, type);
         break;
 
       default:
