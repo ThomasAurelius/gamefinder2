@@ -313,7 +313,7 @@ export default function LibraryPage() {
 					)}
 					<div className="mt-6 flex justify-center">
 						<p className="text-center w-160 text-slate-400">
-							Game Search is powered by a download of BoardGameGeek's
+							Game Search is powered by a download of BoardGameGeek&apos;s
 							games database. Future enhancements may include real-time
 							search via BGG API, allowing you to bring in info from your
 							BGG collection.
