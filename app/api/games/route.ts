@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     const timesParam = searchParams.get("times");
     const times = timesParam ? timesParam.split(",") : undefined;
     const locationSearch = searchParams.get("location") || "";
-    const radiusMiles = parseFloat(searchParams.get("radius") || "50");
+    const radiusMiles = parseFloat(searchParams.get("radius") || "25");
 
     let sessions = await listGameSessions({ game, date, times });
 
