@@ -146,6 +146,7 @@ function GameSessionCard({
 
 export default function FindGamesPage() {
   const [selectedGame, setSelectedGame] = useState("");
+  const [customGameName, setCustomGameName] = useState("");
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [gameSessions, setGameSessions] = useState<GameSession[]>([]);
@@ -253,7 +254,12 @@ export default function FindGamesPage() {
 
     try {
       const params = new URLSearchParams();
-      if (selectedGame) params.append("game", selectedGame);
+      // Use custom game name if "Other" is selected and a custom name is provided
+      const gameName = selectedGame === "Other" && customGameName.trim() 
+        ? customGameName.trim() 
+        : selectedGame;
+      
+      if (gameName) params.append("game", gameName);
       if (selectedDate) params.append("date", selectedDate);
       if (selectedTimes.length > 0) params.append("times", selectedTimes.join(","));
       if (locationSearch) {
@@ -358,6 +364,25 @@ export default function FindGamesPage() {
               </select>
             </div>
 
+            {selectedGame === "Other" && (
+              <div className="space-y-2">
+                <label htmlFor="custom-game-search" className="block text-sm font-medium text-slate-200">
+                  Game Name
+                </label>
+                <input
+                  id="custom-game-search"
+                  type="text"
+                  value={customGameName}
+                  onChange={(e) => setCustomGameName(e.target.value)}
+                  placeholder="Enter the name of the game to search for"
+                  className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                />
+                <p className="text-xs text-slate-500">
+                  Search for games by their specific name.
+                </p>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label htmlFor="date-select" className="block text-sm font-medium text-slate-200">
                 Game Date
@@ -437,7 +462,7 @@ export default function FindGamesPage() {
               type="button"
               onClick={handleSearch}
               className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={(!selectedGame && !selectedDate && selectedTimes.length === 0 && !locationSearch) || isLoading}
+              disabled={(!selectedGame && !selectedDate && selectedTimes.length === 0 && !locationSearch) || (selectedGame === "Other" && !customGameName.trim()) || isLoading}
             >
               {isLoading ? "Searching..." : "Search Games"}
             </button>
@@ -460,7 +485,7 @@ export default function FindGamesPage() {
                 Showing games
                 {selectedGame && (
                   <>
-                    {" "}for <span className="text-sky-400">{selectedGame}</span>
+                    {" "}for <span className="text-sky-400">{selectedGame === "Other" && customGameName.trim() ? customGameName : selectedGame}</span>
                   </>
                 )}
                 {selectedDate && (
