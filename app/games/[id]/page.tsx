@@ -117,7 +117,10 @@ export default async function GameDetailPage({
 					Game Master
 				</h2>
 				<div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
-					<div className="flex items-center gap-4">
+					<Link
+						href={`/user/${session.userId}`}
+						className="flex items-center gap-4 hover:opacity-80 transition-opacity"
+					>
 						{host?.avatarUrl ? (
 							<img
 								src={host.avatarUrl}
@@ -132,7 +135,7 @@ export default async function GameDetailPage({
 						<p className="text-base text-slate-100">
 							{host ? host.name : "Unknown Host"}
 						</p>
-					</div>
+					</Link>
 				</div>
 			</section>
 
