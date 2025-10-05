@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { joinGameSession } from "@/lib/games/db";
+import { getUserBasicInfo } from "@/lib/users";
 
 export async function POST(
   request: Request,
@@ -28,7 +29,15 @@ export async function POST(
       );
     }
     
-    return NextResponse.json(session, { status: 200 });
+    // Fetch host information
+    const host = await getUserBasicInfo(session.userId);
+    const sessionWithHost = {
+      ...session,
+      hostName: host?.name || "Unknown Host",
+      hostAvatarUrl: host?.avatarUrl,
+    };
+    
+    return NextResponse.json(sessionWithHost, { status: 200 });
   } catch (error) {
     console.error("Failed to join game session", error);
     return NextResponse.json(

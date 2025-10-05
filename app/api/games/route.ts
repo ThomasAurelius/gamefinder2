@@ -7,6 +7,7 @@ import {
 } from "@/lib/games/db";
 import { GameSessionPayload } from "@/lib/games/types";
 import { geocodeLocation, calculateDistance } from "@/lib/geolocation";
+import { getUsersBasicInfo } from "@/lib/users";
 
 function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
   if (!data || typeof data !== "object") {
@@ -52,7 +53,18 @@ export async function GET(request: Request) {
     const locationSearch = searchParams.get("location") || "";
     const radiusMiles = parseFloat(searchParams.get("radius") || "25");
 
-    let sessions = await listGameSessions({ game, date, times });
+    const sessions = await listGameSessions({ game, date, times });
+
+    // Fetch host information for all sessions
+    const hostIds = [...new Set(sessions.map(s => s.userId))];
+    const hostsMap = await getUsersBasicInfo(hostIds);
+    
+    // Add host information to sessions
+    const sessionsWithHosts = sessions.map(session => ({
+      ...session,
+      hostName: hostsMap.get(session.userId)?.name || "Unknown Host",
+      hostAvatarUrl: hostsMap.get(session.userId)?.avatarUrl,
+    }));
 
     // If location search is provided, filter by distance
     if (locationSearch) {
@@ -61,9 +73,9 @@ export async function GET(request: Request) {
         
         if (searchCoords) {
           // Calculate distances and filter by radius
-          const sessionsWithDistance: (typeof sessions[0] & { distance?: number })[] = [];
+          const sessionsWithDistance: (typeof sessionsWithHosts[0] & { distance?: number })[] = [];
           
-          for (const session of sessions) {
+          for (const session of sessionsWithHosts) {
             const lat = session.latitude;
             const lon = session.longitude;
             
@@ -82,7 +94,10 @@ export async function GET(request: Request) {
           }
           
           // Sort by distance
-          sessions = sessionsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+          return NextResponse.json(
+            sessionsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0)),
+            { status: 200 }
+          );
         }
       } catch (error) {
         console.error("Failed to geocode search location:", error);
@@ -90,7 +105,7 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json(sessions, { status: 200 });
+    return NextResponse.json(sessionsWithHosts, { status: 200 });
   } catch (error) {
     console.error("Failed to list game sessions", error);
     return NextResponse.json(
