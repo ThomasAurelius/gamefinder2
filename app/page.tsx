@@ -1,10 +1,14 @@
+import Image from "next/image";
+
 export default function HomePage() {
 	return (
 		<div className="space-y-10 flex flex-col items-center py-16 text-center">
 			<h1 className="text-3xl font-bold sm:text-4xl">Welcome!</h1>
-			<img
+			<Image
 				src="/logo.png"
 				alt="The Gathering Call Logo"
+				width={240}
+				height={240}
 				className="h-60 w-auto"
 			/>
 			<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
