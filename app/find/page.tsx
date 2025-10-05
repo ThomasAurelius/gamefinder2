@@ -81,7 +81,12 @@ function GameSessionCard({
             {session.hostName && (
               <p>
                 <span className="text-slate-500">Host:</span>{" "}
-                <span className="text-slate-300">{session.hostName}</span>
+                <Link
+                  href={`/user/${session.userId}`}
+                  className="text-slate-300 hover:text-sky-300 transition-colors"
+                >
+                  {session.hostName}
+                </Link>
               </p>
             )}
             <p>
