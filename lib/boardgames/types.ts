@@ -12,6 +12,7 @@ export type UserLibraryEntry = {
   gameId: string;
   gameName: string;
   addedAt: string;
+  isFavorite?: boolean;
 };
 
 export type UserLibrary = {
