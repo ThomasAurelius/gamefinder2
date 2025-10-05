@@ -17,6 +17,13 @@ type GameSession = {
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;
+  location?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
+  hostName?: string;
+  hostAvatarUrl?: string;
 };
 
 function GameSessionCard({
@@ -77,6 +84,17 @@ function GameSessionCard({
             )}
           </div>
           <div className="mt-2 space-y-1 text-sm text-slate-400">
+            {session.hostName && (
+              <p>
+                <span className="text-slate-500">Host:</span>{" "}
+                <Link
+                  href={`/user/${session.userId}`}
+                  className="text-slate-300 hover:text-sky-300 transition-colors"
+                >
+                  {session.hostName}
+                </Link>
+              </p>
+            )}
             <p>
               <span className="text-slate-500">Date:</span>{" "}
               {formatDateInTimezone(session.date, userTimezone)}
@@ -85,6 +103,17 @@ function GameSessionCard({
               <span className="text-slate-500">Times:</span>{" "}
               {session.times.join(", ")}
             </p>
+            {(session.location || session.zipCode) && (
+              <p>
+                <span className="text-slate-500">Location:</span>{" "}
+                {session.location || session.zipCode}
+                {session.distance !== undefined && (
+                  <span className="ml-2 text-sky-400">
+                    ({session.distance.toFixed(1)} mi away)
+                  </span>
+                )}
+              </p>
+            )}
             <p>
               <span className="text-slate-500">Players:</span>{" "}
               <span className={isFull ? "text-orange-400" : "text-green-400"}>
