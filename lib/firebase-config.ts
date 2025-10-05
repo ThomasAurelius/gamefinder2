@@ -13,7 +13,6 @@ export const FIREBASE_CONFIG = {
 // Optional: runtime assertion (client-only)
 for (const [k, v] of Object.entries(FIREBASE_CONFIG)) {
 	if (!v || v === "undefined") {
-		// eslint-disable-next-line no-console
 		console.warn(
 			`[firebase-config] Missing ${k}. Check your .env.local and restart dev server.`
 		);
