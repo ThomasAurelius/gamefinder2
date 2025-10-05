@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { listUserGameSessions } from "@/lib/games/db";
+import { getUsersBasicInfo } from "@/lib/users";
 
 export async function GET() {
   try {
@@ -15,7 +16,19 @@ export async function GET() {
     }
     
     const sessions = await listUserGameSessions(userId);
-    return NextResponse.json(sessions, { status: 200 });
+    
+    // Fetch host information for all sessions
+    const hostIds = [...new Set(sessions.map(s => s.userId))];
+    const hostsMap = await getUsersBasicInfo(hostIds);
+    
+    // Add host information to sessions
+    const sessionsWithHosts = sessions.map(session => ({
+      ...session,
+      hostName: hostsMap.get(session.userId)?.name || "Unknown Host",
+      hostAvatarUrl: hostsMap.get(session.userId)?.avatarUrl,
+    }));
+    
+    return NextResponse.json(sessionsWithHosts, { status: 200 });
   } catch (error) {
     console.error("Failed to list user game sessions", error);
     return NextResponse.json(

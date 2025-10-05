@@ -24,6 +24,8 @@ type GameSession = {
   latitude?: number;
   longitude?: number;
   distance?: number;
+  hostName?: string;
+  hostAvatarUrl?: string;
 };
 
 const tagButtonClasses = (
@@ -76,6 +78,12 @@ function GameSessionCard({
             <h3 className="font-medium text-slate-100">{session.game}</h3>
           </Link>
           <div className="mt-2 space-y-1 text-sm text-slate-400">
+            {session.hostName && (
+              <p>
+                <span className="text-slate-500">Host:</span>{" "}
+                <span className="text-slate-300">{session.hostName}</span>
+              </p>
+            )}
             <p>
               <span className="text-slate-500">Date:</span>{" "}
               {formatDateInTimezone(session.date, userTimezone)}
