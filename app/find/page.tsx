@@ -62,17 +62,6 @@ function GameSessionCard({
       className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
     >
       <div className="flex items-start justify-between gap-4">
-        {session.imageUrl && (
-          <div className="flex-shrink-0">
-            <Link href={`/games/${session.id}`}>
-              <img
-                src={session.imageUrl}
-                alt={session.game}
-                className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
-              />
-            </Link>
-          </div>
-        )}
         <div className="flex-1">
           <Link href={`/games/${session.id}`} className="hover:text-sky-300 transition-colors">
             <h3 className="font-medium text-slate-100">{session.game}</h3>
@@ -130,6 +119,17 @@ function GameSessionCard({
             )}
           </div>
         </div>
+        {session.imageUrl && (
+          <div className="flex-shrink-0">
+            <Link href={`/games/${session.id}`}>
+              <img
+                src={session.imageUrl}
+                alt={session.game}
+                className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
+              />
+            </Link>
+          </div>
+        )}
         <div className="flex-shrink-0">
           <button
             onClick={() => onJoin(session.id)}
