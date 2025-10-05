@@ -20,6 +20,7 @@ const tagButtonClasses = (
 
 export default function PostGamePage() {
   const [selectedGame, setSelectedGame] = useState("");
+  const [customGameName, setCustomGameName] = useState("");
   const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [description, setDescription] = useState("");
@@ -108,13 +109,18 @@ export default function PostGamePage() {
     setIsSubmitting(true);
 
     try {
+      // Use custom game name if "Other" is selected and a custom name is provided
+      const gameName = selectedGame === "Other" && customGameName.trim() 
+        ? customGameName.trim() 
+        : selectedGame;
+
       const response = await fetch("/api/games", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          game: selectedGame,
+          game: gameName,
           date: selectedDate,
           times: selectedTimes,
           description: description,
@@ -133,6 +139,7 @@ export default function PostGamePage() {
       setSubmitted(true);
       // Reset form
       setSelectedGame("");
+      setCustomGameName("");
       setSelectedTimes([]);
       setSelectedDate("");
       setDescription("");
@@ -178,6 +185,26 @@ export default function PostGamePage() {
             ))}
           </select>
         </div>
+
+        {selectedGame === "Other" && (
+          <div className="space-y-2">
+            <label htmlFor="custom-game-name" className="block text-sm font-medium text-slate-200">
+              Game Name <span className="text-red-400">*</span>
+            </label>
+            <input
+              id="custom-game-name"
+              type="text"
+              value={customGameName}
+              onChange={(e) => setCustomGameName(e.target.value)}
+              placeholder="Enter the name of the game"
+              required
+              className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+            />
+            <p className="text-xs text-slate-500">
+              Please enter the specific name of the game you want to play.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2">
           <label htmlFor="date-select" className="block text-sm font-medium text-slate-200">
@@ -330,7 +357,7 @@ export default function PostGamePage() {
         <button
           type="submit"
           className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!selectedGame || selectedTimes.length === 0 || !selectedDate || isSubmitting}
+          disabled={!selectedGame || (selectedGame === "Other" && !customGameName.trim()) || selectedTimes.length === 0 || !selectedDate || isSubmitting}
         >
           {isSubmitting ? "Posting..." : "Post Game Session"}
         </button>
