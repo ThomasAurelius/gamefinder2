@@ -7,6 +7,7 @@ type PendingPlayer = {
   id: string;
   name: string;
   avatarUrl?: string;
+  characterName?: string;
 };
 
 type PendingPlayersManagerProps = {
@@ -107,7 +108,14 @@ export default function PendingPlayersManager({
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
                   ?
                 </span>
-                <span className="text-base text-slate-100">{player.name}</span>
+                <div className="flex flex-col">
+                  <span className="text-base text-slate-100">{player.name}</span>
+                  {player.characterName && (
+                    <span className="text-sm text-slate-400">
+                      Playing as: {player.characterName}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2">
                 <button

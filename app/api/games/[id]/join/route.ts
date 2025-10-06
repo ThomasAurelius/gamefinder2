@@ -20,7 +20,19 @@ export async function POST(
     
     const { id } = await params;
     
-    const session = await joinGameSession(id, userId);
+    // Parse the request body to get optional character info
+    let characterId: string | undefined;
+    let characterName: string | undefined;
+    
+    try {
+      const body = await request.json();
+      characterId = body.characterId;
+      characterName = body.characterName;
+    } catch {
+      // Body is optional, continue without character info
+    }
+    
+    const session = await joinGameSession(id, userId, characterId, characterName);
     
     if (!session) {
       return NextResponse.json(

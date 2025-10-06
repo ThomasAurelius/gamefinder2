@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 
 type GameSession = {
   id: string;
@@ -161,6 +162,8 @@ export default function FindGamesPage() {
   const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
   const [locationSearch, setLocationSearch] = useState("");
   const [radiusMiles, setRadiusMiles] = useState("25");
+  const [showCharacterDialog, setShowCharacterDialog] = useState(false);
+  const [sessionToJoin, setSessionToJoin] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTimezone = async () => {
@@ -282,13 +285,25 @@ export default function FindGamesPage() {
     }
   };
 
-  const handleJoin = async (sessionId: string) => {
-    setJoiningSessionId(sessionId);
+  const handleJoinClick = (sessionId: string) => {
+    setSessionToJoin(sessionId);
+    setShowCharacterDialog(true);
+  };
+
+  const handleCharacterSelect = async (characterId?: string, characterName?: string) => {
+    if (!sessionToJoin) return;
+    
+    setShowCharacterDialog(false);
+    setJoiningSessionId(sessionToJoin);
     setJoinError(null);
 
     try {
-      const response = await fetch(`/api/games/${sessionId}/join`, {
+      const response = await fetch(`/api/games/${sessionToJoin}/join`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ characterId, characterName }),
       });
 
       if (!response.ok) {
@@ -301,25 +316,38 @@ export default function FindGamesPage() {
       // Update the session in the search results list
       setGameSessions(prevSessions =>
         prevSessions.map(session =>
-          session.id === sessionId ? updatedSession : session
+          session.id === sessionToJoin ? updatedSession : session
         )
       );
       
       // Update the session in the all events list
       setAllEvents(prevEvents =>
         prevEvents.map(event =>
-          event.id === sessionId ? updatedSession : event
+          event.id === sessionToJoin ? updatedSession : event
         )
       );
     } catch (error) {
       setJoinError(error instanceof Error ? error.message : "Failed to join game session");
     } finally {
       setJoiningSessionId(null);
+      setSessionToJoin(null);
     }
+  };
+
+  const handleCharacterCancel = () => {
+    setShowCharacterDialog(false);
+    setSessionToJoin(null);
   };
 
   return (
     <section className="space-y-6">
+      {showCharacterDialog && (
+        <CharacterSelectionDialog
+          onSelect={handleCharacterSelect}
+          onCancel={handleCharacterCancel}
+          isLoading={joiningSessionId !== null}
+        />
+      )}
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Find Games</h1>
         <p className="mt-2 text-sm text-slate-400">
@@ -520,7 +548,7 @@ export default function FindGamesPage() {
                   session={session}
                   userTimezone={userTimezone}
                   joiningSessionId={joiningSessionId}
-                  onJoin={handleJoin}
+                  onJoin={handleJoinClick}
                 />
               ))}
             </div>
@@ -549,7 +577,7 @@ export default function FindGamesPage() {
                 session={event}
                 userTimezone={userTimezone}
                 joiningSessionId={joiningSessionId}
-                onJoin={handleJoin}
+                onJoin={handleJoinClick}
               />
             ))}
           </div>

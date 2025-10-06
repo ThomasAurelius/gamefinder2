@@ -33,14 +33,33 @@ export default async function GameDetailPage({
 	const usersMap = await getUsersBasicInfo(allUserIds);
 
 	const host = usersMap.get(session.userId);
+	
+	// Create enriched player lists with character information
+	const signedUpPlayersWithCharacters = session.signedUpPlayersWithCharacters || [];
 	const signedUpPlayersList = session.signedUpPlayers
-		.map((playerId) => usersMap.get(playerId))
+		.map((playerId) => {
+			const user = usersMap.get(playerId);
+			const characterInfo = signedUpPlayersWithCharacters.find(p => p.userId === playerId);
+			return user ? { ...user, characterName: characterInfo?.characterName } : undefined;
+		})
 		.filter((user) => user !== undefined);
+	
+	const waitlistWithCharacters = session.waitlistWithCharacters || [];
 	const waitlistPlayersList = session.waitlist
-		.map((playerId) => usersMap.get(playerId))
+		.map((playerId) => {
+			const user = usersMap.get(playerId);
+			const characterInfo = waitlistWithCharacters.find(p => p.userId === playerId);
+			return user ? { ...user, characterName: characterInfo?.characterName } : undefined;
+		})
 		.filter((user) => user !== undefined);
+	
+	const pendingPlayersWithCharacters = session.pendingPlayersWithCharacters || [];
 	const pendingPlayersList = session.pendingPlayers
-		.map((playerId) => usersMap.get(playerId))
+		.map((playerId) => {
+			const user = usersMap.get(playerId);
+			const characterInfo = pendingPlayersWithCharacters.find(p => p.userId === playerId);
+			return user ? { ...user, characterName: characterInfo?.characterName } : undefined;
+		})
 		.filter((user) => user !== undefined);
 
 	const isFull = session.signedUpPlayers.length >= session.maxPlayers;
@@ -164,6 +183,7 @@ export default async function GameDetailPage({
 						id: p.id,
 						name: p.name,
 						avatarUrl: p.avatarUrl,
+						characterName: p.characterName,
 					}))}
 				/>
 			)}
@@ -190,7 +210,14 @@ export default async function GameDetailPage({
 									<span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
 										{index + 1}
 									</span>
-									<span>{player.name}</span>
+									<div className="flex flex-col">
+										<span>{player.name}</span>
+										{player.characterName && (
+											<span className="text-sm text-slate-400">
+												Playing as: {player.characterName}
+											</span>
+										)}
+									</div>
 								</div>
 							</div>
 						))}
@@ -233,7 +260,14 @@ export default async function GameDetailPage({
 										<span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
 											{index + 1}
 										</span>
-										<span>{player.name}</span>
+										<div className="flex flex-col">
+											<span>{player.name}</span>
+											{player.characterName && (
+												<span className="text-sm text-slate-400">
+													Playing as: {player.characterName}
+												</span>
+											)}
+										</div>
 									</div>
 								</div>
 							))}
