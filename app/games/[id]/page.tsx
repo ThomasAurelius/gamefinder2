@@ -27,9 +27,12 @@ export async function generateMetadata({
 
 	const formattedDate = formatDateInTimezone(session.date, DEFAULT_TIMEZONE);
 	
-	const description = session.description
-		? `${session.description.substring(0, 200)}${session.description.length > 200 ? "..." : ""}`
-		: `Join us for ${session.game} on ${formattedDate}. ${session.maxPlayers - session.signedUpPlayers.length} spots available!`;
+	// Always include the date in the description, even with custom descriptions
+	const baseDescription = session.description
+		? `${session.description.substring(0, 150)}${session.description.length > 150 ? "..." : ""}`
+		: `Join us for ${session.game}. ${session.maxPlayers - session.signedUpPlayers.length} spots available!`;
+	
+	const description = `${baseDescription} | Date: ${formattedDate}`;
 
 	const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
 
@@ -37,7 +40,7 @@ export async function generateMetadata({
 		title: `${session.game} - Game Session`,
 		description,
 		openGraph: {
-			title: `${session.game} - Game Session`,
+			title: `${session.game} on ${formattedDate}`,
 			description,
 			url,
 			type: "website",
@@ -54,7 +57,7 @@ export async function generateMetadata({
 		},
 		twitter: {
 			card: "summary_large_image",
-			title: `${session.game} - Game Session`,
+			title: `${session.game} on ${formattedDate}`,
 			description,
 			images: session.imageUrl ? [session.imageUrl] : [],
 		},
