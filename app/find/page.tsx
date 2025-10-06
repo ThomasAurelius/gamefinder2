@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
@@ -626,22 +626,31 @@ export default function FindGamesPage() {
 								Click to select individual times or hold Shift and click
 								to select a range.
 							</p>
-							<div className="flex flex-wrap gap-2">
-								{TIME_SLOTS.map((slot) => {
-									const active = selectedTimes.includes(slot);
-									return (
-										<button
-											key={slot}
-											type="button"
-											onClick={(e) => toggleTime(slot, e.shiftKey)}
-											className={tagButtonClasses(active, {
-												size: "sm",
+							<div className="space-y-3">
+								{TIME_SLOT_GROUPS.map((group) => (
+									<div key={group.label}>
+										<div className="mb-2 text-xs font-medium text-slate-400">
+											{group.label}:
+										</div>
+										<div className="flex flex-wrap gap-2">
+											{group.slots.map((slot) => {
+												const active = selectedTimes.includes(slot);
+												return (
+													<button
+														key={slot}
+														type="button"
+														onClick={(e) => toggleTime(slot, e.shiftKey)}
+														className={tagButtonClasses(active, {
+															size: "sm",
+														})}
+													>
+														{slot}
+													</button>
+												);
 											})}
-										>
-											{slot}
-										</button>
-									);
-								})}
+										</div>
+									</div>
+								))}
 							</div>
 							<p className="text-xs text-slate-500">
 								{selectedTimes.length} time slot(s) selected
