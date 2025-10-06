@@ -202,7 +202,7 @@ export default async function GameDetailPage({
 					<ShareToFacebook url={gameUrl} quote={shareQuote} />
 					<GameDetailActions
 						sessionId={id}
-						currentUserId={currentUserId}
+						currentUserId={currentUserId ?? null}
 						isUserSignedUp={!!isUserSignedUp}
 						isHost={isHost}
 					/>
