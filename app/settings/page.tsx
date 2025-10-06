@@ -16,7 +16,9 @@ export default function SettingsPage() {
       try {
         // Check admin status
         console.log("[Settings] Fetching admin status...");
-        const statusRes = await fetch("/api/admin/status");
+        const statusRes = await fetch("/api/admin/status", {
+          credentials: "include",
+        });
         const statusData = await statusRes.json();
         console.log("[Settings] Admin status response:", statusData);
         setIsAdmin(statusData.isAdmin);
@@ -24,7 +26,9 @@ export default function SettingsPage() {
         // Load current announcement if admin
         if (statusData.isAdmin) {
           console.log("[Settings] User is admin, loading announcement...");
-          const announcementRes = await fetch("/api/announcements");
+          const announcementRes = await fetch("/api/announcements", {
+            credentials: "include",
+          });
           const announcementData = await announcementRes.json();
           setAnnouncement(announcementData.message || "");
           setIsActive(announcementData.isActive || false);
@@ -49,6 +53,7 @@ export default function SettingsPage() {
       const response = await fetch("/api/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ message: announcement, isActive }),
       });
 
