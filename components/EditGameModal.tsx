@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { StoredGameSession } from "@/lib/games/types";
+import { TIME_SLOTS } from "@/lib/constants";
 
 interface EditGameModalProps {
   session: StoredGameSession;
@@ -24,18 +25,45 @@ export default function EditGameModal({
   const [zipCode, setZipCode] = useState(session.zipCode || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 
-  const TIME_SLOTS = [
-    "Morning (9am-12pm)",
-    "Afternoon (12pm-5pm)",
-    "Evening (5pm-9pm)",
-    "Night (9pm+)",
-  ];
+  const handleTimeToggle = (time: string, shiftKey: boolean = false) => {
+    setTimes((prev) => {
+      // Handle range selection with shift key
+      if (shiftKey && lastClickedSlot) {
+        const startIdx = TIME_SLOTS.indexOf(lastClickedSlot);
+        const endIdx = TIME_SLOTS.indexOf(time);
 
-  const handleTimeToggle = (time: string) => {
-    setTimes((prev) =>
-      prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time]
-    );
+        if (startIdx !== -1 && endIdx !== -1) {
+          const [minIdx, maxIdx] = [
+            Math.min(startIdx, endIdx),
+            Math.max(startIdx, endIdx),
+          ];
+          const slotsInRange = TIME_SLOTS.slice(minIdx, maxIdx + 1);
+
+          // Check if all slots in range are already selected
+          const allSelected = slotsInRange.every((s) => prev.includes(s));
+
+          if (allSelected) {
+            // Deselect all slots in range
+            return prev.filter((s) => !slotsInRange.includes(s));
+          } else {
+            // Select all slots in range
+            const newSlots = [...prev];
+            slotsInRange.forEach((s) => {
+              if (!newSlots.includes(s)) {
+                newSlots.push(s);
+              }
+            });
+            return newSlots;
+          }
+        }
+      }
+
+      // Normal toggle behavior
+      setLastClickedSlot(time);
+      return prev.includes(time) ? prev.filter((t) => t !== time) : [...prev, time];
+    });
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -122,22 +150,28 @@ export default function EditGameModal({
             <label className="block text-sm font-medium text-slate-200">
               Time Slots
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <p className="text-xs text-slate-400">
+              Click to select individual times or hold Shift and click to select a range.
+            </p>
+            <div className="flex flex-wrap gap-2">
               {TIME_SLOTS.map((slot) => (
                 <button
                   key={slot}
                   type="button"
-                  onClick={() => handleTimeToggle(slot)}
-                  className={`rounded-lg border px-4 py-2 text-sm transition ${
+                  onClick={(e) => handleTimeToggle(slot, e.shiftKey)}
+                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${
                     times.includes(slot)
-                      ? "border-sky-500 bg-sky-500/20 text-sky-200"
-                      : "border-slate-800 bg-slate-950/80 text-slate-300 hover:border-slate-700"
+                      ? "border-sky-400 bg-sky-500/20 text-sky-100"
+                      : "border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500"
                   }`}
                 >
                   {slot}
                 </button>
               ))}
             </div>
+            <p className="text-xs text-slate-500">
+              {times.length} time slot(s) selected
+            </p>
           </div>
 
           <div className="space-y-2">
