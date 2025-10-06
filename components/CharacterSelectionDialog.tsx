@@ -7,12 +7,14 @@ interface CharacterSelectionDialogProps {
   onSelect: (characterId?: string, characterName?: string) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  gameSystem?: string | null;
 }
 
 export default function CharacterSelectionDialog({
   onSelect,
   onCancel,
   isLoading = false,
+  gameSystem = null,
 }: CharacterSelectionDialogProps) {
   const [characters, setCharacters] = useState<StoredCharacter[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>("");
@@ -25,7 +27,11 @@ export default function CharacterSelectionDialog({
         const response = await fetch("/api/characters");
         if (response.ok) {
           const data = await response.json();
-          setCharacters(data);
+          // Filter characters by game system if specified
+          const filteredData = gameSystem
+            ? data.filter((char: StoredCharacter) => char.system === gameSystem)
+            : data;
+          setCharacters(filteredData);
         } else {
           setError("Failed to load characters");
         }
@@ -38,7 +44,7 @@ export default function CharacterSelectionDialog({
     };
 
     fetchCharacters();
-  }, []);
+  }, [gameSystem]);
 
   const handleConfirm = () => {
     if (selectedCharacterId) {
@@ -79,7 +85,9 @@ export default function CharacterSelectionDialog({
             <p className="text-sm text-red-400">{error}</p>
           ) : characters.length === 0 ? (
             <p className="text-sm text-slate-400">
-              You don&apos;t have any characters yet. You can still join without one.
+              {gameSystem
+                ? "You don't have any characters for this game system yet. You can still join without one."
+                : "You don't have any characters yet. You can still join without one."}
             </p>
           ) : (
             <div className="space-y-2">
