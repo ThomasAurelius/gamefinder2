@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import AvatarCropper from "@/components/AvatarCropper";
 import CityAutocomplete from "@/components/CityAutocomplete";
@@ -692,24 +692,33 @@ export default function ProfilePage() {
 										{availability[day]?.length ?? 0} hour(s) selected
 									</span>
 								</div>
-								<div className="flex flex-wrap gap-2">
-									{TIME_SLOTS.map((slot) => {
-										const active = availability[day]?.includes(slot);
-										return (
-											<button
-												key={slot}
-												type="button"
-												onClick={(e) =>
-													toggleAvailability(day, slot, e.shiftKey)
-												}
-												className={tagButtonClasses(active, {
-													size: "sm",
+								<div className="space-y-3">
+									{TIME_SLOT_GROUPS.map((group) => (
+										<div key={group.label}>
+											<div className="mb-2 text-xs font-medium text-slate-400">
+												{group.label}:
+											</div>
+											<div className="flex flex-wrap gap-2">
+												{group.slots.map((slot) => {
+													const active = availability[day]?.includes(slot);
+													return (
+														<button
+															key={slot}
+															type="button"
+															onClick={(e) =>
+																toggleAvailability(day, slot, e.shiftKey)
+															}
+															className={tagButtonClasses(active, {
+																size: "sm",
+															})}
+														>
+															{slot}
+														</button>
+													);
 												})}
-											>
-												{slot}
-											</button>
-										);
-									})}
+											</div>
+										</div>
+									))}
 								</div>
 							</div>
 						))}

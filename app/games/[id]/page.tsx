@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getGameSession } from "@/lib/games/db";
 import { getUsersBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import { formatTimeSlotsByGroup } from "@/lib/constants";
 import PendingPlayersManager from "@/components/PendingPlayersManager";
 import GameActions from "@/components/GameActions";
 
@@ -117,8 +118,8 @@ export default async function GameDetailPage({
 						<span className="block text-xs uppercase tracking-wide text-slate-400">
 							Time Slots
 						</span>
-						<span className="text-base font-medium text-slate-100">
-							{session.times.join(", ")}
+						<span className="whitespace-pre-line text-base font-medium text-slate-100">
+							{formatTimeSlotsByGroup(session.times)}
 						</span>
 					</div>
 
