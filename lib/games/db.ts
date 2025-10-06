@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { GameSessionPayload, StoredGameSession } from "./types";
+import { GameSessionPayload, StoredGameSession, PlayerSignup } from "./types";
 
 type GameSessionDocument = StoredGameSession & {
   _id?: ObjectId;
@@ -356,18 +356,18 @@ export async function approvePlayer(
   let result;
   if (signedUpPlayers.length < maxPlayers) {
     // Move from pending to signed up players
-    const updateDoc: any = {
+    const updateDoc: Record<string, unknown> = {
       $pull: { 
         pendingPlayers: playerId,
         pendingPlayersWithCharacters: { userId: playerId }
       },
-      $push: { signedUpPlayers: playerId },
+      $push: { signedUpPlayers: playerId } as Record<string, unknown>,
       $set: { updatedAt: timestamp },
     };
     
     // Add character info if available
     if (playerSignup) {
-      updateDoc.$push.signedUpPlayersWithCharacters = playerSignup;
+      (updateDoc.$push as Record<string, unknown>).signedUpPlayersWithCharacters = playerSignup;
     }
     
     result = await gamesCollection.findOneAndUpdate(
@@ -377,18 +377,18 @@ export async function approvePlayer(
     );
   } else {
     // Move from pending to waitlist if full
-    const updateDoc: any = {
+    const updateDoc: Record<string, unknown> = {
       $pull: { 
         pendingPlayers: playerId,
         pendingPlayersWithCharacters: { userId: playerId }
       },
-      $push: { waitlist: playerId },
+      $push: { waitlist: playerId } as Record<string, unknown>,
       $set: { updatedAt: timestamp },
     };
     
     // Add character info if available
     if (playerSignup) {
-      updateDoc.$push.waitlistWithCharacters = playerSignup;
+      (updateDoc.$push as Record<string, unknown>).waitlistWithCharacters = playerSignup;
     }
     
     result = await gamesCollection.findOneAndUpdate(

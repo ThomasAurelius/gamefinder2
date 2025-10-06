@@ -69,7 +69,7 @@ export default function CharacterSelectionDialog({
             <p className="text-sm text-red-400">{error}</p>
           ) : characters.length === 0 ? (
             <p className="text-sm text-slate-400">
-              You don't have any characters yet. You can still join without one.
+              You don&apos;t have any characters yet. You can still join without one.
             </p>
           ) : (
             <div className="space-y-2">
