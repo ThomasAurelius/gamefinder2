@@ -49,14 +49,12 @@ function GameSessionCard({
 	userTimezone,
 	joiningSessionId,
 	onJoin,
-	handleWithdraw,
 	currentUserId,
 }: {
 	session: GameSession;
 	userTimezone: string;
 	joiningSessionId: string | null;
 	onJoin: (sessionId: string) => void;
-	handleWithdraw: (sessionId: string) => void;
 	currentUserId: string | null;
 }) {
 	const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
