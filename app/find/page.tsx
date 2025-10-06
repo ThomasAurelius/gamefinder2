@@ -227,13 +227,16 @@ export default function FindGamesPage() {
 			}
 		};
 
-		const fetchUserProfile = async () => {
+		const fetchUserProfileAndEvents = async () => {
+			// First, fetch user profile to get their zipcode
+			let userZipCode = "";
 			try {
 				const response = await fetch("/api/profile");
 				if (response.ok) {
 					const profile = await response.json();
 					// Auto-populate location with user's zip code
 					if (profile.zipCode) {
+						userZipCode = profile.zipCode;
 						setLocationSearch(profile.zipCode);
 					}
 					// Set the current user ID
@@ -244,12 +247,17 @@ export default function FindGamesPage() {
 			} catch (error) {
 				console.error("Failed to fetch user profile:", error);
 			}
-		};
 
-		const fetchAllEvents = async () => {
+			// Then fetch all events with location filtering if zipcode is available
 			setIsLoadingEvents(true);
 			try {
-				const response = await fetch("/api/games");
+				const params = new URLSearchParams();
+				if (userZipCode) {
+					params.append("location", userZipCode);
+					params.append("radius", "25"); // Use default radius of 25 miles
+				}
+				
+				const response = await fetch(`/api/games?${params.toString()}`);
 				if (response.ok) {
 					const events = await response.json();
 					setAllEvents(events);
@@ -262,8 +270,7 @@ export default function FindGamesPage() {
 		};
 
 		fetchTimezone();
-		fetchUserProfile();
-		fetchAllEvents();
+		fetchUserProfileAndEvents();
 	}, []);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
