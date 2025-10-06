@@ -60,6 +60,9 @@ function GameSessionCard({
 	const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
 	const isFull = availableSlots <= 0;
 
+	// Check if the current user is the host
+	const isHost = currentUserId === session.userId;
+
 	// Check if the current user is signed up (in any list)
 	const isUserSignedUp =
 		currentUserId &&
@@ -142,28 +145,37 @@ function GameSessionCard({
 					</div>
 				</div>
 				<div className="flex flex-col items-end gap-2 flex-shrink-0">
-					<button
-						onClick={() => onJoin(session.id)}
-						disabled={joiningSessionId === session.id}
-						className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
-							isUserSignedUp
-								? "bg-red-600 hover:bg-red-700 focus:ring-red-500"
-								: "bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
-						}`}
-						title={
-							isUserSignedUp
-								? "Withdraw from this game"
-								: "Request to join"
-						}
-					>
-						{joiningSessionId === session.id
-							? isUserSignedUp
-								? "Withdrawing..."
-								: "Requesting..."
-							: isUserSignedUp
-								? "Withdraw"
-								: "Request to Join"}
-					</button>
+					{isHost ? (
+						<Link
+							href={`/games/${session.id}`}
+							className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 bg-purple-600 hover:bg-purple-700 focus:ring-purple-500"
+						>
+							Hosting this game
+						</Link>
+					) : (
+						<button
+							onClick={() => onJoin(session.id)}
+							disabled={joiningSessionId === session.id}
+							className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
+								!isUserSignedUp
+									? "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+									: "bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
+							}`}
+							title={
+								!isUserSignedUp
+									? "Withdraw from this game"
+									: "Request to join"
+							}
+						>
+							{joiningSessionId === session.id
+								? !isUserSignedUp
+									? "Withdrawing..."
+									: "Requesting..."
+								: !isUserSignedUp
+									? "Withdraw"
+									: "Request to Join"}
+						</button>
+					)}
 					{session.imageUrl && (
 						<Link href={`/games/${session.id}`}>
 							<img
