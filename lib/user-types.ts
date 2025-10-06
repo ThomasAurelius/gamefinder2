@@ -8,5 +8,6 @@ export type UserDocument = {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+  lastLoginAt?: Date;
   profile?: ProfileRecord;
 };
