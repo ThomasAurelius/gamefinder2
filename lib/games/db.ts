@@ -208,6 +208,11 @@ export async function joinGameSession(
     return null;
   }
   
+  // Check if user is the host (DM) - hosts cannot join their own game as players
+  if (session.userId === userId) {
+    return null;
+  }
+  
   // Check if user is already signed up, on waitlist, or pending
   if (
     session.signedUpPlayers?.includes(userId) || 
