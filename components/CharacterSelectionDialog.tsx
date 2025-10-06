@@ -14,6 +14,7 @@ export default function CharacterSelectionDialog({
   onCancel,
   isLoading = false,
 }: CharacterSelectionDialogProps) {
+  console.log("CharacterSelectionDialog rendered, isLoading:", isLoading);
   const [characters, setCharacters] = useState<StoredCharacter[]>([]);
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>("");
   const [loadingCharacters, setLoadingCharacters] = useState(true);
@@ -51,9 +52,9 @@ export default function CharacterSelectionDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 shadow-2xl">
-        <div className="border-b border-slate-800 px-6 py-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-md rounded-xl border-2 border-sky-500 bg-slate-900 shadow-2xl shadow-sky-500/20" onClick={(e) => e.stopPropagation()}>
+        <div className="border-b border-slate-800 px-6 py-4 bg-sky-900/20">
           <h2 className="text-xl font-semibold text-slate-100">
             Select a Character
           </h2>

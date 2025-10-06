@@ -124,7 +124,7 @@ function GameSessionCard({
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <button
             onClick={() => onJoin(session.id)}
-            disabled={joiningSessionId === session.id}
+            disabled={joiningSessionId !== null}
             className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
             title="Request to join - requires host approval"
           >
@@ -286,8 +286,14 @@ export default function FindGamesPage() {
   };
 
   const handleJoinClick = (sessionId: string) => {
+    console.log("handleJoinClick called with sessionId:", sessionId);
+    if (showCharacterDialog) {
+      console.log("Dialog already open, ignoring click");
+      return;
+    }
     setSessionToJoin(sessionId);
     setShowCharacterDialog(true);
+    console.log("Dialog state set to true");
   };
 
   const handleCharacterSelect = async (characterId?: string, characterName?: string) => {
