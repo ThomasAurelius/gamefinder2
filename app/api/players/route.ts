@@ -30,6 +30,7 @@ export async function GET(request: Request) {
     // Only require that the profile object exists
     const filter: Record<string, unknown> = {
       profile: { $exists: true },
+      isHidden: { $ne: true }, // Exclude hidden profiles
     };
 
     // Add search filter for name or location

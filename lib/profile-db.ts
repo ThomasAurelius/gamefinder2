@@ -113,3 +113,22 @@ export async function writeProfile(
     throw new Error("User not found");
   }
 }
+
+/**
+ * Get the isHidden status for a user profile
+ */
+export async function getProfileHiddenStatus(userId: string): Promise<boolean> {
+  if (!ObjectId.isValid(userId)) {
+    return false;
+  }
+
+  const db = await getDb();
+  const usersCollection = db.collection("users");
+
+  const user = await usersCollection.findOne(
+    { _id: new ObjectId(userId) },
+    { projection: { isHidden: 1 } }
+  );
+
+  return user?.isHidden === true;
+}
