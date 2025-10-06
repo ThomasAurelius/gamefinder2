@@ -8,6 +8,58 @@ import { formatTimeSlotsByGroup } from "@/lib/constants";
 import PendingPlayersManager from "@/components/PendingPlayersManager";
 import GameActions from "@/components/GameActions";
 import { getCharactersPublicStatus } from "@/lib/characters/db";
+import ShareToFacebook from "@/components/ShareToFacebook";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+	const { id } = await params;
+	const session = await getGameSession(id);
+
+	if (!session) {
+		return {
+			title: "Game Not Found",
+		};
+	}
+
+	const formattedDate = formatDateInTimezone(session.date, DEFAULT_TIMEZONE);
+	
+	const description = session.description
+		? `${session.description.substring(0, 200)}${session.description.length > 200 ? "..." : ""}`
+		: `Join us for ${session.game} on ${formattedDate}. ${session.maxPlayers - session.signedUpPlayers.length} spots available!`;
+
+	const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
+
+	return {
+		title: `${session.game} - Game Session`,
+		description,
+		openGraph: {
+			title: `${session.game} - Game Session`,
+			description,
+			url,
+			type: "website",
+			images: session.imageUrl
+				? [
+						{
+							url: session.imageUrl,
+							width: 1200,
+							height: 630,
+							alt: session.game,
+						},
+				  ]
+				: [],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: `${session.game} - Game Session`,
+			description,
+			images: session.imageUrl ? [session.imageUrl] : [],
+		},
+	};
+}
 
 export default async function GameDetailPage({
 	params,
@@ -93,6 +145,10 @@ export default async function GameDetailPage({
 	const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
 	const isHost = currentUserId === session.userId;
 
+	// Get the full URL for sharing
+	const gameUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
+	const shareQuote = `Join me for ${session.game} on ${formatDateInTimezone(session.date, DEFAULT_TIMEZONE)}!`;
+
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
 			{/* Back link */}
@@ -128,6 +184,11 @@ export default async function GameDetailPage({
 
 					{/* Edit and Delete buttons - only visible to host */}
 					{isHost && <GameActions session={session} />}
+				</div>
+
+				{/* Share to Facebook button */}
+				<div className="flex gap-3">
+					<ShareToFacebook url={gameUrl} quote={shareQuote} />
 				</div>
 
 				<div className="flex flex-wrap items-center gap-4 text-sm">

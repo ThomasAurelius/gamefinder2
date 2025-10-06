@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import ShareToFacebook from "@/components/ShareToFacebook";
 
 const tagButtonClasses = (
 	active: boolean,
@@ -33,6 +34,7 @@ export default function PostGamePage() {
 	const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
+	const [postedGameId, setPostedGameId] = useState<string | null>(null);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -144,6 +146,8 @@ export default function PostGamePage() {
 				throw new Error(errorData.error || "Failed to post game session");
 			}
 
+			const data = await response.json();
+			setPostedGameId(data.id || null);
 			setSubmitted(true);
 			// Reset form
 			setSelectedGame("");
@@ -155,6 +159,7 @@ export default function PostGamePage() {
 			setImageUrl("");
 			setLocation("");
 			setZipCode("");
+			setPostedGameId(null);
 
 			setTimeout(() => setSubmitted(false), 5000);
 		} catch (err) {
@@ -432,8 +437,18 @@ export default function PostGamePage() {
 				)}
 
 				{submitted && (
-					<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-						Game session posted successfully!
+					<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 space-y-3">
+						<p className="text-sm text-green-400">
+							Game session posted successfully!
+						</p>
+						{postedGameId && (
+							<div className="flex gap-3">
+								<ShareToFacebook
+									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
+									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame}!`}
+								/>
+							</div>
+						)}
 					</div>
 				)}
 			</form>
