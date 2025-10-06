@@ -9,6 +9,7 @@ import PendingPlayersManager from "@/components/PendingPlayersManager";
 import GameActions from "@/components/GameActions";
 import { getCharactersPublicStatus } from "@/lib/characters/db";
 import ShareToFacebook from "@/components/ShareToFacebook";
+import GameDetailActions from "@/components/GameDetailActions";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -148,6 +149,13 @@ export default async function GameDetailPage({
 	const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
 	const isHost = currentUserId === session.userId;
 
+	// Check if the current user is signed up (in any list)
+	const isUserSignedUp =
+		currentUserId &&
+		(session.signedUpPlayers.includes(currentUserId) ||
+			session.waitlist.includes(currentUserId) ||
+			session.pendingPlayers.includes(currentUserId));
+
 	// Get the full URL for sharing
 	const gameUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
 	const shareQuote = `Join me for ${session.game} on ${formatDateInTimezone(session.date, DEFAULT_TIMEZONE)}!`;
@@ -192,6 +200,12 @@ export default async function GameDetailPage({
 				{/* Share to Facebook button */}
 				<div className="flex gap-3">
 					<ShareToFacebook url={gameUrl} quote={shareQuote} />
+					<GameDetailActions
+						sessionId={id}
+						currentUserId={currentUserId}
+						isUserSignedUp={!!isUserSignedUp}
+						isHost={isHost}
+					/>
 				</div>
 
 				<div className="flex flex-wrap items-center gap-4 text-sm">
