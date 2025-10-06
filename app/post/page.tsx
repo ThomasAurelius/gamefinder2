@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { GAME_OPTIONS, TIME_SLOTS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 
 const tagButtonClasses = (
@@ -292,20 +292,29 @@ export default function PostGamePage() {
 						Click to select individual times or hold Shift and click to
 						select a range.
 					</p>
-					<div className="flex flex-wrap gap-2">
-						{TIME_SLOTS.map((slot) => {
-							const active = selectedTimes.includes(slot);
-							return (
-								<button
-									key={slot}
-									type="button"
-									onClick={(e) => toggleTime(slot, e.shiftKey)}
-									className={tagButtonClasses(active, { size: "sm" })}
-								>
-									{slot}
-								</button>
-							);
-						})}
+					<div className="space-y-3">
+						{TIME_SLOT_GROUPS.map((group) => (
+							<div key={group.label}>
+								<div className="mb-2 text-xs font-medium text-slate-400">
+									{group.label}:
+								</div>
+								<div className="flex flex-wrap gap-2">
+									{group.slots.map((slot) => {
+										const active = selectedTimes.includes(slot);
+										return (
+											<button
+												key={slot}
+												type="button"
+												onClick={(e) => toggleTime(slot, e.shiftKey)}
+												className={tagButtonClasses(active, { size: "sm" })}
+											>
+												{slot}
+											</button>
+										);
+									})}
+								</div>
+							</div>
+						))}
 					</div>
 					<p className="text-xs text-slate-500">
 						{selectedTimes.length} time slot(s) selected

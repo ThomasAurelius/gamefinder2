@@ -335,8 +335,6 @@ export default function FindGamesPage() {
 		if (showCharacterDialog) {
 			return;
 		}
-		setSessionToJoin(sessionId);
-		setShowCharacterDialog(true);
 		// Find the session to check if user is already signed up
 		const session = [...gameSessions, ...allEvents].find(
 			(s) => s.id === sessionId
