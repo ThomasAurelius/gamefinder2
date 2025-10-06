@@ -146,7 +146,7 @@ export async function GET(request: Request) {
     }
     
     const profile = await readProfile(userId);
-    return NextResponse.json(profile);
+    return NextResponse.json({ ...profile, userId });
   } catch (error) {
     console.error(error);
     return new NextResponse("Unable to read profile", { status: 500 });
