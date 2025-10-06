@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { readProfile } from "@/lib/profile-db";
+import { readProfile, getProfileHiddenStatus } from "@/lib/profile-db";
 import { ObjectId } from "mongodb";
 import SendMessageButton from "@/components/SendMessageButton";
 import { listPublicCharacters } from "@/lib/characters/db";
+import ProfileAdminControls from "@/components/ProfileAdminControls";
 
 const DAYS_OF_WEEK = [
   "Monday",
@@ -87,9 +88,15 @@ export default async function PlayerDetailPage({
     
     // Fetch public characters for this user
     const publicCharacters = await listPublicCharacters(id);
+    
+    // Get hidden status for admin controls
+    const isHidden = await getProfileHiddenStatus(id);
 
     return (
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
+        {/* Admin Controls */}
+        <ProfileAdminControls profileUserId={id} initialIsHidden={isHidden} />
+        
         {/* Header Section */}
         <div className="flex items-start gap-6">
           {profile.avatarUrl ? (

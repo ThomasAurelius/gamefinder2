@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getGameSession, updateGameSession, deleteGameSession } from "@/lib/games/db";
 import { GameSessionPayload } from "@/lib/games/types";
+import { isAdmin } from "@/lib/admin";
 
 export async function GET(
   request: Request,
@@ -56,14 +57,21 @@ export async function PUT(
       );
     }
     
-    if (existingSession.userId !== userId) {
+    // Check if user is admin or owns the session
+    const userIsAdmin = await isAdmin(userId);
+    if (existingSession.userId !== userId && !userIsAdmin) {
       return NextResponse.json(
         { error: "You can only edit your own game sessions" },
         { status: 403 }
       );
     }
     
-    const updatedSession = await updateGameSession(userId, id, data as Partial<GameSessionPayload>);
+    // If admin is editing someone else's game, use the original owner's userId
+    const ownerUserId = userIsAdmin && existingSession.userId !== userId 
+      ? existingSession.userId 
+      : userId;
+    
+    const updatedSession = await updateGameSession(ownerUserId, id, data as Partial<GameSessionPayload>);
     
     if (!updatedSession) {
       return NextResponse.json(
@@ -108,14 +116,21 @@ export async function DELETE(
       );
     }
     
-    if (existingSession.userId !== userId) {
+    // Check if user is admin or owns the session
+    const userIsAdmin = await isAdmin(userId);
+    if (existingSession.userId !== userId && !userIsAdmin) {
       return NextResponse.json(
         { error: "You can only delete your own game sessions" },
         { status: 403 }
       );
     }
     
-    const deleted = await deleteGameSession(userId, id);
+    // If admin is deleting someone else's game, use the original owner's userId
+    const ownerUserId = userIsAdmin && existingSession.userId !== userId 
+      ? existingSession.userId 
+      : userId;
+    
+    const deleted = await deleteGameSession(ownerUserId, id);
     
     if (!deleted) {
       return NextResponse.json(
