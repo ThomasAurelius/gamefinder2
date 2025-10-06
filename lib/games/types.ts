@@ -11,12 +11,21 @@ export type GameSessionPayload = {
   longitude?: number;
 };
 
+export type PlayerSignup = {
+  userId: string;
+  characterId?: string;
+  characterName?: string;
+};
+
 export type StoredGameSession = GameSessionPayload & {
   id: string;
   userId: string;
   signedUpPlayers: string[];
+  signedUpPlayersWithCharacters?: PlayerSignup[];
   waitlist: string[];
+  waitlistWithCharacters?: PlayerSignup[];
   pendingPlayers: string[];
+  pendingPlayersWithCharacters?: PlayerSignup[];
   createdAt: string;
   updatedAt: string;
 };

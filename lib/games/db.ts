@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { GameSessionPayload, StoredGameSession } from "./types";
+import { GameSessionPayload, StoredGameSession, PlayerSignup } from "./types";
 
 type GameSessionDocument = StoredGameSession & {
   _id?: ObjectId;
@@ -45,8 +45,11 @@ export async function listGameSessions(filters?: {
     description: session.description,
     maxPlayers: session.maxPlayers || 4,
     signedUpPlayers: session.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: session.signedUpPlayersWithCharacters || [],
     waitlist: session.waitlist || [],
+    waitlistWithCharacters: session.waitlistWithCharacters || [],
     pendingPlayers: session.pendingPlayers || [],
+    pendingPlayersWithCharacters: session.pendingPlayersWithCharacters || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
@@ -76,8 +79,11 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     description: session.description,
     maxPlayers: session.maxPlayers || 4,
     signedUpPlayers: session.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: session.signedUpPlayersWithCharacters || [],
     waitlist: session.waitlist || [],
+    waitlistWithCharacters: session.waitlistWithCharacters || [],
     pendingPlayers: session.pendingPlayers || [],
+    pendingPlayersWithCharacters: session.pendingPlayersWithCharacters || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
@@ -106,8 +112,11 @@ export async function createGameSession(
     description: payload.description,
     maxPlayers: payload.maxPlayers,
     signedUpPlayers: [],
+    signedUpPlayersWithCharacters: [],
     waitlist: [],
+    waitlistWithCharacters: [],
     pendingPlayers: [],
+    pendingPlayersWithCharacters: [],
     createdAt: timestamp,
     updatedAt: timestamp,
     imageUrl: payload.imageUrl,
@@ -128,8 +137,11 @@ export async function createGameSession(
     description: newSession.description,
     maxPlayers: newSession.maxPlayers,
     signedUpPlayers: newSession.signedUpPlayers,
+    signedUpPlayersWithCharacters: newSession.signedUpPlayersWithCharacters,
     waitlist: newSession.waitlist,
+    waitlistWithCharacters: newSession.waitlistWithCharacters,
     pendingPlayers: newSession.pendingPlayers,
+    pendingPlayersWithCharacters: newSession.pendingPlayersWithCharacters,
     createdAt: newSession.createdAt,
     updatedAt: newSession.updatedAt,
     imageUrl: newSession.imageUrl,
@@ -174,8 +186,11 @@ export async function updateGameSession(
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
     waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
     pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
     imageUrl: result.imageUrl,
@@ -197,7 +212,9 @@ export async function deleteGameSession(userId: string, id: string): Promise<boo
 
 export async function joinGameSession(
   sessionId: string,
-  userId: string
+  userId: string,
+  characterId?: string,
+  characterName?: string
 ): Promise<StoredGameSession | null> {
   const db = await getDb();
   const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
@@ -224,11 +241,17 @@ export async function joinGameSession(
   
   const timestamp = new Date().toISOString();
   
+  // Prepare player signup data
+  const playerSignup = { userId, characterId, characterName };
+  
   // Add to pending players for host approval
   const result = await gamesCollection.findOneAndUpdate(
     { id: sessionId },
     {
-      $push: { pendingPlayers: userId },
+      $push: { 
+        pendingPlayers: userId,
+        pendingPlayersWithCharacters: playerSignup
+      },
       $set: { updatedAt: timestamp },
     },
     { returnDocument: "after" }
@@ -247,8 +270,11 @@ export async function joinGameSession(
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
     waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
     pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
     imageUrl: result.imageUrl,
@@ -285,8 +311,11 @@ export async function listUserGameSessions(userId: string): Promise<StoredGameSe
     description: session.description,
     maxPlayers: session.maxPlayers || 4,
     signedUpPlayers: session.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: session.signedUpPlayersWithCharacters || [],
     waitlist: session.waitlist || [],
+    waitlistWithCharacters: session.waitlistWithCharacters || [],
     pendingPlayers: session.pendingPlayers || [],
+    pendingPlayersWithCharacters: session.pendingPlayersWithCharacters || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
@@ -316,6 +345,10 @@ export async function approvePlayer(
     return null;
   }
   
+  // Find the player's character info from pending list
+  const pendingPlayersWithCharacters = session.pendingPlayersWithCharacters || [];
+  const playerSignup = pendingPlayersWithCharacters.find(p => p.userId === playerId);
+  
   const timestamp = new Date().toISOString();
   const maxPlayers = session.maxPlayers || 4;
   const signedUpPlayers = session.signedUpPlayers || [];
@@ -323,24 +356,44 @@ export async function approvePlayer(
   let result;
   if (signedUpPlayers.length < maxPlayers) {
     // Move from pending to signed up players
+    const updateDoc: Record<string, unknown> = {
+      $pull: { 
+        pendingPlayers: playerId,
+        pendingPlayersWithCharacters: { userId: playerId }
+      },
+      $push: { signedUpPlayers: playerId } as Record<string, unknown>,
+      $set: { updatedAt: timestamp },
+    };
+    
+    // Add character info if available
+    if (playerSignup) {
+      (updateDoc.$push as Record<string, unknown>).signedUpPlayersWithCharacters = playerSignup;
+    }
+    
     result = await gamesCollection.findOneAndUpdate(
       { id: sessionId, userId: hostId },
-      {
-        $pull: { pendingPlayers: playerId },
-        $push: { signedUpPlayers: playerId },
-        $set: { updatedAt: timestamp },
-      },
+      updateDoc,
       { returnDocument: "after" }
     );
   } else {
     // Move from pending to waitlist if full
+    const updateDoc: Record<string, unknown> = {
+      $pull: { 
+        pendingPlayers: playerId,
+        pendingPlayersWithCharacters: { userId: playerId }
+      },
+      $push: { waitlist: playerId } as Record<string, unknown>,
+      $set: { updatedAt: timestamp },
+    };
+    
+    // Add character info if available
+    if (playerSignup) {
+      (updateDoc.$push as Record<string, unknown>).waitlistWithCharacters = playerSignup;
+    }
+    
     result = await gamesCollection.findOneAndUpdate(
       { id: sessionId, userId: hostId },
-      {
-        $pull: { pendingPlayers: playerId },
-        $push: { waitlist: playerId },
-        $set: { updatedAt: timestamp },
-      },
+      updateDoc,
       { returnDocument: "after" }
     );
   }
@@ -358,8 +411,11 @@ export async function approvePlayer(
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
     waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
     pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
     imageUrl: result.imageUrl,
@@ -395,7 +451,10 @@ export async function denyPlayer(
   const result = await gamesCollection.findOneAndUpdate(
     { id: sessionId, userId: hostId },
     {
-      $pull: { pendingPlayers: playerId },
+      $pull: { 
+        pendingPlayers: playerId,
+        pendingPlayersWithCharacters: { userId: playerId }
+      },
       $set: { updatedAt: timestamp },
     },
     { returnDocument: "after" }
@@ -414,8 +473,11 @@ export async function denyPlayer(
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
     waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
     pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
     imageUrl: result.imageUrl,
