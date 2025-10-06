@@ -24,7 +24,7 @@ export default function PostGamePage() {
 	const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 	const [selectedDate, setSelectedDate] = useState("");
 	const [description, setDescription] = useState("");
-	const [maxPlayers, setMaxPlayers] = useState(4);
+	const [maxPlayers, setMaxPlayers] = useState<number | ''>(4);
 	const [submitted, setSubmitted] = useState(false);
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,7 +132,7 @@ export default function PostGamePage() {
 					date: selectedDate,
 					times: selectedTimes,
 					description: description,
-					maxPlayers: maxPlayers,
+					maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
 					imageUrl: imageUrl,
 					location: location,
 					zipCode: zipCode,
@@ -334,7 +334,10 @@ export default function PostGamePage() {
 						min="1"
 						max="20"
 						value={maxPlayers}
-						onChange={(e) => setMaxPlayers(parseInt(e.target.value) || 1)}
+						onChange={(e) => {
+							const value = e.target.value;
+							setMaxPlayers(value === '' ? '' : parseInt(value));
+						}}
 						required
 						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
