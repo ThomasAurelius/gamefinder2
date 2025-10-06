@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { getGameSession } from "@/lib/games/db";
 import { getUsersBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import PendingPlayersManager from "@/components/PendingPlayersManager";
 
 export default async function GameDetailPage({
 	params,
@@ -16,11 +18,16 @@ export default async function GameDetailPage({
 		notFound();
 	}
 
-	// Fetch user information for all players and waitlist
+	// Get current user ID
+	const cookieStore = await cookies();
+	const currentUserId = cookieStore.get("userId")?.value;
+
+	// Fetch user information for all players, waitlist, and pending
 	const allUserIds = [
 		session.userId,
 		...session.signedUpPlayers,
 		...session.waitlist,
+		...session.pendingPlayers,
 	];
 	const usersMap = await getUsersBasicInfo(allUserIds);
 
@@ -31,9 +38,13 @@ export default async function GameDetailPage({
 	const waitlistPlayersList = session.waitlist
 		.map((playerId) => usersMap.get(playerId))
 		.filter((user) => user !== undefined);
+	const pendingPlayersList = session.pendingPlayers
+		.map((playerId) => usersMap.get(playerId))
+		.filter((user) => user !== undefined);
 
 	const isFull = session.signedUpPlayers.length >= session.maxPlayers;
 	const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
+	const isHost = currentUserId === session.userId;
 
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
@@ -138,6 +149,18 @@ export default async function GameDetailPage({
 					</Link>
 				</div>
 			</section>
+
+			{/* Pending Players (only visible to host) */}
+			{isHost && pendingPlayersList.length > 0 && (
+				<PendingPlayersManager
+					sessionId={id}
+					pendingPlayers={pendingPlayersList.map(p => ({
+						id: p.id,
+						name: p.name,
+						avatarUrl: p.avatarUrl,
+					}))}
+				/>
+			)}
 
 			{/* Signed Up Players */}
 			<section className="space-y-3">

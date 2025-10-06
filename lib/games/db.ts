@@ -46,6 +46,7 @@ export async function listGameSessions(filters?: {
     maxPlayers: session.maxPlayers || 4,
     signedUpPlayers: session.signedUpPlayers || [],
     waitlist: session.waitlist || [],
+    pendingPlayers: session.pendingPlayers || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
@@ -76,6 +77,7 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     maxPlayers: session.maxPlayers || 4,
     signedUpPlayers: session.signedUpPlayers || [],
     waitlist: session.waitlist || [],
+    pendingPlayers: session.pendingPlayers || [],
     createdAt: session.createdAt,
     updatedAt: session.updatedAt,
     imageUrl: session.imageUrl,
@@ -105,6 +107,7 @@ export async function createGameSession(
     maxPlayers: payload.maxPlayers,
     signedUpPlayers: [],
     waitlist: [],
+    pendingPlayers: [],
     createdAt: timestamp,
     updatedAt: timestamp,
     imageUrl: payload.imageUrl,
@@ -126,6 +129,7 @@ export async function createGameSession(
     maxPlayers: newSession.maxPlayers,
     signedUpPlayers: newSession.signedUpPlayers,
     waitlist: newSession.waitlist,
+    pendingPlayers: newSession.pendingPlayers,
     createdAt: newSession.createdAt,
     updatedAt: newSession.updatedAt,
     imageUrl: newSession.imageUrl,
@@ -158,8 +162,106 @@ export async function joinGameSession(
     return null;
   }
   
-  // Check if user is already signed up or on waitlist
-  if (session.signedUpPlayers?.includes(userId) || session.waitlist?.includes(userId)) {
+  // Check if user is already signed up, on waitlist, or pending
+  if (
+    session.signedUpPlayers?.includes(userId) || 
+    session.waitlist?.includes(userId) ||
+    session.pendingPlayers?.includes(userId)
+  ) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Add to pending players for host approval
+  const result = await gamesCollection.findOneAndUpdate(
+    { id: sessionId },
+    {
+      $push: { pendingPlayers: userId },
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    waitlist: result.waitlist || [],
+    pendingPlayers: result.pendingPlayers || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+  };
+}
+
+export async function listUserGameSessions(userId: string): Promise<StoredGameSession[]> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+
+  // Find sessions where user is the host, signed up player, on waitlist, or pending
+  const sessions = await gamesCollection
+    .find({
+      $or: [
+        { userId },
+        { signedUpPlayers: userId },
+        { waitlist: userId },
+        { pendingPlayers: userId },
+      ],
+    })
+    .sort({ date: 1, createdAt: -1 })
+    .toArray();
+
+  return sessions.map((session) => ({
+    id: session.id,
+    userId: session.userId,
+    game: session.game,
+    date: session.date,
+    times: [...session.times],
+    description: session.description,
+    maxPlayers: session.maxPlayers || 4,
+    signedUpPlayers: session.signedUpPlayers || [],
+    waitlist: session.waitlist || [],
+    pendingPlayers: session.pendingPlayers || [],
+    createdAt: session.createdAt,
+    updatedAt: session.updatedAt,
+    imageUrl: session.imageUrl,
+    location: session.location,
+    zipCode: session.zipCode,
+    latitude: session.latitude,
+    longitude: session.longitude,
+  }));
+}
+
+export async function approvePlayer(
+  sessionId: string,
+  hostId: string,
+  playerId: string
+): Promise<StoredGameSession | null> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+  
+  const session = await gamesCollection.findOne({ id: sessionId, userId: hostId });
+  
+  if (!session) {
+    return null;
+  }
+  
+  // Check if player is in pending list
+  if (!session.pendingPlayers?.includes(playerId)) {
     return null;
   }
   
@@ -169,21 +271,23 @@ export async function joinGameSession(
   
   let result;
   if (signedUpPlayers.length < maxPlayers) {
-    // Add to signed up players
+    // Move from pending to signed up players
     result = await gamesCollection.findOneAndUpdate(
-      { id: sessionId },
+      { id: sessionId, userId: hostId },
       {
-        $push: { signedUpPlayers: userId },
+        $pull: { pendingPlayers: playerId },
+        $push: { signedUpPlayers: playerId },
         $set: { updatedAt: timestamp },
       },
       { returnDocument: "after" }
     );
   } else {
-    // Add to waitlist
+    // Move from pending to waitlist if full
     result = await gamesCollection.findOneAndUpdate(
-      { id: sessionId },
+      { id: sessionId, userId: hostId },
       {
-        $push: { waitlist: userId },
+        $pull: { pendingPlayers: playerId },
+        $push: { waitlist: playerId },
         $set: { updatedAt: timestamp },
       },
       { returnDocument: "after" }
@@ -204,6 +308,7 @@ export async function joinGameSession(
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
     waitlist: result.waitlist || [],
+    pendingPlayers: result.pendingPlayers || [],
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
     imageUrl: result.imageUrl,
@@ -214,38 +319,58 @@ export async function joinGameSession(
   };
 }
 
-export async function listUserGameSessions(userId: string): Promise<StoredGameSession[]> {
+export async function denyPlayer(
+  sessionId: string,
+  hostId: string,
+  playerId: string
+): Promise<StoredGameSession | null> {
   const db = await getDb();
   const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
-
-  // Find sessions where user is the host, signed up player, or on waitlist
-  const sessions = await gamesCollection
-    .find({
-      $or: [
-        { userId },
-        { signedUpPlayers: userId },
-        { waitlist: userId },
-      ],
-    })
-    .sort({ date: 1, createdAt: -1 })
-    .toArray();
-
-  return sessions.map((session) => ({
-    id: session.id,
-    userId: session.userId,
-    game: session.game,
-    date: session.date,
-    times: [...session.times],
-    description: session.description,
-    maxPlayers: session.maxPlayers || 4,
-    signedUpPlayers: session.signedUpPlayers || [],
-    waitlist: session.waitlist || [],
-    createdAt: session.createdAt,
-    updatedAt: session.updatedAt,
-    imageUrl: session.imageUrl,
-    location: session.location,
-    zipCode: session.zipCode,
-    latitude: session.latitude,
-    longitude: session.longitude,
-  }));
+  
+  const session = await gamesCollection.findOne({ id: sessionId, userId: hostId });
+  
+  if (!session) {
+    return null;
+  }
+  
+  // Check if player is in pending list
+  if (!session.pendingPlayers?.includes(playerId)) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Remove from pending players
+  const result = await gamesCollection.findOneAndUpdate(
+    { id: sessionId, userId: hostId },
+    {
+      $pull: { pendingPlayers: playerId },
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    waitlist: result.waitlist || [],
+    pendingPlayers: result.pendingPlayers || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+  };
 }

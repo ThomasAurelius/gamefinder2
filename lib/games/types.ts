@@ -16,6 +16,7 @@ export type StoredGameSession = GameSessionPayload & {
   userId: string;
   signedUpPlayers: string[];
   waitlist: string[];
+  pendingPlayers: string[];
   createdAt: string;
   updatedAt: string;
 };
