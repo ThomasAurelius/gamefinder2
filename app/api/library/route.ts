@@ -47,9 +47,17 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, gameId, gameName, type, fromType, toType } = body;
 
-    if (!action || !gameId || !gameName) {
+    if (!action || !gameId) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // gameName is required for add and move actions, but not for remove or toggleFavorite
+    if ((action === "add" || action === "move") && !gameName) {
+      return NextResponse.json(
+        { error: "Missing required field: gameName" },
         { status: 400 }
       );
     }
