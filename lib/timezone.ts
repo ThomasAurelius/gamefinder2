@@ -31,21 +31,22 @@ export const DEFAULT_TIMEZONE = "America/New_York";
 
 /**
  * Format a date string (YYYY-MM-DD) for display in the user's timezone
+ * Note: Since YYYY-MM-DD represents a calendar date (not a moment in time),
+ * we format it directly without timezone conversion to avoid date shifts.
  */
 export function formatDateInTimezone(dateStr: string, timezone: string): string {
   if (!dateStr) return "";
   
+  // Note: timezone parameter kept for API compatibility but not used
+  // Calendar dates (YYYY-MM-DD) should display the same regardless of timezone
+  void timezone;
+  
   try {
-    // Parse the date as a local date (not UTC)
+    // Parse the date components directly
     const [year, month, day] = dateStr.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
     
-    return date.toLocaleDateString("en-US", {
-      timeZone: timezone,
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-    });
+    // Format as M/D/YYYY (e.g., "10/31/2024")
+    return `${month}/${day}/${year}`;
   } catch (error) {
     console.error("Error formatting date:", error);
     return dateStr;
