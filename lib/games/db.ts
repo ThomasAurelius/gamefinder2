@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { GameSessionPayload, StoredGameSession, PlayerSignup } from "./types";
+import { GameSessionPayload, StoredGameSession } from "./types";
 
 type GameSessionDocument = StoredGameSession & {
   _id?: ObjectId;
@@ -454,6 +454,71 @@ export async function denyPlayer(
       $pull: { 
         pendingPlayers: playerId,
         pendingPlayersWithCharacters: { userId: playerId }
+      },
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+  };
+}
+
+export async function leaveGameSession(
+  sessionId: string,
+  userId: string
+): Promise<StoredGameSession | null> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+  
+  const session = await gamesCollection.findOne({ id: sessionId });
+  
+  if (!session) {
+    return null;
+  }
+  
+  // Check if user is the host (DM) - hosts cannot leave their own game
+  if (session.userId === userId) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Remove user from all possible lists (pending, signed up, or waitlist)
+  const result = await gamesCollection.findOneAndUpdate(
+    { id: sessionId },
+    {
+      $pull: { 
+        pendingPlayers: userId,
+        pendingPlayersWithCharacters: { userId: userId },
+        signedUpPlayers: userId,
+        signedUpPlayersWithCharacters: { userId: userId },
+        waitlist: userId,
+        waitlistWithCharacters: { userId: userId }
       },
       $set: { updatedAt: timestamp },
     },

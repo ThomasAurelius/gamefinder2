@@ -49,14 +49,23 @@ function GameSessionCard({
   userTimezone,
   joiningSessionId,
   onJoin,
+  currentUserId,
 }: {
   session: GameSession;
   userTimezone: string;
   joiningSessionId: string | null;
   onJoin: (sessionId: string) => void;
+  currentUserId: string | null;
 }) {
   const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
   const isFull = availableSlots <= 0;
+  
+  // Check if the current user is signed up (in any list)
+  const isUserSignedUp = currentUserId && (
+    session.signedUpPlayers.includes(currentUserId) ||
+    session.waitlist.includes(currentUserId) ||
+    session.pendingPlayers.includes(currentUserId)
+  );
 
   return (
     <div
@@ -125,10 +134,16 @@ function GameSessionCard({
           <button
             onClick={() => onJoin(session.id)}
             disabled={joiningSessionId === session.id}
-            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
-            title="Request to join - requires host approval"
+            className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
+              isUserSignedUp
+                ? "bg-red-600 hover:bg-red-700 focus:ring-red-500"
+                : "bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
+            }`}
+            title={isUserSignedUp ? "Withdraw from this game" : "Request to join - requires host approval"}
           >
-            {joiningSessionId === session.id ? "Requesting..." : "Request to Join"}
+            {joiningSessionId === session.id 
+              ? (isUserSignedUp ? "Withdrawing..." : "Requesting...") 
+              : (isUserSignedUp ? "Withdraw" : "Request to Join")}
           </button>
           {session.imageUrl && (
             <Link href={`/games/${session.id}`}>
@@ -164,6 +179,7 @@ export default function FindGamesPage() {
   const [radiusMiles, setRadiusMiles] = useState("25");
   const [showCharacterDialog, setShowCharacterDialog] = useState(false);
   const [sessionToJoin, setSessionToJoin] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTimezone = async () => {
@@ -186,6 +202,10 @@ export default function FindGamesPage() {
           // Auto-populate location with user's zip code
           if (profile.zipCode) {
             setLocationSearch(profile.zipCode);
+          }
+          // Set the current user ID
+          if (profile.userId) {
+            setCurrentUserId(profile.userId);
           }
         }
       } catch (error) {
@@ -286,8 +306,67 @@ export default function FindGamesPage() {
   };
 
   const handleJoinClick = (sessionId: string) => {
-    setSessionToJoin(sessionId);
-    setShowCharacterDialog(true);
+    // Find the session to check if user is already signed up
+    const session = [...gameSessions, ...allEvents].find(s => s.id === sessionId);
+    
+    if (!session) {
+      return;
+    }
+    
+    // Check if user is already signed up (pending, signed up, or waitlisted)
+    const isUserSignedUp = currentUserId && (
+      session.signedUpPlayers.includes(currentUserId) ||
+      session.waitlist.includes(currentUserId) ||
+      session.pendingPlayers.includes(currentUserId)
+    );
+    
+    if (isUserSignedUp) {
+      // Handle withdraw
+      handleWithdraw(sessionId);
+    } else {
+      // Handle join request
+      setSessionToJoin(sessionId);
+      setShowCharacterDialog(true);
+    }
+  };
+
+  const handleWithdraw = async (sessionId: string) => {
+    setJoiningSessionId(sessionId);
+    setJoinError(null);
+
+    try {
+      const response = await fetch(`/api/games/${sessionId}/leave`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to withdraw from game session");
+      }
+
+      const updatedSession = await response.json();
+      
+      // Update the session in the search results list
+      setGameSessions(prevSessions =>
+        prevSessions.map(session =>
+          session.id === sessionId ? updatedSession : session
+        )
+      );
+      
+      // Update the session in the all events list
+      setAllEvents(prevEvents =>
+        prevEvents.map(event =>
+          event.id === sessionId ? updatedSession : event
+        )
+      );
+    } catch (error) {
+      setJoinError(error instanceof Error ? error.message : "Failed to withdraw from game session");
+    } finally {
+      setJoiningSessionId(null);
+    }
   };
 
   const handleCharacterSelect = async (characterId?: string, characterName?: string) => {
@@ -549,6 +628,7 @@ export default function FindGamesPage() {
                   userTimezone={userTimezone}
                   joiningSessionId={joiningSessionId}
                   onJoin={handleJoinClick}
+                  currentUserId={currentUserId}
                 />
               ))}
             </div>
@@ -578,6 +658,7 @@ export default function FindGamesPage() {
                 userTimezone={userTimezone}
                 joiningSessionId={joiningSessionId}
                 onJoin={handleJoinClick}
+                currentUserId={currentUserId}
               />
             ))}
           </div>
