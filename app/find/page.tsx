@@ -49,12 +49,14 @@ function GameSessionCard({
 	userTimezone,
 	joiningSessionId,
 	onJoin,
+	handleWithdraw,
 	currentUserId,
 }: {
 	session: GameSession;
 	userTimezone: string;
 	joiningSessionId: string | null;
 	onJoin: (sessionId: string) => void;
+	handleWithdraw: (sessionId: string) => void;
 	currentUserId: string | null;
 }) {
 	const availableSlots = session.maxPlayers - session.signedUpPlayers.length;
@@ -143,7 +145,13 @@ function GameSessionCard({
 				</div>
 				<div className="flex flex-col items-end gap-2 flex-shrink-0">
 					<button
-						onClick={() => onJoin(session.id)}
+						//						onClick={() => onJoin(session.id)}
+
+						onClick={() =>
+							isUserSignedUp
+								? handleWithdraw(session.id)
+								: onJoin(session.id)
+						}
 						disabled={joiningSessionId === session.id}
 						className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
 							isUserSignedUp
