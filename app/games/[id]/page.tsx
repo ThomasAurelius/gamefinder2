@@ -6,6 +6,7 @@ import { getUsersBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingPlayersManager from "@/components/PendingPlayersManager";
 import GameActions from "@/components/GameActions";
+import { getCharactersPublicStatus } from "@/lib/characters/db";
 
 export default async function GameDetailPage({
 	params,
@@ -34,31 +35,56 @@ export default async function GameDetailPage({
 
 	const host = usersMap.get(session.userId);
 	
-	// Create enriched player lists with character information
+	// Collect all character IDs to fetch their public status
 	const signedUpPlayersWithCharacters = session.signedUpPlayersWithCharacters || [];
+	const waitlistWithCharacters = session.waitlistWithCharacters || [];
+	const pendingPlayersWithCharacters = session.pendingPlayersWithCharacters || [];
+	
+	const allCharacterRefs = [
+		...signedUpPlayersWithCharacters.filter(p => p.characterId).map(p => ({ userId: p.userId, characterId: p.characterId! })),
+		...waitlistWithCharacters.filter(p => p.characterId).map(p => ({ userId: p.userId, characterId: p.characterId! })),
+		...pendingPlayersWithCharacters.filter(p => p.characterId).map(p => ({ userId: p.userId, characterId: p.characterId! })),
+	];
+	
+	const charactersPublicStatusMap = await getCharactersPublicStatus(allCharacterRefs);
+	
+	// Create enriched player lists with character information
 	const signedUpPlayersList = session.signedUpPlayers
 		.map((playerId) => {
 			const user = usersMap.get(playerId);
 			const characterInfo = signedUpPlayersWithCharacters.find(p => p.userId === playerId);
-			return user ? { ...user, characterName: characterInfo?.characterName } : undefined;
+			return user ? { 
+				...user, 
+				characterName: characterInfo?.characterName,
+				characterId: characterInfo?.characterId,
+				characterIsPublic: characterInfo?.characterId ? charactersPublicStatusMap.get(characterInfo.characterId) ?? false : false,
+			} : undefined;
 		})
 		.filter((user) => user !== undefined);
 	
-	const waitlistWithCharacters = session.waitlistWithCharacters || [];
 	const waitlistPlayersList = session.waitlist
 		.map((playerId) => {
 			const user = usersMap.get(playerId);
 			const characterInfo = waitlistWithCharacters.find(p => p.userId === playerId);
-			return user ? { ...user, characterName: characterInfo?.characterName } : undefined;
+			return user ? { 
+				...user, 
+				characterName: characterInfo?.characterName,
+				characterId: characterInfo?.characterId,
+				characterIsPublic: characterInfo?.characterId ? charactersPublicStatusMap.get(characterInfo.characterId) ?? false : false,
+			} : undefined;
 		})
 		.filter((user) => user !== undefined);
 	
-	const pendingPlayersWithCharacters = session.pendingPlayersWithCharacters || [];
 	const pendingPlayersList = session.pendingPlayers
 		.map((playerId) => {
 			const user = usersMap.get(playerId);
 			const characterInfo = pendingPlayersWithCharacters.find(p => p.userId === playerId);
-			return user ? { ...user, characterName: characterInfo?.characterName } : undefined;
+			return user ? { 
+				...user, 
+				characterName: characterInfo?.characterName,
+				characterId: characterInfo?.characterId,
+				characterIsPublic: characterInfo?.characterId ? charactersPublicStatusMap.get(characterInfo.characterId) ?? false : false,
+			} : undefined;
 		})
 		.filter((user) => user !== undefined);
 
@@ -211,10 +237,25 @@ export default async function GameDetailPage({
 										{index + 1}
 									</span>
 									<div className="flex flex-col">
-										<span>{player.name}</span>
+										<Link
+											href={`/players/${player.id}`}
+											className="hover:text-sky-300 transition-colors"
+										>
+											{player.name}
+										</Link>
 										{player.characterName && (
 											<span className="text-sm text-slate-400">
-												Playing as: {player.characterName}
+												Playing as:{" "}
+												{player.characterIsPublic && player.characterId ? (
+													<Link
+														href={`/players/${player.id}/characters/${player.characterId}`}
+														className="hover:text-sky-300 transition-colors"
+													>
+														{player.characterName}
+													</Link>
+												) : (
+													player.characterName
+												)}
 											</span>
 										)}
 									</div>
@@ -261,10 +302,25 @@ export default async function GameDetailPage({
 											{index + 1}
 										</span>
 										<div className="flex flex-col">
-											<span>{player.name}</span>
+											<Link
+												href={`/players/${player.id}`}
+												className="hover:text-sky-300 transition-colors"
+											>
+												{player.name}
+											</Link>
 											{player.characterName && (
 												<span className="text-sm text-slate-400">
-													Playing as: {player.characterName}
+													Playing as:{" "}
+													{player.characterIsPublic && player.characterId ? (
+														<Link
+															href={`/players/${player.id}/characters/${player.characterId}`}
+															className="hover:text-sky-300 transition-colors"
+														>
+															{player.characterName}
+														</Link>
+													) : (
+														player.characterName
+													)}
 												</span>
 											)}
 										</div>
