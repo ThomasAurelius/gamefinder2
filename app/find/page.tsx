@@ -314,9 +314,12 @@ export default function FindGamesPage() {
       const updatedSession = await response.json();
       
       // Update the session in the search results list
+      // Preserve the distance field from the original session
       setGameSessions(prevSessions =>
         prevSessions.map(session =>
-          session.id === sessionToJoin ? updatedSession : session
+          session.id === sessionToJoin 
+            ? { ...updatedSession, distance: session.distance } 
+            : session
         )
       );
       
