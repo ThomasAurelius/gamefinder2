@@ -140,6 +140,52 @@ export async function createGameSession(
   };
 }
 
+export async function updateGameSession(
+  userId: string,
+  id: string,
+  payload: Partial<GameSessionPayload>
+): Promise<StoredGameSession | null> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+
+  const timestamp = new Date().toISOString();
+
+  const result = await gamesCollection.findOneAndUpdate(
+    { userId, id },
+    {
+      $set: {
+        ...payload,
+        updatedAt: timestamp,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    waitlist: result.waitlist || [],
+    pendingPlayers: result.pendingPlayers || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+  };
+}
+
 export async function deleteGameSession(userId: string, id: string): Promise<boolean> {
   const db = await getDb();
   const gamesCollection = db.collection<GameSessionDocument>("gameSessions");

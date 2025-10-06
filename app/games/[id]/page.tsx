@@ -5,6 +5,7 @@ import { getGameSession } from "@/lib/games/db";
 import { getUsersBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingPlayersManager from "@/components/PendingPlayersManager";
+import GameActions from "@/components/GameActions";
 
 export default async function GameDetailPage({
 	params,
@@ -69,13 +70,18 @@ export default async function GameDetailPage({
 
 			{/* Game title and basic info */}
 			<header className="space-y-4">
-				<div>
-					<h1 className="text-3xl font-bold text-slate-100">
-						{session.game}
-					</h1>
-					<p className="mt-2 text-sm uppercase tracking-wide text-slate-400">
-						Game Session
-					</p>
+				<div className="flex items-start justify-between gap-4">
+					<div>
+						<h1 className="text-3xl font-bold text-slate-100">
+							{session.game}
+						</h1>
+						<p className="mt-2 text-sm uppercase tracking-wide text-slate-400">
+							Game Session
+						</p>
+					</div>
+
+					{/* Edit and Delete buttons - only visible to host */}
+					{isHost && <GameActions session={session} />}
 				</div>
 
 				<div className="flex flex-wrap items-center gap-4 text-sm">
