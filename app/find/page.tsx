@@ -146,21 +146,21 @@ function GameSessionCard({
 						onClick={() => onJoin(session.id)}
 						disabled={joiningSessionId === session.id}
 						className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
-							!isUserSignedUp
+							isUserSignedUp
 								? "bg-red-600 hover:bg-red-700 focus:ring-red-500"
 								: "bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
 						}`}
 						title={
-							!isUserSignedUp
+							isUserSignedUp
 								? "Withdraw from this game"
 								: "Request to join"
 						}
 					>
 						{joiningSessionId === session.id
-							? !isUserSignedUp
+							? isUserSignedUp
 								? "Withdrawing..."
 								: "Requesting..."
-							: !isUserSignedUp
+							: isUserSignedUp
 								? "Withdraw"
 								: "Request to Join"}
 					</button>
@@ -335,6 +335,8 @@ export default function FindGamesPage() {
 		if (showCharacterDialog) {
 			return;
 		}
+		setSessionToJoin(sessionId);
+		setShowCharacterDialog(true);
 		// Find the session to check if user is already signed up
 		const session = [...gameSessions, ...allEvents].find(
 			(s) => s.id === sessionId
