@@ -286,14 +286,11 @@ export default function FindGamesPage() {
   };
 
   const handleJoinClick = (sessionId: string) => {
-    console.log("handleJoinClick called with sessionId:", sessionId);
     if (showCharacterDialog) {
-      console.log("Dialog already open, ignoring click");
       return;
     }
     setSessionToJoin(sessionId);
     setShowCharacterDialog(true);
-    console.log("Dialog state set to true");
   };
 
   const handleCharacterSelect = async (characterId?: string, characterName?: string) => {
