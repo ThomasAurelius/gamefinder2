@@ -9,6 +9,7 @@ import type { UserDocument } from "@/lib/user-types";
  */
 export async function isAdmin(userId: string): Promise<boolean> {
   if (!userId || !ObjectId.isValid(userId)) {
+    console.log("[isAdmin] Invalid userId:", userId ? `${userId.substring(0, 8)}...` : "empty");
     return false;
   }
 
@@ -21,9 +22,11 @@ export async function isAdmin(userId: string): Promise<boolean> {
       { projection: { isAdmin: 1 } }
     );
     
+    console.log("[isAdmin] User found:", !!user, "isAdmin value:", user?.isAdmin);
+    
     return user?.isAdmin === true;
   } catch (error) {
-    console.error("Error checking admin status:", error);
+    console.error("[isAdmin] Error checking admin status:", error);
     return false;
   }
 }

@@ -10,15 +10,20 @@ export async function GET() {
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
     
+    console.log("[Admin Status] Checking admin status for userId:", userId ? `${userId.substring(0, 8)}...` : "none");
+    
     if (!userId) {
+      console.log("[Admin Status] No userId cookie found");
       return NextResponse.json({ isAdmin: false });
     }
     
     const userIsAdmin = await isAdmin(userId);
     
+    console.log("[Admin Status] User isAdmin:", userIsAdmin);
+    
     return NextResponse.json({ isAdmin: userIsAdmin });
   } catch (error) {
-    console.error("Error checking admin status:", error);
+    console.error("[Admin Status] Error checking admin status:", error);
     return NextResponse.json({ isAdmin: false });
   }
 }

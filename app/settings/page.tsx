@@ -15,16 +15,21 @@ export default function SettingsPage() {
     async function checkAdminAndLoadAnnouncement() {
       try {
         // Check admin status
+        console.log("[Settings] Fetching admin status...");
         const statusRes = await fetch("/api/admin/status");
         const statusData = await statusRes.json();
+        console.log("[Settings] Admin status response:", statusData);
         setIsAdmin(statusData.isAdmin);
 
         // Load current announcement if admin
         if (statusData.isAdmin) {
+          console.log("[Settings] User is admin, loading announcement...");
           const announcementRes = await fetch("/api/announcements");
           const announcementData = await announcementRes.json();
           setAnnouncement(announcementData.message || "");
           setIsActive(announcementData.isActive || false);
+        } else {
+          console.log("[Settings] User is not admin");
         }
       } catch (error) {
         console.error("Failed to load settings:", error);
