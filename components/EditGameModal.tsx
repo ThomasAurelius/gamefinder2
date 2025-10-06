@@ -19,7 +19,7 @@ export default function EditGameModal({
   const [date, setDate] = useState(session.date);
   const [times, setTimes] = useState<string[]>(session.times);
   const [description, setDescription] = useState(session.description);
-  const [maxPlayers, setMaxPlayers] = useState(session.maxPlayers);
+  const [maxPlayers, setMaxPlayers] = useState<number | ''>(session.maxPlayers);
   const [imageUrl, setImageUrl] = useState(session.imageUrl || "");
   const [location, setLocation] = useState(session.location || "");
   const [zipCode, setZipCode] = useState(session.zipCode || "");
@@ -82,7 +82,7 @@ export default function EditGameModal({
           date,
           times,
           description,
-          maxPlayers,
+          maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
           imageUrl: imageUrl || undefined,
           location: location || undefined,
           zipCode: zipCode || undefined,
@@ -191,7 +191,10 @@ export default function EditGameModal({
               id="maxPlayers"
               type="number"
               value={maxPlayers}
-              onChange={(e) => setMaxPlayers(parseInt(e.target.value))}
+              onChange={(e) => {
+                const value = e.target.value;
+                setMaxPlayers(value === '' ? '' : parseInt(value));
+              }}
               min="1"
               max="20"
               required
