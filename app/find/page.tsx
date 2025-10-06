@@ -133,6 +133,9 @@ function GameSessionCard({
         <div className="flex flex-col items-end gap-2 flex-shrink-0">
           <button
             onClick={() => onJoin(session.id)}
+            disabled={joiningSessionId !== null}
+            className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+            title="Request to join - requires host approval"
             disabled={joiningSessionId === session.id}
             className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
               isUserSignedUp
@@ -306,6 +309,11 @@ export default function FindGamesPage() {
   };
 
   const handleJoinClick = (sessionId: string) => {
+    if (showCharacterDialog) {
+      return;
+    }
+    setSessionToJoin(sessionId);
+    setShowCharacterDialog(true);
     // Find the session to check if user is already signed up
     const session = [...gameSessions, ...allEvents].find(s => s.id === sessionId);
     
