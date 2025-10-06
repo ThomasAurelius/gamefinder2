@@ -185,3 +185,36 @@ export async function deleteCharacter(userId: string, id: string): Promise<boole
 
   return result.deletedCount > 0;
 }
+
+export async function getCharactersPublicStatus(
+  characterIds: { userId: string; characterId: string }[]
+): Promise<Map<string, boolean>> {
+  const result = new Map<string, boolean>();
+  
+  if (characterIds.length === 0) {
+    return result;
+  }
+
+  const db = await getDb();
+  const charactersCollection = db.collection<CharacterDocument>("characters");
+
+  // Build query to find all requested characters
+  const orConditions = characterIds.map(({ userId, characterId }) => ({
+    userId,
+    id: characterId,
+  }));
+
+  const characters = await charactersCollection
+    .find(
+      { $or: orConditions },
+      { projection: { id: 1, userId: 1, isPublic: 1 } }
+    )
+    .toArray();
+
+  for (const char of characters) {
+    // Use characterId as the key for easy lookup
+    result.set(char.id, char.isPublic ?? false);
+  }
+
+  return result;
+}
