@@ -445,7 +445,7 @@ export default function PostGamePage() {
 							<div className="flex gap-3">
 								<ShareToFacebook
 									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
-									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame}!`}
+									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
 								/>
 							</div>
 						)}
