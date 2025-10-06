@@ -46,6 +46,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Update lastLoginAt timestamp
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { $set: { lastLoginAt: new Date() } }
+    );
+
     const response = NextResponse.json({
       message: "Login successful",
       user: {

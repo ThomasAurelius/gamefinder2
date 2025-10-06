@@ -420,3 +420,17 @@ export async function denyPlayer(
     longitude: result.longitude,
   };
 }
+
+/**
+ * Count new game sessions created since a given date
+ */
+export async function countNewGamesSinceDate(sinceDate: Date): Promise<number> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+
+  const count = await gamesCollection.countDocuments({
+    createdAt: { $gte: sinceDate.toISOString() }
+  });
+
+  return count;
+}

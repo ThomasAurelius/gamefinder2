@@ -8,6 +8,7 @@ export type UserDocument = {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+  lastLoginAt?: Date;
   profile?: ProfileRecord;
   isAdmin?: boolean;
   isHidden?: boolean; // Admin can hide profiles
