@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { readProfile, getProfileHiddenStatus } from "@/lib/profile-db";
 import { ObjectId } from "mongodb";
+import { TIME_SLOT_GROUPS } from "@/lib/constants";
 import SendMessageButton from "@/components/SendMessageButton";
 import { listPublicCharacters } from "@/lib/characters/db";
 import ProfileAdminControls from "@/components/ProfileAdminControls";
@@ -44,15 +45,30 @@ function AvailabilityGrid({
               {day}
             </div>
             {availability[day]?.length ? (
-              <div className="flex flex-wrap gap-2">
-                {availability[day].map((slot) => (
-                  <span
-                    key={slot}
-                    className="rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300"
-                  >
-                    {slot}
-                  </span>
-                ))}
+              <div className="space-y-2 flex-1">
+                {TIME_SLOT_GROUPS.map((group) => {
+                  const groupSlots = availability[day].filter((slot) =>
+                    group.slots.includes(slot)
+                  );
+                  if (groupSlots.length === 0) return null;
+                  return (
+                    <div key={group.label}>
+                      <div className="text-xs font-medium text-slate-400 mb-1">
+                        {group.label}:
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {groupSlots.map((slot) => (
+                          <span
+                            key={slot}
+                            className="rounded-full border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-slate-300"
+                          >
+                            {slot}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <p className="mt-1 text-sm text-slate-500">No sessions</p>
