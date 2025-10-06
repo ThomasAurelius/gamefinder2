@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
@@ -211,7 +211,7 @@ export default function FindGamesPage() {
 	const [locationSearch, setLocationSearch] = useState("");
 	const [radiusMiles, setRadiusMiles] = useState("25");
 	const [showCharacterDialog, setShowCharacterDialog] = useState(false);
-	const [sessionToJoin, setSessionToJoin] = useState<string | null>(null);
+	const [sessionToJoin, setSessionToJoin] = useState<GameSession | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -375,7 +375,7 @@ export default function FindGamesPage() {
 			handleWithdraw(sessionId);
 		} else {
 			// Handle join request
-			setSessionToJoin(sessionId);
+			setSessionToJoin(session);
 			setShowCharacterDialog(true);
 		}
 	};
@@ -432,11 +432,11 @@ export default function FindGamesPage() {
 		if (!sessionToJoin) return;
 
 		setShowCharacterDialog(false);
-		setJoiningSessionId(sessionToJoin);
+		setJoiningSessionId(sessionToJoin.id);
 		setJoinError(null);
 
 		try {
-			const response = await fetch(`/api/games/${sessionToJoin}/join`, {
+			const response = await fetch(`/api/games/${sessionToJoin.id}/join`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -455,7 +455,7 @@ export default function FindGamesPage() {
 			// Preserve the distance field from the original session
 			setGameSessions((prevSessions) =>
 				prevSessions.map((session) =>
-					session.id === sessionToJoin
+					session.id === sessionToJoin.id
 						? { ...updatedSession, distance: session.distance }
 						: session
 				)
@@ -464,7 +464,7 @@ export default function FindGamesPage() {
 			// Update the session in the all events list
 			setAllEvents((prevEvents) =>
 				prevEvents.map((event) =>
-					event.id === sessionToJoin ? updatedSession : event
+					event.id === sessionToJoin.id ? updatedSession : event
 				)
 			);
 		} catch (error) {
@@ -486,11 +486,12 @@ export default function FindGamesPage() {
 
 	return (
 		<section className="space-y-6">
-			{showCharacterDialog && (
+			{showCharacterDialog && sessionToJoin && (
 				<CharacterSelectionDialog
 					onSelect={handleCharacterSelect}
 					onCancel={handleCharacterCancel}
 					isLoading={joiningSessionId !== null}
+					gameSystem={mapGameToSystemKey(sessionToJoin.game)}
 				/>
 			)}
 			<div>

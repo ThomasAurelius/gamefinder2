@@ -6,6 +6,29 @@ export const GAME_OPTIONS = [
 	"Other",
 ];
 
+/**
+ * Map game names to game system keys for character filtering
+ */
+export function mapGameToSystemKey(gameName: string): string | null {
+	const gameNameLower = gameName.toLowerCase().trim();
+	
+	if (gameNameLower.includes("dungeons") && gameNameLower.includes("dragons")) {
+		return "dnd";
+	}
+	if (gameNameLower.includes("pathfinder")) {
+		return "pathfinder";
+	}
+	if (gameNameLower.includes("starfinder")) {
+		return "starfinder";
+	}
+	if (gameNameLower.includes("shadowdark")) {
+		return "shadowdark";
+	}
+	
+	// For "Other" or unknown games, return null (show all characters)
+	return null;
+}
+
 export const TIME_SLOTS = Array.from({ length: 24 }, (_, index) => {
 	const hour = index % 12 || 12;
 	const suffix = index < 12 ? "AM" : "PM";
