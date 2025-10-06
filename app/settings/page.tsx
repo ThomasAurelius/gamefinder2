@@ -18,6 +18,7 @@ export default function SettingsPage() {
         console.log("[Settings] Fetching admin status...");
         const statusRes = await fetch("/api/admin/status", {
           credentials: "include",
+          cache: "no-store",
         });
         const statusData = await statusRes.json();
         console.log("[Settings] Admin status response:", statusData);
@@ -28,6 +29,7 @@ export default function SettingsPage() {
           console.log("[Settings] User is admin, loading announcement...");
           const announcementRes = await fetch("/api/announcements", {
             credentials: "include",
+            cache: "no-store",
           });
           const announcementData = await announcementRes.json();
           setAnnouncement(announcementData.message || "");
