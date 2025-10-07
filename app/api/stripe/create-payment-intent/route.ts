@@ -26,13 +26,67 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { amount, campaignId, campaignName } = body;
+    const {
+      amount,
+      campaignId,
+      campaignName,
+      paymentType = "one_time",
+    } = body;
 
     if (!amount || amount <= 0) {
       return NextResponse.json(
         { error: "Valid amount is required" },
         { status: 400 }
       );
+    }
+
+    if (paymentType === "subscription") {
+      const customer = await stripe.customers.create({
+        metadata: {
+          userId,
+        },
+      });
+
+      const price = await stripe.prices.create({
+        unit_amount: Math.round(amount * 100),
+        currency: "usd",
+        recurring: { interval: "week" },
+        product_data: {
+          name: `${campaignName || "Campaign"} Subscription`,
+          metadata: {
+            campaignId: campaignId || "",
+          },
+        },
+      });
+
+      const subscription = await stripe.subscriptions.create({
+        customer: customer.id,
+        items: [{ price: price.id }],
+        metadata: {
+          campaignId: campaignId || "",
+          campaignName: campaignName || "",
+          userId,
+        },
+        payment_behavior: "default_incomplete",
+        payment_settings: {
+          save_default_payment_method: "on_subscription",
+        },
+        expand: ["latest_invoice.payment_intent"],
+      });
+
+      const paymentIntent = subscription.latest_invoice?.payment_intent;
+
+      if (!paymentIntent || typeof paymentIntent === "string") {
+        throw new Error("Failed to initialize subscription payment");
+      }
+
+      return NextResponse.json({
+        clientSecret: paymentIntent.client_secret,
+        subscriptionId: subscription.id,
+        customerId: customer.id,
+        priceId: price.id,
+        mode: "subscription",
+      });
     }
 
     // Create a PaymentIntent with the order amount and currency
@@ -52,6 +106,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
+      mode: "payment",
     });
   } catch (error) {
     console.error("Error creating payment intent:", error);

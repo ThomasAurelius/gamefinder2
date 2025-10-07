@@ -1,0 +1,195 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import StripePaymentForm from "@/components/StripePaymentForm";
+
+interface Campaign {
+  id: string;
+  game: string;
+  description?: string;
+  costPerSession?: number;
+  sessionsLeft?: number;
+}
+
+type PaymentMode = "payment" | "subscription";
+
+export default function CampaignPaymentPage() {
+  const params = useParams();
+  const router = useRouter();
+  const campaignId = params.id as string;
+
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInitializingPayment, setIsInitializingPayment] = useState(false);
+  const [paymentComplete, setPaymentComplete] = useState(false);
+
+  const paymentMode: PaymentMode = useMemo(() => {
+    if (!campaign || typeof campaign.sessionsLeft !== "number") {
+      return "payment";
+    }
+
+    return campaign.sessionsLeft > 1 ? "subscription" : "payment";
+  }, [campaign]);
+
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/campaigns/${campaignId}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            router.push("/find-campaigns");
+            return;
+          }
+          throw new Error("Failed to load campaign details");
+        }
+
+        const campaignData = (await response.json()) as Campaign;
+        setCampaign(campaignData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load campaign");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCampaign();
+  }, [campaignId, router]);
+
+  useEffect(() => {
+    const initializePayment = async () => {
+      if (!campaign?.costPerSession || campaign.costPerSession <= 0) {
+        return;
+      }
+
+      try {
+        setIsInitializingPayment(true);
+        const response = await fetch("/api/stripe/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: campaign.costPerSession,
+            campaignId,
+            campaignName: campaign.game,
+            paymentType: paymentMode === "subscription" ? "subscription" : "one_time",
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to initialize payment");
+        }
+
+        const data = await response.json();
+        setClientSecret(data.clientSecret);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to initialize payment");
+      } finally {
+        setIsInitializingPayment(false);
+      }
+    };
+
+    if (campaign) {
+      initializePayment();
+    }
+  }, [campaign, campaignId, paymentMode]);
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-slate-300">
+        Loading campaign details...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-red-500/40 bg-red-500/10 p-8 text-sm text-red-200">
+        {error}
+      </div>
+    );
+  }
+
+  if (!campaign) {
+    return null;
+  }
+
+  if (!campaign.costPerSession || campaign.costPerSession <= 0) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl space-y-4">
+        <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-slate-200">
+          <h1 className="text-xl font-semibold text-slate-100">{campaign.game}</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            This campaign does not require payment.
+          </p>
+        </div>
+        <Link
+          href={`/campaigns/${campaignId}`}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-sky-400"
+        >
+          ← Back to campaign details
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto mt-10 max-w-2xl space-y-6">
+      <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-8">
+        <div className="mb-6 space-y-2">
+          <h1 className="text-xl font-semibold text-slate-100">
+            {paymentMode === "subscription" ? "Subscribe to" : "Pay for"} {campaign.game}
+          </h1>
+          <p className="text-sm text-slate-400">
+            {paymentMode === "subscription"
+              ? "This campaign runs for multiple sessions. Subscribe to keep your seat reserved."
+              : "This campaign only runs for a single session. Complete your one-time payment to confirm your spot."}
+          </p>
+          <p className="text-sm text-slate-300">
+            Amount due: <span className="font-semibold text-slate-100">${campaign.costPerSession.toFixed(2)}</span>
+          </p>
+          {typeof campaign.sessionsLeft === "number" && (
+            <p className="text-xs text-slate-500">
+              Sessions: {campaign.sessionsLeft} {campaign.sessionsLeft === 1 ? "session" : "sessions"}
+            </p>
+          )}
+        </div>
+
+        {paymentComplete && (
+          <div className="mb-6 rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+            {paymentMode === "subscription"
+              ? "Your subscription is active."
+              : "Your payment was successful."}
+          </div>
+        )}
+
+        {isInitializingPayment && !clientSecret ? (
+          <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-6 text-sm text-slate-400">
+            Initializing payment...
+          </div>
+        ) : clientSecret ? (
+          <StripePaymentForm
+            clientSecret={clientSecret}
+            paymentMode={paymentMode}
+            onSuccess={() => setPaymentComplete(true)}
+            onError={(errMsg) => setError(errMsg)}
+          />
+        ) : (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-sm text-red-200">
+            Unable to load the payment form. Please try again later.
+          </div>
+        )}
+      </div>
+
+      <Link
+        href={`/campaigns/${campaignId}`}
+        className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-sky-400"
+      >
+        ← Back to campaign details
+      </Link>
+    </div>
+  );
+}
