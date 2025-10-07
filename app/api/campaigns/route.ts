@@ -48,6 +48,7 @@ function parseCampaignPayload(data: unknown): CampaignPayload | null {
     sessionsLeft: typeof payload.sessionsLeft === "number" ? payload.sessionsLeft : undefined,
     classesNeeded: Array.isArray(payload.classesNeeded) ? payload.classesNeeded as string[] : undefined,
     costPerSession: typeof payload.costPerSession === "number" ? payload.costPerSession : undefined,
+    paymentMethod: typeof payload.paymentMethod === "string" ? payload.paymentMethod : undefined,
     meetingFrequency: typeof payload.meetingFrequency === "string" ? payload.meetingFrequency : undefined,
     daysOfWeek: Array.isArray(payload.daysOfWeek) ? payload.daysOfWeek as string[] : undefined,
   };
