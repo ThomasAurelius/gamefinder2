@@ -156,9 +156,17 @@ export function Navbar() {
 							);
 							const isGamesMenu = item.label === "Games";
 							const isCampaignsMenu = item.label === "Campaigns";
-							const isOpen = isGamesMenu ? gamesOpen : isCampaignsMenu ? campaignsOpen : false;
-							const toggleOpen = isGamesMenu ? toggleGames : isCampaignsMenu ? toggleCampaigns : () => {};
-							
+							const isOpen = isGamesMenu
+								? gamesOpen
+								: isCampaignsMenu
+									? campaignsOpen
+									: false;
+							const toggleOpen = isGamesMenu
+								? toggleGames
+								: isCampaignsMenu
+									? toggleCampaigns
+									: () => {};
+
 							return (
 								<div key={item.label} className="relative">
 									<button
@@ -192,7 +200,8 @@ export function Navbar() {
 													href={link.href}
 													onClick={() => {
 														if (isGamesMenu) setGamesOpen(false);
-														if (isCampaignsMenu) setCampaignsOpen(false);
+														if (isCampaignsMenu)
+															setCampaignsOpen(false);
 														closeMenu();
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
@@ -233,71 +242,73 @@ export function Navbar() {
 					{!authLoading &&
 						(isAuthenticated ? (
 							<>
-							<div className="relative">
-								<button
-									type="button"
-									className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
-										accountOpen ? "bg-white/10 text-white" : ""
-									}`}
-									onClick={toggleAccount}
-									aria-haspopup="menu"
-									aria-expanded={accountOpen}
-								>
-									Account
-									<svg
-										aria-hidden
-										className={`h-4 w-4 transition-transform ${
-											accountOpen ? "rotate-180" : ""
+								<div className="relative">
+									<button
+										type="button"
+										className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
+											accountOpen ? "bg-white/10 text-white" : ""
 										}`}
-										viewBox="0 0 20 20"
-										fill="currentColor"
+										onClick={toggleAccount}
+										aria-haspopup="menu"
+										aria-expanded={accountOpen}
 									>
-										<path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
-									</svg>
-								</button>
-								{accountOpen ? (
-									<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
-										{accountLinks.map((link) => (
-											<Link
-												key={link.href}
-												href={link.href}
-												onClick={() => {
-													setAccountOpen(false);
-													closeMenu();
-												}}
-												className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
-													isActive(pathname, link.href)
-														? "bg-white/10 text-white"
-														: "text-slate-200"
-												}`}
-											>
-												<span>{link.label}</span>
-												{link.href === "/profile" &&
-													hasIncompleteSettings && (
-														<NotificationBadge />
-													)}
-												{link.href === "/messages" &&
-													unreadMessageCount > 0 && (
-														<NotificationBadge
-															count={unreadMessageCount}
-														/>
-													)}
-											</Link>
-										))}
-									</div>
-								) : null}
-							</div>
-							{userAvatarUrl ? (
-								<img
-									src={userAvatarUrl}
-									alt={userCommonName || "User avatar"}
-									className="h-8 w-8 rounded-full border border-white/20 object-cover"
-								/>
-							) : (
-								<div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-xs font-semibold text-slate-300">
-									{userCommonName ? userCommonName.charAt(0).toUpperCase() : "U"}
+										Account
+										<svg
+											aria-hidden
+											className={`h-4 w-4 transition-transform ${
+												accountOpen ? "rotate-180" : ""
+											}`}
+											viewBox="0 0 20 20"
+											fill="currentColor"
+										>
+											<path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
+										</svg>
+									</button>
+									{accountOpen ? (
+										<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
+											{accountLinks.map((link) => (
+												<Link
+													key={link.href}
+													href={link.href}
+													onClick={() => {
+														setAccountOpen(false);
+														closeMenu();
+													}}
+													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
+														isActive(pathname, link.href)
+															? "bg-white/10 text-white"
+															: "text-slate-200"
+													}`}
+												>
+													<span>{link.label}</span>
+													{link.href === "/profile" &&
+														hasIncompleteSettings && (
+															<NotificationBadge />
+														)}
+													{link.href === "/messages" &&
+														unreadMessageCount > 0 && (
+															<NotificationBadge
+																count={unreadMessageCount}
+															/>
+														)}
+												</Link>
+											))}
+										</div>
+									) : null}
 								</div>
-							)}
+								{userAvatarUrl ? (
+									<img
+										src={userAvatarUrl}
+										alt={userCommonName || "User avatar"}
+										className="h-12 w-12 rounded-full border border-white/20 object-cover"
+									/>
+								) : (
+									<div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-xs font-semibold text-slate-300">
+										{userCommonName
+											? userCommonName.charAt(0).toUpperCase()
+											: "U"}
+									</div>
+								)}
 							</>
 						) : (
 							<Link
@@ -406,7 +417,9 @@ export function Navbar() {
 											/>
 										) : (
 											<div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-sm font-semibold text-slate-300">
-												{userCommonName ? userCommonName.charAt(0).toUpperCase() : "U"}
+												{userCommonName
+													? userCommonName.charAt(0).toUpperCase()
+													: "U"}
 											</div>
 										)}
 										<div className="text-sm text-slate-200">
