@@ -70,7 +70,9 @@ export async function PUT(
       sessionsLeft: body.sessionsLeft,
       classesNeeded: body.classesNeeded,
       costPerSession: body.costPerSession,
-      paymentMethod: body.paymentMethod,
+      requiresPayment: body.requiresPayment,
+      stripePaymentIntentId: body.stripePaymentIntentId,
+      stripeClientSecret: body.stripeClientSecret,
       meetingFrequency: body.meetingFrequency,
       daysOfWeek: body.daysOfWeek,
     };
