@@ -128,7 +128,7 @@ export default function CampaignDetailPage() {
                 avatarUrl: userData.avatarUrl,
                 characterName: characterInfo?.characterName,
               };
-            }).filter((user): user is PendingPlayer => user !== null);
+            }).filter((user: PendingPlayer | null): user is PendingPlayer => user !== null);
             
             setPendingPlayersList(pendingPlayers);
           }
