@@ -71,6 +71,8 @@ export function Navbar() {
 	const [hasIncompleteSettings, setHasIncompleteSettings] = useState(false);
 	const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 	const [newPostsCount, setNewPostsCount] = useState(0);
+	const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
+	const [userCommonName, setUserCommonName] = useState<string>("");
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -106,7 +108,23 @@ export function Navbar() {
 			}
 		};
 
+		const fetchUserProfile = async () => {
+			if (!isAuthenticated || authLoading) return;
+
+			try {
+				const response = await fetch("/api/profile");
+				if (response.ok) {
+					const profile = await response.json();
+					setUserAvatarUrl(profile.avatarUrl || null);
+					setUserCommonName(profile.commonName || profile.name || "");
+				}
+			} catch (error) {
+				console.error("Failed to fetch user profile:", error);
+			}
+		};
+
 		fetchNotifications();
+		fetchUserProfile();
 	}, [isAuthenticated, authLoading, pathname]);
 
 	const toggleMenu = () => setMenuOpen((open) => !open);
@@ -214,6 +232,7 @@ export function Navbar() {
 					})}
 					{!authLoading &&
 						(isAuthenticated ? (
+							<>
 							<div className="relative">
 								<button
 									type="button"
@@ -268,6 +287,18 @@ export function Navbar() {
 									</div>
 								) : null}
 							</div>
+							{userAvatarUrl ? (
+								<img
+									src={userAvatarUrl}
+									alt={userCommonName || "User avatar"}
+									className="h-8 w-8 rounded-full border border-white/20 object-cover"
+								/>
+							) : (
+								<div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-xs font-semibold text-slate-300">
+									{userCommonName ? userCommonName.charAt(0).toUpperCase() : "U"}
+								</div>
+							)}
+							</>
 						) : (
 							<Link
 								href="/auth/login"
@@ -366,6 +397,22 @@ export function Navbar() {
 						{!authLoading &&
 							(isAuthenticated ? (
 								<div className="border-t border-white/5 pt-2">
+									<div className="flex items-center gap-3 px-3 pb-2">
+										{userAvatarUrl ? (
+											<img
+												src={userAvatarUrl}
+												alt={userCommonName || "User avatar"}
+												className="h-10 w-10 rounded-full border border-white/20 object-cover"
+											/>
+										) : (
+											<div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-sm font-semibold text-slate-300">
+												{userCommonName ? userCommonName.charAt(0).toUpperCase() : "U"}
+											</div>
+										)}
+										<div className="text-sm text-slate-200">
+											{userCommonName || "User"}
+										</div>
+									</div>
 									<p className="px-3 text-xs uppercase tracking-wide text-slate-400">
 										Account
 									</p>
