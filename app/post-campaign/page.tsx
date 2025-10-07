@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import ShareToFacebook from "@/components/ShareToFacebook";
+import StripePaymentForm from "@/components/StripePaymentForm";
 
 const tagButtonClasses = (
 	active: boolean,
@@ -40,9 +41,13 @@ export default function PostCampaignPage() {
 	const [sessionsLeft, setSessionsLeft] = useState<number | ''>('');
 	const [classesNeeded, setClassesNeeded] = useState<string[]>([]);
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
-	const [paymentMethod, setPaymentMethod] = useState("");
 	const [meetingFrequency, setMeetingFrequency] = useState("");
 	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
+	
+	// Stripe payment state
+	const [clientSecret, setClientSecret] = useState<string>("");
+	const [showPaymentForm, setShowPaymentForm] = useState(false);
+	const [paymentCompleted, setPaymentCompleted] = useState(false);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -149,7 +154,7 @@ export default function PostCampaignPage() {
 				sessionsLeft: typeof sessionsLeft === 'number' ? sessionsLeft : (sessionsLeft ? parseInt(String(sessionsLeft)) : undefined),
 				classesNeeded: classesNeeded.length > 0 ? classesNeeded : undefined,
 				costPerSession: typeof costPerSession === 'number' ? costPerSession : (costPerSession ? parseFloat(String(costPerSession)) : undefined),
-				paymentMethod: paymentMethod || undefined,
+				requiresPayment: (typeof costPerSession === 'number' && costPerSession > 0) || false,
 				meetingFrequency: meetingFrequency || undefined,
 				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
 				}),
@@ -177,9 +182,11 @@ export default function PostCampaignPage() {
 			setSessionsLeft('');
 			setClassesNeeded([]);
 			setCostPerSession('');
-			setPaymentMethod('');
 			setMeetingFrequency('');
 			setDaysOfWeek([]);
+			setClientSecret('');
+			setShowPaymentForm(false);
+			setPaymentCompleted(false);
 
 			setTimeout(() => setSubmitted(false), 5000);
 		} catch (err) {
@@ -451,24 +458,61 @@ export default function PostCampaignPage() {
 			</div>
 
 			{costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
-				<div className="space-y-2">
-					<label
-						htmlFor="paymentMethod"
-						className="block text-sm font-medium text-slate-200"
-					>
-						Payment Method Link
-					</label>
-					<input
-						id="paymentMethod"
-						type="url"
-						value={paymentMethod}
-						onChange={(e) => setPaymentMethod(e.target.value)}
-						placeholder="e.g., https://paypal.me/yourname or https://venmo.com/yourname"
-						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					/>
-					<p className="text-xs text-slate-500">
-						Link to your payment page (PayPal, Venmo, etc.)
-					</p>
+				<div className="space-y-4">
+					<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+						<h3 className="text-sm font-medium text-slate-200 mb-2">
+							Payment Setup
+						</h3>
+						<p className="text-xs text-slate-500 mb-4">
+							Players will be required to pay ${costPerSession} per session using Stripe when they join this campaign.
+						</p>
+						{!showPaymentForm && (
+							<button
+								type="button"
+								onClick={async () => {
+									try {
+										// Create payment intent for the campaign owner to set up payment
+										const response = await fetch("/api/stripe/create-payment-intent", {
+											method: "POST",
+											headers: { "Content-Type": "application/json" },
+											body: JSON.stringify({
+												amount: costPerSession,
+												campaignName: selectedGame === "Other" ? customGameName : selectedGame,
+											}),
+										});
+										
+										if (!response.ok) {
+											throw new Error("Failed to initialize payment");
+										}
+										
+										const { clientSecret: secret } = await response.json();
+										setClientSecret(secret);
+										setShowPaymentForm(true);
+									} catch (err) {
+										setError(err instanceof Error ? err.message : "Failed to initialize payment");
+									}
+								}}
+								className="w-full rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+							>
+								Set Up Stripe Payment
+							</button>
+						)}
+						{showPaymentForm && clientSecret && (
+							<StripePaymentForm
+								clientSecret={clientSecret}
+								onSuccess={() => {
+									setPaymentCompleted(true);
+									setShowPaymentForm(false);
+								}}
+								onError={(error) => setError(error)}
+							/>
+						)}
+						{paymentCompleted && (
+							<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+								✓ Payment method verified and ready
+							</div>
+						)}
+					</div>
 				</div>
 			)}
 
