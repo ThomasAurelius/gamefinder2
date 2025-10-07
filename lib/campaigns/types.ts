@@ -13,6 +13,7 @@ export type CampaignPayload = {
   sessionsLeft?: number;
   classesNeeded?: string[];
   costPerSession?: number;
+  paymentMethod?: string;
   meetingFrequency?: string;
   daysOfWeek?: string[];
 };

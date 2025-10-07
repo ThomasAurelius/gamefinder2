@@ -40,6 +40,7 @@ export default function PostCampaignPage() {
 	const [sessionsLeft, setSessionsLeft] = useState<number | ''>('');
 	const [classesNeeded, setClassesNeeded] = useState<string[]>([]);
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
+	const [paymentMethod, setPaymentMethod] = useState("");
 	const [meetingFrequency, setMeetingFrequency] = useState("");
 	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
 
@@ -148,6 +149,7 @@ export default function PostCampaignPage() {
 				sessionsLeft: typeof sessionsLeft === 'number' ? sessionsLeft : (sessionsLeft ? parseInt(String(sessionsLeft)) : undefined),
 				classesNeeded: classesNeeded.length > 0 ? classesNeeded : undefined,
 				costPerSession: typeof costPerSession === 'number' ? costPerSession : (costPerSession ? parseFloat(String(costPerSession)) : undefined),
+				paymentMethod: paymentMethod || undefined,
 				meetingFrequency: meetingFrequency || undefined,
 				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
 				}),
@@ -175,6 +177,7 @@ export default function PostCampaignPage() {
 			setSessionsLeft('');
 			setClassesNeeded([]);
 			setCostPerSession('');
+			setPaymentMethod('');
 			setMeetingFrequency('');
 			setDaysOfWeek([]);
 
@@ -446,6 +449,28 @@ export default function PostCampaignPage() {
 					The cost per session in dollars (0 for free campaigns)
 				</p>
 			</div>
+
+			{costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
+				<div className="space-y-2">
+					<label
+						htmlFor="paymentMethod"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Payment Method Link
+					</label>
+					<input
+						id="paymentMethod"
+						type="url"
+						value={paymentMethod}
+						onChange={(e) => setPaymentMethod(e.target.value)}
+						placeholder="e.g., https://paypal.me/yourname or https://venmo.com/yourname"
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						Link to your payment page (PayPal, Venmo, etc.)
+					</p>
+				</div>
+			)}
 
 			<div className="space-y-2">
 				<label
