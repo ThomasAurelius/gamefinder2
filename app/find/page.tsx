@@ -204,7 +204,7 @@ export default function FindGamesPage() {
 	);
 	const [joinError, setJoinError] = useState<string | null>(null);
 	const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
-	const [isSearchFormOpen, setIsSearchFormOpen] = useState(true);
+	const [isSearchFormOpen, setIsSearchFormOpen] = useState(false);
 	const [allEvents, setAllEvents] = useState<GameSession[]>([]);
 	const [isLoadingEvents, setIsLoadingEvents] = useState(false);
 	const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
