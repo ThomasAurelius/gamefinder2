@@ -131,7 +131,7 @@ export default function PostCampaignPage() {
 					? customGameName.trim()
 					: selectedGame;
 
-			const response = await fetch("/api/games", {
+			const response = await fetch("/api/campaigns", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -145,16 +145,21 @@ export default function PostCampaignPage() {
 					imageUrl: imageUrl,
 					location: location,
 					zipCode: zipCode,
+				sessionsLeft: typeof sessionsLeft === 'number' ? sessionsLeft : (sessionsLeft ? parseInt(String(sessionsLeft)) : undefined),
+				classesNeeded: classesNeeded.length > 0 ? classesNeeded : undefined,
+				costPerSession: typeof costPerSession === 'number' ? costPerSession : (costPerSession ? parseFloat(String(costPerSession)) : undefined),
+				meetingFrequency: meetingFrequency || undefined,
+				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
 				}),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to post game session");
+				throw new Error(errorData.error || "Failed to post campaign");
 			}
 
 			const data = await response.json();
-			setPostedGameId(data.id || null);
+			setPostedCampaignId(data.id || null);
 			setSubmitted(true);
 			// Reset form
 			setSelectedGame("");
@@ -166,12 +171,17 @@ export default function PostCampaignPage() {
 			setImageUrl("");
 			setLocation("");
 			setZipCode("");
-			setPostedGameId(null);
+			setPostedCampaignId(null);
+			setSessionsLeft('');
+			setClassesNeeded([]);
+			setCostPerSession('');
+			setMeetingFrequency('');
+			setDaysOfWeek([]);
 
 			setTimeout(() => setSubmitted(false), 5000);
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to post game session"
+				err instanceof Error ? err.message : "Failed to post campaign"
 			);
 		} finally {
 			setIsSubmitting(false);
@@ -354,143 +364,143 @@ export default function PostCampaignPage() {
 						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
 					<p className="text-xs text-slate-500">
-						Maximum number of players that can join this session
+						Maximum number of players that can join this campaign
 					</p>
 				</div>
 
-page.tsx page.tsx page.tsx <div className="space-y-2">
-page.tsx page.tsx page.tsx page.tsx <label
-page.tsx page.tsx page.tsx page.tsx page.tsx htmlFor="sessionsLeft"
-page.tsx page.tsx page.tsx page.tsx page.tsx className="block text-sm font-medium text-slate-200"
-page.tsx page.tsx page.tsx page.tsx >
-page.tsx page.tsx page.tsx page.tsx page.tsx Approximate Sessions Left
-page.tsx page.tsx page.tsx page.tsx </label>
-page.tsx page.tsx page.tsx page.tsx <input
-page.tsx page.tsx page.tsx page.tsx page.tsx id="sessionsLeft"
-page.tsx page.tsx page.tsx page.tsx page.tsx type="number"
-page.tsx page.tsx page.tsx page.tsx page.tsx min="1"
-page.tsx page.tsx page.tsx page.tsx page.tsx value={sessionsLeft}
-page.tsx page.tsx page.tsx page.tsx page.tsx onChange={(e) => {
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx const value = e.target.value;
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx setSessionsLeft(value === '' ? '' : parseInt(value));
-page.tsx page.tsx page.tsx page.tsx page.tsx }}
-page.tsx page.tsx page.tsx page.tsx page.tsx placeholder="e.g., 10"
-page.tsx page.tsx page.tsx page.tsx page.tsx className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-page.tsx page.tsx page.tsx page.tsx />
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-500">
-page.tsx page.tsx page.tsx page.tsx page.tsx How many sessions do you expect this campaign to run?
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx </div>
+			<div className="space-y-2">
+				<label
+					htmlFor="sessionsLeft"
+					className="block text-sm font-medium text-slate-200"
+				>
+					Approximate Sessions Left
+				</label>
+				<input
+					id="sessionsLeft"
+					type="number"
+					min="1"
+					value={sessionsLeft}
+					onChange={(e) => {
+						const value = e.target.value;
+						setSessionsLeft(value === '' ? '' : parseInt(value));
+					}}
+					placeholder="e.g., 10"
+					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+				/>
+				<p className="text-xs text-slate-500">
+					How many sessions do you expect this campaign to run?
+				</p>
+			</div>
 
-page.tsx page.tsx page.tsx <div className="space-y-2">
-page.tsx page.tsx page.tsx page.tsx <label className="block text-sm font-medium text-slate-200">
-page.tsx page.tsx page.tsx page.tsx page.tsx Classes/Roles Needed
-page.tsx page.tsx page.tsx page.tsx </label>
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-400 mb-2">
-page.tsx page.tsx page.tsx page.tsx page.tsx Select the character classes or roles you're looking for
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx page.tsx <div className="flex flex-wrap gap-2">
-page.tsx page.tsx page.tsx page.tsx page.tsx {ROLE_OPTIONS.map((role) => (
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx <button
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx key={role}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx type="button"
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx onClick={() => {
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx setClassesNeeded((prev) =>
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx prev.includes(role)
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx ? prev.filter((r) => r !== role)
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx : [...prev, role]
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx );
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx }}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx className={tagButtonClasses(classesNeeded.includes(role))}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx >
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx {role}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx </button>
-page.tsx page.tsx page.tsx page.tsx page.tsx ))}
-page.tsx page.tsx page.tsx page.tsx </div>
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-500">
-page.tsx page.tsx page.tsx page.tsx page.tsx {classesNeeded.length} class(es) selected
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx </div>
+			<div className="space-y-2">
+				<label className="block text-sm font-medium text-slate-200">
+					Classes/Roles Needed
+				</label>
+				<p className="text-xs text-slate-400 mb-2">
+					Select the character classes or roles you&apos;re looking for
+				</p>
+				<div className="flex flex-wrap gap-2">
+					{ROLE_OPTIONS.map((role) => (
+						<button
+							key={role}
+							type="button"
+							onClick={() => {
+								setClassesNeeded((prev) =>
+									prev.includes(role)
+										? prev.filter((r) => r !== role)
+										: [...prev, role]
+								);
+							}}
+							className={tagButtonClasses(classesNeeded.includes(role))}
+						>
+							{role}
+						</button>
+					))}
+				</div>
+				<p className="text-xs text-slate-500">
+					{classesNeeded.length} class(es) selected
+				</p>
+			</div>
 
-page.tsx page.tsx page.tsx <div className="space-y-2">
-page.tsx page.tsx page.tsx page.tsx <label
-page.tsx page.tsx page.tsx page.tsx page.tsx htmlFor="costPerSession"
-page.tsx page.tsx page.tsx page.tsx page.tsx className="block text-sm font-medium text-slate-200"
-page.tsx page.tsx page.tsx page.tsx >
-page.tsx page.tsx page.tsx page.tsx page.tsx Cost per Session
-page.tsx page.tsx page.tsx page.tsx </label>
-page.tsx page.tsx page.tsx page.tsx <input
-page.tsx page.tsx page.tsx page.tsx page.tsx id="costPerSession"
-page.tsx page.tsx page.tsx page.tsx page.tsx type="number"
-page.tsx page.tsx page.tsx page.tsx page.tsx min="0"
-page.tsx page.tsx page.tsx page.tsx page.tsx step="0.01"
-page.tsx page.tsx page.tsx page.tsx page.tsx value={costPerSession}
-page.tsx page.tsx page.tsx page.tsx page.tsx onChange={(e) => {
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx const value = e.target.value;
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx setCostPerSession(value === '' ? '' : parseFloat(value));
-page.tsx page.tsx page.tsx page.tsx page.tsx }}
-page.tsx page.tsx page.tsx page.tsx page.tsx placeholder="e.g., 0 for free, 5.00 for paid"
-page.tsx page.tsx page.tsx page.tsx page.tsx className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-page.tsx page.tsx page.tsx page.tsx />
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-500">
-page.tsx page.tsx page.tsx page.tsx page.tsx The cost per session in dollars (0 for free campaigns)
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx </div>
+			<div className="space-y-2">
+				<label
+					htmlFor="costPerSession"
+					className="block text-sm font-medium text-slate-200"
+				>
+					Cost per Session
+				</label>
+				<input
+					id="costPerSession"
+					type="number"
+					min="0"
+					step="0.01"
+					value={costPerSession}
+					onChange={(e) => {
+						const value = e.target.value;
+						setCostPerSession(value === '' ? '' : parseFloat(value));
+					}}
+					placeholder="e.g., 0 for free, 5.00 for paid"
+					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+				/>
+				<p className="text-xs text-slate-500">
+					The cost per session in dollars (0 for free campaigns)
+				</p>
+			</div>
 
-page.tsx page.tsx page.tsx <div className="space-y-2">
-page.tsx page.tsx page.tsx page.tsx <label
-page.tsx page.tsx page.tsx page.tsx page.tsx htmlFor="meetingFrequency"
-page.tsx page.tsx page.tsx page.tsx page.tsx className="block text-sm font-medium text-slate-200"
-page.tsx page.tsx page.tsx page.tsx >
-page.tsx page.tsx page.tsx page.tsx page.tsx Meeting Frequency
-page.tsx page.tsx page.tsx page.tsx </label>
-page.tsx page.tsx page.tsx page.tsx <select
-page.tsx page.tsx page.tsx page.tsx page.tsx id="meetingFrequency"
-page.tsx page.tsx page.tsx page.tsx page.tsx value={meetingFrequency}
-page.tsx page.tsx page.tsx page.tsx page.tsx onChange={(e) => setMeetingFrequency(e.target.value)}
-page.tsx page.tsx page.tsx page.tsx page.tsx className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-page.tsx page.tsx page.tsx page.tsx >
-page.tsx page.tsx page.tsx page.tsx page.tsx <option value="">Select frequency...</option>
-page.tsx page.tsx page.tsx page.tsx page.tsx {MEETING_FREQUENCY_OPTIONS.map((freq) => (
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx <option key={freq} value={freq}>
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx {freq}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx </option>
-page.tsx page.tsx page.tsx page.tsx page.tsx ))}
-page.tsx page.tsx page.tsx page.tsx </select>
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-500">
-page.tsx page.tsx page.tsx page.tsx page.tsx How often does this campaign meet?
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx </div>
+			<div className="space-y-2">
+				<label
+					htmlFor="meetingFrequency"
+					className="block text-sm font-medium text-slate-200"
+				>
+					Meeting Frequency
+				</label>
+				<select
+					id="meetingFrequency"
+					value={meetingFrequency}
+					onChange={(e) => setMeetingFrequency(e.target.value)}
+					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+				>
+					<option value="">Select frequency...</option>
+					{MEETING_FREQUENCY_OPTIONS.map((freq) => (
+						<option key={freq} value={freq}>
+							{freq}
+						</option>
+					))}
+				</select>
+				<p className="text-xs text-slate-500">
+					How often does this campaign meet?
+				</p>
+			</div>
 
-page.tsx page.tsx page.tsx <div className="space-y-2">
-page.tsx page.tsx page.tsx page.tsx <label className="block text-sm font-medium text-slate-200">
-page.tsx page.tsx page.tsx page.tsx page.tsx Days of the Week
-page.tsx page.tsx page.tsx page.tsx </label>
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-400 mb-2">
-page.tsx page.tsx page.tsx page.tsx page.tsx Select which days the campaign typically meets
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx page.tsx <div className="flex flex-wrap gap-2">
-page.tsx page.tsx page.tsx page.tsx page.tsx {DAYS_OF_WEEK.map((day) => (
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx <button
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx key={day}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx type="button"
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx onClick={() => {
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx setDaysOfWeek((prev) =>
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx prev.includes(day)
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx ? prev.filter((d) => d !== day)
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx : [...prev, day]
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx );
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx }}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx className={tagButtonClasses(daysOfWeek.includes(day))}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx >
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx {day}
-page.tsx page.tsx page.tsx page.tsx page.tsx page.tsx </button>
-page.tsx page.tsx page.tsx page.tsx page.tsx ))}
-page.tsx page.tsx page.tsx page.tsx </div>
-page.tsx page.tsx page.tsx page.tsx <p className="text-xs text-slate-500">
-page.tsx page.tsx page.tsx page.tsx page.tsx {daysOfWeek.length} day(s) selected
-page.tsx page.tsx page.tsx page.tsx </p>
-page.tsx page.tsx page.tsx </div>
+			<div className="space-y-2">
+				<label className="block text-sm font-medium text-slate-200">
+					Days of the Week
+				</label>
+				<p className="text-xs text-slate-400 mb-2">
+					Select which days the campaign typically meets
+				</p>
+				<div className="flex flex-wrap gap-2">
+					{DAYS_OF_WEEK.map((day) => (
+						<button
+							key={day}
+							type="button"
+							onClick={() => {
+								setDaysOfWeek((prev) =>
+									prev.includes(day)
+										? prev.filter((d) => d !== day)
+										: [...prev, day]
+								);
+							}}
+							className={tagButtonClasses(daysOfWeek.includes(day))}
+						>
+							{day}
+						</button>
+					))}
+				</div>
+				<p className="text-xs text-slate-500">
+					{daysOfWeek.length} day(s) selected
+				</p>
+			</div>
 
 				<div className="space-y-2">
 					<label
@@ -552,7 +562,7 @@ page.tsx page.tsx page.tsx </div>
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
 						rows={4}
-						placeholder="Describe your game session, experience level requirements, or any additional details..."
+						placeholder="Describe your campaign, experience level requirements, or any additional details..."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
 				</div>
@@ -568,7 +578,7 @@ page.tsx page.tsx page.tsx </div>
 						isSubmitting
 					}
 				>
-					{isSubmitting ? "Posting..." : "Post Campaign Session"}
+					{isSubmitting ? "Posting..." : "Post Game Session"}
 				</button>
 
 				{error && (
@@ -582,10 +592,10 @@ page.tsx page.tsx page.tsx </div>
 						<p className="text-sm text-green-400">
 							Campaign posted successfully!
 						</p>
-						{postedGameId && (
+						{postedCampaignId && (
 							<div className="flex gap-3">
 								<ShareToFacebook
-									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
+									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedCampaignId}`}
 									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
 								/>
 							</div>

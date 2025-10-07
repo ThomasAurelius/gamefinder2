@@ -94,9 +94,9 @@ export async function GET(request: Request) {
               );
               return { ...campaign, distance };
             }
-            return campaign;
+            return { ...campaign, distance: undefined };
           })
-          .filter(campaign => {
+          .filter((campaign): campaign is typeof campaign & { distance: number | undefined } => {
             // Only show campaigns within the specified radius or campaigns without location
             if (campaign.distance === undefined) return true;
             return campaign.distance <= radiusMiles;

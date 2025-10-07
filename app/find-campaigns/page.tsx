@@ -386,8 +386,8 @@ export default function FindCampaignsPage() {
 				throw new Error("Failed to fetch campaigns");
 			}
 
-			const fetchedCampaigns = await response.json();
-			setCampaigns(sessions);
+			const campaigns = await response.json();
+			setCampaigns(campaigns);
 		} catch (error) {
 			console.error("Failed to fetch campaigns", error);
 			setCampaigns([]);
@@ -448,9 +448,9 @@ export default function FindCampaignsPage() {
 			const updatedSession = await response.json();
 
 			// Update the session in the search results list
-			setGameSessions((prevSessions) =>
-				prevSessions.map((session) =>
-					session.id === campaignId ? updatedSession : session
+			setCampaigns((prevCampaigns) =>
+				prevCampaigns.map((campaign) =>
+					campaign.id === campaignId ? updatedSession : campaign
 				)
 			);
 
@@ -467,7 +467,7 @@ export default function FindCampaignsPage() {
 					: "Failed to withdraw from campaign"
 			);
 		} finally {
-			setJoiningSessionId(null);
+			setJoiningCampaignId(null);
 		}
 	};
 
@@ -478,7 +478,7 @@ export default function FindCampaignsPage() {
 		if (!campaignToJoin) return;
 
 		setShowCharacterDialog(false);
-		setJoiningSessionId(campaignToJoin.id);
+		setJoiningCampaignId(campaignToJoin.id);
 		setJoinError(null);
 
 		try {
@@ -499,11 +499,11 @@ export default function FindCampaignsPage() {
 
 			// Update the session in the search results list
 			// Preserve the distance field from the original session
-			setGameSessions((prevSessions) =>
-				prevSessions.map((session) =>
-					session.id === campaignToJoin.id
-						? { ...updatedSession, distance: session.distance }
-						: session
+			setCampaigns((prevCampaigns) =>
+				prevCampaigns.map((campaign) =>
+					campaign.id === campaignToJoin.id
+						? { ...updatedSession, distance: campaign.distance }
+						: campaign
 				)
 			);
 
@@ -520,14 +520,14 @@ export default function FindCampaignsPage() {
 					: "Failed to join campaign"
 			);
 		} finally {
-			setJoiningSessionId(null);
-			setSessionToJoin(null);
+			setJoiningCampaignId(null);
+			setCampaignToJoin(null);
 		}
 	};
 
 	const handleCharacterCancel = () => {
 		setShowCharacterDialog(false);
-		setSessionToJoin(null);
+		setCampaignToJoin(null);
 	};
 
 	return (
@@ -801,10 +801,10 @@ export default function FindCampaignsPage() {
 						<p className="mt-4 text-sm text-slate-500">Loading...</p>
 					) : campaigns.length > 0 ? (
 						<div className="mt-4 space-y-3">
-							{campaigns.map((campaign) => (
+							{campaigns.map((event) => (
 								<CampaignCard
-									key={session.id}
-									campaign={session}
+									key={event.id}
+									campaign={event}
 									userTimezone={userTimezone}
 									joiningCampaignId={joiningCampaignId}
 									onJoin={handleJoinClick}
