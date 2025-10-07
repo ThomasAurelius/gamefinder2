@@ -14,6 +14,9 @@ export type CampaignPayload = {
   classesNeeded?: string[];
   costPerSession?: number;
   paymentMethod?: string;
+  stripePaymentIntentId?: string;
+  stripeClientSecret?: string;
+  requiresPayment?: boolean;
   meetingFrequency?: string;
   daysOfWeek?: string[];
 };
