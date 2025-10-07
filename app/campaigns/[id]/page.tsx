@@ -332,29 +332,24 @@ export default function CampaignDetailPage() {
       </Link>
 
       <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
+        {isCreator ? (
+          // Layout for creators: image below edit button
+          <div>
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
-              {isCreator && (
-                <Link
-                  href={`/campaigns/${campaignId}/edit`}
-                  className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
-                >
-                  Edit Campaign
-                </Link>
-              )}
+              <Link
+                href={`/campaigns/${campaignId}/edit`}
+                className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+              >
+                Edit Campaign
+              </Link>
             </div>
-            {!isCreator && campaign.hostName && (
-              <p className="mt-2 text-sm text-slate-400">
-                <span className="text-slate-500">Host:</span>{" "}
-                <Link
-                  href={`/user/${campaign.userId}`}
-                  className="text-slate-300 hover:text-sky-300 transition-colors"
-                >
-                  {campaign.hostName}
-                </Link>
-              </p>
+            {campaign.imageUrl && (
+              <img
+                src={campaign.imageUrl}
+                alt={campaign.game}
+                className="mt-4 h-32 w-32 rounded-lg border border-slate-700 object-cover"
+              />
             )}
             <div className="mt-4 space-y-2 text-sm text-slate-400">
               <p>
@@ -403,14 +398,78 @@ export default function CampaignDetailPage() {
               )}
             </div>
           </div>
-          {campaign.imageUrl && (
-            <img
-              src={campaign.imageUrl}
-              alt={campaign.game}
-              className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
-            />
-          )}
-        </div>
+        ) : (
+          // Layout for non-creators: image on the right
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
+              {campaign.hostName && (
+                <p className="mt-2 text-sm text-slate-400">
+                  <span className="text-slate-500">Host:</span>{" "}
+                  <Link
+                    href={`/user/${campaign.userId}`}
+                    className="text-slate-300 hover:text-sky-300 transition-colors"
+                  >
+                    {campaign.hostName}
+                  </Link>
+                </p>
+              )}
+              <div className="mt-4 space-y-2 text-sm text-slate-400">
+                <p>
+                  <span className="text-slate-500">Date:</span>{" "}
+                  {formatDateInTimezone(campaign.date, userTimezone)}
+                </p>
+                <p>
+                  <span className="text-slate-500">Times:</span>{" "}
+                  {campaign.times.join(", ")}
+                </p>
+                {(campaign.location || campaign.zipCode) && (
+                  <p>
+                    <span className="text-slate-500">Location:</span>{" "}
+                    {campaign.location || campaign.zipCode}
+                  </p>
+                )}
+                <p>
+                  <span className="text-slate-500">Players:</span>{" "}
+                  <span className={isFull ? "text-orange-400" : "text-green-400"}>
+                    {campaign.signedUpPlayers.length}/{campaign.maxPlayers}
+                  </span>
+                </p>
+                {campaign.waitlist.length > 0 && (
+                  <p>
+                    <span className="text-slate-500">Waitlist:</span>{" "}
+                    <span className="text-yellow-400">{campaign.waitlist.length}</span>
+                  </p>
+                )}
+                {campaign.meetingFrequency && (
+                  <p>
+                    <span className="text-slate-500">Frequency:</span>{" "}
+                    {campaign.meetingFrequency}
+                  </p>
+                )}
+                {campaign.sessionsLeft && (
+                  <p>
+                    <span className="text-slate-500">Sessions Left:</span>{" "}
+                    {campaign.sessionsLeft}
+                  </p>
+                )}
+                {campaign.costPerSession && (
+                  <p>
+                    <span className="text-slate-500">Cost per Session:</span> $
+                    {campaign.costPerSession}
+                  </p>
+                )}
+              </div>
+            </div>
+            {campaign.imageUrl && (
+              <img
+                src={campaign.imageUrl}
+                alt={campaign.game}
+                className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
+              />
+            )}
+          </div>
+        )}
 
       {campaign.description && (
         <div className="mt-4 border-t border-slate-800 pt-4">
