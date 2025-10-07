@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getGameSession, updateGameSession, deleteGameSession } from "@/lib/games/db";
 import { GameSessionPayload } from "@/lib/games/types";
 import { isAdmin } from "@/lib/admin";
+import { geocodeLocation } from "@/lib/geolocation";
 
 export async function GET(
   request: Request,
@@ -46,7 +47,7 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const data = await request.json();
+    const data = await request.json() as Partial<GameSessionPayload>;
     
     // Validate that the user owns this session
     const existingSession = await getGameSession(id);
@@ -66,12 +67,28 @@ export async function PUT(
       );
     }
     
+    // Geocode the location if it's being updated
+    // Try zipCode first, then fall back to location
+    const locationToGeocode = data.zipCode || data.location;
+    if (locationToGeocode) {
+      try {
+        const coords = await geocodeLocation(locationToGeocode);
+        if (coords) {
+          data.latitude = coords.latitude;
+          data.longitude = coords.longitude;
+        }
+      } catch (error) {
+        // Log the error but don't fail the game session update
+        console.error("Failed to geocode location:", error);
+      }
+    }
+    
     // If admin is editing someone else's game, use the original owner's userId
     const ownerUserId = userIsAdmin && existingSession.userId !== userId 
       ? existingSession.userId 
       : userId;
     
-    const updatedSession = await updateGameSession(ownerUserId, id, data as Partial<GameSessionPayload>);
+    const updatedSession = await updateGameSession(ownerUserId, id, data);
     
     if (!updatedSession) {
       return NextResponse.json(

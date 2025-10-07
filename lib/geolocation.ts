@@ -67,28 +67,66 @@ export async function geocodeLocation(
     }
 
     // Use Nominatim API with a proper user agent
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
-      {
-        headers: {
-          "User-Agent": "GameFinder2-App/1.0",
-        },
+    // Add timeout and retry logic to handle API issues
+    const maxRetries = 2;
+    const timeoutMs = 5000; // 5 second timeout
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        // Add delay between retries to respect rate limits (1 req/sec for Nominatim)
+        if (attempt > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
+          {
+            headers: {
+              "User-Agent": "GameFinder2-App/1.0",
+            },
+            signal: controller.signal,
+          }
+        );
+        
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          console.error("Geocoding API error:", response.statusText);
+          if (attempt < maxRetries) {
+            continue; // Retry on non-OK response
+          }
+          return null;
+        }
+
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+          const result = data[0];
+          return {
+            latitude: parseFloat(result.lat),
+            longitude: parseFloat(result.lon),
+          };
+        }
+
+        // If we got an empty result, don't retry - the location wasn't found
+        return null;
+      } catch (fetchError) {
+        // Handle timeout or network errors
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          console.error(`Geocoding timeout (attempt ${attempt + 1}/${maxRetries + 1})`);
+        } else {
+          console.error(`Geocoding fetch error (attempt ${attempt + 1}/${maxRetries + 1}):`, fetchError);
+        }
+        
+        // If this was the last attempt, give up
+        if (attempt === maxRetries) {
+          throw fetchError;
+        }
+        // Otherwise, continue to retry
       }
-    );
-
-    if (!response.ok) {
-      console.error("Geocoding API error:", response.statusText);
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (Array.isArray(data) && data.length > 0) {
-      const result = data[0];
-      return {
-        latitude: parseFloat(result.lat),
-        longitude: parseFloat(result.lon),
-      };
     }
 
     return null;
