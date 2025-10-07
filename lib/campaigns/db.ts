@@ -1,0 +1,386 @@
+import { randomUUID } from "crypto";
+import type { ObjectId } from "mongodb";
+import { getDb } from "@/lib/mongodb";
+import { CampaignPayload, StoredCampaign } from "./types";
+
+type CampaignDocument = StoredCampaign & {
+  _id?: ObjectId;
+};
+
+export async function listCampaigns(filters?: {
+  game?: string;
+  date?: string;
+  times?: string[];
+}): Promise<StoredCampaign[]> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+
+  // Build query based on filters
+  const query: Record<string, unknown> = {};
+  
+  if (filters?.game) {
+    query.game = filters.game;
+  }
+  
+  if (filters?.date) {
+    query.date = filters.date;
+  }
+  
+  if (filters?.times && filters.times.length > 0) {
+    // Find campaigns that have at least one matching time slot
+    query.times = { $in: filters.times };
+  }
+
+  const campaigns = await campaignsCollection
+    .find(query)
+    .sort({ date: 1, createdAt: -1 })
+    .toArray();
+
+  return campaigns.map((campaign) => ({
+    id: campaign.id,
+    userId: campaign.userId,
+    game: campaign.game,
+    date: campaign.date,
+    times: [...campaign.times],
+    description: campaign.description,
+    maxPlayers: campaign.maxPlayers || 4,
+    signedUpPlayers: campaign.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: campaign.signedUpPlayersWithCharacters || [],
+    waitlist: campaign.waitlist || [],
+    waitlistWithCharacters: campaign.waitlistWithCharacters || [],
+    pendingPlayers: campaign.pendingPlayers || [],
+    pendingPlayersWithCharacters: campaign.pendingPlayersWithCharacters || [],
+    createdAt: campaign.createdAt,
+    updatedAt: campaign.updatedAt,
+    imageUrl: campaign.imageUrl,
+    location: campaign.location,
+    zipCode: campaign.zipCode,
+    latitude: campaign.latitude,
+    longitude: campaign.longitude,
+    sessionsLeft: campaign.sessionsLeft,
+    classesNeeded: campaign.classesNeeded,
+    costPerSession: campaign.costPerSession,
+    meetingFrequency: campaign.meetingFrequency,
+    daysOfWeek: campaign.daysOfWeek,
+  }));
+}
+
+export async function getCampaign(id: string): Promise<StoredCampaign | null> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+
+  const campaign = await campaignsCollection.findOne({ id });
+
+  if (!campaign) {
+    return null;
+  }
+
+  return {
+    id: campaign.id,
+    userId: campaign.userId,
+    game: campaign.game,
+    date: campaign.date,
+    times: [...campaign.times],
+    description: campaign.description,
+    maxPlayers: campaign.maxPlayers || 4,
+    signedUpPlayers: campaign.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: campaign.signedUpPlayersWithCharacters || [],
+    waitlist: campaign.waitlist || [],
+    waitlistWithCharacters: campaign.waitlistWithCharacters || [],
+    pendingPlayers: campaign.pendingPlayers || [],
+    pendingPlayersWithCharacters: campaign.pendingPlayersWithCharacters || [],
+    createdAt: campaign.createdAt,
+    updatedAt: campaign.updatedAt,
+    imageUrl: campaign.imageUrl,
+    location: campaign.location,
+    zipCode: campaign.zipCode,
+    latitude: campaign.latitude,
+    longitude: campaign.longitude,
+    sessionsLeft: campaign.sessionsLeft,
+    classesNeeded: campaign.classesNeeded,
+    costPerSession: campaign.costPerSession,
+    meetingFrequency: campaign.meetingFrequency,
+    daysOfWeek: campaign.daysOfWeek,
+  };
+}
+
+export async function createCampaign(
+  userId: string,
+  payload: CampaignPayload
+): Promise<StoredCampaign> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+
+  const timestamp = new Date().toISOString();
+
+  const newCampaign: CampaignDocument = {
+    id: randomUUID(),
+    userId,
+    game: payload.game,
+    date: payload.date,
+    times: [...payload.times],
+    description: payload.description,
+    maxPlayers: payload.maxPlayers,
+    signedUpPlayers: [],
+    signedUpPlayersWithCharacters: [],
+    waitlist: [],
+    waitlistWithCharacters: [],
+    pendingPlayers: [],
+    pendingPlayersWithCharacters: [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    imageUrl: payload.imageUrl,
+    location: payload.location,
+    zipCode: payload.zipCode,
+    latitude: payload.latitude,
+    longitude: payload.longitude,
+    sessionsLeft: payload.sessionsLeft,
+    classesNeeded: payload.classesNeeded,
+    costPerSession: payload.costPerSession,
+    meetingFrequency: payload.meetingFrequency,
+    daysOfWeek: payload.daysOfWeek,
+  };
+
+  await campaignsCollection.insertOne(newCampaign);
+
+  return {
+    id: newCampaign.id,
+    userId: newCampaign.userId,
+    game: newCampaign.game,
+    date: newCampaign.date,
+    times: newCampaign.times,
+    description: newCampaign.description,
+    maxPlayers: newCampaign.maxPlayers,
+    signedUpPlayers: newCampaign.signedUpPlayers,
+    signedUpPlayersWithCharacters: newCampaign.signedUpPlayersWithCharacters,
+    waitlist: newCampaign.waitlist,
+    waitlistWithCharacters: newCampaign.waitlistWithCharacters,
+    pendingPlayers: newCampaign.pendingPlayers,
+    pendingPlayersWithCharacters: newCampaign.pendingPlayersWithCharacters,
+    createdAt: newCampaign.createdAt,
+    updatedAt: newCampaign.updatedAt,
+    imageUrl: newCampaign.imageUrl,
+    location: newCampaign.location,
+    zipCode: newCampaign.zipCode,
+    latitude: newCampaign.latitude,
+    longitude: newCampaign.longitude,
+    sessionsLeft: newCampaign.sessionsLeft,
+    classesNeeded: newCampaign.classesNeeded,
+    costPerSession: newCampaign.costPerSession,
+    meetingFrequency: newCampaign.meetingFrequency,
+    daysOfWeek: newCampaign.daysOfWeek,
+  };
+}
+
+export async function updateCampaign(
+  userId: string,
+  id: string,
+  payload: Partial<CampaignPayload>
+): Promise<StoredCampaign | null> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+
+  const timestamp = new Date().toISOString();
+
+  const result = await campaignsCollection.findOneAndUpdate(
+    { userId, id },
+    {
+      $set: {
+        ...payload,
+        updatedAt: timestamp,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    sessionsLeft: result.sessionsLeft,
+    classesNeeded: result.classesNeeded,
+    costPerSession: result.costPerSession,
+    meetingFrequency: result.meetingFrequency,
+    daysOfWeek: result.daysOfWeek,
+  };
+}
+
+export async function deleteCampaign(userId: string, id: string): Promise<boolean> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+
+  const result = await campaignsCollection.deleteOne({ userId, id });
+
+  return result.deletedCount > 0;
+}
+
+export async function joinCampaign(
+  campaignId: string,
+  userId: string,
+  characterId?: string,
+  characterName?: string
+): Promise<StoredCampaign | null> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+  
+  const campaign = await campaignsCollection.findOne({ id: campaignId });
+  
+  if (!campaign) {
+    return null;
+  }
+  
+  // Check if user is the host (DM) - hosts cannot join their own campaign as players
+  if (campaign.userId === userId) {
+    return null;
+  }
+  
+  // Check if user is already signed up, on waitlist, or pending
+  if (
+    campaign.signedUpPlayers?.includes(userId) || 
+    campaign.waitlist?.includes(userId) ||
+    campaign.pendingPlayers?.includes(userId)
+  ) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Prepare player signup data
+  const playerSignup = { userId, characterId, characterName };
+  
+  // Add to pending players for host approval
+  const result = await campaignsCollection.findOneAndUpdate(
+    { id: campaignId },
+    {
+      $push: { 
+        pendingPlayers: userId,
+        pendingPlayersWithCharacters: playerSignup
+      },
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    sessionsLeft: result.sessionsLeft,
+    classesNeeded: result.classesNeeded,
+    costPerSession: result.costPerSession,
+    meetingFrequency: result.meetingFrequency,
+    daysOfWeek: result.daysOfWeek,
+  };
+}
+
+export async function leaveCampaign(
+  campaignId: string,
+  userId: string
+): Promise<StoredCampaign | null> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+  
+  const campaign = await campaignsCollection.findOne({ id: campaignId });
+  
+  if (!campaign) {
+    return null;
+  }
+  
+  // Check if user is the host (DM) - hosts cannot leave their own campaign
+  if (campaign.userId === userId) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Remove user from all possible lists (pending, signed up, or waitlist)
+  const result = await campaignsCollection.findOneAndUpdate(
+    { id: campaignId },
+    {
+      $pull: { 
+        pendingPlayers: userId,
+        pendingPlayersWithCharacters: { userId: userId },
+        signedUpPlayers: userId,
+        signedUpPlayersWithCharacters: { userId: userId },
+        waitlist: userId,
+        waitlistWithCharacters: { userId: userId }
+      },
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    sessionsLeft: result.sessionsLeft,
+    classesNeeded: result.classesNeeded,
+    costPerSession: result.costPerSession,
+    meetingFrequency: result.meetingFrequency,
+    daysOfWeek: result.daysOfWeek,
+  };
+}
