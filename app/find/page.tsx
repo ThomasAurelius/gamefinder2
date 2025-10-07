@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
@@ -192,6 +193,7 @@ function GameSessionCard({
 }
 
 export default function FindGamesPage() {
+	const router = useRouter();
 	const [selectedGame, setSelectedGame] = useState("");
 	const [customGameName, setCustomGameName] = useState("");
 	const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
@@ -354,6 +356,13 @@ export default function FindGamesPage() {
 		if (showCharacterDialog) {
 			return;
 		}
+		
+		// Check if user is logged in - redirect to login if not
+		if (!currentUserId) {
+			router.push("/auth/login");
+			return;
+		}
+		
 		// Find the session to check if user is already signed up
 		const session = [...gameSessions, ...allEvents].find(
 			(s) => s.id === sessionId
