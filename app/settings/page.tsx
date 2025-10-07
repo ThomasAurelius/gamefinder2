@@ -2,14 +2,27 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
   const [isAdmin, setIsAdmin] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  
+  // Stripe Connect state
+  const [stripeLoading, setStripeLoading] = useState(true);
+  const [stripeConnecting, setStripeConnecting] = useState(false);
+  const [stripeAccount, setStripeAccount] = useState<{
+    hasAccount: boolean;
+    onboardingComplete?: boolean;
+    chargesEnabled?: boolean;
+    payoutsEnabled?: boolean;
+  }>({ hasAccount: false });
+  const [stripeMessage, setStripeMessage] = useState("");
 
   useEffect(() => {
     async function checkAdminAndLoadAnnouncement() {
@@ -33,8 +46,33 @@ export default function SettingsPage() {
       }
     }
 
+    async function loadStripeAccount() {
+      try {
+        const response = await fetch("/api/stripe/connect");
+        const data = await response.json();
+        setStripeAccount(data);
+        
+        // Check for return from Stripe onboarding
+        const stripeSuccess = searchParams.get("stripe_success");
+        const stripeRefresh = searchParams.get("stripe_refresh");
+        
+        if (stripeSuccess) {
+          setStripeMessage("Successfully connected to Stripe! Refreshing status...");
+          // Refresh account status
+          await refreshStripeStatus();
+        } else if (stripeRefresh) {
+          setStripeMessage("Please complete the Stripe setup process.");
+        }
+      } catch (error) {
+        console.error("Failed to load Stripe account:", error);
+      } finally {
+        setStripeLoading(false);
+      }
+    }
+
     checkAdminAndLoadAnnouncement();
-  }, []);
+    loadStripeAccount();
+  }, [searchParams]);
 
   const handleSaveAnnouncement = async () => {
     setSaving(true);
@@ -61,6 +99,53 @@ export default function SettingsPage() {
     }
   };
 
+  const handleConnectStripe = async () => {
+    setStripeConnecting(true);
+    setStripeMessage("");
+
+    try {
+      const response = await fetch("/api/stripe/connect", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to connect to Stripe");
+      }
+
+      // Redirect to Stripe onboarding
+      window.location.href = data.url;
+    } catch (error) {
+      console.error("Failed to connect Stripe:", error);
+      setStripeMessage(error instanceof Error ? error.message : "Failed to connect to Stripe");
+      setStripeConnecting(false);
+    }
+  };
+
+  const refreshStripeStatus = async () => {
+    try {
+      const response = await fetch("/api/stripe/account-status", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStripeAccount({
+          hasAccount: true,
+          onboardingComplete: data.onboardingComplete,
+          chargesEnabled: data.chargesEnabled,
+          payoutsEnabled: data.payoutsEnabled,
+        });
+        setStripeMessage("Status refreshed successfully!");
+        setTimeout(() => setStripeMessage(""), 3000);
+      }
+    } catch (error) {
+      console.error("Failed to refresh Stripe status:", error);
+    }
+  };
+
   return (
     <section className="space-y-4">
       <h1 className="text-2xl font-semibold">Settings</h1>
@@ -82,6 +167,87 @@ export default function SettingsPage() {
             >
               Go to Profile
             </Link>
+          </div>
+
+          {/* Stripe Connect Section */}
+          <div className="rounded-lg border border-emerald-700/50 bg-emerald-900/20 p-4">
+            <h2 className="text-sm font-medium text-emerald-200">
+              Payment Processing for DMs
+            </h2>
+            <p className="mt-2 text-xs text-slate-400">
+              Connect your Stripe account to receive payments for paid campaigns. We charge a 15% platform fee on the amount after Stripe fees.
+            </p>
+
+            {stripeLoading ? (
+              <div className="mt-4">
+                <p className="text-sm text-slate-400">Loading payment settings...</p>
+              </div>
+            ) : stripeAccount.hasAccount && stripeAccount.onboardingComplete ? (
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-emerald-500"></div>
+                  <span className="text-sm text-emerald-300">
+                    Stripe Connected
+                  </span>
+                </div>
+                
+                <div className="space-y-1 text-xs text-slate-400">
+                  <div className="flex items-center gap-2">
+                    <span>Charges Enabled:</span>
+                    <span className={stripeAccount.chargesEnabled ? "text-emerald-400" : "text-amber-400"}>
+                      {stripeAccount.chargesEnabled ? "Yes" : "No"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Payouts Enabled:</span>
+                    <span className={stripeAccount.payoutsEnabled ? "text-emerald-400" : "text-amber-400"}>
+                      {stripeAccount.payoutsEnabled ? "Yes" : "No"}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={refreshStripeStatus}
+                  className="rounded-lg border border-emerald-600 bg-emerald-600/10 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-600/20"
+                >
+                  Refresh Status
+                </button>
+
+                {stripeMessage && (
+                  <p className={`text-sm ${stripeMessage.includes("success") ? "text-emerald-400" : "text-amber-400"}`}>
+                    {stripeMessage}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {stripeAccount.hasAccount && !stripeAccount.onboardingComplete && (
+                  <div className="rounded-md bg-amber-900/20 border border-amber-700/50 p-3">
+                    <p className="text-xs text-amber-200">
+                      Your Stripe setup is incomplete. Please complete the onboarding process.
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleConnectStripe}
+                  disabled={stripeConnecting}
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {stripeConnecting ? "Connecting..." : stripeAccount.hasAccount ? "Complete Setup" : "Connect Stripe Account"}
+                </button>
+
+                {stripeMessage && (
+                  <p className="text-sm text-rose-400">
+                    {stripeMessage}
+                  </p>
+                )}
+
+                <p className="text-xs text-slate-500">
+                  By connecting Stripe, you agree to receive payments through the platform. Standard Stripe fees apply, plus a 15% platform fee.
+                </p>
+              </div>
+            )}
           </div>
           
           {loading ? (

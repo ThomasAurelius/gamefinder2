@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
+import Link from "next/link";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import ShareToFacebook from "@/components/ShareToFacebook";
@@ -452,23 +453,23 @@ export default function PostCampaignPage() {
 
 			{costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
 				<div className="space-y-2">
-					<label
-						htmlFor="paymentMethod"
-						className="block text-sm font-medium text-slate-200"
-					>
-						Payment Method Link
-					</label>
-					<input
-						id="paymentMethod"
-						type="url"
-						value={paymentMethod}
-						onChange={(e) => setPaymentMethod(e.target.value)}
-						placeholder="e.g., https://paypal.me/yourname or https://venmo.com/yourname"
-						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					/>
-					<p className="text-xs text-slate-500">
-						Link to your payment page (PayPal, Venmo, etc.)
-					</p>
+					<div className="rounded-lg border border-emerald-700/50 bg-emerald-900/20 p-4">
+						<h3 className="text-sm font-medium text-emerald-200">
+							💳 Payment Processing
+						</h3>
+						<p className="mt-2 text-xs text-slate-400">
+							Payments for this campaign will be processed through Stripe. Make sure you've connected your Stripe account in Settings to receive payments.
+						</p>
+						<p className="mt-2 text-xs text-slate-500">
+							Platform fee: 15% of the amount after Stripe fees (~2.9% + $0.30)
+						</p>
+						<Link
+							href="/settings"
+							className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-emerald-700"
+						>
+							Configure Payment Settings
+						</Link>
+					</div>
 				</div>
 			)}
 
