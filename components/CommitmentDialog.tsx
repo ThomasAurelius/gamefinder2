@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface CommitmentDialogProps {
   onAccept: () => void;
@@ -18,6 +18,7 @@ export default function CommitmentDialog({
   isLoading = false,
 }: CommitmentDialogProps) {
   const [hasReadAll, setHasReadAll] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -31,6 +32,24 @@ export default function CommitmentDialog({
     return () => {
       document.body.style.overflow = originalOverflow;
     };
+  }, []);
+
+  // Check if content needs scrolling, if not, automatically mark as read
+  useEffect(() => {
+    const checkScrollNeeded = () => {
+      if (contentRef.current) {
+        const { scrollHeight, clientHeight } = contentRef.current;
+        // If content fits without scrolling, mark as read
+        if (scrollHeight <= clientHeight) {
+          setHasReadAll(true);
+        }
+      }
+    };
+
+    // Check after a brief delay to ensure content is rendered
+    const timeoutId = setTimeout(checkScrollNeeded, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -68,6 +87,7 @@ export default function CommitmentDialog({
         </div>
 
         <div 
+          ref={contentRef}
           className="p-6 space-y-4 max-h-[60vh] overflow-y-auto"
           onScroll={handleScroll}
         >
