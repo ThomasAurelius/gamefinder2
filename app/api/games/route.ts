@@ -74,6 +74,7 @@ export async function GET(request: Request) {
         if (searchCoords) {
           // Calculate distances and filter by radius
           const sessionsWithDistance: (typeof sessionsWithHosts[0] & { distance?: number })[] = [];
+          const sessionsWithoutLocation: typeof sessionsWithHosts = [];
           
           for (const session of sessionsWithHosts) {
             const lat = session.latitude;
@@ -90,14 +91,17 @@ export async function GET(request: Request) {
               if (distance <= radiusMiles) {
                 sessionsWithDistance.push({ ...session, distance });
               }
+            } else {
+              // Include sessions without location data at the end
+              sessionsWithoutLocation.push(session);
             }
           }
           
-          // Sort by distance
-          return NextResponse.json(
-            sessionsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0)),
-            { status: 200 }
-          );
+          // Sort sessions with distance by distance, then append sessions without location
+          const sortedWithDistance = sessionsWithDistance.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+          const allSessions = [...sortedWithDistance, ...sessionsWithoutLocation];
+          
+          return NextResponse.json(allSessions, { status: 200 });
         }
       } catch (error) {
         console.error("Failed to geocode search location:", error);
