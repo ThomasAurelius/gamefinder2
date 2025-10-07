@@ -83,171 +83,177 @@ export default function CampaignDetailPage() {
 
   const campaignId = params.id as string;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch timezone
-        const settingsResponse = await fetch("/api/settings");
-        if (settingsResponse.ok) {
-          const settingsData = await settingsResponse.json();
-          setUserTimezone(settingsData.timezone || DEFAULT_TIMEZONE);
-        }
+  const fetchData = async () => {
+    try {
+      // Fetch timezone
+      const settingsResponse = await fetch("/api/settings");
+      if (settingsResponse.ok) {
+        const settingsData = await settingsResponse.json();
+        setUserTimezone(settingsData.timezone || DEFAULT_TIMEZONE);
+      }
 
-        // Fetch current user ID
-        const profileResponse = await fetch("/api/profile");
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          setCurrentUserId(profileData.userId);
-        }
+      // Fetch current user ID
+      const profileResponse = await fetch("/api/profile");
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        setCurrentUserId(profileData.userId);
+      }
 
-        // Fetch campaign
-        const campaignResponse = await fetch(`/api/campaigns/${campaignId}`);
-        if (!campaignResponse.ok) {
-          if (campaignResponse.status === 404) {
-            router.push("/find-campaigns");
-            return;
-          }
-          throw new Error("Failed to fetch campaign");
+      // Fetch campaign
+      const campaignResponse = await fetch(`/api/campaigns/${campaignId}`);
+      if (!campaignResponse.ok) {
+        if (campaignResponse.status === 404) {
+          router.push("/find-campaigns");
+          return;
         }
-        const campaignData = await campaignResponse.json();
+        throw new Error("Failed to fetch campaign");
+      }
+      const campaignData = await campaignResponse.json();
+      
+      // Fetch host information
+      const hostResponse = await fetch('/api/users/batch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userIds: [campaignData.userId] }),
+      });
+      
+      if (hostResponse.ok) {
+        const hostData = await hostResponse.json();
+        const host = hostData[campaignData.userId];
+        if (host) {
+          campaignData.hostName = host.name;
+          campaignData.hostAvatarUrl = host.avatarUrl;
+        }
+      }
+      
+      setCampaign(campaignData);
+
+      // Fetch pending players with user info if there are any
+      if (campaignData.pendingPlayers && campaignData.pendingPlayers.length > 0) {
+        const pendingPlayersWithCharacters = campaignData.pendingPlayersWithCharacters || [];
         
-        // Fetch host information
-        const hostResponse = await fetch('/api/users/batch', {
+        // Fetch user info for all pending players using batch API
+        const batchResponse = await fetch('/api/users/batch', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ userIds: [campaignData.userId] }),
+          body: JSON.stringify({ userIds: campaignData.pendingPlayers }),
         });
         
-        if (hostResponse.ok) {
-          const hostData = await hostResponse.json();
-          const host = hostData[campaignData.userId];
-          if (host) {
-            campaignData.hostName = host.name;
-            campaignData.hostAvatarUrl = host.avatarUrl;
-          }
+        if (batchResponse.ok) {
+          const usersData = await batchResponse.json();
+          
+          const pendingPlayers = campaignData.pendingPlayers.map((playerId: string) => {
+            const userData = usersData[playerId];
+            if (!userData) return null;
+            
+            const characterInfo = pendingPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+            return {
+              id: playerId,
+              name: userData.name || "Unknown User",
+              avatarUrl: userData.avatarUrl,
+              characterName: characterInfo?.characterName,
+            };
+          }).filter((user: PendingPlayer | null): user is PendingPlayer => user !== null);
+          
+          setPendingPlayersList(pendingPlayers);
         }
-        
-        setCampaign(campaignData);
-
-        // Fetch pending players with user info if there are any
-        if (campaignData.pendingPlayers && campaignData.pendingPlayers.length > 0) {
-          const pendingPlayersWithCharacters = campaignData.pendingPlayersWithCharacters || [];
-          
-          // Fetch user info for all pending players using batch API
-          const batchResponse = await fetch('/api/users/batch', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userIds: campaignData.pendingPlayers }),
-          });
-          
-          if (batchResponse.ok) {
-            const usersData = await batchResponse.json();
-            
-            const pendingPlayers = campaignData.pendingPlayers.map((playerId: string) => {
-              const userData = usersData[playerId];
-              if (!userData) return null;
-              
-              const characterInfo = pendingPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
-              return {
-                id: playerId,
-                name: userData.name || "Unknown User",
-                avatarUrl: userData.avatarUrl,
-                characterName: characterInfo?.characterName,
-              };
-            }).filter((user: PendingPlayer | null): user is PendingPlayer => user !== null);
-            
-            setPendingPlayersList(pendingPlayers);
-          }
-        }
-
-        // Fetch signed up players with user info if there are any
-        if (campaignData.signedUpPlayers && campaignData.signedUpPlayers.length > 0) {
-          const signedUpPlayersWithCharacters = campaignData.signedUpPlayersWithCharacters || [];
-          
-          // Fetch user info for all signed up players using batch API
-          const batchResponse = await fetch('/api/users/batch', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userIds: campaignData.signedUpPlayers }),
-          });
-          
-          if (batchResponse.ok) {
-            const usersData = await batchResponse.json();
-            
-            const signedUpPlayers = campaignData.signedUpPlayers.map((playerId: string) => {
-              const userData = usersData[playerId];
-              if (!userData) return null;
-              
-              const characterInfo = signedUpPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
-              return {
-                userId: playerId,
-                name: userData.name || "Unknown User",
-                avatarUrl: userData.avatarUrl,
-                characterName: characterInfo?.characterName,
-              };
-            }).filter((user: PlayerWithInfo | null): user is PlayerWithInfo => user !== null);
-            
-            setSignedUpPlayersList(signedUpPlayers);
-          }
-        }
-
-        // Fetch waitlist players with user info if there are any
-        if (campaignData.waitlist && campaignData.waitlist.length > 0) {
-          const waitlistWithCharacters = campaignData.waitlistWithCharacters || [];
-          
-          // Fetch user info for all waitlist players using batch API
-          const batchResponse = await fetch('/api/users/batch', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userIds: campaignData.waitlist }),
-          });
-          
-          if (batchResponse.ok) {
-            const usersData = await batchResponse.json();
-            
-            const waitlistPlayers = campaignData.waitlist.map((playerId: string) => {
-              const userData = usersData[playerId];
-              if (!userData) return null;
-              
-              const characterInfo = waitlistWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
-              return {
-                userId: playerId,
-                name: userData.name || "Unknown User",
-                avatarUrl: userData.avatarUrl,
-                characterName: characterInfo?.characterName,
-              };
-            }).filter((user: PlayerWithInfo | null): user is PlayerWithInfo => user !== null);
-            
-            setWaitlistPlayersList(waitlistPlayers);
-          }
-        }
-
-        // Fetch notes if user is the creator
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          if (campaignData.userId === profileData.userId) {
-            const notesResponse = await fetch(`/api/campaigns/${campaignId}/notes`);
-            if (notesResponse.ok) {
-              const notesData = await notesResponse.json();
-              setNotes(notesData);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch campaign data:", error);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setPendingPlayersList([]);
       }
-    };
 
+      // Fetch signed up players with user info if there are any
+      if (campaignData.signedUpPlayers && campaignData.signedUpPlayers.length > 0) {
+        const signedUpPlayersWithCharacters = campaignData.signedUpPlayersWithCharacters || [];
+        
+        // Fetch user info for all signed up players using batch API
+        const batchResponse = await fetch('/api/users/batch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userIds: campaignData.signedUpPlayers }),
+        });
+        
+        if (batchResponse.ok) {
+          const usersData = await batchResponse.json();
+          
+          const signedUpPlayers = campaignData.signedUpPlayers.map((playerId: string) => {
+            const userData = usersData[playerId];
+            if (!userData) return null;
+            
+            const characterInfo = signedUpPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+            return {
+              userId: playerId,
+              name: userData.name || "Unknown User",
+              avatarUrl: userData.avatarUrl,
+              characterName: characterInfo?.characterName,
+            };
+          }).filter((user: PlayerWithInfo | null): user is PlayerWithInfo => user !== null);
+          
+          setSignedUpPlayersList(signedUpPlayers);
+        }
+      } else {
+        setSignedUpPlayersList([]);
+      }
+
+      // Fetch waitlist players with user info if there are any
+      if (campaignData.waitlist && campaignData.waitlist.length > 0) {
+        const waitlistWithCharacters = campaignData.waitlistWithCharacters || [];
+        
+        // Fetch user info for all waitlist players using batch API
+        const batchResponse = await fetch('/api/users/batch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userIds: campaignData.waitlist }),
+        });
+        
+        if (batchResponse.ok) {
+          const usersData = await batchResponse.json();
+          
+          const waitlistPlayers = campaignData.waitlist.map((playerId: string) => {
+            const userData = usersData[playerId];
+            if (!userData) return null;
+            
+            const characterInfo = waitlistWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+            return {
+              userId: playerId,
+              name: userData.name || "Unknown User",
+              avatarUrl: userData.avatarUrl,
+              characterName: characterInfo?.characterName,
+            };
+          }).filter((user: PlayerWithInfo | null): user is PlayerWithInfo => user !== null);
+          
+          setWaitlistPlayersList(waitlistPlayers);
+        }
+      } else {
+        setWaitlistPlayersList([]);
+      }
+
+      // Fetch notes if user is the creator
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        if (campaignData.userId === profileData.userId) {
+          const notesResponse = await fetch(`/api/campaigns/${campaignId}/notes`);
+          if (notesResponse.ok) {
+            const notesData = await notesResponse.json();
+            setNotes(notesData);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch campaign data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, [campaignId, router]);
 
@@ -485,6 +491,7 @@ export default function CampaignDetailPage() {
                   <PendingCampaignPlayersManager
                     campaignId={campaignId}
                     pendingPlayers={pendingPlayersList}
+                    onRefresh={fetchData}
                   />
                 )}
                 
