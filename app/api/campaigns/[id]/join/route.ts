@@ -4,9 +4,10 @@ import { joinCampaign } from "@/lib/campaigns/db";
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -17,9 +18,8 @@ export async function POST(
       );
     }
 
-    const { id } = await params;
-    const body = await request.json();
-    const { characterId, characterName } = body;
+    const data = await request.json();
+    const { characterId, characterName } = data;
 
     const updatedCampaign = await joinCampaign(
       id,
@@ -30,7 +30,7 @@ export async function POST(
 
     if (!updatedCampaign) {
       return NextResponse.json(
-        { error: "Failed to join campaign. You may already be signed up, or the campaign may not exist." },
+        { error: "Failed to join campaign" },
         { status: 400 }
       );
     }

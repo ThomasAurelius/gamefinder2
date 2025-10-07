@@ -4,9 +4,10 @@ import { leaveCampaign } from "@/lib/campaigns/db";
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -17,13 +18,11 @@ export async function POST(
       );
     }
 
-    const { id } = await params;
-
     const updatedCampaign = await leaveCampaign(id, userId);
 
     if (!updatedCampaign) {
       return NextResponse.json(
-        { error: "Failed to leave campaign. The campaign may not exist or you may not be a member." },
+        { error: "Failed to leave campaign" },
         { status: 400 }
       );
     }

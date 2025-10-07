@@ -1,377 +1,368 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { cookies } from "next/headers";
-import { getCampaign } from "@/lib/campaigns/db";
-import { getUsersBasicInfo } from "@/lib/users";
+import { useParams, useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
-import { formatTimeSlotsByGroup } from "@/lib/constants";
-import type { Metadata } from "next";
 
-export async function generateMetadata({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}): Promise<Metadata> {
-	const { id } = await params;
-	const campaign = await getCampaign(id);
+type Campaign = {
+  id: string;
+  userId: string;
+  game: string;
+  date: string;
+  times: string[];
+  description: string;
+  maxPlayers: number;
+  signedUpPlayers: string[];
+  waitlist: string[];
+  pendingPlayers: string[];
+  createdAt: string;
+  updatedAt: string;
+  imageUrl?: string;
+  location?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  sessionsLeft?: number;
+  classesNeeded?: string[];
+  costPerSession?: number;
+  meetingFrequency?: string;
+  daysOfWeek?: string[];
+};
 
-	if (!campaign) {
-		return {
-			title: "Campaign Not Found",
-		};
-	}
+type CampaignNote = {
+  id: string;
+  campaignId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
-	const formattedDate = formatDateInTimezone(campaign.date, DEFAULT_TIMEZONE);
-	
-	const baseDescription = campaign.description
-		? `${campaign.description.substring(0, 150)}${campaign.description.length > 150 ? "..." : ""}`
-		: `Join us for ${campaign.game}. ${campaign.maxPlayers - campaign.signedUpPlayers.length} spots available!`;
-	
-	const description = `${baseDescription} | Start Date: ${formattedDate}`;
+export default function CampaignDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [notes, setNotes] = useState<CampaignNote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"details" | "notes">("details");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
+  const [newNoteContent, setNewNoteContent] = useState("");
+  const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+  const [noteError, setNoteError] = useState<string | null>(null);
 
-	const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/campaigns/${id}`;
+  const campaignId = params.id as string;
 
-	return {
-		title: `${campaign.game} - Campaign`,
-		description,
-		openGraph: {
-			title: `${campaign.game} Campaign`,
-			description,
-			url,
-			type: "website",
-			images: campaign.imageUrl
-				? [
-						{
-							url: campaign.imageUrl,
-							width: 1200,
-							height: 630,
-							alt: campaign.game,
-						},
-				  ]
-				: [],
-		},
-		twitter: {
-			card: "summary_large_image",
-			title: `${campaign.game} Campaign`,
-			description,
-			images: campaign.imageUrl ? [campaign.imageUrl] : [],
-		},
-	};
-}
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch timezone
+        const settingsResponse = await fetch("/api/settings");
+        if (settingsResponse.ok) {
+          const settingsData = await settingsResponse.json();
+          setUserTimezone(settingsData.timezone || DEFAULT_TIMEZONE);
+        }
 
-export default async function CampaignDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const { id } = await params;
-	const campaign = await getCampaign(id);
+        // Fetch current user ID
+        const profileResponse = await fetch("/api/profile");
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          setCurrentUserId(profileData.userId);
+        }
 
-	if (!campaign) {
-		notFound();
-	}
+        // Fetch campaign
+        const campaignResponse = await fetch(`/api/campaigns/${campaignId}`);
+        if (!campaignResponse.ok) {
+          if (campaignResponse.status === 404) {
+            router.push("/find-campaigns");
+            return;
+          }
+          throw new Error("Failed to fetch campaign");
+        }
+        const campaignData = await campaignResponse.json();
+        setCampaign(campaignData);
 
-	// Get current user ID
-	const cookieStore = await cookies();
-	const currentUserId = cookieStore.get("userId")?.value;
+        // Fetch notes if user is the creator
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          if (campaignData.userId === profileData.userId) {
+            const notesResponse = await fetch(`/api/campaigns/${campaignId}/notes`);
+            if (notesResponse.ok) {
+              const notesData = await notesResponse.json();
+              setNotes(notesData);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch campaign data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-	// Fetch user information for all players
-	const allUserIds = [
-		campaign.userId,
-		...campaign.signedUpPlayers,
-		...campaign.waitlist,
-		...campaign.pendingPlayers,
-	];
-	const usersMap = await getUsersBasicInfo(allUserIds);
+    fetchData();
+  }, [campaignId, router]);
 
-	const host = usersMap.get(campaign.userId);
-	
-	const signedUpPlayersList = campaign.signedUpPlayers
-		.map((playerId) => {
-			const user = usersMap.get(playerId);
-			const characterInfo = campaign.signedUpPlayersWithCharacters?.find(p => p.userId === playerId);
-			return user ? { 
-				...user, 
-				characterName: characterInfo?.characterName,
-			} : undefined;
-		})
-		.filter((user) => user !== undefined);
-	
-	const waitlistPlayersList = campaign.waitlist
-		.map((playerId) => {
-			const user = usersMap.get(playerId);
-			const characterInfo = campaign.waitlistWithCharacters?.find(p => p.userId === playerId);
-			return user ? { 
-				...user, 
-				characterName: characterInfo?.characterName,
-			} : undefined;
-		})
-		.filter((user) => user !== undefined);
+  const isCreator = currentUserId && campaign?.userId === currentUserId;
 
-	const isFull = campaign.signedUpPlayers.length >= campaign.maxPlayers;
-	const availableSlots = campaign.maxPlayers - campaign.signedUpPlayers.length;
-	const isHost = currentUserId === campaign.userId;
+  const handleAddNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newNoteContent.trim() || isSubmittingNote) return;
 
-	const isUserSignedUp =
-		currentUserId &&
-		(campaign.signedUpPlayers.includes(currentUserId) ||
-			campaign.waitlist.includes(currentUserId) ||
-			campaign.pendingPlayers.includes(currentUserId));
+    setIsSubmittingNote(true);
+    setNoteError(null);
 
-	return (
-		<div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
-			{/* Back link */}
-			<Link
-				href="/find-campaigns"
-				className="text-sm font-medium text-sky-300 hover:text-sky-200"
-			>
-				← Back to Find Campaigns
-			</Link>
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: newNoteContent.trim() }),
+      });
 
-			{/* Campaign Image */}
-			{campaign.imageUrl && (
-				<div className="aspect-video w-full overflow-hidden rounded-lg border border-slate-800 bg-slate-900/50">
-					<img
-						src={campaign.imageUrl}
-						alt={campaign.game}
-						className="h-full w-full object-cover"
-					/>
-				</div>
-			)}
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add note");
+      }
 
-			{/* Campaign title and basic info */}
-			<header className="space-y-4">
-				<div className="flex items-start justify-between gap-4">
-					<div>
-						<h1 className="text-3xl font-bold text-slate-100">
-							{campaign.game}
-						</h1>
-						<p className="mt-2 text-sm uppercase tracking-wide text-slate-400">
-							Campaign
-						</p>
-					</div>
-				</div>
-			</header>
+      const newNote = await response.json();
+      setNotes((prev) => [newNote, ...prev]);
+      setNewNoteContent("");
+    } catch (error) {
+      setNoteError(error instanceof Error ? error.message : "Failed to add note");
+    } finally {
+      setIsSubmittingNote(false);
+    }
+  };
 
-			{/* Campaign details grid */}
-			<div className="grid gap-6 md:grid-cols-2">
-				{/* Left column - Campaign information */}
-				<div className="space-y-6">
-					{/* Host information */}
-					<section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-						<h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-							Game Master
-						</h2>
-						{host ? (
-							<Link
-								href={`/user/${campaign.userId}`}
-								className="flex items-center gap-3 text-slate-100 hover:text-sky-300"
-							>
-								{host.avatarUrl && (
-									<img
-										src={host.avatarUrl}
-										alt={host.name}
-										className="h-10 w-10 rounded-full border border-slate-700"
-									/>
-								)}
-								<span className="font-medium">{host.name}</span>
-							</Link>
-						) : (
-							<p className="text-slate-400">Unknown Host</p>
-						)}
-					</section>
+  const handleDeleteNote = async (noteId: string) => {
+    if (!confirm("Are you sure you want to delete this note?")) return;
 
-					{/* Campaign schedule */}
-					<section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-						<h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-							Schedule
-						</h2>
-						<div className="space-y-2 text-sm">
-							<div>
-								<span className="text-slate-500">Start Date:</span>{" "}
-								<span className="text-slate-100">
-									{formatDateInTimezone(campaign.date, DEFAULT_TIMEZONE)}
-								</span>
-							</div>
-							{campaign.times && campaign.times.length > 0 && (
-								<div>
-									<span className="text-slate-500">Time Slots:</span>{" "}
-									<span className="text-slate-100">
-										{formatTimeSlotsByGroup(campaign.times)}
-									</span>
-								</div>
-							)}
-							{campaign.meetingFrequency && (
-								<div>
-									<span className="text-slate-500">Frequency:</span>{" "}
-									<span className="text-slate-100">{campaign.meetingFrequency}</span>
-								</div>
-							)}
-							{campaign.daysOfWeek && campaign.daysOfWeek.length > 0 && (
-								<div>
-									<span className="text-slate-500">Days:</span>{" "}
-									<span className="text-slate-100">
-										{campaign.daysOfWeek.join(", ")}
-									</span>
-								</div>
-							)}
-							{campaign.sessionsLeft && (
-								<div>
-									<span className="text-slate-500">Sessions Remaining:</span>{" "}
-									<span className="text-slate-100">{campaign.sessionsLeft}</span>
-								</div>
-							)}
-						</div>
-					</section>
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/notes/${noteId}`, {
+        method: "DELETE",
+      });
 
-					{/* Location */}
-					{campaign.location && (
-						<section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-							<h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-								Location
-							</h2>
-							<p className="text-sm text-slate-100">
-								{campaign.location}
-								{campaign.zipCode && ` (${campaign.zipCode})`}
-							</p>
-						</section>
-					)}
+      if (!response.ok) {
+        throw new Error("Failed to delete note");
+      }
 
-					{/* Campaign info */}
-					{(campaign.classesNeeded || campaign.costPerSession) && (
-						<section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-							<h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-								Campaign Details
-							</h2>
-							<div className="space-y-2 text-sm">
-								{campaign.classesNeeded && campaign.classesNeeded.length > 0 && (
-									<div>
-										<span className="text-slate-500">Classes Needed:</span>{" "}
-										<span className="text-slate-100">{campaign.classesNeeded.join(", ")}</span>
-									</div>
-								)}
-								{campaign.costPerSession && (
-									<div>
-										<span className="text-slate-500">Cost Per Session:</span>{" "}
-										<span className="text-slate-100">${campaign.costPerSession}</span>
-									</div>
-								)}
-							</div>
-						</section>
-					)}
-				</div>
+      setNotes((prev) => prev.filter((note) => note.id !== noteId));
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      alert("Failed to delete note");
+    }
+  };
 
-				{/* Right column - Players and description */}
-				<div className="space-y-6">
-					{/* Description */}
-					<section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-						<h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-							Description
-						</h2>
-						<p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-200">
-							{campaign.description}
-						</p>
-					</section>
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-slate-400">Loading campaign...</p>
+      </div>
+    );
+  }
 
-					{/* Player slots */}
-					<section className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-						<div className="mb-3 flex items-center justify-between">
-							<h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
-								Players
-							</h2>
-							<span className="text-sm text-slate-400">
-								{campaign.signedUpPlayers.length} / {campaign.maxPlayers}
-							</span>
-						</div>
+  if (!campaign) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-slate-400">Campaign not found</p>
+      </div>
+    );
+  }
 
-						{/* Signed up players */}
-						{signedUpPlayersList.length > 0 ? (
-							<ul className="space-y-2">
-								{signedUpPlayersList.map((player) => (
-									<li key={player.id} className="flex items-center gap-2">
-										{player.avatarUrl && (
-											<img
-												src={player.avatarUrl}
-												alt={player.name}
-												className="h-8 w-8 rounded-full border border-slate-700"
-											/>
-										)}
-										<div className="flex-1">
-											<Link
-												href={`/user/${player.id}`}
-												className="text-sm font-medium text-slate-100 hover:text-sky-300"
-											>
-												{player.name}
-											</Link>
-											{player.characterName && (
-												<p className="text-xs text-slate-500">
-													Playing: {player.characterName}
-												</p>
-											)}
-										</div>
-									</li>
-								))}
-							</ul>
-						) : (
-							<p className="text-sm text-slate-500">No players yet</p>
-						)}
+  const availableSlots = campaign.maxPlayers - campaign.signedUpPlayers.length;
+  const isFull = availableSlots <= 0;
 
-						{/* Available slots indicator */}
-						{!isFull && availableSlots > 0 && (
-							<p className="mt-3 text-sm text-slate-400">
-								{availableSlots} {availableSlots === 1 ? "slot" : "slots"} available
-							</p>
-						)}
+  return (
+    <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
+      <Link
+        href="/find-campaigns"
+        className="inline-block text-sm text-sky-400 hover:text-sky-300"
+      >
+        ← Back to campaigns
+      </Link>
 
-						{/* Waitlist */}
-						{waitlistPlayersList.length > 0 && (
-							<div className="mt-4 border-t border-slate-700 pt-4">
-								<h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-									Waitlist ({waitlistPlayersList.length})
-								</h3>
-								<ul className="space-y-2">
-									{waitlistPlayersList.map((player) => (
-										<li key={player.id} className="flex items-center gap-2">
-											{player.avatarUrl && (
-												<img
-													src={player.avatarUrl}
-													alt={player.name}
-													className="h-6 w-6 rounded-full border border-slate-700"
-												/>
-											)}
-											<Link
-												href={`/user/${player.id}`}
-												className="text-sm text-slate-300 hover:text-sky-300"
-											>
-												{player.name}
-											</Link>
-										</li>
-									))}
-								</ul>
-							</div>
-						)}
-					</section>
+      <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
+            <div className="mt-4 space-y-2 text-sm text-slate-400">
+              <p>
+                <span className="text-slate-500">Date:</span>{" "}
+                {formatDateInTimezone(campaign.date, userTimezone)}
+              </p>
+              <p>
+                <span className="text-slate-500">Times:</span>{" "}
+                {campaign.times.join(", ")}
+              </p>
+              {(campaign.location || campaign.zipCode) && (
+                <p>
+                  <span className="text-slate-500">Location:</span>{" "}
+                  {campaign.location || campaign.zipCode}
+                </p>
+              )}
+              <p>
+                <span className="text-slate-500">Players:</span>{" "}
+                <span className={isFull ? "text-orange-400" : "text-green-400"}>
+                  {campaign.signedUpPlayers.length}/{campaign.maxPlayers}
+                </span>
+              </p>
+              {campaign.waitlist.length > 0 && (
+                <p>
+                  <span className="text-slate-500">Waitlist:</span>{" "}
+                  <span className="text-yellow-400">{campaign.waitlist.length}</span>
+                </p>
+              )}
+              {campaign.meetingFrequency && (
+                <p>
+                  <span className="text-slate-500">Frequency:</span>{" "}
+                  {campaign.meetingFrequency}
+                </p>
+              )}
+              {campaign.sessionsLeft && (
+                <p>
+                  <span className="text-slate-500">Sessions Left:</span>{" "}
+                  {campaign.sessionsLeft}
+                </p>
+              )}
+              {campaign.costPerSession && (
+                <p>
+                  <span className="text-slate-500">Cost per Session:</span> $
+                  {campaign.costPerSession}
+                </p>
+              )}
+            </div>
+          </div>
+          {campaign.imageUrl && (
+            <img
+              src={campaign.imageUrl}
+              alt={campaign.game}
+              className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
+            />
+          )}
+        </div>
 
-					{/* Join/Leave button */}
-					{!isHost && currentUserId && (
-						<div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
-							{isUserSignedUp ? (
-								<p className="text-sm text-slate-400">
-									You have requested to join this campaign. The Game Master will review your request.
-								</p>
-							) : isFull ? (
-								<p className="text-sm text-slate-400">
-									This campaign is currently full. You can join the waitlist from the Find Campaigns page.
-								</p>
-							) : (
-								<p className="text-sm text-slate-400">
-									You can request to join this campaign from the Find Campaigns page.
-								</p>
-							)}
-						</div>
-					)}
-				</div>
-			</div>
-		</div>
-	);
+        {campaign.description && (
+          <div className="mt-4 border-t border-slate-800 pt-4">
+            <p className="text-slate-300">{campaign.description}</p>
+          </div>
+        )}
+      </div>
+
+      {isCreator && (
+        <div className="rounded-lg border border-slate-800 bg-slate-950/40">
+          <div className="border-b border-slate-800">
+            <div className="flex gap-4 px-6">
+              <button
+                onClick={() => setActiveTab("details")}
+                className={`border-b-2 px-4 py-3 text-sm font-medium transition ${
+                  activeTab === "details"
+                    ? "border-sky-500 text-sky-400"
+                    : "border-transparent text-slate-400 hover:text-slate-300"
+                }`}
+              >
+                Campaign Details
+              </button>
+              <button
+                onClick={() => setActiveTab("notes")}
+                className={`border-b-2 px-4 py-3 text-sm font-medium transition ${
+                  activeTab === "notes"
+                    ? "border-sky-500 text-sky-400"
+                    : "border-transparent text-slate-400 hover:text-slate-300"
+                }`}
+              >
+                DM Notes
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6">
+            {activeTab === "details" && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-slate-100">
+                  Campaign Management
+                </h2>
+                <p className="text-sm text-slate-400">
+                  Manage your campaign details, players, and settings here.
+                </p>
+                {campaign.pendingPlayers.length > 0 && (
+                  <div className="rounded-md border border-yellow-500/50 bg-yellow-500/10 p-4">
+                    <p className="text-sm text-yellow-400">
+                      You have {campaign.pendingPlayers.length} pending player
+                      request(s) to review.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "notes" && (
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-100">DM Notes</h2>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Private notes visible only to you as the campaign creator.
+                  </p>
+                </div>
+
+                <form onSubmit={handleAddNote} className="space-y-3">
+                  <textarea
+                    value={newNoteContent}
+                    onChange={(e) => setNewNoteContent(e.target.value)}
+                    placeholder="Add a new note..."
+                    rows={4}
+                    className="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                  {noteError && (
+                    <p className="text-sm text-red-400">{noteError}</p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isSubmittingNote || !newNoteContent.trim()}
+                    className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isSubmittingNote ? "Adding..." : "Add Note"}
+                  </button>
+                </form>
+
+                <div className="space-y-3">
+                  {notes.length === 0 ? (
+                    <p className="text-sm text-slate-500">
+                      No notes yet. Add your first note above.
+                    </p>
+                  ) : (
+                    notes.map((note) => (
+                      <div
+                        key={note.id}
+                        className="rounded-md border border-slate-800 bg-slate-950/50 p-4"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <p className="whitespace-pre-wrap text-sm text-slate-300">
+                              {note.content}
+                            </p>
+                            <p className="mt-2 text-xs text-slate-500">
+                              {new Date(note.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteNote(note.id)}
+                            className="text-sm text-red-400 hover:text-red-300"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
