@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
+
+type PlayerSignup = {
+  userId: string;
+  characterId?: string;
+  characterName?: string;
+};
 
 type Campaign = {
   id: string;
@@ -14,8 +21,11 @@ type Campaign = {
   description: string;
   maxPlayers: number;
   signedUpPlayers: string[];
+  signedUpPlayersWithCharacters?: PlayerSignup[];
   waitlist: string[];
+  waitlistWithCharacters?: PlayerSignup[];
   pendingPlayers: string[];
+  pendingPlayersWithCharacters?: PlayerSignup[];
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;
@@ -28,6 +38,13 @@ type Campaign = {
   costPerSession?: number;
   meetingFrequency?: string;
   daysOfWeek?: string[];
+};
+
+type PendingPlayer = {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  characterName?: string;
 };
 
 type CampaignNote = {
@@ -44,6 +61,7 @@ export default function CampaignDetailPage() {
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [notes, setNotes] = useState<CampaignNote[]>([]);
+  const [pendingPlayersList, setPendingPlayersList] = useState<PendingPlayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "notes">("details");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -82,6 +100,39 @@ export default function CampaignDetailPage() {
         }
         const campaignData = await campaignResponse.json();
         setCampaign(campaignData);
+
+        // Fetch pending players with user info if there are any
+        if (campaignData.pendingPlayers && campaignData.pendingPlayers.length > 0) {
+          const pendingPlayersWithCharacters = campaignData.pendingPlayersWithCharacters || [];
+          
+          // Fetch user info for all pending players using batch API
+          const batchResponse = await fetch('/api/users/batch', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userIds: campaignData.pendingPlayers }),
+          });
+          
+          if (batchResponse.ok) {
+            const usersData = await batchResponse.json();
+            
+            const pendingPlayers = campaignData.pendingPlayers.map((playerId: string) => {
+              const userData = usersData[playerId];
+              if (!userData) return null;
+              
+              const characterInfo = pendingPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+              return {
+                id: playerId,
+                name: userData.name || "Unknown User",
+                avatarUrl: userData.avatarUrl,
+                characterName: characterInfo?.characterName,
+              };
+            }).filter((user): user is PendingPlayer => user !== null);
+            
+            setPendingPlayersList(pendingPlayers);
+          }
+        }
 
         // Fetch notes if user is the creator
         if (profileResponse.ok) {
@@ -287,13 +338,19 @@ export default function CampaignDetailPage() {
                 <p className="text-sm text-slate-400">
                   Manage your campaign details, players, and settings here.
                 </p>
-                {campaign.pendingPlayers.length > 0 && (
-                  <div className="rounded-md border border-yellow-500/50 bg-yellow-500/10 p-4">
-                    <p className="text-sm text-yellow-400">
-                      You have {campaign.pendingPlayers.length} pending player
-                      request(s) to review.
-                    </p>
-                  </div>
+                
+                {/* Pending Players Manager */}
+                {pendingPlayersList.length > 0 && (
+                  <PendingCampaignPlayersManager
+                    campaignId={campaignId}
+                    pendingPlayers={pendingPlayersList}
+                  />
+                )}
+                
+                {campaign.pendingPlayers.length === 0 && (
+                  <p className="text-sm text-slate-500">
+                    No pending player requests at this time.
+                  </p>
                 )}
               </div>
             )}
