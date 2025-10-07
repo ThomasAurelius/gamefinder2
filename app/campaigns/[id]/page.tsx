@@ -281,12 +281,22 @@ export default function CampaignDetailPage() {
           <div className="p-6">
             {activeTab === "details" && (
               <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-slate-100">
-                  Campaign Management
-                </h2>
-                <p className="text-sm text-slate-400">
-                  Manage your campaign details, players, and settings here.
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-100">
+                      Campaign Management
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      Manage your campaign details, players, and settings here.
+                    </p>
+                  </div>
+                  <Link
+                    href={`/campaigns/${campaignId}/edit`}
+                    className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                  >
+                    Edit Campaign
+                  </Link>
+                </div>
                 {campaign.pendingPlayers.length > 0 && (
                   <div className="rounded-md border border-yellow-500/50 bg-yellow-500/10 p-4">
                     <p className="text-sm text-yellow-400">
