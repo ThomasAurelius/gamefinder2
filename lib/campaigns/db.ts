@@ -1,10 +1,15 @@
-import { randomUUID } from "crypto";
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { CampaignPayload, StoredCampaign } from "./types";
 
-type CampaignDocument = StoredCampaign & {
-  _id?: ObjectId;
+type CampaignDocument = Omit<StoredCampaign, 'id'> & {
+  _id: ObjectId;
+};
+
+// Legacy document type for backward compatibility with old UUID-based campaigns
+type LegacyCampaignDocument = StoredCampaign & {
+  _id: ObjectId;
+  id: string;
 };
 
 export async function listCampaigns(filters?: {
@@ -37,7 +42,7 @@ export async function listCampaigns(filters?: {
     .toArray();
 
   return campaigns.map((campaign) => ({
-    id: campaign.id,
+    id: campaign._id.toString(),
     userId: campaign.userId,
     game: campaign.game,
     date: campaign.date,
@@ -69,14 +74,29 @@ export async function getCampaign(id: string): Promise<StoredCampaign | null> {
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
 
-  const campaign = await campaignsCollection.findOne({ id });
+  // Try to parse as ObjectId first (new format)
+  let campaign;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(id) && id.length === 24) {
+      campaign = await campaignsCollection.findOne({ _id: new ObjectId(id) });
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to find by old 'id' field (UUID format) for backward compatibility
+  if (!campaign) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    campaign = await legacyCollection.findOne({ id });
+  }
 
   if (!campaign) {
     return null;
   }
 
   return {
-    id: campaign.id,
+    id: campaign._id.toString(),
     userId: campaign.userId,
     game: campaign.game,
     date: campaign.date,
@@ -113,8 +133,7 @@ export async function createCampaign(
 
   const timestamp = new Date().toISOString();
 
-  const newCampaign: CampaignDocument = {
-    id: randomUUID(),
+  const newCampaign: Omit<CampaignDocument, '_id'> = {
     userId,
     game: payload.game,
     date: payload.date,
@@ -141,10 +160,10 @@ export async function createCampaign(
     daysOfWeek: payload.daysOfWeek,
   };
 
-  await campaignsCollection.insertOne(newCampaign);
+  const result = await campaignsCollection.insertOne(newCampaign as CampaignDocument);
 
   return {
-    id: newCampaign.id,
+    id: result.insertedId.toString(),
     userId: newCampaign.userId,
     game: newCampaign.game,
     date: newCampaign.date,
@@ -182,23 +201,47 @@ export async function updateCampaign(
 
   const timestamp = new Date().toISOString();
 
-  const result = await campaignsCollection.findOneAndUpdate(
-    { userId, id },
-    {
-      $set: {
-        ...payload,
-        updatedAt: timestamp,
+  // Try to parse as ObjectId first (new format)
+  let result;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(id) && id.length === 24) {
+      result = await campaignsCollection.findOneAndUpdate(
+        { userId, _id: new ObjectId(id) },
+        {
+          $set: {
+            ...payload,
+            updatedAt: timestamp,
+          },
+        },
+        { returnDocument: "after" }
+      );
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to find by old 'id' field (UUID format) for backward compatibility
+  if (!result) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    result = await legacyCollection.findOneAndUpdate(
+      { userId, id },
+      {
+        $set: {
+          ...payload,
+          updatedAt: timestamp,
+        },
       },
-    },
-    { returnDocument: "after" }
-  );
+      { returnDocument: "after" }
+    );
+  }
 
   if (!result) {
     return null;
   }
 
   return {
-    id: result.id,
+    id: result._id.toString(),
     userId: result.userId,
     game: result.game,
     date: result.date,
@@ -230,9 +273,24 @@ export async function deleteCampaign(userId: string, id: string): Promise<boolea
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
 
-  const result = await campaignsCollection.deleteOne({ userId, id });
+  // Try to parse as ObjectId first (new format)
+  let result;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(id) && id.length === 24) {
+      result = await campaignsCollection.deleteOne({ userId, _id: new ObjectId(id) });
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
 
-  return result.deletedCount > 0;
+  // Fallback: try to find by old 'id' field (UUID format) for backward compatibility
+  if (!result || result.deletedCount === 0) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    result = await legacyCollection.deleteOne({ userId, id });
+  }
+
+  return result ? result.deletedCount > 0 : false;
 }
 
 export async function joinCampaign(
@@ -244,7 +302,22 @@ export async function joinCampaign(
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
   
-  const campaign = await campaignsCollection.findOne({ id: campaignId });
+  // Try to parse as ObjectId first (new format)
+  let campaign;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(campaignId) && campaignId.length === 24) {
+      campaign = await campaignsCollection.findOne({ _id: new ObjectId(campaignId) });
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to find by old 'id' field (UUID format) for backward compatibility
+  if (!campaign) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    campaign = await legacyCollection.findOne({ id: campaignId });
+  }
   
   if (!campaign) {
     return null;
@@ -270,24 +343,48 @@ export async function joinCampaign(
   const playerSignup = { userId, characterId, characterName };
   
   // Add to pending players for host approval
-  const result = await campaignsCollection.findOneAndUpdate(
-    { id: campaignId },
-    {
-      $push: { 
-        pendingPlayers: userId,
-        pendingPlayersWithCharacters: playerSignup
+  let result;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(campaignId) && campaignId.length === 24) {
+      result = await campaignsCollection.findOneAndUpdate(
+        { _id: new ObjectId(campaignId) },
+        {
+          $push: { 
+            pendingPlayers: userId,
+            pendingPlayersWithCharacters: playerSignup
+          },
+          $set: { updatedAt: timestamp },
+        },
+        { returnDocument: "after" }
+      );
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to update by old 'id' field (UUID format) for backward compatibility
+  if (!result) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    result = await legacyCollection.findOneAndUpdate(
+      { id: campaignId },
+      {
+        $push: { 
+          pendingPlayers: userId,
+          pendingPlayersWithCharacters: playerSignup
+        },
+        $set: { updatedAt: timestamp },
       },
-      $set: { updatedAt: timestamp },
-    },
-    { returnDocument: "after" }
-  );
+      { returnDocument: "after" }
+    );
+  }
   
   if (!result) {
     return null;
   }
   
   return {
-    id: result.id,
+    id: result._id.toString(),
     userId: result.userId,
     game: result.game,
     date: result.date,
@@ -322,7 +419,22 @@ export async function leaveCampaign(
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
   
-  const campaign = await campaignsCollection.findOne({ id: campaignId });
+  // Try to parse as ObjectId first (new format)
+  let campaign;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(campaignId) && campaignId.length === 24) {
+      campaign = await campaignsCollection.findOne({ _id: new ObjectId(campaignId) });
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to find by old 'id' field (UUID format) for backward compatibility
+  if (!campaign) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    campaign = await legacyCollection.findOne({ id: campaignId });
+  }
   
   if (!campaign) {
     return null;
@@ -336,28 +448,56 @@ export async function leaveCampaign(
   const timestamp = new Date().toISOString();
   
   // Remove user from all possible lists (pending, signed up, or waitlist)
-  const result = await campaignsCollection.findOneAndUpdate(
-    { id: campaignId },
-    {
-      $pull: { 
-        pendingPlayers: userId,
-        pendingPlayersWithCharacters: { userId: userId },
-        signedUpPlayers: userId,
-        signedUpPlayersWithCharacters: { userId: userId },
-        waitlist: userId,
-        waitlistWithCharacters: { userId: userId }
+  let result;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(campaignId) && campaignId.length === 24) {
+      result = await campaignsCollection.findOneAndUpdate(
+        { _id: new ObjectId(campaignId) },
+        {
+          $pull: { 
+            pendingPlayers: userId,
+            pendingPlayersWithCharacters: { userId: userId },
+            signedUpPlayers: userId,
+            signedUpPlayersWithCharacters: { userId: userId },
+            waitlist: userId,
+            waitlistWithCharacters: { userId: userId }
+          },
+          $set: { updatedAt: timestamp },
+        },
+        { returnDocument: "after" }
+      );
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to update by old 'id' field (UUID format) for backward compatibility
+  if (!result) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    result = await legacyCollection.findOneAndUpdate(
+      { id: campaignId },
+      {
+        $pull: { 
+          pendingPlayers: userId,
+          pendingPlayersWithCharacters: { userId: userId },
+          signedUpPlayers: userId,
+          signedUpPlayersWithCharacters: { userId: userId },
+          waitlist: userId,
+          waitlistWithCharacters: { userId: userId }
+        },
+        $set: { updatedAt: timestamp },
       },
-      $set: { updatedAt: timestamp },
-    },
-    { returnDocument: "after" }
-  );
+      { returnDocument: "after" }
+    );
+  }
   
   if (!result) {
     return null;
   }
   
   return {
-    id: result.id,
+    id: result._id.toString(),
     userId: result.userId,
     game: result.game,
     date: result.date,
