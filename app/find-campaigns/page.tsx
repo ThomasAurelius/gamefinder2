@@ -6,6 +6,7 @@ import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey, ROLE_OP
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
+import CommitmentDialog from "@/components/CommitmentDialog";
 
 type Campaign = {
 	id: string;
@@ -257,6 +258,7 @@ export default function FindCampaignsPage() {
 	const [locationSearch, setLocationSearch] = useState("");
 	const [radiusMiles, setRadiusMiles] = useState("25");
 	const [showCharacterDialog, setShowCharacterDialog] = useState(false);
+	const [showCommitmentDialog, setShowCommitmentDialog] = useState(false);
 	const [campaignToJoin, setCampaignToJoin] = useState<Campaign | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -391,7 +393,7 @@ export default function FindCampaignsPage() {
 	};
 
 	const handleJoinClick = (campaignId: string) => {
-		if (showCharacterDialog) {
+		if (showCharacterDialog || showCommitmentDialog) {
 			return;
 		}
 		// Find the campaign to check if user is already signed up
@@ -414,9 +416,9 @@ export default function FindCampaignsPage() {
 			// Handle withdraw
 			handleWithdraw(campaignId);
 		} else {
-			// Handle join request
+			// Handle join request - show commitment dialog first
 			setCampaignToJoin(campaign);
-			setShowCharacterDialog(true);
+			setShowCommitmentDialog(true);
 		}
 	};
 
@@ -524,8 +526,28 @@ export default function FindCampaignsPage() {
 		setCampaignToJoin(null);
 	};
 
+	const handleCommitmentAccept = () => {
+		// User accepted commitment, now show character selection
+		setShowCommitmentDialog(false);
+		setShowCharacterDialog(true);
+	};
+
+	const handleCommitmentDecline = () => {
+		// User declined commitment, cancel the join process
+		setShowCommitmentDialog(false);
+		setCampaignToJoin(null);
+	};
+
 	return (
 		<section className="space-y-6">
+			{showCommitmentDialog && campaignToJoin && (
+				<CommitmentDialog
+					onAccept={handleCommitmentAccept}
+					onDecline={handleCommitmentDecline}
+					campaignName={campaignToJoin.game}
+					costPerSession={campaignToJoin.costPerSession}
+				/>
+			)}
 			{showCharacterDialog && campaignToJoin && (
 				<CharacterSelectionDialog
 					onSelect={handleCharacterSelect}
