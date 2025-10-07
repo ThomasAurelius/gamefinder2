@@ -49,6 +49,13 @@ type PendingPlayer = {
   characterName?: string;
 };
 
+type PlayerWithInfo = {
+  userId: string;
+  name: string;
+  avatarUrl?: string;
+  characterName?: string;
+};
+
 type CampaignNote = {
   id: string;
   campaignId: string;
@@ -64,6 +71,8 @@ export default function CampaignDetailPage() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [notes, setNotes] = useState<CampaignNote[]>([]);
   const [pendingPlayersList, setPendingPlayersList] = useState<PendingPlayer[]>([]);
+  const [signedUpPlayersList, setSignedUpPlayersList] = useState<PlayerWithInfo[]>([]);
+  const [waitlistPlayersList, setWaitlistPlayersList] = useState<PlayerWithInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "notes">("details");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -152,6 +161,72 @@ export default function CampaignDetailPage() {
             }).filter((user: PendingPlayer | null): user is PendingPlayer => user !== null);
             
             setPendingPlayersList(pendingPlayers);
+          }
+        }
+
+        // Fetch signed up players with user info if there are any
+        if (campaignData.signedUpPlayers && campaignData.signedUpPlayers.length > 0) {
+          const signedUpPlayersWithCharacters = campaignData.signedUpPlayersWithCharacters || [];
+          
+          // Fetch user info for all signed up players using batch API
+          const batchResponse = await fetch('/api/users/batch', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userIds: campaignData.signedUpPlayers }),
+          });
+          
+          if (batchResponse.ok) {
+            const usersData = await batchResponse.json();
+            
+            const signedUpPlayers = campaignData.signedUpPlayers.map((playerId: string) => {
+              const userData = usersData[playerId];
+              if (!userData) return null;
+              
+              const characterInfo = signedUpPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+              return {
+                userId: playerId,
+                name: userData.name || "Unknown User",
+                avatarUrl: userData.avatarUrl,
+                characterName: characterInfo?.characterName,
+              };
+            }).filter((user: PlayerWithInfo | null): user is PlayerWithInfo => user !== null);
+            
+            setSignedUpPlayersList(signedUpPlayers);
+          }
+        }
+
+        // Fetch waitlist players with user info if there are any
+        if (campaignData.waitlist && campaignData.waitlist.length > 0) {
+          const waitlistWithCharacters = campaignData.waitlistWithCharacters || [];
+          
+          // Fetch user info for all waitlist players using batch API
+          const batchResponse = await fetch('/api/users/batch', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userIds: campaignData.waitlist }),
+          });
+          
+          if (batchResponse.ok) {
+            const usersData = await batchResponse.json();
+            
+            const waitlistPlayers = campaignData.waitlist.map((playerId: string) => {
+              const userData = usersData[playerId];
+              if (!userData) return null;
+              
+              const characterInfo = waitlistWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+              return {
+                userId: playerId,
+                name: userData.name || "Unknown User",
+                avatarUrl: userData.avatarUrl,
+                characterName: characterInfo?.characterName,
+              };
+            }).filter((user: PlayerWithInfo | null): user is PlayerWithInfo => user !== null);
+            
+            setWaitlistPlayersList(waitlistPlayers);
           }
         }
 
@@ -420,38 +495,42 @@ export default function CampaignDetailPage() {
                   </h3>
                   {campaign.signedUpPlayers.length > 0 ? (
                     <div className="space-y-2">
-                      {campaign.signedUpPlayersWithCharacters?.map((player, index) => (
-                        <div
-                          key={player.userId}
-                          className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
-                              {index + 1}
-                            </span>
-                            <div className="flex flex-col">
-                              <span className="text-sm text-slate-200">Player {index + 1}</span>
-                              {player.characterName && (
-                                <span className="text-xs text-slate-400">
-                                  Character: {player.characterName}
-                                </span>
-                              )}
+                      {signedUpPlayersList.length > 0 ? (
+                        signedUpPlayersList.map((player, index) => (
+                          <div
+                            key={player.userId}
+                            className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
+                                {index + 1}
+                              </span>
+                              <div className="flex flex-col">
+                                <span className="text-sm text-slate-200">{player.name}</span>
+                                {player.characterName && (
+                                  <span className="text-xs text-slate-400">
+                                    Character: {player.characterName}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )) || campaign.signedUpPlayers.map((playerId, index) => (
-                        <div
-                          key={playerId}
-                          className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
-                              {index + 1}
-                            </span>
-                            <span className="text-sm text-slate-200">Player {index + 1}</span>
+                        ))
+                      ) : (
+                        campaign.signedUpPlayers.map((playerId, index) => (
+                          <div
+                            key={playerId}
+                            className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
+                                {index + 1}
+                              </span>
+                              <span className="text-sm text-slate-200">Player {index + 1}</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500">
@@ -467,38 +546,42 @@ export default function CampaignDetailPage() {
                       Waitlist
                     </h3>
                     <div className="space-y-2">
-                      {campaign.waitlistWithCharacters?.map((player, index) => (
-                        <div
-                          key={player.userId}
-                          className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
-                              {index + 1}
-                            </span>
-                            <div className="flex flex-col">
-                              <span className="text-sm text-slate-200">Waitlist Position {index + 1}</span>
-                              {player.characterName && (
-                                <span className="text-xs text-slate-400">
-                                  Character: {player.characterName}
-                                </span>
-                              )}
+                      {waitlistPlayersList.length > 0 ? (
+                        waitlistPlayersList.map((player, index) => (
+                          <div
+                            key={player.userId}
+                            className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
+                                {index + 1}
+                              </span>
+                              <div className="flex flex-col">
+                                <span className="text-sm text-slate-200">{player.name}</span>
+                                {player.characterName && (
+                                  <span className="text-xs text-slate-400">
+                                    Character: {player.characterName}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )) || campaign.waitlist.map((playerId, index) => (
-                        <div
-                          key={playerId}
-                          className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
-                              {index + 1}
-                            </span>
-                            <span className="text-sm text-slate-200">Waitlist Position {index + 1}</span>
+                        ))
+                      ) : (
+                        campaign.waitlist.map((playerId, index) => (
+                          <div
+                            key={playerId}
+                            className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
+                                {index + 1}
+                              </span>
+                              <span className="text-sm text-slate-200">Waitlist Position {index + 1}</span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
