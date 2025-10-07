@@ -6,6 +6,32 @@ export const GAME_OPTIONS = [
 	"Other",
 ];
 
+export const DAYS_OF_WEEK = [
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+	"Sunday",
+];
+
+export const ROLE_OPTIONS = [
+	"Healer",
+	"Damage",
+	"Caster",
+	"Support",
+	"DM",
+	"Other",
+] as const;
+
+export const MEETING_FREQUENCY_OPTIONS = [
+	"Weekly",
+	"Bi-weekly",
+	"Monthly",
+	"Variable",
+];
+
 /**
  * Map game names to game system keys for character filtering
  */

@@ -31,6 +31,13 @@ const primaryLinks: NavItem[] = [
 			{ href: "/post", label: "Post Game" },
 		],
 	},
+	{
+		label: "Campaigns",
+		submenu: [
+			{ href: "/find-campaigns", label: "Find Campaigns" },
+			{ href: "/post-campaign", label: "Post Campaign" },
+		],
+	},
 ];
 
 const accountLinks: NavLink[] = [
