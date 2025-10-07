@@ -182,7 +182,7 @@ function GameSessionCard({
 							<img
 								src={session.imageUrl}
 								alt={session.game}
-								className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
+								className="h-36 w-36 rounded-lg border border-slate-700 object-cover"
 							/>
 						</Link>
 					)}
