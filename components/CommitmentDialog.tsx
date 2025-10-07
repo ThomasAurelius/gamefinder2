@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface CommitmentDialogProps {
   onAccept: () => void;
@@ -18,6 +18,20 @@ export default function CommitmentDialog({
   isLoading = false,
 }: CommitmentDialogProps) {
   const [hasReadAll, setHasReadAll] = useState(false);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    // Save the original overflow style
+    const originalOverflow = document.body.style.overflow;
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+    
+    // Restore original overflow when component unmounts
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     // Only close if clicking the backdrop itself, not the dialog content
