@@ -14,6 +14,29 @@ export default function HomePage() {
 					height={240}
 					className="h-60 w-auto"
 				/>
+				<section className="rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-900/30 to-slate-900/50 p-8 shadow-xl max-w-2xl">
+					<h2 className="text-2xl font-bold text-sky-400 mb-4">Why Choose Paid Campaigns?</h2>
+					<ul className="space-y-3 text-left">
+						<li className="flex items-start gap-3">
+							<span className="text-sky-400 mt-1">✓</span>
+							<p className="text-slate-300">
+								<strong className="text-slate-100">Professional DM Experience:</strong> A dedicated Game Master brings polish and expertise that elevates your game beyond casual sessions with friends.
+							</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<span className="text-sky-400 mt-1">✓</span>
+							<p className="text-slate-300">
+								<strong className="text-slate-100">High-Quality Sessions:</strong> Professional preparation, engaging storytelling, and consistent quality ensure memorable adventures every time.
+							</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<span className="text-sky-400 mt-1">✓</span>
+							<p className="text-slate-300">
+								<strong className="text-slate-100">Player Accountability:</strong> Financial commitment encourages better attendance and more engaged participants, creating a reliable gaming schedule.
+							</p>
+						</li>
+					</ul>
+				</section>
 				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
 					<p className="mt-4 max-w-2xl text-base text-slate-300">
 						Build your tabletop adventures, manage characters, and discover
