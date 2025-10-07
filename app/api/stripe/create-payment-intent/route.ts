@@ -74,7 +74,15 @@ export async function POST(request: Request) {
         expand: ["latest_invoice.payment_intent"],
       });
 
-      const paymentIntent = subscription.latest_invoice?.payment_intent;
+      // Type guard: ensure latest_invoice is expanded to Invoice object, not string
+      const latestInvoice = subscription.latest_invoice;
+      if (!latestInvoice || typeof latestInvoice === "string") {
+        throw new Error("Failed to retrieve invoice for subscription");
+      }
+
+      // When using expand, payment_intent is added to the invoice but TypeScript doesn't know about it
+      // Use type assertion to access the expanded property
+      const paymentIntent = (latestInvoice as Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent }).payment_intent;
 
       if (!paymentIntent || typeof paymentIntent === "string") {
         throw new Error("Failed to initialize subscription payment");
