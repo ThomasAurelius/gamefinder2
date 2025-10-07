@@ -330,7 +330,15 @@ export default function LibraryPage() {
 						<p className="text-slate-400">Loading...</p>
 					) : library.owned.length > 0 ? (
 						<div className="space-y-2">
-							{library.owned.map((entry) => (
+							{[...library.owned]
+								.sort((a, b) => {
+									// Sort favorites first
+									if (a.isFavorite && !b.isFavorite) return -1;
+									if (!a.isFavorite && b.isFavorite) return 1;
+									// Then by addedAt (newest first)
+									return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+								})
+								.map((entry) => (
 								<div
 									key={entry.gameId}
 									className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
@@ -412,7 +420,15 @@ export default function LibraryPage() {
 						<p className="text-slate-400">Loading...</p>
 					) : library.wishlist.length > 0 ? (
 						<div className="space-y-2">
-							{library.wishlist.map((entry) => (
+							{[...library.wishlist]
+								.sort((a, b) => {
+									// Sort favorites first
+									if (a.isFavorite && !b.isFavorite) return -1;
+									if (!a.isFavorite && b.isFavorite) return 1;
+									// Then by addedAt (newest first)
+									return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+								})
+								.map((entry) => (
 								<div
 									key={entry.gameId}
 									className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
