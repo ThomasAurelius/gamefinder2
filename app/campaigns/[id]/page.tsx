@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
+
+type PlayerSignup = {
+  userId: string;
+  characterId?: string;
+  characterName?: string;
+};
 
 type Campaign = {
   id: string;
@@ -14,8 +21,11 @@ type Campaign = {
   description: string;
   maxPlayers: number;
   signedUpPlayers: string[];
+  signedUpPlayersWithCharacters?: PlayerSignup[];
   waitlist: string[];
+  waitlistWithCharacters?: PlayerSignup[];
   pendingPlayers: string[];
+  pendingPlayersWithCharacters?: PlayerSignup[];
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;
@@ -28,6 +38,13 @@ type Campaign = {
   costPerSession?: number;
   meetingFrequency?: string;
   daysOfWeek?: string[];
+};
+
+type PendingPlayer = {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  characterName?: string;
 };
 
 type CampaignNote = {
@@ -44,6 +61,7 @@ export default function CampaignDetailPage() {
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [notes, setNotes] = useState<CampaignNote[]>([]);
+  const [pendingPlayersList, setPendingPlayersList] = useState<PendingPlayer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "notes">("details");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -82,6 +100,39 @@ export default function CampaignDetailPage() {
         }
         const campaignData = await campaignResponse.json();
         setCampaign(campaignData);
+
+        // Fetch pending players with user info if there are any
+        if (campaignData.pendingPlayers && campaignData.pendingPlayers.length > 0) {
+          const pendingPlayersWithCharacters = campaignData.pendingPlayersWithCharacters || [];
+          
+          // Fetch user info for all pending players using batch API
+          const batchResponse = await fetch('/api/users/batch', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userIds: campaignData.pendingPlayers }),
+          });
+          
+          if (batchResponse.ok) {
+            const usersData = await batchResponse.json();
+            
+            const pendingPlayers = campaignData.pendingPlayers.map((playerId: string) => {
+              const userData = usersData[playerId];
+              if (!userData) return null;
+              
+              const characterInfo = pendingPlayersWithCharacters.find((p: PlayerSignup) => p.userId === playerId);
+              return {
+                id: playerId,
+                name: userData.name || "Unknown User",
+                avatarUrl: userData.avatarUrl,
+                characterName: characterInfo?.characterName,
+              };
+            }).filter((user: PendingPlayer | null): user is PendingPlayer => user !== null);
+            
+            setPendingPlayersList(pendingPlayers);
+          }
+        }
 
         // Fetch notes if user is the creator
         if (profileResponse.ok) {
@@ -280,31 +331,184 @@ export default function CampaignDetailPage() {
 
           <div className="p-6">
             {activeTab === "details" && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-100">
-                      Campaign Management
-                    </h2>
-                    <p className="text-sm text-slate-400">
-                      Manage your campaign details, players, and settings here.
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-100">
+                    Campaign Management
+                  </h2>
+                  <p className="text-sm text-slate-400">
+                    Manage your campaign details, players, and settings here.
+                  </p>
+                </div>
+                
+                {/* Campaign Statistics */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Total Players</p>
+                    <p className="mt-1 text-2xl font-semibold text-slate-100">
+                      {campaign.signedUpPlayers.length}/{campaign.maxPlayers}
                     </p>
                   </div>
-                  <Link
-                    href={`/campaigns/${campaignId}/edit`}
-                    className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-                  >
-                    Edit Campaign
-                  </Link>
-                </div>
-                {campaign.pendingPlayers.length > 0 && (
-                  <div className="rounded-md border border-yellow-500/50 bg-yellow-500/10 p-4">
-                    <p className="text-sm text-yellow-400">
-                      You have {campaign.pendingPlayers.length} pending player
-                      request(s) to review.
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Waitlist</p>
+                    <p className="mt-1 text-2xl font-semibold text-yellow-400">
+                      {campaign.waitlist.length}
                     </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Pending</p>
+                    <p className="mt-1 text-2xl font-semibold text-orange-400">
+                      {campaign.pendingPlayers.length}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Pending Players Manager */}
+                {pendingPlayersList.length > 0 && (
+                  <PendingCampaignPlayersManager
+                    campaignId={campaignId}
+                    pendingPlayers={pendingPlayersList}
+                  />
+                )}
+                
+                {/* Current Players Section */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-slate-100">
+                    Current Players
+                  </h3>
+                  {campaign.signedUpPlayers.length > 0 ? (
+                    <div className="space-y-2">
+                      {campaign.signedUpPlayersWithCharacters?.map((player, index) => (
+                        <div
+                          key={player.userId}
+                          className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
+                              {index + 1}
+                            </span>
+                            <div className="flex flex-col">
+                              <span className="text-sm text-slate-200">Player {index + 1}</span>
+                              {player.characterName && (
+                                <span className="text-xs text-slate-400">
+                                  Character: {player.characterName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )) || campaign.signedUpPlayers.map((playerId, index) => (
+                        <div
+                          key={playerId}
+                          className="rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm text-slate-200">Player {index + 1}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-500">
+                      No players have joined yet.
+                    </p>
+                  )}
+                </div>
+                
+                {/* Waitlist Section */}
+                {campaign.waitlist.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-base font-semibold text-slate-100">
+                      Waitlist
+                    </h3>
+                    <div className="space-y-2">
+                      {campaign.waitlistWithCharacters?.map((player, index) => (
+                        <div
+                          key={player.userId}
+                          className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
+                              {index + 1}
+                            </span>
+                            <div className="flex flex-col">
+                              <span className="text-sm text-slate-200">Waitlist Position {index + 1}</span>
+                              {player.characterName && (
+                                <span className="text-xs text-slate-400">
+                                  Character: {player.characterName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )) || campaign.waitlist.map((playerId, index) => (
+                        <div
+                          key={playerId}
+                          className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
+                              {index + 1}
+                            </span>
+                            <span className="text-sm text-slate-200">Waitlist Position {index + 1}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
+                
+                {/* Campaign Settings Summary */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-semibold text-slate-100">
+                    Campaign Settings
+                  </h3>
+                  <div className="rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+                    <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <dt className="text-xs uppercase tracking-wide text-slate-500">Game</dt>
+                        <dd className="mt-1 text-sm text-slate-200">{campaign.game}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs uppercase tracking-wide text-slate-500">Max Players</dt>
+                        <dd className="mt-1 text-sm text-slate-200">{campaign.maxPlayers}</dd>
+                      </div>
+                      {campaign.meetingFrequency && (
+                        <div>
+                          <dt className="text-xs uppercase tracking-wide text-slate-500">Frequency</dt>
+                          <dd className="mt-1 text-sm text-slate-200">{campaign.meetingFrequency}</dd>
+                        </div>
+                      )}
+                      {campaign.sessionsLeft && (
+                        <div>
+                          <dt className="text-xs uppercase tracking-wide text-slate-500">Sessions Left</dt>
+                          <dd className="mt-1 text-sm text-slate-200">{campaign.sessionsLeft}</dd>
+                        </div>
+                      )}
+                      {campaign.costPerSession && (
+                        <div>
+                          <dt className="text-xs uppercase tracking-wide text-slate-500">Cost per Session</dt>
+                          <dd className="mt-1 text-sm text-slate-200">${campaign.costPerSession}</dd>
+                        </div>
+                      )}
+                      {campaign.daysOfWeek && campaign.daysOfWeek.length > 0 && (
+                        <div>
+                          <dt className="text-xs uppercase tracking-wide text-slate-500">Days</dt>
+                          <dd className="mt-1 text-sm text-slate-200">{campaign.daysOfWeek.join(", ")}</dd>
+                        </div>
+                      )}
+                      {campaign.classesNeeded && campaign.classesNeeded.length > 0 && (
+                        <div className="sm:col-span-2">
+                          <dt className="text-xs uppercase tracking-wide text-slate-500">Classes Needed</dt>
+                          <dd className="mt-1 text-sm text-slate-200">{campaign.classesNeeded.join(", ")}</dd>
+                        </div>
+                      )}
+                    </dl>
+                  </div>
+                </div>
               </div>
             )}
 
