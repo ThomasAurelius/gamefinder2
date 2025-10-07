@@ -412,14 +412,25 @@ export default function CampaignDetailPage() {
           )}
         </div>
 
-        {campaign.description && (
-          <div className="mt-4 border-t border-slate-800 pt-4">
-            <p className="text-slate-300">{campaign.description}</p>
-          </div>
-        )}
-      </div>
+      {campaign.description && (
+        <div className="mt-4 border-t border-slate-800 pt-4">
+          <p className="text-slate-300">{campaign.description}</p>
+        </div>
+      )}
 
-      {isCreator && (
+      {campaign.costPerSession && campaign.costPerSession > 0 && (
+        <div className="mt-6">
+          <Link
+            href={`/campaigns/${campaign.id}/payment`}
+            className="inline-flex items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-500 hover:bg-sky-500/20"
+          >
+            Proceed to payment
+          </Link>
+        </div>
+      )}
+    </div>
+
+    {isCreator && (
         <div className="rounded-lg border border-slate-800 bg-slate-950/40">
           <div className="border-b border-slate-800">
             <div className="flex gap-4 px-6">

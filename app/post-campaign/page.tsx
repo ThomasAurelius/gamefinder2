@@ -466,23 +466,27 @@ export default function PostCampaignPage() {
 						<p className="text-xs text-slate-500 mb-4">
 							Players will be required to pay ${costPerSession} per session using Stripe when they join this campaign.
 						</p>
-						{!showPaymentForm && (
-							<button
-								type="button"
-								onClick={async () => {
-									try {
-										// Create payment intent for the campaign owner to set up payment
-										const response = await fetch("/api/stripe/create-payment-intent", {
-											method: "POST",
-											headers: { "Content-Type": "application/json" },
-											body: JSON.stringify({
-												amount: costPerSession,
-												campaignName: selectedGame === "Other" ? customGameName : selectedGame,
-											}),
-										});
-										
-										if (!response.ok) {
-											throw new Error("Failed to initialize payment");
+                                                {!showPaymentForm && (
+                                                        <button
+                                                                type="button"
+                                                                onClick={async () => {
+                                                                        try {
+                                                                                const isSubscription =
+                                                                                        typeof sessionsLeft === "number" &&
+                                                                                        sessionsLeft > 1;
+                                                                                // Create payment intent for the campaign owner to set up payment
+                                                                                const response = await fetch("/api/stripe/create-payment-intent", {
+                                                                                        method: "POST",
+                                                                                        headers: { "Content-Type": "application/json" },
+                                                                                        body: JSON.stringify({
+                                                                                                amount: costPerSession,
+                                                                                                campaignName: selectedGame === "Other" ? customGameName : selectedGame,
+                                                                                                paymentType: isSubscription ? "subscription" : "one_time",
+                                                                                        }),
+                                                                                });
+
+                                                                                if (!response.ok) {
+                                                                                        throw new Error("Failed to initialize payment");
 										}
 										
 										const { clientSecret: secret } = await response.json();
@@ -497,13 +501,18 @@ export default function PostCampaignPage() {
 								Set Up Stripe Payment
 							</button>
 						)}
-						{showPaymentForm && clientSecret && (
-							<StripePaymentForm
-								clientSecret={clientSecret}
-								onSuccess={() => {
-									setPaymentCompleted(true);
-									setShowPaymentForm(false);
-								}}
+                                                {showPaymentForm && clientSecret && (
+                                                        <StripePaymentForm
+                                                                clientSecret={clientSecret}
+                                                                paymentMode={
+                                                                        typeof sessionsLeft === "number" && sessionsLeft > 1
+                                                                                ? "subscription"
+                                                                                : "payment"
+                                                                }
+                                                                onSuccess={() => {
+                                                                        setPaymentCompleted(true);
+                                                                        setShowPaymentForm(false);
+                                                                }}
 								onError={(error) => setError(error)}
 							/>
 						)}

@@ -16,11 +16,16 @@ const stripePromise = loadStripe(
 
 interface PaymentFormProps {
   clientSecret: string;
+  paymentMode?: "payment" | "subscription";
   onSuccess?: () => void;
   onError?: (error: string) => void;
 }
 
-function CheckoutForm({ onSuccess, onError }: Omit<PaymentFormProps, "clientSecret">) {
+function CheckoutForm({
+  onSuccess,
+  onError,
+  paymentMode = "payment",
+}: Omit<PaymentFormProps, "clientSecret">) {
   const stripe = useStripe();
   const elements = useElements();
   const [message, setMessage] = useState<string | null>(null);
@@ -48,7 +53,11 @@ function CheckoutForm({ onSuccess, onError }: Omit<PaymentFormProps, "clientSecr
       setMessage(error.message || "An unexpected error occurred.");
       onError?.(error.message || "An unexpected error occurred.");
     } else {
-      setMessage("Payment successful!");
+      setMessage(
+        paymentMode === "subscription"
+          ? "Subscription started successfully!"
+          : "Payment successful!"
+      );
       onSuccess?.();
     }
 
@@ -76,7 +85,11 @@ function CheckoutForm({ onSuccess, onError }: Omit<PaymentFormProps, "clientSecr
         disabled={isLoading || !stripe || !elements}
         className="w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isLoading ? "Processing..." : "Pay Now"}
+        {isLoading
+          ? "Processing..."
+          : paymentMode === "subscription"
+            ? "Subscribe Now"
+            : "Pay Now"}
       </button>
     </form>
   );
@@ -84,6 +97,7 @@ function CheckoutForm({ onSuccess, onError }: Omit<PaymentFormProps, "clientSecr
 
 export default function StripePaymentForm({
   clientSecret,
+  paymentMode = "payment",
   onSuccess,
   onError,
 }: PaymentFormProps) {
@@ -136,7 +150,11 @@ export default function StripePaymentForm({
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-6">
       <Elements stripe={stripePromise} options={options}>
-        <CheckoutForm onSuccess={onSuccess} onError={onError} />
+        <CheckoutForm
+          paymentMode={paymentMode}
+          onSuccess={onSuccess}
+          onError={onError}
+        />
       </Elements>
     </div>
   );
