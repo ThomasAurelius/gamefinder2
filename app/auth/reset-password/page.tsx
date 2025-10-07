@@ -1,9 +1,10 @@
 interface ResetPasswordPageProps {
-  searchParams?: { token?: string };
+  searchParams: Promise<{ token?: string }>;
 }
 
-export default function ResetPasswordPage({ searchParams }: ResetPasswordPageProps) {
-  const hasToken = Boolean(searchParams?.token);
+export default async function ResetPasswordPage({ searchParams }: ResetPasswordPageProps) {
+  const params = await searchParams;
+  const hasToken = Boolean(params?.token);
 
   return (
     <div className="mx-auto max-w-md space-y-6 rounded-2xl border border-white/10 bg-slate-900/60 p-8">
@@ -20,7 +21,7 @@ export default function ResetPasswordPage({ searchParams }: ResetPasswordPagePro
       <form className="space-y-4">
         {hasToken ? (
           <>
-            <input type="hidden" name="token" value={searchParams?.token} />
+            <input type="hidden" name="token" value={params?.token} />
             <label className="block text-sm">
               <span className="text-slate-200">New password</span>
               <input
