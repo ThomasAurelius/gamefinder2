@@ -134,6 +134,17 @@ export default function StripePaymentForm({
     }
   }, [clientSecret]);
 
+  // Check if Stripe publishable key is missing
+  if (!STRIPE_PUBLISHABLE_KEY) {
+    return (
+      <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-6">
+        <p className="text-sm text-red-200">
+          Payment system is not configured. Please contact support.
+        </p>
+      </div>
+    );
+  }
+
   if (!options) {
     return (
       <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-6">

@@ -135,6 +135,21 @@ Before going live:
 
 Make sure you've added the Stripe secret key to your `.env.local` file and restarted your development server.
 
+### "Please call Stripe() with your publishable key" Error
+
+This error occurs when `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is not properly set or accessible. To fix:
+
+1. Ensure you've added the key to your `.env.local` file:
+   ```bash
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
+   ```
+
+2. **Restart your development server** after adding or changing environment variables. Next.js only loads environment variables at startup.
+
+3. Verify the key is being loaded by checking the browser console. You should see a warning if the key is missing.
+
+4. The application uses a dedicated `lib/stripe-config.ts` file to properly expose the environment variable to client-side components.
+
 ### Payment Form Not Appearing
 
 Check your browser console for errors. Common issues:
