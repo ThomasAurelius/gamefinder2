@@ -294,16 +294,10 @@ export default function FindCampaignsPage() {
 				console.error("Failed to fetch user profile:", error);
 			}
 
-			// Then fetch all events with location filtering if zipcode is available
+			// Then fetch all events without any filtering
 			setIsLoadingEvents(true);
 			try {
-				const params = new URLSearchParams();
-				if (userZipCode) {
-					params.append("location", userZipCode);
-					params.append("radius", "25"); // Use default radius of 25 miles
-				}
-				
-				const response = await fetch(`/api/campaigns?${params.toString()}`);
+				const response = await fetch(`/api/campaigns`);
 				if (response.ok) {
 					const events = await response.json();
 					setAllEvents(events);
@@ -821,35 +815,37 @@ export default function FindCampaignsPage() {
 			)}
 
 			{/* All Events Feed */}
-			<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-				<h2 className="text-lg font-semibold text-slate-100">
-					All Upcoming Events
-				</h2>
-				<p className="mt-2 text-sm text-slate-400">
-					Browse all campaigns in chronological order
-				</p>
-
-				{isLoadingEvents ? (
-					<p className="mt-4 text-sm text-slate-500">Loading events...</p>
-				) : allEvents.length > 0 ? (
-					<div className="mt-4 space-y-3">
-						{allEvents.map((event) => (
-							<CampaignCard
-								key={event.id}
-								campaign={event}
-								userTimezone={userTimezone}
-								joiningCampaignId={joiningCampaignId}
-								onJoin={handleJoinClick}
-								currentUserId={currentUserId}
-							/>
-						))}
-					</div>
-				) : (
-					<p className="mt-4 text-sm text-slate-500">
-						No upcoming events available.
+			{!hasSearched && (
+				<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
+					<h2 className="text-lg font-semibold text-slate-100">
+						All Upcoming Events
+					</h2>
+					<p className="mt-2 text-sm text-slate-400">
+						Browse all campaigns in chronological order
 					</p>
-				)}
-			</div>
+
+					{isLoadingEvents ? (
+						<p className="mt-4 text-sm text-slate-500">Loading events...</p>
+					) : allEvents.length > 0 ? (
+						<div className="mt-4 space-y-3">
+							{allEvents.map((event) => (
+								<CampaignCard
+									key={event.id}
+									campaign={event}
+									userTimezone={userTimezone}
+									joiningCampaignId={joiningCampaignId}
+									onJoin={handleJoinClick}
+									currentUserId={currentUserId}
+								/>
+							))}
+						</div>
+					) : (
+						<p className="mt-4 text-sm text-slate-500">
+							No upcoming events available.
+						</p>
+					)}
+				</div>
+			)}
 		</section>
 	);
 }
