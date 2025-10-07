@@ -65,6 +65,7 @@ export function Navbar() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [gamesOpen, setGamesOpen] = useState(false);
+	const [campaignsOpen, setCampaignsOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [authLoading, setAuthLoading] = useState(true);
 	const [hasIncompleteSettings, setHasIncompleteSettings] = useState(false);
@@ -112,6 +113,7 @@ export function Navbar() {
 	const closeMenu = () => setMenuOpen(false);
 	const toggleAccount = () => setAccountOpen((open) => !open);
 	const toggleGames = () => setGamesOpen((open) => !open);
+	const toggleCampaigns = () => setCampaignsOpen((open) => !open);
 
 	return (
 		<header className="border-b border-white/10 bg-slate-950/80 backdrop-blur">
@@ -134,24 +136,29 @@ export function Navbar() {
 							const isAnySubmenuActive = item.submenu.some((link) =>
 								isActive(pathname, link.href)
 							);
+							const isGamesMenu = item.label === "Games";
+							const isCampaignsMenu = item.label === "Campaigns";
+							const isOpen = isGamesMenu ? gamesOpen : isCampaignsMenu ? campaignsOpen : false;
+							const toggleOpen = isGamesMenu ? toggleGames : isCampaignsMenu ? toggleCampaigns : () => {};
+							
 							return (
 								<div key={item.label} className="relative">
 									<button
 										type="button"
 										className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
-											gamesOpen || isAnySubmenuActive
+											isOpen || isAnySubmenuActive
 												? "bg-white/10 text-white"
 												: ""
 										}`}
-										onClick={toggleGames}
+										onClick={toggleOpen}
 										aria-haspopup="menu"
-										aria-expanded={gamesOpen}
+										aria-expanded={isOpen}
 									>
 										{item.label}
 										<svg
 											aria-hidden
 											className={`h-4 w-4 transition-transform ${
-												gamesOpen ? "rotate-180" : ""
+												isOpen ? "rotate-180" : ""
 											}`}
 											viewBox="0 0 20 20"
 											fill="currentColor"
@@ -159,14 +166,15 @@ export function Navbar() {
 											<path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.585l3.71-3.354a.75.75 0 0 1 1.02 1.1l-4.25 3.84a.75.75 0 0 1-1.02 0l-4.25-3.84a.75.75 0 0 1 .02-1.06z" />
 										</svg>
 									</button>
-									{gamesOpen ? (
+									{isOpen ? (
 										<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
 											{item.submenu.map((link) => (
 												<Link
 													key={link.href}
 													href={link.href}
 													onClick={() => {
-														setGamesOpen(false);
+														if (isGamesMenu) setGamesOpen(false);
+														if (isCampaignsMenu) setCampaignsOpen(false);
 														closeMenu();
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
