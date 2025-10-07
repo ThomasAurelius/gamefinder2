@@ -8,11 +8,10 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe-config";
 
 // Load Stripe outside of component to avoid recreating on every render
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
-);
+const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
 
 interface PaymentFormProps {
   clientSecret: string;
