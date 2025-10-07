@@ -38,6 +38,8 @@ type Campaign = {
   costPerSession?: number;
   meetingFrequency?: string;
   daysOfWeek?: string[];
+  hostName?: string;
+  hostAvatarUrl?: string;
 };
 
 type PendingPlayer = {
@@ -99,6 +101,25 @@ export default function CampaignDetailPage() {
           throw new Error("Failed to fetch campaign");
         }
         const campaignData = await campaignResponse.json();
+        
+        // Fetch host information
+        const hostResponse = await fetch('/api/users/batch', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userIds: [campaignData.userId] }),
+        });
+        
+        if (hostResponse.ok) {
+          const hostData = await hostResponse.json();
+          const host = hostData[campaignData.userId];
+          if (host) {
+            campaignData.hostName = host.name;
+            campaignData.hostAvatarUrl = host.avatarUrl;
+          }
+        }
+        
         setCampaign(campaignData);
 
         // Fetch pending players with user info if there are any
@@ -238,7 +259,28 @@ export default function CampaignDetailPage() {
       <div className="rounded-lg border border-slate-800 bg-slate-950/40 p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
+              {isCreator && (
+                <Link
+                  href={`/campaigns/${campaignId}/edit`}
+                  className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+                >
+                  Edit Campaign
+                </Link>
+              )}
+            </div>
+            {!isCreator && campaign.hostName && (
+              <p className="mt-2 text-sm text-slate-400">
+                <span className="text-slate-500">Host:</span>{" "}
+                <Link
+                  href={`/user/${campaign.userId}`}
+                  className="text-slate-300 hover:text-sky-300 transition-colors"
+                >
+                  {campaign.hostName}
+                </Link>
+              </p>
+            )}
             <div className="mt-4 space-y-2 text-sm text-slate-400">
               <p>
                 <span className="text-slate-500">Date:</span>{" "}
