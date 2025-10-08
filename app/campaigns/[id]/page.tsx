@@ -82,6 +82,7 @@ export default function CampaignDetailPage() {
   const [noteError, setNoteError] = useState<string | null>(null);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
 
   const campaignId = params.id as string;
 
@@ -252,6 +253,43 @@ export default function CampaignDetailPage() {
 
     fetchData();
   }, [campaignId, router]);
+
+  // Check if user has an active subscription for this campaign
+  useEffect(() => {
+    const checkSubscriptionStatus = async () => {
+      // Only check for subscription campaigns with multiple sessions
+      if (!campaign || !campaign.sessionsLeft || campaign.sessionsLeft <= 1) {
+        setHasActiveSubscription(false);
+        return;
+      }
+
+      // Only check if there's a cost per session (payment required)
+      if (!campaign.costPerSession || campaign.costPerSession <= 0) {
+        setHasActiveSubscription(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/stripe/check-subscription?campaignId=${campaignId}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          setHasActiveSubscription(data.hasActiveSubscription || false);
+        } else {
+          // If check fails, assume no subscription
+          setHasActiveSubscription(false);
+        }
+      } catch (err) {
+        console.error("Failed to check subscription status:", err);
+        // Don't show error to user, just assume no subscription
+        setHasActiveSubscription(false);
+      }
+    };
+
+    checkSubscriptionStatus();
+  }, [campaign, campaignId]);
 
   const isCreator = currentUserId && campaign?.userId === currentUserId;
 
@@ -538,12 +576,28 @@ export default function CampaignDetailPage() {
 
       {campaign.costPerSession && campaign.costPerSession > 0 && (
         <div className="mt-6">
-          <Link
-            href={`/campaigns/${campaign.id}/payment`}
-            className="inline-flex items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-500 hover:bg-sky-500/20"
-          >
-            Proceed to payment
-          </Link>
+          {hasActiveSubscription ? (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+                You have an active subscription for this campaign.
+              </div>
+              <a
+                href="https://billing.stripe.com/p/login/00w4gy3Jmad7bDT6k273G00"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+              >
+                Manage Subscription (Stripe Dashboard)
+              </a>
+            </div>
+          ) : (
+            <Link
+              href={`/campaigns/${campaign.id}/payment`}
+              className="inline-flex items-center gap-2 rounded-xl border border-sky-500/40 bg-sky-500/10 px-4 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-500 hover:bg-sky-500/20"
+            >
+              Proceed to payment
+            </Link>
+          )}
         </div>
       )}
     </div>
