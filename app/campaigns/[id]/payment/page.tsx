@@ -99,6 +99,10 @@ export default function CampaignPaymentPage() {
         }
 
         if (!response.ok) {
+          if (response.status === 503) {
+            throw new Error(STRIPE_NOT_CONFIGURED_MESSAGE);
+          }
+
           const message =
             data && typeof data === "object" && "error" in data && data.error
               ? String((data as { error: unknown }).error)
