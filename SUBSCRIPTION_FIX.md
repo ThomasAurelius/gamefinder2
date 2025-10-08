@@ -35,7 +35,7 @@ payment_settings: {
    - Price object is created for the recurring subscription
    - Subscription is created with `payment_behavior: "default_incomplete"`
    - This generates an invoice with an associated PaymentIntent
-   - The PaymentIntent is automatically configured with appropriate payment methods since we don't restrict `payment_method_types`
+   - The PaymentIntent is configured with card payment method since we explicitly specify `payment_method_types: ["card"]`
 
 2. **Frontend Collects Payment**:
    - Client secret from the PaymentIntent is sent to the frontend
