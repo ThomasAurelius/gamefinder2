@@ -98,7 +98,9 @@ console.log('\n🔌 Testing Stripe API connection...');
 
 const Stripe = require('stripe');
 const stripe = new Stripe(secretKey, {
-  apiVersion: '2025-09-30.clover',
+  // Match the stable API version used by the application so validation
+  // mirrors runtime behaviour.
+  apiVersion: '2024-04-10',
 });
 
 // Test API call - list products (lightweight operation)
