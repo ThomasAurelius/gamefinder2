@@ -39,45 +39,56 @@ expand: ["latest_invoice.payment_intent"],
 - `automatic_tax: { enabled: false }` - Prevents tax calculation issues that could interfere with PaymentIntent creation
 - `expand: ["latest_invoice.payment_intent"]` - Ensures we get the full PaymentIntent object in the response
 
-#### 2. Added Fallback PaymentIntent Creation (Lines 189-258)
+#### 2. Added Multi-Level Fallback PaymentIntent Creation (Lines 189-307)
 
 **The Critical Fix:**
-If the invoice doesn't have a PaymentIntent after subscription creation, we now have a sophisticated fallback mechanism:
+If the invoice doesn't have a PaymentIntent after subscription creation, we now have a sophisticated multi-level fallback mechanism:
 
+**Level 1: Invoice Finalization (for draft invoices)**
 ```typescript
-if (!paymentIntent) {
-  console.log("Attempting to manually create PaymentIntent for invoice...");
-  
-  try {
-    // Check if invoice is in draft status (can be finalized)
-    if (latestInvoice.status === "draft") {
-      // Finalize the invoice to trigger PaymentIntent creation
-      const finalizedInvoice = await stripe.invoices.finalizeInvoice(
-        latestInvoice.id,
-        { expand: ["payment_intent"] }
-      );
-      paymentIntent = finalizedInvoice.payment_intent;
-    } else {
-      // For non-draft invoices, re-retrieve with expanded payment_intent
-      const retrievedInvoice = await stripe.invoices.retrieve(
-        latestInvoice.id,
-        { expand: ["payment_intent"] }
-      );
-      paymentIntent = retrievedInvoice.payment_intent;
-    }
-  } catch (finalizeError) {
-    console.error("Failed to finalize or retrieve invoice:", finalizeError);
-  }
+if (latestInvoice.status === "draft") {
+  const finalizedInvoice = await stripe.invoices.finalizeInvoice(
+    latestInvoice.id,
+    { expand: ["payment_intent"] }
+  );
+  paymentIntent = finalizedInvoice.payment_intent;
 }
 ```
 
-**Why this fallback is necessary:**
+**Level 2: Invoice Re-retrieval (for non-draft invoices)**
+```typescript
+const retrievedInvoice = await stripe.invoices.retrieve(
+  latestInvoice.id,
+  { expand: ["payment_intent"] }
+);
+paymentIntent = retrievedInvoice.payment_intent;
+```
+
+**Level 3: Manual PaymentIntent Creation (NEW - last resort)**
+```typescript
+if (!paymentIntent) {
+  const createdPaymentIntent = await stripe.paymentIntents.create({
+    amount: latestInvoice.amount_due || Math.round(amount * 100),
+    currency: latestInvoice.currency || "usd",
+    customer: customerId,
+    payment_method_types: ["card"],
+    metadata: {
+      invoiceId: latestInvoice.id,
+      subscriptionId: subscription.id,
+      // ... other metadata
+    },
+  });
+  paymentIntent = createdPaymentIntent;
+}
+```
+
+**Why this multi-level fallback is necessary:**
 - Some Stripe accounts or configurations may not automatically create PaymentIntents on invoice creation
-- **For draft invoices**: Invoice finalization explicitly triggers PaymentIntent creation as a required step
-- **For non-draft invoices**: Re-retrieving the invoice with expanded payment_intent may find a PaymentIntent that was created but not initially expanded
-- This ensures that even in edge cases, we can successfully initialize the subscription payment
-- The fallback checks invoice status to use the appropriate recovery method
-- The fallback is only attempted when the initial PaymentIntent creation fails, avoiding unnecessary API calls
+- **Level 1 (Draft invoices)**: Invoice finalization explicitly triggers PaymentIntent creation as a required step
+- **Level 2 (Non-draft invoices)**: Re-retrieving the invoice with expanded payment_intent may find a PaymentIntent that was created but not initially expanded
+- **Level 3 (Manual creation - NEW)**: If both previous methods fail, we manually create a standalone PaymentIntent that can be used for payment. This PaymentIntent includes metadata linking it to the invoice and subscription for proper tracking
+- This three-tier approach ensures that even in the most problematic edge cases, we can successfully initialize the subscription payment
+- Each fallback is only attempted if the previous one fails, avoiding unnecessary API calls
 
 #### 3. Enhanced Error Logging and Diagnostics
 
@@ -88,16 +99,16 @@ To improve troubleshooting when subscriptions fail, comprehensive logging has be
 3. **Price Creation**: Logs the price ID and amount
 4. **Subscription Creation**: Logs subscription ID, status, collection method, and invoice type
 5. **Invoice Retrieval**: Logs invoice details including collection method and PaymentIntent presence
-6. **Fallback Attempt**: Logs when attempting manual PaymentIntent creation via invoice finalization
+6. **Fallback Attempts**: Logs when attempting manual PaymentIntent creation (three levels: finalization, re-retrieval, manual creation)
 7. **PaymentIntent Validation**: Logs detailed error context when PaymentIntent is missing or invalid
 8. **Success Confirmation**: Logs successful initialization with all relevant IDs
 
 **Error Messages Enhanced**:
 - Generic "Failed to initialize subscription payment" errors now include specific context:
-  - "No PaymentIntent created on invoice" - indicates the invoice exists but has no payment intent (even after fallback attempt)
+  - "No PaymentIntent created on invoice" - indicates the invoice exists but has no payment intent (even after all three fallback attempts)
   - "PaymentIntent missing client_secret" - indicates the payment intent exists but lacks the client secret needed for frontend payment
 - All error logs include related object IDs (invoice ID, subscription ID, payment intent ID) for easier debugging in Stripe Dashboard
-- Fallback mechanism logs show whether the invoice finalization attempt succeeded or failed
+- Fallback mechanism logs show which level succeeded or if all failed
 
 ## How Subscription Payments Work
 
@@ -106,7 +117,10 @@ To improve troubleshooting when subscriptions fail, comprehensive logging has be
    - Price object is created for the recurring subscription
    - Subscription is created with `payment_behavior: "default_incomplete"` and explicit payment settings
    - This should generate an invoice with an associated PaymentIntent
-   - **Fallback**: If no PaymentIntent is created initially, the invoice is finalized to force PaymentIntent creation
+   - **Three-Level Fallback**: If no PaymentIntent is created initially:
+     1. Try finalizing the invoice (for draft status)
+     2. Try re-retrieving the invoice with expanded payment_intent
+     3. Manually create a standalone PaymentIntent with proper metadata
    - The PaymentIntent is configured with card payment method
 
 2. **Frontend Collects Payment**:
@@ -140,9 +154,11 @@ If subscriptions are still failing, check the server console logs for detailed d
 5. **Fallback Attempt**: Look for "Attempting to manually create PaymentIntent for invoice..." followed by either success or failure message
 6. **PaymentIntent Issues**: Look for error logs with specific failure reasons:
    - "PaymentIntent is missing from invoice" - The invoice was created but has no payment intent initially
-   - "Successfully created PaymentIntent via invoice finalization" - The fallback mechanism worked
-   - "Failed to finalize invoice" - The fallback mechanism failed (check the error details)
-   - "PaymentIntent could not be created even after invoice finalization" - Both primary and fallback methods failed
+   - "Successfully created PaymentIntent via invoice finalization" - The first fallback (finalization) worked
+   - "Found PaymentIntent on invoice after retrieval" - The second fallback (re-retrieval) worked
+   - "Successfully created PaymentIntent manually" - The third fallback (manual creation) worked
+   - "Failed to manually create PaymentIntent" - The third fallback also failed
+   - "PaymentIntent could not be created even after all fallback attempts" - All three fallback methods failed
    - "PaymentIntent missing client_secret" - The payment intent exists but lacks client secret
 
 Each log entry includes relevant object IDs that you can use to look up the objects in your Stripe Dashboard for further investigation.
@@ -167,12 +183,25 @@ Found PaymentIntent on invoice after retrieval: { invoiceId: 'in_xxx', ... }
 ```
 → The PaymentIntent existed but wasn't initially expanded. Re-retrieving the invoice found it.
 
-**Scenario 3: Fallback fails**
+**Scenario 3: Manual creation succeeds (NEW fallback)**
+```
+PaymentIntent is missing from invoice: { invoiceId: 'in_xxx', ... }
+Attempting to manually create PaymentIntent for invoice...
+Invoice status is 'open', not 'draft'. Checking if PaymentIntent exists...
+[no PaymentIntent found]
+Attempting to manually create PaymentIntent for the invoice...
+Successfully created PaymentIntent manually: { paymentIntentId: 'pi_xxx', invoiceId: 'in_xxx', ... }
+```
+→ The third-level fallback succeeded. A standalone PaymentIntent was created with proper metadata linking it to the invoice and subscription. Payment will proceed normally.
+
+**Scenario 4: All fallbacks fail**
 ```
 PaymentIntent is missing from invoice: { invoiceId: 'in_xxx', ... }
 Attempting to manually create PaymentIntent for invoice...
 Failed to finalize or retrieve invoice: [error details]
-PaymentIntent could not be created even after invoice finalization
+Attempting to manually create PaymentIntent for the invoice...
+Failed to manually create PaymentIntent: [error details]
+PaymentIntent could not be created even after all fallback attempts
 ```
 → Check your Stripe Dashboard settings:
   - Verify card payments are enabled
