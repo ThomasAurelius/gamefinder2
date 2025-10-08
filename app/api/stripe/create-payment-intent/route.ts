@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import Stripe from "stripe";
+import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
 
 // Initialize Stripe only if the secret key is available
 const getStripe = () => {
@@ -13,6 +14,14 @@ const getStripe = () => {
 };
 
 export async function POST(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("Error creating payment intent: STRIPE_SECRET_KEY is not configured");
+    return NextResponse.json(
+      { error: STRIPE_NOT_CONFIGURED_MESSAGE },
+      { status: 500 }
+    );
+  }
+
   try {
     const stripe = getStripe();
     const cookieStore = await cookies();
