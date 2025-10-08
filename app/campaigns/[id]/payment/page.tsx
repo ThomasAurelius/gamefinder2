@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import StripePaymentForm from "@/components/StripePaymentForm";
+import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe-config";
 
 interface Campaign {
   id: string;
@@ -62,6 +63,14 @@ export default function CampaignPaymentPage() {
 
   useEffect(() => {
     const initializePayment = async () => {
+      if (!STRIPE_PUBLISHABLE_KEY) {
+        setError(
+          "Payments are currently unavailable because Stripe is not configured. Please contact support."
+        );
+        setClientSecret(null);
+        return;
+      }
+
       if (!campaign?.costPerSession || campaign.costPerSession <= 0) {
         return;
       }
@@ -79,13 +88,39 @@ export default function CampaignPaymentPage() {
           }),
         });
 
-        if (!response.ok) {
-          throw new Error("Failed to initialize payment");
+        let data: unknown;
+
+        try {
+          data = await response.json();
+        } catch (parseError) {
+          if (!response.ok) {
+            throw new Error("Failed to initialize payment");
+          }
+          throw parseError;
         }
 
-        const data = await response.json();
-        setClientSecret(data.clientSecret);
+        if (!response.ok) {
+          const message =
+            data && typeof data === "object" && "error" in data && data.error
+              ? String((data as { error: unknown }).error)
+              : "Failed to initialize payment";
+          throw new Error(message);
+        }
+
+        if (
+          !data ||
+          typeof data !== "object" ||
+          !("clientSecret" in data) ||
+          typeof data.clientSecret !== "string"
+        ) {
+          throw new Error("Payment configuration is incomplete. Please try again later.");
+        }
+
+        const clientSecret = (data as { clientSecret: string }).clientSecret;
+        setClientSecret(clientSecret);
+        setError(null);
       } catch (err) {
+        setClientSecret(null);
         setError(err instanceof Error ? err.message : "Failed to initialize payment");
       } finally {
         setIsInitializingPayment(false);
