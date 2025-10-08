@@ -114,8 +114,8 @@ export default function SettingsPage() {
                   value={announcement}
                   onChange={(e) => setAnnouncement(e.target.value)}
                   placeholder="Enter announcement message..."
-                  rows={4}
-                  className="w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/40"
+                  rows={10}
+                  className="w-full max-h-96 resize-y overflow-y-auto rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/40"
                 />
 
                 <button
