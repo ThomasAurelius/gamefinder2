@@ -109,7 +109,6 @@ export async function POST(request: Request) {
         payment_behavior: "default_incomplete",
         payment_settings: {
           save_default_payment_method: "on_subscription",
-          payment_method_types: ["card"],
         },
         expand: ["latest_invoice.payment_intent"],
       });
@@ -138,6 +137,16 @@ export async function POST(request: Request) {
 
       if (!paymentIntent?.client_secret) {
         throw new Error("Failed to initialize subscription payment");
+      }
+
+      // Update the payment intent to ensure automatic payment methods are enabled
+      if (paymentIntent.id && paymentIntent.status === "requires_payment_method") {
+        paymentIntent = await stripe.paymentIntents.update(paymentIntent.id, {
+          automatic_payment_methods: {
+            enabled: true,
+            allow_redirects: "never",
+          },
+        });
       }
 
       return NextResponse.json({
