@@ -9,6 +9,7 @@ import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
 
 interface Campaign {
   id: string;
+  userId: string;
   game: string;
   description?: string;
   costPerSession?: number;
@@ -31,6 +32,7 @@ export default function CampaignPaymentPage() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
   const [subscriptionCheckAttempted, setSubscriptionCheckAttempted] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const paymentMode: PaymentMode = useMemo(() => {
     if (!campaign || typeof campaign.sessionsLeft !== "number") {
@@ -44,6 +46,16 @@ export default function CampaignPaymentPage() {
     const fetchCampaign = async () => {
       try {
         setIsLoading(true);
+        
+        // Fetch current user ID
+        const profileResponse = await fetch("/api/profile");
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          if (profileData?.userId) {
+            setCurrentUserId(profileData.userId);
+          }
+        }
+        
         const response = await fetch(`/api/campaigns/${campaignId}`);
         if (!response.ok) {
           if (response.status === 404) {
@@ -201,6 +213,26 @@ export default function CampaignPaymentPage() {
 
   if (!campaign) {
     return null;
+  }
+
+  // Redirect campaign creators - they don't need to pay for their own campaigns
+  if (currentUserId && campaign.userId === currentUserId) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl space-y-4">
+        <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-slate-200">
+          <h1 className="text-xl font-semibold text-slate-100">{campaign.game}</h1>
+          <p className="mt-2 text-sm text-slate-400">
+            As the host of this campaign, you don't need to make a payment.
+          </p>
+        </div>
+        <Link
+          href={`/campaigns/${campaignId}`}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-sky-400"
+        >
+          ← Back to campaign details
+        </Link>
+      </div>
+    );
   }
 
   if (!campaign.costPerSession || campaign.costPerSession <= 0) {
