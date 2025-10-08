@@ -606,7 +606,8 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      {campaign.costPerSession && campaign.costPerSession > 0 && (
+      {/* Only show payment button for non-creators */}
+      {!isCreator && campaign.costPerSession && campaign.costPerSession > 0 && (
         <div className="mt-6">
           {hasActiveSubscription ? (
             <div className="space-y-4">
