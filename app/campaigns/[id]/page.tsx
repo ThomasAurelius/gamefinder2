@@ -98,7 +98,9 @@ export default function CampaignDetailPage() {
         let profileData: { userId: string } | null = null;
         if (profileResponse.ok) {
           profileData = await profileResponse.json();
-          setCurrentUserId(profileData.userId);
+          if (profileData?.userId) {
+            setCurrentUserId(profileData.userId);
+          }
         }
 
         // Fetch campaign
