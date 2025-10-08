@@ -71,6 +71,15 @@ export default function PendingCampaignPlayersManager({
     setProcessingPlayerId(playerId);
     setError(null);
 
+    // Validate player exists in pending list
+    const playerExists = pendingPlayers.some((p) => p.id === playerId);
+    if (!playerExists) {
+      console.error(`Player with id ${playerId} not found in pending list`);
+      setError("Player not found in pending list");
+      setProcessingPlayerId(null);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/deny`, {
         method: "POST",
