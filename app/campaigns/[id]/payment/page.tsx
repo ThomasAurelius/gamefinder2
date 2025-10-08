@@ -30,6 +30,7 @@ export default function CampaignPaymentPage() {
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
+  const [subscriptionCheckAttempted, setSubscriptionCheckAttempted] = useState(false);
 
   const paymentMode: PaymentMode = useMemo(() => {
     if (!campaign || typeof campaign.sessionsLeft !== "number") {
@@ -68,6 +69,7 @@ export default function CampaignPaymentPage() {
     const checkSubscriptionStatus = async () => {
       // Check for active subscription on any paid campaign
       if (!campaign || !campaign.costPerSession || campaign.costPerSession <= 0) {
+        setSubscriptionCheckAttempted(true);
         return;
       }
 
@@ -87,6 +89,7 @@ export default function CampaignPaymentPage() {
         setHasActiveSubscription(false);
       } finally {
         setIsCheckingSubscription(false);
+        setSubscriptionCheckAttempted(true);
       }
     };
 
@@ -175,10 +178,10 @@ export default function CampaignPaymentPage() {
       }
     };
 
-    if (campaign && !isCheckingSubscription) {
+    if (campaign && !isCheckingSubscription && subscriptionCheckAttempted) {
       initializePayment();
     }
-  }, [campaign, campaignId, paymentMode, hasActiveSubscription, isCheckingSubscription]);
+  }, [campaign, campaignId, paymentMode, hasActiveSubscription, isCheckingSubscription, subscriptionCheckAttempted]);
 
   if (isLoading) {
     return (
