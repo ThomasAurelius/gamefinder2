@@ -121,9 +121,21 @@ export async function POST(request: Request) {
 
       // When using expand, payment_intent is added to the invoice but TypeScript doesn't know about it
       // Use type assertion to access the expanded property
-      const paymentIntent = (latestInvoice as Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent }).payment_intent;
+      let paymentIntent = (
+        latestInvoice as Stripe.Invoice & {
+          payment_intent?: string | Stripe.PaymentIntent;
+        }
+      ).payment_intent;
 
-      if (!paymentIntent || typeof paymentIntent === "string") {
+      if (!paymentIntent) {
+        throw new Error("Failed to initialize subscription payment");
+      }
+
+      if (typeof paymentIntent === "string") {
+        paymentIntent = await stripe.paymentIntents.retrieve(paymentIntent);
+      }
+
+      if (!paymentIntent?.client_secret) {
         throw new Error("Failed to initialize subscription payment");
       }
 
