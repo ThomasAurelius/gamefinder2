@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function PaidGamesTermsPage() {
+function PaidGamesTermsContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [accepted, setAccepted] = useState(false);
@@ -201,5 +201,24 @@ export default function PaidGamesTermsPage() {
 				</div>
 			</div>
 		</section>
+	);
+}
+
+export default function PaidGamesTermsPage() {
+	return (
+		<Suspense fallback={
+			<section className="space-y-6">
+				<div>
+					<h1 className="text-2xl font-semibold text-slate-100">
+						Paid Games Terms and Conditions
+					</h1>
+					<p className="mt-2 text-sm text-slate-400">
+						Loading terms and conditions...
+					</p>
+				</div>
+			</section>
+		}>
+			<PaidGamesTermsContent />
+		</Suspense>
 	);
 }
