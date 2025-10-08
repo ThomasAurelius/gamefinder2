@@ -92,7 +92,7 @@ function CampaignCard({
 						</Link>
 						{isHost && campaign.pendingPlayers.length > 0 && (
 							<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
-								{campaign.pendingPlayers.length} pending approval
+								{campaign.pendingPlayers.length} pending approval{campaign.pendingPlayers.length !== 1 ? 's' : ''}
 							</span>
 						)}
 					</div>
