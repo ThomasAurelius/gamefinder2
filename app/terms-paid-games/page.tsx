@@ -52,7 +52,8 @@ function PaidGamesTermsContent() {
 					Paid Games Terms and Conditions
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Please read and accept these terms to enable posting paid campaigns.
+					Please read and accept these terms to enable posting paid
+					campaigns.
 				</p>
 			</div>
 
@@ -67,9 +68,10 @@ function PaidGamesTermsContent() {
 							1. Payment Processing
 						</h3>
 						<p>
-							All payments for paid game sessions are processed securely through
-							Stripe. By enabling paid games, you agree to Stripe&apos;s terms of
-							service and authorize us to process payments on your behalf.
+							All payments for paid game sessions are processed securely
+							through Stripe. By enabling paid games, you agree to
+							Stripe&apos;s terms of service and authorize us to process
+							payments on your behalf.
 						</p>
 					</div>
 
@@ -79,14 +81,18 @@ function PaidGamesTermsContent() {
 						</h3>
 						<p>
 							<strong className="text-slate-100">
-								The platform operator will retain 20% of each paid game fee.
+								The platform operator will retain 20% of each paid game
+								fee.
 							</strong>{" "}
 							The remaining 80% will be paid to you (the game host) after
 							deducting payment processing fees.
 						</p>
 						<p className="text-slate-400 text-xs">
-							Example: If you charge $10 per session, you will receive $8.00
-							(minus payment processing fees) and the platform will retain $2.00.
+							Example: If you charge $10 per session, the platform will
+							retain $2.00 and you will receive the remainder, minus
+							payment processing fees. Stripe&apos;s fee is $0.30 + 2.9%
+							per transaction, you would receive approximately $7.41 per
+							session.
 						</p>
 					</div>
 
@@ -96,20 +102,20 @@ function PaidGamesTermsContent() {
 						</h3>
 						<ul className="list-disc list-inside space-y-2 ml-2">
 							<li>
-								You must provide the game sessions as advertised and agreed upon
-								with players
+								You must provide the game sessions as advertised and
+								agreed upon with players
 							</li>
 							<li>
-								You are responsible for maintaining professional conduct and
-								providing a quality gaming experience
+								You are responsible for maintaining professional conduct
+								and providing a quality gaming experience
 							</li>
 							<li>
-								You must honor all scheduled sessions or provide appropriate
-								refunds
+								You must honor all scheduled sessions or provide
+								appropriate refunds
 							</li>
 							<li>
-								You agree to communicate clearly with players about session
-								details, requirements, and any changes
+								You agree to communicate clearly with players about
+								session details, requirements, and any changes
 							</li>
 						</ul>
 					</div>
@@ -119,10 +125,11 @@ function PaidGamesTermsContent() {
 							4. Refund Policy
 						</h3>
 						<p>
-							Refunds are at the discretion of the game host and must be processed
-							through the platform. Hosts are expected to provide refunds for
-							canceled or undelivered sessions. Repeated refund requests or
-							payment disputes may result in suspension of paid game privileges.
+							Refunds are at the discretion of the game host and must be
+							processed through the platform. Hosts are expected to
+							provide refunds for canceled or undelivered sessions.
+							Repeated refund requests or payment disputes may result in
+							suspension of paid game privileges.
 						</p>
 					</div>
 
@@ -131,10 +138,11 @@ function PaidGamesTermsContent() {
 							5. Compliance and Tax Obligations
 						</h3>
 						<p>
-							You are responsible for complying with all applicable laws and
-							regulations, including reporting income and paying taxes on earnings
-							from paid game sessions. The platform will provide necessary tax
-							documentation as required by law.
+							You are responsible for complying with all applicable laws
+							and regulations, including reporting income and paying
+							taxes on earnings from paid game sessions. The platform
+							will provide necessary tax documentation as required by
+							law.
 						</p>
 					</div>
 
@@ -143,9 +151,10 @@ function PaidGamesTermsContent() {
 							6. Account Suspension
 						</h3>
 						<p>
-							The platform reserves the right to suspend or revoke paid game
-							privileges for violations of these terms, fraud, excessive disputes,
-							or conduct that harms the community or platform reputation.
+							The platform reserves the right to suspend or revoke paid
+							game privileges for violations of these terms, fraud,
+							excessive disputes, or conduct that harms the community or
+							platform reputation.
 						</p>
 					</div>
 
@@ -154,10 +163,10 @@ function PaidGamesTermsContent() {
 							7. Changes to Terms
 						</h3>
 						<p>
-							These terms may be updated from time to time. Continued use of paid
-							game features after changes constitutes acceptance of the updated
-							terms. You will be notified of significant changes via email or
-							platform notification.
+							These terms may be updated from time to time. Continued use
+							of paid game features after changes constitutes acceptance
+							of the updated terms. You will be notified of significant
+							changes via email or platform notification.
 						</p>
 					</div>
 				</div>
@@ -171,8 +180,9 @@ function PaidGamesTermsContent() {
 							className="mt-1 h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-sky-500 focus:ring-2 focus:ring-sky-500/40"
 						/>
 						<span className="text-sm text-slate-300">
-							I have read and agree to the Paid Games Terms and Conditions,
-							including the 20% platform fee on all paid game sessions.
+							I have read and agree to the Paid Games Terms and
+							Conditions, including the 20% platform fee on all paid game
+							sessions.
 						</span>
 					</label>
 				</div>
@@ -190,7 +200,9 @@ function PaidGamesTermsContent() {
 						disabled={!accepted || isSubmitting}
 						className="flex-1 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						{isSubmitting ? "Processing..." : "Accept and Enable Paid Games"}
+						{isSubmitting
+							? "Processing..."
+							: "Accept and Enable Paid Games"}
 					</button>
 					<Link
 						href={fromSettings ? "/settings" : "/profile"}
@@ -206,18 +218,20 @@ function PaidGamesTermsContent() {
 
 export default function PaidGamesTermsPage() {
 	return (
-		<Suspense fallback={
-			<section className="space-y-6">
-				<div>
-					<h1 className="text-2xl font-semibold text-slate-100">
-						Paid Games Terms and Conditions
-					</h1>
-					<p className="mt-2 text-sm text-slate-400">
-						Loading terms and conditions...
-					</p>
-				</div>
-			</section>
-		}>
+		<Suspense
+			fallback={
+				<section className="space-y-6">
+					<div>
+						<h1 className="text-2xl font-semibold text-slate-100">
+							Paid Games Terms and Conditions
+						</h1>
+						<p className="mt-2 text-sm text-slate-400">
+							Loading terms and conditions...
+						</p>
+					</div>
+				</section>
+			}
+		>
 			<PaidGamesTermsContent />
 		</Suspense>
 	);

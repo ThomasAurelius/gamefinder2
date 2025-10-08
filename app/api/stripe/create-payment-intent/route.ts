@@ -2,345 +2,394 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import Stripe from "stripe";
 import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
-import { getStripeCustomerId, setStripeCustomerId, getUserEmail } from "@/lib/users";
+import {
+	getStripeCustomerId,
+	setStripeCustomerId,
+	getUserEmail,
+} from "@/lib/users";
 
 type StripeErrorLike = {
-  type?: string;
-  code?: string;
-  message?: string;
+	type?: string;
+	code?: string;
+	message?: string;
 };
 
 const isStripeMisconfigurationError = (error: unknown) => {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
+	if (!error || typeof error !== "object") {
+		return false;
+	}
 
-  const { type, code, message } = error as StripeErrorLike;
+	const { type, code, message } = error as StripeErrorLike;
 
-  if (type === "StripeAuthenticationError" || code === "authentication_error") {
-    return true;
-  }
+	if (
+		type === "StripeAuthenticationError" ||
+		code === "authentication_error"
+	) {
+		return true;
+	}
 
-  if (typeof message === "string") {
-    const normalizedMessage = message.toLowerCase();
-    if (
-      normalizedMessage.includes("invalid api key") ||
-      normalizedMessage.includes("no api key provided")
-    ) {
-      return true;
-    }
-  }
+	if (typeof message === "string") {
+		const normalizedMessage = message.toLowerCase();
+		if (
+			normalizedMessage.includes("invalid api key") ||
+			normalizedMessage.includes("no api key provided")
+		) {
+			return true;
+		}
+	}
 
-  return false;
+	return false;
 };
 
 // Initialize Stripe only if the secret key is available
 const getStripe = () => {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error("STRIPE_SECRET_KEY is not configured");
-  }
-  return new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2025-09-30.clover",
-  });
+	if (!process.env.STRIPE_SECRET_KEY) {
+		throw new Error("STRIPE_SECRET_KEY is not configured");
+	}
+	return new Stripe(process.env.STRIPE_SECRET_KEY, {
+		apiVersion: "2025-09-30.clover",
+	});
 };
 
 export async function POST(request: Request) {
-  // Validate Stripe configuration
-  if (!process.env.STRIPE_SECRET_KEY) {
-    console.error("Error creating payment intent: STRIPE_SECRET_KEY is not configured");
-    console.error("Please add STRIPE_SECRET_KEY to your .env.local file and restart the server");
-    return NextResponse.json(
-      { error: STRIPE_NOT_CONFIGURED_MESSAGE },
-      { status: 503 }
-    );
-  }
+	// Validate Stripe configuration
+	if (!process.env.STRIPE_SECRET_KEY) {
+		console.error(
+			"Error creating payment intent: STRIPE_SECRET_KEY is not configured"
+		);
+		console.error(
+			"Please add STRIPE_SECRET_KEY to your .env.local file and restart the server"
+		);
+		return NextResponse.json(
+			{ error: STRIPE_NOT_CONFIGURED_MESSAGE },
+			{ status: 503 }
+		);
+	}
 
-  // Validate key format (test mode check)
-  const isTestMode = process.env.STRIPE_SECRET_KEY.startsWith("sk_test_");
-  const isLiveMode = process.env.STRIPE_SECRET_KEY.startsWith("sk_live_");
-  
-  if (!isTestMode && !isLiveMode) {
-    console.error("Error: STRIPE_SECRET_KEY has invalid format");
-    console.error("Expected format: sk_test_... (for test mode) or sk_live_... (for live mode)");
-    return NextResponse.json(
-      { error: "Stripe configuration error: Invalid API key format" },
-      { status: 503 }
-    );
-  }
+	// Validate key format (test mode check)
+	const isTestMode = process.env.STRIPE_SECRET_KEY.startsWith("sk_test_");
+	const isLiveMode = process.env.STRIPE_SECRET_KEY.startsWith("sk_live_");
 
-  console.log(`Stripe API initialized in ${isTestMode ? "TEST" : "LIVE"} mode`);
+	if (!isTestMode && !isLiveMode) {
+		console.error("Error: STRIPE_SECRET_KEY has invalid format");
+		console.error(
+			"Expected format: sk_test_... (for test mode) or sk_live_... (for live mode)"
+		);
+		return NextResponse.json(
+			{ error: "Stripe configuration error: Invalid API key format" },
+			{ status: 503 }
+		);
+	}
 
-  try {
-    const stripe = getStripe();
-    const cookieStore = await cookies();
-    const userId = cookieStore.get("userId")?.value;
-    
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
-    }
+	console.log(
+		`Stripe API initialized in ${isTestMode ? "TEST" : "LIVE"} mode`
+	);
 
-    const body = await request.json();
-    const {
-      amount,
-      campaignId,
-      campaignName,
-      paymentType = "one_time",
-    } = body;
+	try {
+		const stripe = getStripe();
+		const cookieStore = await cookies();
+		const userId = cookieStore.get("userId")?.value;
 
-    if (!amount || amount <= 0) {
-      return NextResponse.json(
-        { error: "Valid amount is required" },
-        { status: 400 }
-      );
-    }
+		if (!userId) {
+			return NextResponse.json(
+				{ error: "Authentication required" },
+				{ status: 401 }
+			);
+		}
 
-    if (paymentType === "subscription") {
-      console.log("Creating subscription for:", {
-        amount,
-        campaignId,
-        campaignName,
-        userId,
-      });
+		const body = await request.json();
+		const {
+			amount,
+			campaignId,
+			campaignName,
+			paymentType = "one_time",
+		} = body;
 
-      // Check if user already has a Stripe customer ID
-      let customerId = await getStripeCustomerId(userId);
-      
-      if (customerId) {
-        console.log("Reusing existing Stripe customer:", customerId);
-      } else {
-        // Get user email for better customer tracking in Stripe
-        const userEmail = await getUserEmail(userId);
-        
-        // Create new customer
-        const customer = await stripe.customers.create({
-          email: userEmail || undefined,
-          metadata: {
-            userId,
-          },
-        });
+		if (!amount || amount <= 0) {
+			return NextResponse.json(
+				{ error: "Valid amount is required" },
+				{ status: 400 }
+			);
+		}
 
-        customerId = customer.id;
-        console.log("Customer created:", customerId);
-        
-        // Save customer ID to database for future use
-        await setStripeCustomerId(userId, customerId);
-      }
+		if (paymentType === "subscription") {
+			console.log("Creating subscription for:", {
+				amount,
+				campaignId,
+				campaignName,
+				userId,
+			});
 
-      const price = await stripe.prices.create({
-        unit_amount: Math.round(amount * 100),
-        currency: "usd",
-        recurring: { interval: "week" },
-        product_data: {
-          name: `${campaignName || "Campaign"} Subscription`,
-          metadata: {
-            campaignId: campaignId || "",
-          },
-        },
-      });
+			// Check if user already has a Stripe customer ID
+			let customerId = await getStripeCustomerId(userId);
 
-      console.log("Price created:", {
-        priceId: price.id,
-        amount: price.unit_amount,
-      });
+			if (customerId) {
+				console.log("Reusing existing Stripe customer:", customerId);
+			} else {
+				// Get user email for better customer tracking in Stripe
+				const userEmail = await getUserEmail(userId);
 
-      const subscription = await stripe.subscriptions.create({
-        customer: customerId,
-        items: [{ price: price.id }],
-        metadata: {
-          campaignId: campaignId || "",
-          campaignName: campaignName || "",
-          userId,
-        },
-        payment_behavior: "default_incomplete",
-        collection_method: "charge_automatically",
-        payment_settings: {
-          save_default_payment_method: "on_subscription",
-          payment_method_types: ["card"],
-        },
-        automatic_tax: {
-          enabled: false,
-        },
-        expand: ["latest_invoice.payment_intent"],
-      });
+				// Create new customer
+				const customer = await stripe.customers.create({
+					email: userEmail || undefined,
+					metadata: {
+						userId,
+					},
+				});
 
-      console.log("Subscription created:", {
-        subscriptionId: subscription.id,
-        status: subscription.status,
-        collectionMethod: subscription.collection_method,
-        latestInvoiceType: typeof subscription.latest_invoice,
-      });
+				customerId = customer.id;
+				console.log("Customer created:", customerId);
 
-      // Type guard: ensure latest_invoice is expanded to Invoice object, not string
-      const latestInvoice = subscription.latest_invoice;
-      if (!latestInvoice || typeof latestInvoice === "string") {
-        console.error("Invoice retrieval failed:", {
-          latestInvoice,
-          subscriptionId: subscription.id,
-        });
-        throw new Error("Failed to retrieve invoice for subscription");
-      }
+				// Save customer ID to database for future use
+				await setStripeCustomerId(userId, customerId);
+			}
 
-      console.log("Invoice retrieved:", {
-        invoiceId: latestInvoice.id,
-        status: latestInvoice.status,
-        collectionMethod: latestInvoice.collection_method,
-        hasPaymentIntent: !!(latestInvoice as Stripe.Invoice & {
-          payment_intent?: string | Stripe.PaymentIntent;
-        }).payment_intent,
-        paymentIntentType: typeof (latestInvoice as Stripe.Invoice & {
-          payment_intent?: string | Stripe.PaymentIntent;
-        }).payment_intent,
-      });
+			const price = await stripe.prices.create({
+				unit_amount: Math.round(amount * 100),
+				currency: "usd",
+				recurring: { interval: "week" },
+				product_data: {
+					name: `${campaignName || "Campaign"} Subscription`,
+					metadata: {
+						campaignId: campaignId || "",
+					},
+				},
+			});
 
-      // When using expand, payment_intent is added to the invoice but TypeScript doesn't know about it
-      // Use type assertion to access the expanded property
-      let paymentIntent = (
-        latestInvoice as Stripe.Invoice & {
-          payment_intent?: string | Stripe.PaymentIntent;
-        }
-      ).payment_intent;
+			console.log("Price created:", {
+				priceId: price.id,
+				amount: price.unit_amount,
+			});
 
-      if (!paymentIntent) {
-        console.error("PaymentIntent is missing from invoice:", {
-          invoiceId: latestInvoice.id,
-          invoiceStatus: latestInvoice.status,
-          subscriptionId: subscription.id,
-        });
-        console.log("Attempting to manually create PaymentIntent for invoice...");
-        
-        // Fallback: Manually create a PaymentIntent for the invoice
-        try {
-          // Check if invoice is in draft status (can be finalized)
-          if (latestInvoice.status === "draft") {
-            console.log("Invoice is in draft status, attempting to finalize...");
-            // Finalize the invoice to trigger PaymentIntent creation
-            const finalizedInvoice = await stripe.invoices.finalizeInvoice(
-              latestInvoice.id,
-              {
-                expand: ["payment_intent"],
-              }
-            );
-            
-            paymentIntent = (
-              finalizedInvoice as Stripe.Invoice & {
-                payment_intent?: string | Stripe.PaymentIntent;
-              }
-            ).payment_intent;
-            
-            if (paymentIntent) {
-              console.log("Successfully created PaymentIntent via invoice finalization:", {
-                invoiceId: finalizedInvoice.id,
-                paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
-              });
-            }
-          } else {
-            console.log(`Invoice status is '${latestInvoice.status}', not 'draft'. Checking if PaymentIntent exists...`);
-            // For non-draft invoices, try to retrieve the invoice again with expanded payment_intent
-            const retrievedInvoice = await stripe.invoices.retrieve(
-              latestInvoice.id,
-              {
-                expand: ["payment_intent"],
-              }
-            );
-            
-            paymentIntent = (
-              retrievedInvoice as Stripe.Invoice & {
-                payment_intent?: string | Stripe.PaymentIntent;
-              }
-            ).payment_intent;
-            
-            if (paymentIntent) {
-              console.log("Found PaymentIntent on invoice after retrieval:", {
-                invoiceId: retrievedInvoice.id,
-                paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
-              });
-            }
-          }
-        } catch (finalizeError) {
-          console.error("Failed to finalize or retrieve invoice:", finalizeError);
-        }
-        
-        // If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics
-        if (!paymentIntent) {
-          console.error("PaymentIntent could not be created even after invoice finalization");
-          console.error("Possible causes:");
-          console.error("1. Card payments not enabled in Stripe Dashboard");
-          console.error("2. Invalid API keys or key mismatch");
-          console.error("3. Stripe account restrictions or configuration issues");
-          console.error("4. Payment method types mismatch in account settings");
-          console.error("See TEST_MODE_VERIFICATION.md for troubleshooting steps");
-          throw new Error("Failed to initialize subscription payment: No PaymentIntent created on invoice");
-        }
-      }
+			const subscription = await stripe.subscriptions.create({
+				customer: customerId,
+				items: [{ price: price.id }],
+				metadata: {
+					campaignId: campaignId || "",
+					campaignName: campaignName || "",
+					userId,
+				},
+				payment_behavior: "default_incomplete",
+				collection_method: "charge_automatically",
+				payment_settings: {
+					save_default_payment_method: "on_subscription",
+					payment_method_types: ["card"],
+				},
+				automatic_tax: {
+					enabled: false,
+				},
+				expand: ["latest_invoice.payment_intent"],
+			});
 
-      if (typeof paymentIntent === "string") {
-        console.log("Retrieving PaymentIntent by ID:", paymentIntent);
-        paymentIntent = await stripe.paymentIntents.retrieve(paymentIntent);
-      }
+			console.log("Subscription created:", {
+				subscriptionId: subscription.id,
+				status: subscription.status,
+				collectionMethod: subscription.collection_method,
+				latestInvoiceType: typeof subscription.latest_invoice,
+			});
 
-      if (!paymentIntent?.client_secret) {
-        console.error("PaymentIntent missing client_secret:", {
-          paymentIntentId: paymentIntent?.id,
-          paymentIntentStatus: paymentIntent?.status,
-        });
-        throw new Error("Failed to initialize subscription payment: PaymentIntent missing client_secret");
-      }
+			// Type guard: ensure latest_invoice is expanded to Invoice object, not string
+			const latestInvoice = subscription.latest_invoice;
+			if (!latestInvoice || typeof latestInvoice === "string") {
+				console.error("Invoice retrieval failed:", {
+					latestInvoice,
+					subscriptionId: subscription.id,
+				});
+				throw new Error("Failed to retrieve invoice for subscription");
+			}
 
-      console.log("Subscription payment initialized successfully:", {
-        subscriptionId: subscription.id,
-        paymentIntentId: paymentIntent.id,
-        hasClientSecret: !!paymentIntent.client_secret,
-      });
+			console.log("Invoice retrieved:", {
+				invoiceId: latestInvoice.id,
+				status: latestInvoice.status,
+				collectionMethod: latestInvoice.collection_method,
+				hasPaymentIntent: !!(
+					latestInvoice as Stripe.Invoice & {
+						payment_intent?: string | Stripe.PaymentIntent;
+					}
+				).payment_intent,
+				paymentIntentType: typeof (
+					latestInvoice as Stripe.Invoice & {
+						payment_intent?: string | Stripe.PaymentIntent;
+					}
+				).payment_intent,
+			});
 
-      return NextResponse.json({
-        clientSecret: paymentIntent.client_secret,
-        subscriptionId: subscription.id,
-        customerId: customerId,
-        priceId: price.id,
-        mode: "subscription",
-      });
-    }
+			// When using expand, payment_intent is added to the invoice but TypeScript doesn't know about it
+			// Use type assertion to access the expanded property
+			let paymentIntent = (
+				latestInvoice as Stripe.Invoice & {
+					payment_intent?: string | Stripe.PaymentIntent;
+				}
+			).payment_intent;
 
-    // Create a PaymentIntent with the order amount and currency
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
-      currency: "usd",
-      metadata: {
-        campaignId: campaignId || "",
-        campaignName: campaignName || "",
-        userId: userId,
-      },
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
+			if (!paymentIntent) {
+				console.error("PaymentIntent is missing from invoice:", {
+					invoiceId: latestInvoice.id,
+					invoiceStatus: latestInvoice.status,
+					subscriptionId: subscription.id,
+				});
+				console.log(
+					"Attempting to manually create PaymentIntent for invoice..."
+				);
 
-    return NextResponse.json({
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
-      mode: "payment",
-    });
-  } catch (error) {
-    console.error("Error creating payment intent:", error);
+				// Fallback: Manually create a PaymentIntent for the invoice
+				try {
+					// Check if invoice is in draft status (can be finalized)
+					if (latestInvoice.status === "draft") {
+						console.log(
+							"Invoice is in draft status, attempting to finalize..."
+						);
+						// Finalize the invoice to trigger PaymentIntent creation
+						const finalizedInvoice =
+							await stripe.invoices.finalizeInvoice(latestInvoice.id, {
+								expand: ["payment_intent"],
+							});
 
-    if (isStripeMisconfigurationError(error)) {
-      return NextResponse.json(
-        { error: STRIPE_NOT_CONFIGURED_MESSAGE },
-        { status: 503 }
-      );
-    }
+						paymentIntent = (
+							finalizedInvoice as Stripe.Invoice & {
+								payment_intent?: string | Stripe.PaymentIntent;
+							}
+						).payment_intent;
 
-    const message =
-      error instanceof Error && error.message
-        ? error.message
-        : "Failed to create payment intent";
+						if (paymentIntent) {
+							console.log(
+								"Successfully created PaymentIntent via invoice finalization:",
+								{
+									invoiceId: finalizedInvoice.id,
+									paymentIntentId:
+										typeof paymentIntent === "string"
+											? paymentIntent
+											: paymentIntent.id,
+								}
+							);
+						}
+					} else {
+						console.log(
+							`Invoice status is '${latestInvoice.status}', not 'draft'. Checking if PaymentIntent exists...`
+						);
+						// For non-draft invoices, try to retrieve the invoice again with expanded payment_intent
+						const retrievedInvoice = await stripe.invoices.retrieve(
+							latestInvoice.id,
+							{
+								expand: ["payment_intent"],
+							}
+						);
 
-    return NextResponse.json(
-      { error: message },
-      { status: 500 }
-    );
-  }
+						paymentIntent = (
+							retrievedInvoice as Stripe.Invoice & {
+								payment_intent?: string | Stripe.PaymentIntent;
+							}
+						).payment_intent;
+
+						if (paymentIntent) {
+							console.log(
+								"Found PaymentIntent on invoice after retrieval:",
+								{
+									invoiceId: retrievedInvoice.id,
+									paymentIntentId:
+										typeof paymentIntent === "string"
+											? paymentIntent
+											: paymentIntent.id,
+								}
+							);
+						}
+					}
+				} catch (finalizeError) {
+					console.error(
+						"Failed to finalize or retrieve invoice:",
+						finalizeError
+					);
+				}
+
+				// If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics
+				if (!paymentIntent) {
+					console.error(
+						"PaymentIntent could not be created even after invoice finalization"
+					);
+					console.error("Possible causes:");
+					console.error(
+						"1. Card payments not enabled in Stripe Dashboard"
+					);
+					console.error("2. Invalid API keys or key mismatch");
+					console.error(
+						"3. Stripe account restrictions or configuration issues"
+					);
+					console.error(
+						"4. Payment method types mismatch in account settings"
+					);
+					console.error(
+						"See TEST_MODE_VERIFICATION.md for troubleshooting steps"
+					);
+					throw new Error(
+						"Failed to initialize subscription payment: No PaymentIntent created on invoice"
+					);
+				}
+			}
+
+			if (typeof paymentIntent === "string") {
+				console.log("Retrieving PaymentIntent by ID:", paymentIntent);
+				paymentIntent = await stripe.paymentIntents.retrieve(paymentIntent);
+			}
+
+			if (!paymentIntent?.client_secret) {
+				console.error("PaymentIntent missing client_secret:", {
+					paymentIntentId: paymentIntent?.id,
+					paymentIntentStatus: paymentIntent?.status,
+				});
+				throw new Error(
+					"Failed to initialize subscription payment: PaymentIntent missing client_secret"
+				);
+			}
+
+			console.log("Subscription payment initialized successfully:", {
+				subscriptionId: subscription.id,
+				paymentIntentId: paymentIntent.id,
+				hasClientSecret: !!paymentIntent.client_secret,
+			});
+
+			return NextResponse.json({
+				clientSecret: paymentIntent.client_secret,
+				subscriptionId: subscription.id,
+				customerId: customerId,
+				priceId: price.id,
+				mode: "subscription",
+			});
+		}
+
+		// Create a PaymentIntent with the order amount and currency
+		const paymentIntent = await stripe.paymentIntents.create({
+			amount: Math.round(amount * 100), // Convert to cents
+			currency: "usd",
+			metadata: {
+				campaignId: campaignId || "",
+				campaignName: campaignName || "",
+				userId: userId,
+			},
+			automatic_payment_methods: {
+				enabled: true,
+			},
+		});
+
+		return NextResponse.json({
+			clientSecret: paymentIntent.client_secret,
+			paymentIntentId: paymentIntent.id,
+			mode: "payment",
+		});
+	} catch (error) {
+		console.error("Error creating payment intent:", error);
+
+		if (isStripeMisconfigurationError(error)) {
+			return NextResponse.json(
+				{ error: STRIPE_NOT_CONFIGURED_MESSAGE },
+				{ status: 503 }
+			);
+		}
+
+		const message =
+			error instanceof Error && error.message
+				? error.message
+				: "Failed to create payment intent";
+
+		return NextResponse.json({ error: message }, { status: 500 });
+	}
 }
