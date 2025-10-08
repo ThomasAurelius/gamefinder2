@@ -50,6 +50,23 @@ const tagButtonClasses = (
 	return [sizeClasses, baseClasses, activeClasses].join(" ");
 };
 
+function getRoleBadgeClasses(role: string): string {
+	const baseClasses = "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border";
+	
+	switch (role) {
+		case "Hosting":
+			return `${baseClasses} bg-purple-500/20 text-purple-300 border-purple-400`;
+		case "Playing":
+			return `${baseClasses} bg-green-500/20 text-green-300 border-green-400`;
+		case "Waitlisted":
+			return `${baseClasses} bg-yellow-500/20 text-yellow-300 border-yellow-400`;
+		case "Pending Approval":
+			return `${baseClasses} bg-orange-500/20 text-orange-300 border-orange-400`;
+		default:
+			return baseClasses;
+	}
+}
+
 function CampaignCard({
 	campaign,
 	userTimezone,
@@ -77,15 +94,17 @@ function CampaignCard({
 			campaign.pendingPlayers.includes(currentUserId));
 
 	// Determine user's role in the campaign
-	const userRole = isHost 
-		? "Hosting" 
-		: campaign.signedUpPlayers.includes(currentUserId!) 
-			? "Playing" 
-			: campaign.waitlist.includes(currentUserId!) 
-				? "Waitlisted" 
-				: campaign.pendingPlayers.includes(currentUserId!) 
-					? "Pending Approval" 
-					: "";
+	const userRole = !currentUserId 
+		? ""
+		: isHost 
+			? "Hosting" 
+			: campaign.signedUpPlayers.includes(currentUserId) 
+				? "Playing" 
+				: campaign.waitlist.includes(currentUserId) 
+					? "Waitlisted" 
+					: campaign.pendingPlayers.includes(currentUserId) 
+						? "Pending Approval" 
+						: "";
 
 	return (
 		<div
@@ -102,15 +121,7 @@ function CampaignCard({
 							<h3 className="font-medium text-slate-100">{campaign.game}</h3>
 						</Link>
 						{userRole && (
-							<span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-								userRole === "Hosting" 
-									? "bg-purple-500/20 text-purple-300 border border-purple-400" 
-									: userRole === "Playing" 
-										? "bg-green-500/20 text-green-300 border border-green-400" 
-										: userRole === "Waitlisted" 
-											? "bg-yellow-500/20 text-yellow-300 border border-yellow-400" 
-											: "bg-orange-500/20 text-orange-300 border border-orange-400"
-							}`}>
+							<span className={getRoleBadgeClasses(userRole)}>
 								{userRole}
 							</span>
 						)}
