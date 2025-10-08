@@ -123,6 +123,34 @@ export async function POST(request: Request) {
 			// Check if user already has a Stripe customer ID
 			let customerId = await getStripeCustomerId(userId);
 
+			// Check if user already has an active subscription for this campaign
+			if (customerId && campaignId) {
+				const existingSubscriptions = await stripe.subscriptions.list({
+					customer: customerId,
+					status: "active",
+					limit: 100,
+				});
+
+				const campaignSubscription = existingSubscriptions.data.find(
+					(sub) => sub.metadata.campaignId === campaignId
+				);
+
+				if (campaignSubscription) {
+					console.log("User already has an active subscription for this campaign:", {
+						subscriptionId: campaignSubscription.id,
+						campaignId,
+						userId,
+					});
+					return NextResponse.json(
+						{
+							error: "You already have an active subscription for this campaign",
+							hasActiveSubscription: true,
+						},
+						{ status: 409 }
+					);
+				}
+			}
+
 			if (customerId) {
 				console.log("Reusing existing Stripe customer:", customerId);
 			} else {

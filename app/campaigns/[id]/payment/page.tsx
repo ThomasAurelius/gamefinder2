@@ -138,6 +138,15 @@ export default function CampaignPaymentPage() {
             throw new Error(STRIPE_NOT_CONFIGURED_MESSAGE);
           }
 
+          // Check if this is a 409 error indicating user already has a subscription
+          if (response.status === 409 && data && typeof data === "object" && "hasActiveSubscription" in data) {
+            // User already has an active subscription, update state to show manage subscription UI
+            setHasActiveSubscription(true);
+            setClientSecret(null);
+            setError(null);
+            return;
+          }
+
           const message =
             data && typeof data === "object" && "error" in data && data.error
               ? String((data as { error: unknown }).error)
