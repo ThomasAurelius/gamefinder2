@@ -1,23 +1,20 @@
 # Subscription Payment Fix
 
 ## Issue
-Subscriptions were failing while one-off card payments worked correctly.
+Subscriptions were failing to initialize because no PaymentIntent was being created on the subscription's first invoice.
 
 ## Root Cause
-When creating Stripe subscriptions with `payment_behavior: "default_incomplete"`, the configuration had an issue that prevented successful payment:
-
-**Explicit payment method types**: The subscription creation had `payment_method_types: ["card"]` explicitly set in the `payment_settings`, which can limit Stripe's ability to dynamically handle payment methods and may cause compatibility issues with the Payment Element.
+When creating Stripe subscriptions with `payment_behavior: "default_incomplete"` without specifying `payment_method_types` in `payment_settings`, Stripe attempts to automatically determine which payment methods to enable for the invoice's PaymentIntent. However, since we're creating a fresh customer without any payment methods attached, Stripe cannot auto-determine the payment method types, resulting in no PaymentIntent being created on the invoice. This causes the error "Failed to initialize subscription payment".
 
 ## Solution
 
 ### Changes Made to `/app/api/stripe/create-payment-intent/route.ts`
 
-#### Removed Explicit Payment Method Types (Line 110-112)
+#### Added Explicit Payment Method Types (Line 112)
 **Before:**
 ```typescript
 payment_settings: {
   save_default_payment_method: "on_subscription",
-  payment_method_types: ["card"],
 },
 ```
 
@@ -25,10 +22,11 @@ payment_settings: {
 ```typescript
 payment_settings: {
   save_default_payment_method: "on_subscription",
+  payment_method_types: ["card"],
 },
 ```
 
-**Why this helps**: Removing the explicit `payment_method_types` allows Stripe to automatically determine which payment methods should be available based on your Stripe account configuration and the Payment Element's capabilities. This makes the integration more flexible and compatible with Stripe's recommended practices. When `payment_method_types` is not specified, Stripe automatically enables appropriate payment methods for the PaymentIntent created by the subscription.
+**Why this helps**: Explicitly specifying `payment_method_types: ["card"]` ensures that Stripe creates a PaymentIntent on the subscription's first invoice with card payments enabled. Without this explicit specification, Stripe attempts to auto-determine payment methods by looking at the customer's default payment method, subscription's default payment method, or invoice template settings. Since we're creating a fresh customer without any payment methods attached, Stripe fails to auto-determine them, resulting in no PaymentIntent being created. By explicitly specifying card payments, we guarantee the PaymentIntent is created and can be used with the Payment Element on the frontend.
 
 ## How Subscription Payments Work
 
@@ -37,7 +35,7 @@ payment_settings: {
    - Price object is created for the recurring subscription
    - Subscription is created with `payment_behavior: "default_incomplete"`
    - This generates an invoice with an associated PaymentIntent
-   - The PaymentIntent is automatically configured with appropriate payment methods since we don't restrict `payment_method_types`
+   - The PaymentIntent is configured with card payment method since we explicitly specify `payment_method_types: ["card"]`
 
 2. **Frontend Collects Payment**:
    - Client secret from the PaymentIntent is sent to the frontend
