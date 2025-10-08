@@ -257,14 +257,8 @@ export default function CampaignDetailPage() {
   // Check if user has an active subscription for this campaign
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
-      // Only check for subscription campaigns with multiple sessions
-      if (!campaign || !campaign.sessionsLeft || campaign.sessionsLeft <= 1) {
-        setHasActiveSubscription(false);
-        return;
-      }
-
       // Only check if there's a cost per session (payment required)
-      if (!campaign.costPerSession || campaign.costPerSession <= 0) {
+      if (!campaign || !campaign.costPerSession || campaign.costPerSession <= 0) {
         setHasActiveSubscription(false);
         return;
       }

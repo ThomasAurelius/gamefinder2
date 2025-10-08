@@ -66,7 +66,8 @@ export default function CampaignPaymentPage() {
 
   useEffect(() => {
     const checkSubscriptionStatus = async () => {
-      if (!campaign || paymentMode !== "subscription") {
+      // Check for active subscription on any paid campaign
+      if (!campaign || !campaign.costPerSession || campaign.costPerSession <= 0) {
         return;
       }
 
@@ -90,7 +91,7 @@ export default function CampaignPaymentPage() {
     };
 
     checkSubscriptionStatus();
-  }, [campaign, campaignId, paymentMode]);
+  }, [campaign, campaignId]);
 
   useEffect(() => {
     const initializePayment = async () => {
