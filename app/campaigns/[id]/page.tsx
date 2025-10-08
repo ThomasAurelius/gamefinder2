@@ -287,33 +287,28 @@ export default function CampaignDetailPage() {
 
   const isCreator = currentUserId && campaign?.userId === currentUserId;
 
-  const handlePlayerApproved = (playerId: string) => {
-    // Find the player in the pending list
-    const approvedPlayer = pendingPlayersList.find((p) => p.id === playerId);
+  const handlePlayerApproved = (player: PendingPlayer) => {
+    // Remove from pending list
+    setPendingPlayersList((prev) => prev.filter((p) => p.id !== player.id));
     
-    if (approvedPlayer) {
-      // Remove from pending list
-      setPendingPlayersList((prev) => prev.filter((p) => p.id !== playerId));
-      
-      // Add to signed up players list
-      setSignedUpPlayersList((prev) => [
-        ...prev,
-        {
-          userId: approvedPlayer.id,
-          name: approvedPlayer.name,
-          avatarUrl: approvedPlayer.avatarUrl,
-          characterName: approvedPlayer.characterName,
-        },
-      ]);
-      
-      // Update campaign state
-      if (campaign) {
-        setCampaign({
-          ...campaign,
-          pendingPlayers: campaign.pendingPlayers.filter((id) => id !== playerId),
-          signedUpPlayers: [...campaign.signedUpPlayers, playerId],
-        });
-      }
+    // Add to signed up players list
+    setSignedUpPlayersList((prev) => [
+      ...prev,
+      {
+        userId: player.id,
+        name: player.name,
+        avatarUrl: player.avatarUrl,
+        characterName: player.characterName,
+      },
+    ]);
+    
+    // Update campaign state
+    if (campaign) {
+      setCampaign({
+        ...campaign,
+        pendingPlayers: campaign.pendingPlayers.filter((id) => id !== player.id),
+        signedUpPlayers: [...campaign.signedUpPlayers, player.id],
+      });
     }
   };
 

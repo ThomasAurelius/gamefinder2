@@ -13,7 +13,7 @@ type PendingPlayer = {
 type PendingCampaignPlayersManagerProps = {
   campaignId: string;
   pendingPlayers: PendingPlayer[];
-  onPlayerApproved?: (playerId: string) => void;
+  onPlayerApproved?: (player: PendingPlayer) => void;
   onPlayerDenied?: (playerId: string) => void;
 };
 
@@ -46,8 +46,10 @@ export default function PendingCampaignPlayersManager({
       }
 
       // Call the callback to update parent state immediately
-      if (onPlayerApproved) {
-        onPlayerApproved(playerId);
+      // Find the player data before calling the callback
+      const player = pendingPlayers.find((p) => p.id === playerId);
+      if (onPlayerApproved && player) {
+        onPlayerApproved(player);
       }
 
       router.refresh();
