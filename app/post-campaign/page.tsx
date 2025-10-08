@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import ShareToFacebook from "@/components/ShareToFacebook";
 import StripePaymentForm from "@/components/StripePaymentForm";
+import Link from "next/link";
 
 const tagButtonClasses = (
 	active: boolean,
@@ -48,6 +49,28 @@ export default function PostCampaignPage() {
 	const [clientSecret, setClientSecret] = useState<string>("");
 	const [showPaymentForm, setShowPaymentForm] = useState(false);
 	const [paymentCompleted, setPaymentCompleted] = useState(false);
+
+	// User profile state
+	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
+	const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+	useEffect(() => {
+		const fetchProfile = async () => {
+			try {
+				const response = await fetch("/api/profile");
+				if (response.ok) {
+					const profileData = await response.json();
+					setCanPostPaidGames(profileData.canPostPaidGames || false);
+				}
+			} catch (error) {
+				console.error("Failed to load profile:", error);
+			} finally {
+				setIsLoadingProfile(false);
+			}
+		};
+
+		fetchProfile();
+	}, []);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -432,30 +455,49 @@ export default function PostCampaignPage() {
 				</p>
 			</div>
 
-			<div className="space-y-2">
-				<label
-					htmlFor="costPerSession"
-					className="block text-sm font-medium text-slate-200"
-				>
-					Cost per Session
-				</label>
-				<input
-					id="costPerSession"
-					type="number"
-					min="0"
-					step="0.01"
-					value={costPerSession}
-					onChange={(e) => {
-						const value = e.target.value;
-						setCostPerSession(value === '' ? '' : parseFloat(value));
-					}}
-					placeholder="e.g., 0 for free, 5.00 for paid"
-					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-				/>
-				<p className="text-xs text-slate-500">
-					The cost per session in dollars (0 for free campaigns)
-				</p>
-			</div>
+			{canPostPaidGames && (
+				<div className="space-y-2">
+					<label
+						htmlFor="costPerSession"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Cost per Session
+					</label>
+					<input
+						id="costPerSession"
+						type="number"
+						min="0"
+						step="0.01"
+						value={costPerSession}
+						onChange={(e) => {
+							const value = e.target.value;
+							setCostPerSession(value === '' ? '' : parseFloat(value));
+						}}
+						placeholder="e.g., 0 for free, 5.00 for paid"
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						The cost per session in dollars (0 for free campaigns)
+					</p>
+				</div>
+			)}
+
+			{!canPostPaidGames && !isLoadingProfile && (
+				<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
+					<h3 className="text-sm font-medium text-amber-200 mb-2">
+						Want to charge for game sessions?
+					</h3>
+					<p className="text-xs text-slate-400 mb-3">
+						Enable paid games to charge players for sessions. The platform will keep 20% of fees.
+					</p>
+					<Link
+						href="/terms-paid-games"
+						className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+					>
+						Enable Paid Games
+					</Link>
+				</div>
+			)}
 
 			{costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
 				<div className="space-y-4">

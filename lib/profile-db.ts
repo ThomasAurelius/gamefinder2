@@ -16,6 +16,7 @@ export type ProfileRecord = {
   userName?: string; // The user's name from the users collection
   latitude?: number;
   longitude?: number;
+  canPostPaidGames?: boolean; // Flag to allow posting paid campaigns
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -38,6 +39,7 @@ const DEFAULT_PROFILE: ProfileRecord = {
   primaryRole: "",
   timezone: "America/New_York",
   avatarUrl: "",
+  canPostPaidGames: false,
 };
 
 export async function readProfile(userId: string): Promise<ProfileRecord> {
@@ -82,6 +84,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
     userName: user.name || "",
     latitude: profile.latitude,
     longitude: profile.longitude,
+    canPostPaidGames: profile.canPostPaidGames ?? false,
   };
 }
 

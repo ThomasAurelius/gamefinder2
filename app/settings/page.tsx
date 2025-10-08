@@ -10,6 +10,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [canPostPaidGames, setCanPostPaidGames] = useState(false);
 
   useEffect(() => {
     async function checkAdminAndLoadAnnouncement() {
@@ -25,6 +26,13 @@ export default function SettingsPage() {
           const announcementData = await announcementRes.json();
           setAnnouncement(announcementData.message || "");
           setIsActive(announcementData.isActive || false);
+        }
+
+        // Load user profile to check canPostPaidGames
+        const profileRes = await fetch("/api/profile");
+        if (profileRes.ok) {
+          const profileData = await profileRes.json();
+          setCanPostPaidGames(profileData.canPostPaidGames || false);
         }
       } catch (error) {
         console.error("Failed to load settings:", error);
@@ -82,6 +90,25 @@ export default function SettingsPage() {
             >
               Go to Profile
             </Link>
+          </div>
+
+          <div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
+            <h2 className="text-sm font-medium text-slate-200">Paid Games</h2>
+            <p className="mt-2 text-xs text-slate-400">
+              Enable the ability to post paid campaigns and charge players for game sessions.
+            </p>
+            {canPostPaidGames ? (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-sm text-emerald-400">✓ Paid games enabled</span>
+              </div>
+            ) : (
+              <Link
+                href="/terms-paid-games?from=settings"
+                className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+              >
+                Enable Paid Games
+              </Link>
+            )}
           </div>
           
           {loading ? (
