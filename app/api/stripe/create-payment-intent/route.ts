@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import Stripe from "stripe";
 import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
+import { getStripeCustomerId, setStripeCustomerId, getUserEmail } from "@/lib/users";
 
 type StripeErrorLike = {
   type?: string;
@@ -104,13 +105,29 @@ export async function POST(request: Request) {
         userId,
       });
 
-      const customer = await stripe.customers.create({
-        metadata: {
-          userId,
-        },
-      });
+      // Check if user already has a Stripe customer ID
+      let customerId = await getStripeCustomerId(userId);
+      
+      if (customerId) {
+        console.log("Reusing existing Stripe customer:", customerId);
+      } else {
+        // Get user email for better customer tracking in Stripe
+        const userEmail = await getUserEmail(userId);
+        
+        // Create new customer
+        const customer = await stripe.customers.create({
+          email: userEmail || undefined,
+          metadata: {
+            userId,
+          },
+        });
 
-      console.log("Customer created:", customer.id);
+        customerId = customer.id;
+        console.log("Customer created:", customerId);
+        
+        // Save customer ID to database for future use
+        await setStripeCustomerId(userId, customerId);
+      }
 
       const price = await stripe.prices.create({
         unit_amount: Math.round(amount * 100),
@@ -130,7 +147,7 @@ export async function POST(request: Request) {
       });
 
       const subscription = await stripe.subscriptions.create({
-        customer: customer.id,
+        customer: customerId,
         items: [{ price: price.id }],
         metadata: {
           campaignId: campaignId || "",
@@ -281,7 +298,7 @@ export async function POST(request: Request) {
       return NextResponse.json({
         clientSecret: paymentIntent.client_secret,
         subscriptionId: subscription.id,
-        customerId: customer.id,
+        customerId: customerId,
         priceId: price.id,
         mode: "subscription",
       });
