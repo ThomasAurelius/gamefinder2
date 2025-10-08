@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Payment Integration
+
+This application integrates Stripe for payment processing, including support for both one-time payments and recurring subscriptions.
+
+**Quick Links:**
+- [Stripe Setup Guide](./STRIPE_SETUP.md) - Complete setup instructions
+- [Subscription FAQ](./STRIPE_SUBSCRIPTION_FAQ.md) - Common questions and troubleshooting
+- [Subscription Fix Details](./SUBSCRIPTION_FIX.md) - Technical details about subscription implementation
+
 ## Getting Started
 
 First, run the development server:
