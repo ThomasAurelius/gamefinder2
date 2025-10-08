@@ -63,7 +63,7 @@ For subscriptions to work properly in this application, you need to ensure your 
    - Go to [Stripe Dashboard](https://dashboard.stripe.com/)
    - Navigate to **Settings** > **Payment methods**
    - Ensure **Cards** is enabled (it should be enabled by default)
-   - This is critical because the code explicitly specifies `payment_method_types: ["card"]` for subscriptions
+   - This is critical because the code explicitly specifies `payment_method_types: ["card"]` and `collection_method: "charge_automatically"` for subscriptions to ensure PaymentIntents are created correctly
 
 2. **Billing & Subscriptions** (No Action Required):
    - Subscriptions are enabled by default on all Stripe accounts
