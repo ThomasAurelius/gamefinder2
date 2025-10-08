@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import StripePaymentForm from "@/components/StripePaymentForm";
 import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe-config";
+import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
 
 interface Campaign {
   id: string;
@@ -64,9 +65,7 @@ export default function CampaignPaymentPage() {
   useEffect(() => {
     const initializePayment = async () => {
       if (!STRIPE_PUBLISHABLE_KEY) {
-        setError(
-          "Payments are currently unavailable because Stripe is not configured. Please contact support."
-        );
+        setError(STRIPE_NOT_CONFIGURED_MESSAGE);
         setClientSecret(null);
         return;
       }
