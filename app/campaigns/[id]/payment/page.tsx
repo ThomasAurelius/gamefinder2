@@ -28,6 +28,8 @@ export default function CampaignPaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isInitializingPayment, setIsInitializingPayment] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
 
   const paymentMode: PaymentMode = useMemo(() => {
     if (!campaign || typeof campaign.sessionsLeft !== "number") {
@@ -63,6 +65,34 @@ export default function CampaignPaymentPage() {
   }, [campaignId, router]);
 
   useEffect(() => {
+    const checkSubscriptionStatus = async () => {
+      if (!campaign || paymentMode !== "subscription") {
+        return;
+      }
+
+      try {
+        setIsCheckingSubscription(true);
+        const response = await fetch(
+          `/api/stripe/check-subscription?campaignId=${campaignId}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          setHasActiveSubscription(data.hasActiveSubscription || false);
+        }
+      } catch (err) {
+        console.error("Failed to check subscription status:", err);
+        // Don't show error to user, just assume no subscription
+        setHasActiveSubscription(false);
+      } finally {
+        setIsCheckingSubscription(false);
+      }
+    };
+
+    checkSubscriptionStatus();
+  }, [campaign, campaignId, paymentMode]);
+
+  useEffect(() => {
     const initializePayment = async () => {
       if (!STRIPE_PUBLISHABLE_KEY) {
         setError(STRIPE_NOT_CONFIGURED_MESSAGE);
@@ -71,6 +101,11 @@ export default function CampaignPaymentPage() {
       }
 
       if (!campaign?.costPerSession || campaign.costPerSession <= 0) {
+        return;
+      }
+
+      // Skip payment initialization if user has an active subscription
+      if (hasActiveSubscription) {
         return;
       }
 
@@ -130,10 +165,10 @@ export default function CampaignPaymentPage() {
       }
     };
 
-    if (campaign) {
+    if (campaign && !isCheckingSubscription) {
       initializePayment();
     }
-  }, [campaign, campaignId, paymentMode]);
+  }, [campaign, campaignId, paymentMode, hasActiveSubscription, isCheckingSubscription]);
 
   if (isLoading) {
     return (
@@ -204,7 +239,21 @@ export default function CampaignPaymentPage() {
           </div>
         )}
 
-        {isInitializingPayment && !clientSecret ? (
+        {hasActiveSubscription ? (
+          <div className="space-y-4">
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+              You have an active subscription for this campaign.
+            </div>
+            <a
+              href="https://billing.stripe.com/p/login/00w4gy3Jmad7bDT6k273G00"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+            >
+              Manage Subscription (Stripe Dashboard)
+            </a>
+          </div>
+        ) : isInitializingPayment && !clientSecret ? (
           <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-6 text-sm text-slate-400">
             Initializing payment...
           </div>
