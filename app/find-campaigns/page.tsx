@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey, ROLE_OPTIONS, DAYS_OF_WEEK } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
@@ -199,30 +199,24 @@ function CampaignCard({
 						>
 							Hosting this campaign
 						</Link>
-					) : (
+					) : !isUserSignedUp ? (
 						<button
 							onClick={() => onJoin(campaign.id)}
 							disabled={joiningCampaignId === campaign.id}
-							className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 ${
-								isUserSignedUp
-									? "bg-red-600 hover:bg-red-700 focus:ring-red-500"
-									: "bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
-							}`}
-							title={
-								isUserSignedUp
-									? "Withdraw from this campaign"
-									: "Request to join"
-							}
+							className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
+							title="Request to join"
 						>
 							{joiningCampaignId === campaign.id
-								? isUserSignedUp
-									? "Withdrawing..."
-									: "Requesting..."
-								: isUserSignedUp
-									? "Withdraw"
-									: "Request to Join"}
+								? "Requesting..."
+								: "Request to Join"}
 						</button>
-					)}
+					) : null}
+					<Link
+						href={`/campaigns/${campaign.id}`}
+						className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 bg-slate-600 hover:bg-slate-700 focus:ring-slate-500"
+					>
+						Details
+					</Link>
 					{campaign.imageUrl && (
 						<Link href={`/campaigns/${campaign.id}`}>
 							<img
@@ -277,14 +271,12 @@ export default function FindCampaignsPage() {
 
 		const fetchUserProfileAndEvents = async () => {
 			// First, fetch user profile to get their zipcode
-			let userZipCode = "";
 			try {
 				const response = await fetch("/api/profile");
 				if (response.ok) {
 					const profile = await response.json();
 					// Auto-populate location with user's zip code
 					if (profile.zipCode) {
-						userZipCode = profile.zipCode;
 						setLocationSearch(profile.zipCode);
 					}
 					// Set the current user ID
@@ -396,7 +388,7 @@ export default function FindCampaignsPage() {
 		if (showCharacterDialog || showCommitmentDialog) {
 			return;
 		}
-		// Find the campaign to check if user is already signed up
+		// Find the campaign
 		const campaign = [...campaigns, ...allEvents].find(
 			(c) => c.id === campaignId
 		);
@@ -405,66 +397,9 @@ export default function FindCampaignsPage() {
 			return;
 		}
 
-		// Check if user is already signed up (pending, signed up, or waitlisted)
-		const isUserSignedUp =
-			currentUserId &&
-			(campaign.signedUpPlayers.includes(currentUserId) ||
-				campaign.waitlist.includes(currentUserId) ||
-				campaign.pendingPlayers.includes(currentUserId));
-
-		if (isUserSignedUp) {
-			// Handle withdraw
-			handleWithdraw(campaignId);
-		} else {
-			// Handle join request - show commitment dialog first
-			setCampaignToJoin(campaign);
-			setShowCommitmentDialog(true);
-		}
-	};
-
-	const handleWithdraw = async (campaignId: string) => {
-		setJoiningCampaignId(campaignId);
-		setJoinError(null);
-
-		try {
-			const response = await fetch(`/api/campaigns/${campaignId}/leave`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(
-					errorData.error || "Failed to withdraw from campaign"
-				);
-			}
-
-			const updatedSession = await response.json();
-
-			// Update the session in the search results list
-			setCampaigns((prevCampaigns) =>
-				prevCampaigns.map((campaign) =>
-					campaign.id === campaignId ? updatedSession : campaign
-				)
-			);
-
-			// Update the session in the all events list
-			setAllEvents((prevEvents) =>
-				prevEvents.map((event) =>
-					event.id === campaignId ? updatedSession : event
-				)
-			);
-		} catch (error) {
-			setJoinError(
-				error instanceof Error
-					? error.message
-					: "Failed to withdraw from campaign"
-			);
-		} finally {
-			setJoiningCampaignId(null);
-		}
+		// Handle join request - show commitment dialog first
+		setCampaignToJoin(campaign);
+		setShowCommitmentDialog(true);
 	};
 
 	const handleCharacterSelect = async (

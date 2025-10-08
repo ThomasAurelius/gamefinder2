@@ -80,6 +80,8 @@ export default function CampaignDetailPage() {
   const [newNoteContent, setNewNoteContent] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
   const [noteError, setNoteError] = useState<string | null>(null);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
   const campaignId = params.id as string;
 
@@ -306,6 +308,40 @@ export default function CampaignDetailPage() {
     }
   };
 
+  const handleWithdraw = async () => {
+    if (!confirm("Are you sure you want to withdraw from this campaign?")) return;
+
+    setIsWithdrawing(true);
+    setWithdrawError(null);
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/leave`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error || "Failed to withdraw from campaign"
+        );
+      }
+
+      // Redirect back to find campaigns page after successful withdrawal
+      router.push("/find-campaigns");
+    } catch (error) {
+      setWithdrawError(
+        error instanceof Error
+          ? error.message
+          : "Failed to withdraw from campaign"
+      );
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -477,6 +513,26 @@ export default function CampaignDetailPage() {
       {campaign.description && (
         <div className="mt-4 border-t border-slate-800 pt-4">
           <p className="text-slate-300">{campaign.description}</p>
+        </div>
+      )}
+
+      {/* Withdrawal button for non-creators who are signed up */}
+      {!isCreator && currentUserId && (
+        campaign.signedUpPlayers.includes(currentUserId) ||
+        campaign.waitlist.includes(currentUserId) ||
+        campaign.pendingPlayers.includes(currentUserId)
+      ) && (
+        <div className="mt-6 space-y-2">
+          <button
+            onClick={handleWithdraw}
+            disabled={isWithdrawing}
+            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isWithdrawing ? "Withdrawing..." : "Withdraw from Campaign"}
+          </button>
+          {withdrawError && (
+            <p className="text-sm text-red-400">{withdrawError}</p>
+          )}
         </div>
       )}
 
