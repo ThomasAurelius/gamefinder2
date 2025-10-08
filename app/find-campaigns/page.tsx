@@ -83,12 +83,19 @@ function CampaignCard({
 		>
 			<div className="flex items-start justify-between gap-4">
 				<div className="flex-1">
-					<Link
-						href={`/campaigns/${campaign.id}`}
-						className="hover:text-sky-300 transition-colors"
-					>
-						<h3 className="font-medium text-slate-100">{campaign.game}</h3>
-					</Link>
+					<div className="flex items-center gap-2">
+						<Link
+							href={`/campaigns/${campaign.id}`}
+							className="hover:text-sky-300 transition-colors"
+						>
+							<h3 className="font-medium text-slate-100">{campaign.game}</h3>
+						</Link>
+						{isHost && campaign.pendingPlayers.length > 0 && (
+							<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
+								{campaign.pendingPlayers.length} pending approval
+							</span>
+						)}
+					</div>
 					<div className="mt-2 space-y-1 text-sm text-slate-400">
 						{campaign.hostName && (
 							<p>
