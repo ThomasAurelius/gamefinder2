@@ -10,23 +10,32 @@ When creating Stripe subscriptions with `payment_behavior: "default_incomplete"`
 
 ### Changes Made to `/app/api/stripe/create-payment-intent/route.ts`
 
-#### Added Explicit Payment Method Types (Line 126)
+#### Added Explicit Collection Method (Line 124)
 **Before:**
 ```typescript
-payment_settings: {
-  save_default_payment_method: "on_subscription",
-},
-```
-
-**After:**
-```typescript
+payment_behavior: "default_incomplete",
 payment_settings: {
   save_default_payment_method: "on_subscription",
   payment_method_types: ["card"],
 },
 ```
 
-**Why this helps**: Explicitly specifying `payment_method_types: ["card"]` ensures that Stripe creates a PaymentIntent on the subscription's first invoice with card payments enabled. Without this explicit specification, Stripe attempts to auto-determine payment methods by looking at the customer's default payment method, subscription's default payment method, or invoice template settings. Since we're creating a fresh customer without any payment methods attached, Stripe fails to auto-determine them, resulting in no PaymentIntent being created. By explicitly specifying card payments, we guarantee the PaymentIntent is created and can be used with the Payment Element on the frontend.
+**After:**
+```typescript
+payment_behavior: "default_incomplete",
+collection_method: "charge_automatically",
+payment_settings: {
+  save_default_payment_method: "on_subscription",
+  payment_method_types: ["card"],
+},
+```
+
+**Why this helps**: Explicitly specifying `collection_method: "charge_automatically"` ensures that Stripe knows how to handle the payment collection for the subscription. While `charge_automatically` is the default value, explicitly setting it removes any ambiguity and ensures consistent behavior across different Stripe account configurations. This, combined with `payment_method_types: ["card"]`, guarantees that:
+1. Stripe creates a PaymentIntent on the subscription's first invoice
+2. The invoice is configured to automatically charge the payment method
+3. Card payments are enabled for the PaymentIntent
+
+Without these explicit specifications, Stripe attempts to auto-determine settings by looking at the customer's default payment method, subscription's default payment method, or invoice template settings. Since we're creating a fresh customer without any payment methods attached, Stripe can fail to properly configure the invoice, resulting in no PaymentIntent being created. By explicitly specifying both the collection method and payment method types, we guarantee the PaymentIntent is created and can be used with the Payment Element on the frontend.
 
 #### Enhanced Error Logging and Diagnostics
 
@@ -35,10 +44,10 @@ To improve troubleshooting when subscriptions fail, comprehensive logging has be
 1. **Initial Request Logging** (Line 83-88): Logs the subscription request parameters including amount, campaign details, and user ID
 2. **Customer Creation** (Line 96): Logs the created customer ID
 3. **Price Creation** (Line 110-113): Logs the price ID and amount
-4. **Subscription Creation** (Line 131-135): Logs subscription ID, status, and invoice type
-5. **Invoice Retrieval** (Line 147-156): Logs invoice details and PaymentIntent presence
-6. **PaymentIntent Validation** (Line 166-192): Logs detailed error context when PaymentIntent is missing or invalid
-7. **Success Confirmation** (Line 188-192): Logs successful initialization with all relevant IDs
+4. **Subscription Creation** (Line 132-137): Logs subscription ID, status, collection method, and invoice type
+5. **Invoice Retrieval** (Line 149-159): Logs invoice details including collection method and PaymentIntent presence
+6. **PaymentIntent Validation** (Line 169-195): Logs detailed error context when PaymentIntent is missing or invalid
+7. **Success Confirmation** (Line 191-195): Logs successful initialization with all relevant IDs
 
 **Error Messages Enhanced**:
 - Generic "Failed to initialize subscription payment" errors now include specific context:

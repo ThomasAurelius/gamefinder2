@@ -151,9 +151,15 @@ You can choose to cancel immediately or at the end of the billing period.
 
 **A:** The application uses Stripe API version `2025-09-30.clover`. This is specified in the code and should be compatible with all recent Stripe accounts.
 
-### Q: Why does the code specify `payment_method_types: ["card"]`?
+### Q: Why does the code specify `payment_method_types: ["card"]` and `collection_method: "charge_automatically"`?
 
-**A:** This is critical for subscriptions to work correctly. Without explicitly specifying the payment method type, Stripe attempts to auto-determine which payment methods to enable by looking at the customer's saved payment methods. Since we create fresh customers without any saved payment methods, Stripe can't auto-determine them, resulting in no PaymentIntent being created. By explicitly specifying card payments, we guarantee the PaymentIntent is created.
+**A:** Both settings are critical for subscriptions to work correctly:
+
+1. **`payment_method_types: ["card"]`**: Without explicitly specifying the payment method type, Stripe attempts to auto-determine which payment methods to enable by looking at the customer's saved payment methods. Since we create fresh customers without any saved payment methods, Stripe can't auto-determine them, resulting in no PaymentIntent being created. By explicitly specifying card payments, we guarantee the PaymentIntent is created.
+
+2. **`collection_method: "charge_automatically"`**: This ensures Stripe knows to automatically charge the payment method for invoices. While this is the default value, explicitly setting it removes any ambiguity and ensures consistent behavior across different Stripe account configurations.
+
+Together, these settings guarantee that the subscription invoice is created with a PaymentIntent that can be used with the Payment Element on the frontend.
 
 For more details, see [SUBSCRIPTION_FIX.md](./SUBSCRIPTION_FIX.md).
 
