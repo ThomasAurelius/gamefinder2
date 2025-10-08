@@ -9,9 +9,12 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe-config";
+import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
 
 // Load Stripe outside of component to avoid recreating on every render
-const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
+const stripePromise = STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(STRIPE_PUBLISHABLE_KEY)
+  : null;
 
 interface PaymentFormProps {
   clientSecret: string;
@@ -100,6 +103,7 @@ export default function StripePaymentForm({
   onSuccess,
   onError,
 }: PaymentFormProps) {
+  const stripeInstance = stripePromise;
   const [options, setOptions] = useState<{
     clientSecret: string;
     appearance: {
@@ -135,12 +139,10 @@ export default function StripePaymentForm({
   }, [clientSecret]);
 
   // Check if Stripe publishable key is missing
-  if (!STRIPE_PUBLISHABLE_KEY) {
+  if (!STRIPE_PUBLISHABLE_KEY || !stripeInstance) {
     return (
       <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-6">
-        <p className="text-sm text-red-200">
-          Payment system is not configured. Please contact support.
-        </p>
+        <p className="text-sm text-red-200">{STRIPE_NOT_CONFIGURED_MESSAGE}</p>
       </div>
     );
   }
@@ -159,7 +161,7 @@ export default function StripePaymentForm({
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-6">
-      <Elements stripe={stripePromise} options={options}>
+      <Elements stripe={stripeInstance} options={options}>
         <CheckoutForm
           paymentMode={paymentMode}
           onSuccess={onSuccess}

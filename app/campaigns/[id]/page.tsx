@@ -95,8 +95,9 @@ export default function CampaignDetailPage() {
 
         // Fetch current user ID
         const profileResponse = await fetch("/api/profile");
+        let profileData: { userId: string } | null = null;
         if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
+          profileData = await profileResponse.json();
           setCurrentUserId(profileData.userId);
         }
 
@@ -231,14 +232,11 @@ export default function CampaignDetailPage() {
         }
 
         // Fetch notes if user is the creator
-        if (profileResponse.ok) {
-          const profileData = await profileResponse.json();
-          if (campaignData.userId === profileData.userId) {
-            const notesResponse = await fetch(`/api/campaigns/${campaignId}/notes`);
-            if (notesResponse.ok) {
-              const notesData = await notesResponse.json();
-              setNotes(notesData);
-            }
+        if (profileData && campaignData.userId === profileData.userId) {
+          const notesResponse = await fetch(`/api/campaigns/${campaignId}/notes`);
+          if (notesResponse.ok) {
+            const notesData = await notesResponse.json();
+            setNotes(notesData);
           }
         }
       } catch (error) {
@@ -269,12 +267,15 @@ export default function CampaignDetailPage() {
         body: JSON.stringify({ content: newNoteContent.trim() }),
       });
 
+      const data = (await response.json()) as CampaignNote & {
+        error?: string;
+      };
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add note");
+        throw new Error(data?.error || "Failed to add note");
       }
 
-      const newNote = await response.json();
+      const newNote: CampaignNote = data;
       setNotes((prev) => [newNote, ...prev]);
       setNewNoteContent("");
     } catch (error) {
