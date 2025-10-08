@@ -1,13 +1,34 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## ⭐ Does Subscriptions Work in Test Mode?
+
+**YES!** See [SUBSCRIPTIONS_WORK_IN_TEST_MODE.md](./SUBSCRIPTIONS_WORK_IN_TEST_MODE.md) for the complete answer and troubleshooting guide.
+
 ## Payment Integration
 
 This application integrates Stripe for payment processing, including support for both one-time payments and recurring subscriptions.
 
 **Quick Links:**
+- [Test Mode Verification](./TEST_MODE_VERIFICATION.md) - ⭐ **YES, subscriptions work in test mode!** Verify your setup here
 - [Stripe Setup Guide](./STRIPE_SETUP.md) - Complete setup instructions
 - [Subscription FAQ](./STRIPE_SUBSCRIPTION_FAQ.md) - Common questions and troubleshooting
 - [Subscription Fix Details](./SUBSCRIPTION_FIX.md) - Technical details about subscription implementation
+
+### Verify Your Stripe Configuration
+
+Before starting development, validate your Stripe setup:
+
+```bash
+npm run validate:stripe
+```
+
+This will check:
+- ✅ Environment variables are properly set
+- ✅ API keys have correct format (test vs live)
+- ✅ Both keys are in the same mode
+- ✅ Connection to Stripe API works
+
+If you get errors about missing keys, see [STRIPE_SETUP.md](./STRIPE_SETUP.md) for setup instructions.
 
 ## Getting Started
 
