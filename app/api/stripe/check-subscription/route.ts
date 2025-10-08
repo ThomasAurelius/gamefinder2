@@ -34,6 +34,13 @@ export async function GET(request: Request) {
 			);
 		}
 
+		// If Stripe is not configured, assume no subscriptions
+		if (!process.env.STRIPE_SECRET_KEY) {
+			return NextResponse.json({
+				hasActiveSubscription: false,
+			});
+		}
+
 		// Check if user has a Stripe customer ID
 		const customerId = await getStripeCustomerId(userId);
 
