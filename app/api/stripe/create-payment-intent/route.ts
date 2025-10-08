@@ -44,13 +44,30 @@ const getStripe = () => {
 };
 
 export async function POST(request: Request) {
+  // Validate Stripe configuration
   if (!process.env.STRIPE_SECRET_KEY) {
     console.error("Error creating payment intent: STRIPE_SECRET_KEY is not configured");
+    console.error("Please add STRIPE_SECRET_KEY to your .env.local file and restart the server");
     return NextResponse.json(
       { error: STRIPE_NOT_CONFIGURED_MESSAGE },
       { status: 503 }
     );
   }
+
+  // Validate key format (test mode check)
+  const isTestMode = process.env.STRIPE_SECRET_KEY.startsWith("sk_test_");
+  const isLiveMode = process.env.STRIPE_SECRET_KEY.startsWith("sk_live_");
+  
+  if (!isTestMode && !isLiveMode) {
+    console.error("Error: STRIPE_SECRET_KEY has invalid format");
+    console.error("Expected format: sk_test_... (for test mode) or sk_live_... (for live mode)");
+    return NextResponse.json(
+      { error: "Stripe configuration error: Invalid API key format" },
+      { status: 503 }
+    );
+  }
+
+  console.log(`Stripe API initialized in ${isTestMode ? "TEST" : "LIVE"} mode`);
 
   try {
     const stripe = getStripe();
@@ -172,6 +189,11 @@ export async function POST(request: Request) {
           invoiceStatus: latestInvoice.status,
           subscriptionId: subscription.id,
         });
+        console.error("Possible causes:");
+        console.error("1. Card payments not enabled in Stripe Dashboard");
+        console.error("2. Invalid API keys or key mismatch");
+        console.error("3. Stripe account restrictions");
+        console.error("See TEST_MODE_VERIFICATION.md for troubleshooting steps");
         throw new Error("Failed to initialize subscription payment: No PaymentIntent created on invoice");
       }
 

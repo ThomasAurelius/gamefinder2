@@ -20,7 +20,14 @@ This application uses Stripe embedded components for payment processing. Campaig
 - Customers are created automatically when payments are initiated
 - Subscriptions are managed through the Stripe API
 
-If subscriptions are still failing, see the [Troubleshooting](#troubleshooting) section below.
+**✨ Verify Your Setup:**
+```bash
+npm run validate:stripe
+```
+
+This command checks your configuration and tests the connection to Stripe API.
+
+If subscriptions are still failing, see [TEST_MODE_VERIFICATION.md](./TEST_MODE_VERIFICATION.md) for detailed troubleshooting.
 
 ## Setup
 
@@ -229,25 +236,33 @@ This error typically occurs when a PaymentIntent cannot be created for a subscri
    - Ensure **Cards** is enabled
    - This is the most common cause of subscription initialization failures
 
-2. **Check Your Stripe Account Status**:
+2. **Validate Your Configuration**:
+   ```bash
+   npm run validate:stripe
+   ```
+   This will check your API keys and test the connection to Stripe.
+
+3. **Check Your Stripe Account Status**:
    - Ensure your Stripe account is fully activated (not restricted)
    - In Test Mode, there should be no restrictions
    - If using Live Mode, ensure your account verification is complete
 
-3. **Verify API Version Compatibility**:
+4. **Verify API Version Compatibility**:
    - The code uses Stripe API version `2025-09-30.clover`
    - This should work with all recent Stripe accounts
    - If you see API version errors, your account might need updating
 
-4. **Review Server Logs**:
+5. **Review Server Logs**:
    - Check the server console for detailed error messages
    - Look for Stripe API errors that provide more context
-   - Common issues include invalid metadata or configuration errors
+   - The logs now include helpful troubleshooting hints
 
-5. **Test with a Simple Subscription**:
+6. **Test with a Simple Subscription**:
    - Create a campaign with just 2 sessions (minimum for subscription mode)
    - Set a small amount like $1.00 for testing
    - If this works, the issue might be with specific campaign settings
+
+For detailed troubleshooting steps, see [TEST_MODE_VERIFICATION.md](./TEST_MODE_VERIFICATION.md).
 
 ### Subscriptions Not Appearing in Dashboard
 

@@ -27,20 +27,33 @@ The application dynamically creates all necessary Stripe resources (customers, p
 2. **Invalid API keys**: Verify your `STRIPE_SECRET_KEY` is correct and matches your test/live mode
 3. **Account restrictions**: Ensure your Stripe account is fully activated (especially in Live Mode)
 
-See the [STRIPE_SETUP.md Troubleshooting section](./STRIPE_SETUP.md#troubleshooting) for detailed steps.
+**Quick fix:** Run the validation command to check your setup:
+```bash
+npm run validate:stripe
+```
+
+See [TEST_MODE_VERIFICATION.md](./TEST_MODE_VERIFICATION.md) for detailed troubleshooting steps.
 
 ### Q: How do I know if subscriptions are working?
 
 **A:** Follow these verification steps:
 
-1. **Create a test campaign** with multiple sessions (2 or more triggers subscription mode)
-2. **Set up payment** during campaign creation
-3. **Check for the payment form** - if it appears, API connection is working
-4. **Complete a test payment** using card `4242 4242 4242 4242`
-5. **Verify in Stripe Dashboard**:
+1. **Validate your configuration first**:
+   ```bash
+   npm run validate:stripe
+   ```
+   This checks your API keys and Stripe connection.
+
+2. **Create a test campaign** with multiple sessions (2 or more triggers subscription mode)
+3. **Set up payment** during campaign creation
+4. **Check for the payment form** - if it appears, API connection is working
+5. **Complete a test payment** using card `4242 4242 4242 4242`
+6. **Verify in Stripe Dashboard**:
    - Go to [Stripe Dashboard](https://dashboard.stripe.com/)
    - Navigate to **Payments** > **Subscriptions**
    - You should see your test subscription listed
+
+For detailed verification steps, see [TEST_MODE_VERIFICATION.md](./TEST_MODE_VERIFICATION.md).
 
 ### Q: Do I need to create products in my Stripe Dashboard?
 
