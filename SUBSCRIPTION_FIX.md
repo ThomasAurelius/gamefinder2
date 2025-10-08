@@ -44,10 +44,10 @@ To improve troubleshooting when subscriptions fail, comprehensive logging has be
 1. **Initial Request Logging** (Line 83-88): Logs the subscription request parameters including amount, campaign details, and user ID
 2. **Customer Creation** (Line 96): Logs the created customer ID
 3. **Price Creation** (Line 110-113): Logs the price ID and amount
-4. **Subscription Creation** (Line 132-136): Logs subscription ID, status, and invoice type
-5. **Invoice Retrieval** (Line 148-157): Logs invoice details and PaymentIntent presence
-6. **PaymentIntent Validation** (Line 167-193): Logs detailed error context when PaymentIntent is missing or invalid
-7. **Success Confirmation** (Line 189-193): Logs successful initialization with all relevant IDs
+4. **Subscription Creation** (Line 132-137): Logs subscription ID, status, collection method, and invoice type
+5. **Invoice Retrieval** (Line 149-159): Logs invoice details including collection method and PaymentIntent presence
+6. **PaymentIntent Validation** (Line 169-195): Logs detailed error context when PaymentIntent is missing or invalid
+7. **Success Confirmation** (Line 191-195): Logs successful initialization with all relevant IDs
 
 **Error Messages Enhanced**:
 - Generic "Failed to initialize subscription payment" errors now include specific context:

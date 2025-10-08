@@ -132,6 +132,7 @@ export async function POST(request: Request) {
       console.log("Subscription created:", {
         subscriptionId: subscription.id,
         status: subscription.status,
+        collectionMethod: subscription.collection_method,
         latestInvoiceType: typeof subscription.latest_invoice,
       });
 
@@ -148,6 +149,7 @@ export async function POST(request: Request) {
       console.log("Invoice retrieved:", {
         invoiceId: latestInvoice.id,
         status: latestInvoice.status,
+        collectionMethod: latestInvoice.collection_method,
         hasPaymentIntent: !!(latestInvoice as Stripe.Invoice & {
           payment_intent?: string | Stripe.PaymentIntent;
         }).payment_intent,
