@@ -78,12 +78,19 @@ function GameSessionCard({
 		>
 			<div className="flex items-start justify-between gap-4">
 				<div className="flex-1">
-					<Link
-						href={`/games/${session.id}`}
-						className="hover:text-sky-300 transition-colors"
-					>
-						<h3 className="font-medium text-slate-100">{session.game}</h3>
-					</Link>
+					<div className="flex items-center gap-2">
+						<Link
+							href={`/games/${session.id}`}
+							className="hover:text-sky-300 transition-colors"
+						>
+							<h3 className="font-medium text-slate-100">{session.game}</h3>
+						</Link>
+						{isHost && session.pendingPlayers.length > 0 && (
+							<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
+								{session.pendingPlayers.length} pending approval{session.pendingPlayers.length !== 1 ? 's' : ''}
+							</span>
+						)}
+					</div>
 					<div className="mt-2 space-y-1 text-sm text-slate-400">
 						{session.hostName && (
 							<p>
