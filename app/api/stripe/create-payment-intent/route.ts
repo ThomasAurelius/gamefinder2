@@ -263,9 +263,40 @@ export async function POST(request: Request) {
           console.error("Failed to finalize or retrieve invoice:", finalizeError);
         }
         
-        // If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics
+        // If still no PaymentIntent after finalization attempt, try manual creation as last resort
         if (!paymentIntent) {
-          console.error("PaymentIntent could not be created even after invoice finalization");
+          console.log("Attempting to manually create PaymentIntent for the invoice...");
+          
+          try {
+            // Manually create a PaymentIntent linked to this invoice
+            const createdPaymentIntent = await stripe.paymentIntents.create({
+              amount: latestInvoice.amount_due || Math.round(amount * 100),
+              currency: latestInvoice.currency || "usd",
+              customer: customerId,
+              payment_method_types: ["card"],
+              metadata: {
+                invoiceId: latestInvoice.id,
+                subscriptionId: subscription.id,
+                campaignId: campaignId || "",
+                campaignName: campaignName || "",
+                userId,
+              },
+            });
+            
+            paymentIntent = createdPaymentIntent;
+            console.log("Successfully created PaymentIntent manually:", {
+              paymentIntentId: createdPaymentIntent.id,
+              invoiceId: latestInvoice.id,
+              amount: createdPaymentIntent.amount,
+            });
+          } catch (createError) {
+            console.error("Failed to manually create PaymentIntent:", createError);
+          }
+        }
+        
+        // If still no PaymentIntent after all attempts, throw error with detailed diagnostics
+        if (!paymentIntent) {
+          console.error("PaymentIntent could not be created even after all fallback attempts");
           console.error("Possible causes:");
           console.error("1. Card payments not enabled in Stripe Dashboard");
           console.error("2. Invalid API keys or key mismatch");
