@@ -269,12 +269,15 @@ export default function CampaignDetailPage() {
         body: JSON.stringify({ content: newNoteContent.trim() }),
       });
 
+      const data = (await response.json()) as CampaignNote & {
+        error?: string;
+      };
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add note");
+        throw new Error(data?.error || "Failed to add note");
       }
 
-      const newNote = await response.json();
+      const newNote: CampaignNote = data;
       setNotes((prev) => [newNote, ...prev]);
       setNewNoteContent("");
     } catch (error) {
