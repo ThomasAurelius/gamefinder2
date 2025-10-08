@@ -196,28 +196,54 @@ export async function POST(request: Request) {
         
         // Fallback: Manually create a PaymentIntent for the invoice
         try {
-          // Finalize the invoice to trigger PaymentIntent creation
-          const finalizedInvoice = await stripe.invoices.finalizeInvoice(
-            latestInvoice.id,
-            {
-              expand: ["payment_intent"],
+          // Check if invoice is in draft status (can be finalized)
+          if (latestInvoice.status === "draft") {
+            console.log("Invoice is in draft status, attempting to finalize...");
+            // Finalize the invoice to trigger PaymentIntent creation
+            const finalizedInvoice = await stripe.invoices.finalizeInvoice(
+              latestInvoice.id,
+              {
+                expand: ["payment_intent"],
+              }
+            );
+            
+            paymentIntent = (
+              finalizedInvoice as Stripe.Invoice & {
+                payment_intent?: string | Stripe.PaymentIntent;
+              }
+            ).payment_intent;
+            
+            if (paymentIntent) {
+              console.log("Successfully created PaymentIntent via invoice finalization:", {
+                invoiceId: finalizedInvoice.id,
+                paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
+              });
             }
-          );
-          
-          paymentIntent = (
-            finalizedInvoice as Stripe.Invoice & {
-              payment_intent?: string | Stripe.PaymentIntent;
+          } else {
+            console.log(`Invoice status is '${latestInvoice.status}', not 'draft'. Checking if PaymentIntent exists...`);
+            // For non-draft invoices, try to retrieve the invoice again with expanded payment_intent
+            const retrievedInvoice = await stripe.invoices.retrieve(
+              latestInvoice.id,
+              {
+                expand: ["payment_intent"],
+              }
+            );
+            
+            paymentIntent = (
+              retrievedInvoice as Stripe.Invoice & {
+                payment_intent?: string | Stripe.PaymentIntent;
+              }
+            ).payment_intent;
+            
+            if (paymentIntent) {
+              console.log("Found PaymentIntent on invoice after retrieval:", {
+                invoiceId: retrievedInvoice.id,
+                paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
+              });
             }
-          ).payment_intent;
-          
-          if (paymentIntent) {
-            console.log("Successfully created PaymentIntent via invoice finalization:", {
-              invoiceId: finalizedInvoice.id,
-              paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
-            });
           }
         } catch (finalizeError) {
-          console.error("Failed to finalize invoice:", finalizeError);
+          console.error("Failed to finalize or retrieve invoice:", finalizeError);
         }
         
         // If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics

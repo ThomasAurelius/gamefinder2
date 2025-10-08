@@ -39,37 +39,44 @@ expand: ["latest_invoice.payment_intent"],
 - `automatic_tax: { enabled: false }` - Prevents tax calculation issues that could interfere with PaymentIntent creation
 - `expand: ["latest_invoice.payment_intent"]` - Ensures we get the full PaymentIntent object in the response
 
-#### 2. Added Fallback PaymentIntent Creation (Lines 189-234)
+#### 2. Added Fallback PaymentIntent Creation (Lines 189-258)
 
 **The Critical Fix:**
-If the invoice doesn't have a PaymentIntent after subscription creation, we now attempt to manually trigger its creation by finalizing the invoice:
+If the invoice doesn't have a PaymentIntent after subscription creation, we now have a sophisticated fallback mechanism:
 
 ```typescript
 if (!paymentIntent) {
   console.log("Attempting to manually create PaymentIntent for invoice...");
   
   try {
-    // Finalize the invoice to trigger PaymentIntent creation
-    const finalizedInvoice = await stripe.invoices.finalizeInvoice(
-      latestInvoice.id,
-      { expand: ["payment_intent"] }
-    );
-    
-    paymentIntent = finalizedInvoice.payment_intent;
-    
-    if (paymentIntent) {
-      console.log("Successfully created PaymentIntent via invoice finalization");
+    // Check if invoice is in draft status (can be finalized)
+    if (latestInvoice.status === "draft") {
+      // Finalize the invoice to trigger PaymentIntent creation
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(
+        latestInvoice.id,
+        { expand: ["payment_intent"] }
+      );
+      paymentIntent = finalizedInvoice.payment_intent;
+    } else {
+      // For non-draft invoices, re-retrieve with expanded payment_intent
+      const retrievedInvoice = await stripe.invoices.retrieve(
+        latestInvoice.id,
+        { expand: ["payment_intent"] }
+      );
+      paymentIntent = retrievedInvoice.payment_intent;
     }
   } catch (finalizeError) {
-    console.error("Failed to finalize invoice:", finalizeError);
+    console.error("Failed to finalize or retrieve invoice:", finalizeError);
   }
 }
 ```
 
 **Why this fallback is necessary:**
 - Some Stripe accounts or configurations may not automatically create PaymentIntents on invoice creation
-- Invoice finalization explicitly triggers PaymentIntent creation as a required step
+- **For draft invoices**: Invoice finalization explicitly triggers PaymentIntent creation as a required step
+- **For non-draft invoices**: Re-retrieving the invoice with expanded payment_intent may find a PaymentIntent that was created but not initially expanded
 - This ensures that even in edge cases, we can successfully initialize the subscription payment
+- The fallback checks invoice status to use the appropriate recovery method
 - The fallback is only attempted when the initial PaymentIntent creation fails, avoiding unnecessary API calls
 
 #### 3. Enhanced Error Logging and Diagnostics
@@ -142,19 +149,29 @@ Each log entry includes relevant object IDs that you can use to look up the obje
 
 ### Common Scenarios and Solutions
 
-**Scenario 1: Fallback succeeds**
+**Scenario 1: Fallback succeeds (draft invoice)**
 ```
 PaymentIntent is missing from invoice: { invoiceId: 'in_xxx', ... }
 Attempting to manually create PaymentIntent for invoice...
+Invoice is in draft status, attempting to finalize...
 Successfully created PaymentIntent via invoice finalization: { invoiceId: 'in_xxx', ... }
 ```
-→ This is normal for some Stripe account configurations. The fallback worked and the payment will proceed normally.
+→ This is normal for some Stripe account configurations. The invoice was finalized and the payment will proceed normally.
 
-**Scenario 2: Fallback fails**
+**Scenario 2: Fallback succeeds (non-draft invoice)**
 ```
 PaymentIntent is missing from invoice: { invoiceId: 'in_xxx', ... }
 Attempting to manually create PaymentIntent for invoice...
-Failed to finalize invoice: [error details]
+Invoice status is 'open', not 'draft'. Checking if PaymentIntent exists...
+Found PaymentIntent on invoice after retrieval: { invoiceId: 'in_xxx', ... }
+```
+→ The PaymentIntent existed but wasn't initially expanded. Re-retrieving the invoice found it.
+
+**Scenario 3: Fallback fails**
+```
+PaymentIntent is missing from invoice: { invoiceId: 'in_xxx', ... }
+Attempting to manually create PaymentIntent for invoice...
+Failed to finalize or retrieve invoice: [error details]
 PaymentIntent could not be created even after invoice finalization
 ```
 → Check your Stripe Dashboard settings:
