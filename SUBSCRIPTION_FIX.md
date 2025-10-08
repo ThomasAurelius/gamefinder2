@@ -1,7 +1,7 @@
 # Subscription Payment Fix
 
 ## Issue
-Subscriptions were failing to initialize because no PaymentIntent was being created on the subscription's first invoice.
+Subscriptions were failing to initialize because no PaymentIntent was being created on the subscription's first invoice. Despite the initial fix, some subscriptions were still failing with unclear error messages, making it difficult to diagnose the root cause.
 
 ## Root Cause
 When creating Stripe subscriptions with `payment_behavior: "default_incomplete"` without specifying `payment_method_types` in `payment_settings`, Stripe attempts to automatically determine which payment methods to enable for the invoice's PaymentIntent. However, since we're creating a fresh customer without any payment methods attached, Stripe cannot auto-determine the payment method types, resulting in no PaymentIntent being created on the invoice. This causes the error "Failed to initialize subscription payment".
@@ -10,7 +10,7 @@ When creating Stripe subscriptions with `payment_behavior: "default_incomplete"`
 
 ### Changes Made to `/app/api/stripe/create-payment-intent/route.ts`
 
-#### Added Explicit Payment Method Types (Line 112)
+#### Added Explicit Payment Method Types (Line 126)
 **Before:**
 ```typescript
 payment_settings: {
@@ -27,6 +27,24 @@ payment_settings: {
 ```
 
 **Why this helps**: Explicitly specifying `payment_method_types: ["card"]` ensures that Stripe creates a PaymentIntent on the subscription's first invoice with card payments enabled. Without this explicit specification, Stripe attempts to auto-determine payment methods by looking at the customer's default payment method, subscription's default payment method, or invoice template settings. Since we're creating a fresh customer without any payment methods attached, Stripe fails to auto-determine them, resulting in no PaymentIntent being created. By explicitly specifying card payments, we guarantee the PaymentIntent is created and can be used with the Payment Element on the frontend.
+
+#### Enhanced Error Logging and Diagnostics
+
+To improve troubleshooting when subscriptions fail, comprehensive logging has been added throughout the subscription creation flow:
+
+1. **Initial Request Logging** (Line 83-88): Logs the subscription request parameters including amount, campaign details, and user ID
+2. **Customer Creation** (Line 96): Logs the created customer ID
+3. **Price Creation** (Line 110-113): Logs the price ID and amount
+4. **Subscription Creation** (Line 131-135): Logs subscription ID, status, and invoice type
+5. **Invoice Retrieval** (Line 147-156): Logs invoice details and PaymentIntent presence
+6. **PaymentIntent Validation** (Line 166-192): Logs detailed error context when PaymentIntent is missing or invalid
+7. **Success Confirmation** (Line 188-192): Logs successful initialization with all relevant IDs
+
+**Error Messages Enhanced**:
+- Generic "Failed to initialize subscription payment" errors now include specific context:
+  - "No PaymentIntent created on invoice" - indicates the invoice exists but has no payment intent
+  - "PaymentIntent missing client_secret" - indicates the payment intent exists but lacks the client secret needed for frontend payment
+- All error logs include related object IDs (invoice ID, subscription ID, payment intent ID) for easier debugging in Stripe Dashboard
 
 ## How Subscription Payments Work
 
@@ -56,6 +74,20 @@ To test subscription payments:
 3. Enter test card details (e.g., 4242 4242 4242 4242)
 4. Confirm the payment
 5. Verify the subscription is created successfully in your Stripe Dashboard
+
+## Debugging Subscription Issues
+
+If subscriptions are still failing, check the server console logs for detailed diagnostic information:
+
+1. **Customer Creation**: Look for "Customer created: cus_xxx" to confirm customer was created
+2. **Price Creation**: Look for "Price created" with price ID and amount
+3. **Subscription Creation**: Look for "Subscription created" with subscription ID and status
+4. **Invoice Retrieval**: Check if "Invoice retrieved" shows `hasPaymentIntent: true`
+5. **PaymentIntent Issues**: Look for error logs with specific failure reasons:
+   - "PaymentIntent is missing from invoice" - The invoice was created but has no payment intent
+   - "PaymentIntent missing client_secret" - The payment intent exists but lacks client secret
+
+Each log entry includes relevant object IDs that you can use to look up the objects in your Stripe Dashboard for further investigation.
 
 ## Impact on Existing Code
 
