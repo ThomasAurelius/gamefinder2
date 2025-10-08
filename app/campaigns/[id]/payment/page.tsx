@@ -222,7 +222,7 @@ export default function CampaignPaymentPage() {
         <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-slate-200">
           <h1 className="text-xl font-semibold text-slate-100">{campaign.game}</h1>
           <p className="mt-2 text-sm text-slate-400">
-            As the host of this campaign, you don't need to make a payment.
+            As the host of this campaign, you don&apos;t need to make a payment.
           </p>
         </div>
         <Link
