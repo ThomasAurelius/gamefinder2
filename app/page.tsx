@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import AnnouncementPopup from "@/components/AnnouncementPopup";
 
 export default function HomePage() {
@@ -43,6 +44,20 @@ export default function HomePage() {
 						new games with ease. Use the navigation above to explore the
 						dashboard, curate your library, or find the perfect game night.
 					</p>
+					<div className="mt-6 flex gap-4 justify-center">
+						<Link
+							href="/auth/register"
+							className="rounded-md bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+						>
+							Create an Account
+						</Link>
+						<Link
+							href="/auth/login"
+							className="rounded-md border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+						>
+							Log In
+						</Link>
+					</div>
 				</section>
 				<section className="grid gap-6 sm:grid-cols-2">
 					<article className="rounded-xl border border-white/5 bg-slate-900/60 p-6">
