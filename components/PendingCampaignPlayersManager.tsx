@@ -31,6 +31,15 @@ export default function PendingCampaignPlayersManager({
     setProcessingPlayerId(playerId);
     setError(null);
 
+    // Find the player data at the start - fail fast if not found
+    const player = pendingPlayers.find((p) => p.id === playerId);
+    if (!player) {
+      console.error(`Player with id ${playerId} not found in pending list`);
+      setError("Player not found in pending list");
+      setProcessingPlayerId(null);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/approve`, {
         method: "POST",
@@ -46,9 +55,7 @@ export default function PendingCampaignPlayersManager({
       }
 
       // Call the callback to update parent state immediately
-      // Find the player data before calling the callback
-      const player = pendingPlayers.find((p) => p.id === playerId);
-      if (onPlayerApproved && player) {
+      if (onPlayerApproved) {
         onPlayerApproved(player);
       }
 
