@@ -13,11 +13,15 @@ type PendingPlayer = {
 type PendingCampaignPlayersManagerProps = {
   campaignId: string;
   pendingPlayers: PendingPlayer[];
+  onPlayerApproved?: (playerId: string) => void;
+  onPlayerDenied?: (playerId: string) => void;
 };
 
 export default function PendingCampaignPlayersManager({
   campaignId,
   pendingPlayers,
+  onPlayerApproved,
+  onPlayerDenied,
 }: PendingCampaignPlayersManagerProps) {
   const router = useRouter();
   const [processingPlayerId, setProcessingPlayerId] = useState<string | null>(null);
@@ -39,6 +43,11 @@ export default function PendingCampaignPlayersManager({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to approve player");
+      }
+
+      // Call the callback to update parent state immediately
+      if (onPlayerApproved) {
+        onPlayerApproved(playerId);
       }
 
       router.refresh();
@@ -65,6 +74,11 @@ export default function PendingCampaignPlayersManager({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to deny player");
+      }
+
+      // Call the callback to update parent state immediately
+      if (onPlayerDenied) {
+        onPlayerDenied(playerId);
       }
 
       router.refresh();
