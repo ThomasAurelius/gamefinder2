@@ -139,16 +139,6 @@ export async function POST(request: Request) {
         throw new Error("Failed to initialize subscription payment");
       }
 
-      // Update the payment intent to ensure automatic payment methods are enabled
-      if (paymentIntent.id && paymentIntent.status === "requires_payment_method") {
-        paymentIntent = await stripe.paymentIntents.update(paymentIntent.id, {
-          automatic_payment_methods: {
-            enabled: true,
-            allow_redirects: "never",
-          },
-        });
-      }
-
       return NextResponse.json({
         clientSecret: paymentIntent.client_secret,
         subscriptionId: subscription.id,
