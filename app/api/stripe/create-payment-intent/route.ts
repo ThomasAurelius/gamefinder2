@@ -143,6 +143,9 @@ export async function POST(request: Request) {
           save_default_payment_method: "on_subscription",
           payment_method_types: ["card"],
         },
+        automatic_tax: {
+          enabled: false,
+        },
         expand: ["latest_invoice.payment_intent"],
       });
 
@@ -189,12 +192,71 @@ export async function POST(request: Request) {
           invoiceStatus: latestInvoice.status,
           subscriptionId: subscription.id,
         });
-        console.error("Possible causes:");
-        console.error("1. Card payments not enabled in Stripe Dashboard");
-        console.error("2. Invalid API keys or key mismatch");
-        console.error("3. Stripe account restrictions");
-        console.error("See TEST_MODE_VERIFICATION.md for troubleshooting steps");
-        throw new Error("Failed to initialize subscription payment: No PaymentIntent created on invoice");
+        console.log("Attempting to manually create PaymentIntent for invoice...");
+        
+        // Fallback: Manually create a PaymentIntent for the invoice
+        try {
+          // Check if invoice is in draft status (can be finalized)
+          if (latestInvoice.status === "draft") {
+            console.log("Invoice is in draft status, attempting to finalize...");
+            // Finalize the invoice to trigger PaymentIntent creation
+            const finalizedInvoice = await stripe.invoices.finalizeInvoice(
+              latestInvoice.id,
+              {
+                expand: ["payment_intent"],
+              }
+            );
+            
+            paymentIntent = (
+              finalizedInvoice as Stripe.Invoice & {
+                payment_intent?: string | Stripe.PaymentIntent;
+              }
+            ).payment_intent;
+            
+            if (paymentIntent) {
+              console.log("Successfully created PaymentIntent via invoice finalization:", {
+                invoiceId: finalizedInvoice.id,
+                paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
+              });
+            }
+          } else {
+            console.log(`Invoice status is '${latestInvoice.status}', not 'draft'. Checking if PaymentIntent exists...`);
+            // For non-draft invoices, try to retrieve the invoice again with expanded payment_intent
+            const retrievedInvoice = await stripe.invoices.retrieve(
+              latestInvoice.id,
+              {
+                expand: ["payment_intent"],
+              }
+            );
+            
+            paymentIntent = (
+              retrievedInvoice as Stripe.Invoice & {
+                payment_intent?: string | Stripe.PaymentIntent;
+              }
+            ).payment_intent;
+            
+            if (paymentIntent) {
+              console.log("Found PaymentIntent on invoice after retrieval:", {
+                invoiceId: retrievedInvoice.id,
+                paymentIntentId: typeof paymentIntent === "string" ? paymentIntent : paymentIntent.id,
+              });
+            }
+          }
+        } catch (finalizeError) {
+          console.error("Failed to finalize or retrieve invoice:", finalizeError);
+        }
+        
+        // If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics
+        if (!paymentIntent) {
+          console.error("PaymentIntent could not be created even after invoice finalization");
+          console.error("Possible causes:");
+          console.error("1. Card payments not enabled in Stripe Dashboard");
+          console.error("2. Invalid API keys or key mismatch");
+          console.error("3. Stripe account restrictions or configuration issues");
+          console.error("4. Payment method types mismatch in account settings");
+          console.error("See TEST_MODE_VERIFICATION.md for troubleshooting steps");
+          throw new Error("Failed to initialize subscription payment: No PaymentIntent created on invoice");
+        }
       }
 
       if (typeof paymentIntent === "string") {
