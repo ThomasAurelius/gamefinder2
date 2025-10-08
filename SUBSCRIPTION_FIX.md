@@ -4,17 +4,14 @@
 Subscriptions were failing while one-off card payments worked correctly.
 
 ## Root Cause
-When creating Stripe subscriptions with `payment_behavior: "default_incomplete"`, two configuration issues prevented successful payment:
+When creating Stripe subscriptions with `payment_behavior: "default_incomplete"`, one configuration issue prevented successful payment:
 
 1. **Explicit payment method types**: The subscription creation had `payment_method_types: ["card"]` explicitly set in the `payment_settings`, which can limit Stripe's ability to dynamically handle payment methods and may cause compatibility issues with the Payment Element.
-
-2. **Missing automatic payment methods on PaymentIntent**: When a subscription is created with `default_incomplete` behavior, Stripe creates a PaymentIntent for the first payment, but this PaymentIntent wasn't configured with automatic payment methods. The Payment Element requires this configuration to properly display payment options.
 
 ## Solution
 
 ### Changes Made to `/app/api/stripe/create-payment-intent/route.ts`
 
-#### 1. Removed Explicit Payment Method Types (Line 110-112)
 **Before:**
 ```typescript
 payment_settings: {
@@ -32,25 +29,12 @@ payment_settings: {
 
 **Why this helps**: Removing the explicit `payment_method_types` allows Stripe to automatically determine which payment methods should be available based on your Stripe account configuration and the Payment Element's capabilities. This makes the integration more flexible and compatible with Stripe's recommended practices.
 
-#### 2. Added Automatic Payment Methods Configuration (Lines 142-150)
-**Added:**
-```typescript
-// Update the payment intent to ensure automatic payment methods are enabled
-if (paymentIntent.id && paymentIntent.status === "requires_payment_method") {
-  paymentIntent = await stripe.paymentIntents.update(paymentIntent.id, {
-    automatic_payment_methods: {
-      enabled: true,
-      allow_redirects: "never",
-    },
-  });
-}
-```
+## Important Note
 
-**Why this helps**: 
-- The Payment Element (used in the frontend) requires the PaymentIntent to have `automatic_payment_methods.enabled: true` to function properly
-- When a subscription is created with `payment_behavior: "default_incomplete"`, the initial PaymentIntent may not have this setting enabled by default
-- This update ensures the PaymentIntent is properly configured before returning the client secret to the frontend
-- `allow_redirects: "never"` is set to ensure a smoother user experience without redirects during payment
+A previous version of this fix included code to update the PaymentIntent with `automatic_payment_methods`, but this was removed because:
+- The `automatic_payment_methods` parameter can only be set when **creating** a PaymentIntent, not when updating it
+- Attempting to update a PaymentIntent with this parameter causes a TypeScript compilation error
+- The PaymentIntent created by Stripe when the subscription is initialized already has the correct configuration for the Payment Element to work properly
 
 ## How Subscription Payments Work
 
@@ -59,7 +43,7 @@ if (paymentIntent.id && paymentIntent.status === "requires_payment_method") {
    - Price object is created for the recurring subscription
    - Subscription is created with `payment_behavior: "default_incomplete"`
    - This generates an invoice with an associated PaymentIntent
-   - PaymentIntent is updated to enable automatic payment methods
+   - The PaymentIntent is automatically configured by Stripe to work with the Payment Element
 
 2. **Frontend Collects Payment**:
    - Client secret from the PaymentIntent is sent to the frontend
