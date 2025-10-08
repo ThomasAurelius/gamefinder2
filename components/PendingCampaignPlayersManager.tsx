@@ -13,11 +13,15 @@ type PendingPlayer = {
 type PendingCampaignPlayersManagerProps = {
   campaignId: string;
   pendingPlayers: PendingPlayer[];
+  onPlayerApproved?: (player: PendingPlayer) => void;
+  onPlayerDenied?: (playerId: string) => void;
 };
 
 export default function PendingCampaignPlayersManager({
   campaignId,
   pendingPlayers,
+  onPlayerApproved,
+  onPlayerDenied,
 }: PendingCampaignPlayersManagerProps) {
   const router = useRouter();
   const [processingPlayerId, setProcessingPlayerId] = useState<string | null>(null);
@@ -26,6 +30,15 @@ export default function PendingCampaignPlayersManager({
   const handleApprove = async (playerId: string) => {
     setProcessingPlayerId(playerId);
     setError(null);
+
+    // Find the player data at the start - fail fast if not found
+    const player = pendingPlayers.find((p) => p.id === playerId);
+    if (!player) {
+      console.error(`Player with id ${playerId} not found in pending list`);
+      setError("Player not found in pending list");
+      setProcessingPlayerId(null);
+      return;
+    }
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/approve`, {
@@ -41,6 +54,11 @@ export default function PendingCampaignPlayersManager({
         throw new Error(errorData.error || "Failed to approve player");
       }
 
+      // Call the callback to update parent state immediately
+      if (onPlayerApproved) {
+        onPlayerApproved(player);
+      }
+
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to approve player");
@@ -52,6 +70,15 @@ export default function PendingCampaignPlayersManager({
   const handleDeny = async (playerId: string) => {
     setProcessingPlayerId(playerId);
     setError(null);
+
+    // Validate player exists in pending list
+    const playerExists = pendingPlayers.some((p) => p.id === playerId);
+    if (!playerExists) {
+      console.error(`Player with id ${playerId} not found in pending list`);
+      setError("Player not found in pending list");
+      setProcessingPlayerId(null);
+      return;
+    }
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/deny`, {
@@ -65,6 +92,11 @@ export default function PendingCampaignPlayersManager({
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to deny player");
+      }
+
+      // Call the callback to update parent state immediately
+      if (onPlayerDenied) {
+        onPlayerDenied(playerId);
       }
 
       router.refresh();

@@ -287,6 +287,44 @@ export default function CampaignDetailPage() {
 
   const isCreator = currentUserId && campaign?.userId === currentUserId;
 
+  const handlePlayerApproved = (player: PendingPlayer) => {
+    // Remove from pending list
+    setPendingPlayersList((prev) => prev.filter((p) => p.id !== player.id));
+    
+    // Add to signed up players list
+    setSignedUpPlayersList((prev) => [
+      ...prev,
+      {
+        userId: player.id,
+        name: player.name,
+        avatarUrl: player.avatarUrl,
+        characterName: player.characterName,
+      },
+    ]);
+    
+    // Update campaign state
+    if (campaign) {
+      setCampaign({
+        ...campaign,
+        pendingPlayers: campaign.pendingPlayers.filter((id) => id !== player.id),
+        signedUpPlayers: [...campaign.signedUpPlayers, player.id],
+      });
+    }
+  };
+
+  const handlePlayerDenied = (playerId: string) => {
+    // Remove from pending list
+    setPendingPlayersList((prev) => prev.filter((p) => p.id !== playerId));
+    
+    // Update campaign state
+    if (campaign) {
+      setCampaign({
+        ...campaign,
+        pendingPlayers: campaign.pendingPlayers.filter((id) => id !== playerId),
+      });
+    }
+  };
+
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newNoteContent.trim() || isSubmittingNote) return;
@@ -662,6 +700,8 @@ export default function CampaignDetailPage() {
                   <PendingCampaignPlayersManager
                     campaignId={campaignId}
                     pendingPlayers={pendingPlayersList}
+                    onPlayerApproved={handlePlayerApproved}
+                    onPlayerDenied={handlePlayerDenied}
                   />
                 )}
                 
