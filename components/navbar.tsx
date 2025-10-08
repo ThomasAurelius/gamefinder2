@@ -148,6 +148,58 @@ export function Navbar() {
 					/>
 					<span className="hidden sm:inline">The Gathering Call</span>
 				</Link>
+				<div className="flex items-center gap-3">
+					{/* Mobile avatar - shown only on mobile when authenticated */}
+					{!authLoading && isAuthenticated && (
+						<div className="md:hidden">
+							{userAvatarUrl ? (
+								<img
+									src={userAvatarUrl}
+									alt={userCommonName || "User avatar"}
+									className="h-9 w-9 rounded-full border border-white/20 object-cover"
+								/>
+							) : (
+								<div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-xs font-semibold text-slate-300">
+									{userCommonName
+										? userCommonName.charAt(0).toUpperCase()
+										: "U"}
+								</div>
+							)}
+						</div>
+					)}
+					<button
+						type="button"
+						className="inline-flex items-center justify-center rounded-md border border-white/10 p-2 text-slate-200 transition hover:bg-white/10 md:hidden"
+						onClick={toggleMenu}
+						aria-label="Toggle navigation"
+					>
+						{menuOpen ? (
+							<svg
+								className="h-5 w-5"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								strokeWidth={1.5}
+								fill="none"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M6 6l12 12M6 18L18 6" />
+							</svg>
+						) : (
+							<svg
+								className="h-5 w-5"
+								viewBox="0 0 24 24"
+								stroke="currentColor"
+								strokeWidth={1.5}
+								fill="none"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M4 7h16M4 12h16M4 17h16" />
+							</svg>
+						)}
+					</button>
+				</div>
 				<nav className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
 					{primaryLinks.map((item) => {
 						if (isSubmenu(item)) {
@@ -323,38 +375,6 @@ export function Navbar() {
 							</Link>
 						))}
 				</nav>
-				<button
-					type="button"
-					className="inline-flex items-center justify-center rounded-md border border-white/10 p-2 text-slate-200 transition hover:bg-white/10 md:hidden"
-					onClick={toggleMenu}
-					aria-label="Toggle navigation"
-				>
-					{menuOpen ? (
-						<svg
-							className="h-5 w-5"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={1.5}
-							fill="none"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-						>
-							<path d="M6 6l12 12M6 18L18 6" />
-						</svg>
-					) : (
-						<svg
-							className="h-5 w-5"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							strokeWidth={1.5}
-							fill="none"
-							strokeLinecap="round"
-							strokeLinejoin="round"
-						>
-							<path d="M4 7h16M4 12h16M4 17h16" />
-						</svg>
-					)}
-				</button>
 			</div>
 			{menuOpen ? (
 				<div className="border-t border-white/10 bg-slate-950/90 md:hidden">
