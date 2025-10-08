@@ -98,8 +98,18 @@ export default function SettingsPage() {
               Enable the ability to post paid campaigns and charge players for game sessions.
             </p>
             {canPostPaidGames ? (
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-sm text-emerald-400">✓ Paid games enabled</span>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-emerald-400">✓ Paid games enabled</span>
+                </div>
+                <a
+                  href="https://billing.stripe.com/p/login/00w4gy3Jmad7bDT6k273G00"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                >
+                  Manage Billing (Stripe Dashboard)
+                </a>
               </div>
             ) : (
               <Link
