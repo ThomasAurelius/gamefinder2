@@ -1,6 +1,37 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import Stripe from "stripe";
+import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
+
+type StripeErrorLike = {
+  type?: string;
+  code?: string;
+  message?: string;
+};
+
+const isStripeMisconfigurationError = (error: unknown) => {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const { type, code, message } = error as StripeErrorLike;
+
+  if (type === "StripeAuthenticationError" || code === "authentication_error") {
+    return true;
+  }
+
+  if (typeof message === "string") {
+    const normalizedMessage = message.toLowerCase();
+    if (
+      normalizedMessage.includes("invalid api key") ||
+      normalizedMessage.includes("no api key provided")
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
 
 // Initialize Stripe only if the secret key is available
 const getStripe = () => {
@@ -13,6 +44,14 @@ const getStripe = () => {
 };
 
 export async function POST(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("Error creating payment intent: STRIPE_SECRET_KEY is not configured");
+    return NextResponse.json(
+      { error: STRIPE_NOT_CONFIGURED_MESSAGE },
+      { status: 503 }
+    );
+  }
+
   try {
     const stripe = getStripe();
     const cookieStore = await cookies();
@@ -118,8 +157,21 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error creating payment intent:", error);
+
+    if (isStripeMisconfigurationError(error)) {
+      return NextResponse.json(
+        { error: STRIPE_NOT_CONFIGURED_MESSAGE },
+        { status: 503 }
+      );
+    }
+
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "Failed to create payment intent";
+
     return NextResponse.json(
-      { error: "Failed to create payment intent" },
+      { error: message },
       { status: 500 }
     );
   }
