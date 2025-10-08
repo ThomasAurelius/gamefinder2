@@ -80,11 +80,20 @@ export async function POST(request: Request) {
     }
 
     if (paymentType === "subscription") {
+      console.log("Creating subscription for:", {
+        amount,
+        campaignId,
+        campaignName,
+        userId,
+      });
+
       const customer = await stripe.customers.create({
         metadata: {
           userId,
         },
       });
+
+      console.log("Customer created:", customer.id);
 
       const price = await stripe.prices.create({
         unit_amount: Math.round(amount * 100),
@@ -96,6 +105,11 @@ export async function POST(request: Request) {
             campaignId: campaignId || "",
           },
         },
+      });
+
+      console.log("Price created:", {
+        priceId: price.id,
+        amount: price.unit_amount,
       });
 
       const subscription = await stripe.subscriptions.create({
@@ -114,11 +128,32 @@ export async function POST(request: Request) {
         expand: ["latest_invoice.payment_intent"],
       });
 
+      console.log("Subscription created:", {
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        latestInvoiceType: typeof subscription.latest_invoice,
+      });
+
       // Type guard: ensure latest_invoice is expanded to Invoice object, not string
       const latestInvoice = subscription.latest_invoice;
       if (!latestInvoice || typeof latestInvoice === "string") {
+        console.error("Invoice retrieval failed:", {
+          latestInvoice,
+          subscriptionId: subscription.id,
+        });
         throw new Error("Failed to retrieve invoice for subscription");
       }
+
+      console.log("Invoice retrieved:", {
+        invoiceId: latestInvoice.id,
+        status: latestInvoice.status,
+        hasPaymentIntent: !!(latestInvoice as Stripe.Invoice & {
+          payment_intent?: string | Stripe.PaymentIntent;
+        }).payment_intent,
+        paymentIntentType: typeof (latestInvoice as Stripe.Invoice & {
+          payment_intent?: string | Stripe.PaymentIntent;
+        }).payment_intent,
+      });
 
       // When using expand, payment_intent is added to the invoice but TypeScript doesn't know about it
       // Use type assertion to access the expanded property
@@ -129,16 +164,32 @@ export async function POST(request: Request) {
       ).payment_intent;
 
       if (!paymentIntent) {
-        throw new Error("Failed to initialize subscription payment");
+        console.error("PaymentIntent is missing from invoice:", {
+          invoiceId: latestInvoice.id,
+          invoiceStatus: latestInvoice.status,
+          subscriptionId: subscription.id,
+        });
+        throw new Error("Failed to initialize subscription payment: No PaymentIntent created on invoice");
       }
 
       if (typeof paymentIntent === "string") {
+        console.log("Retrieving PaymentIntent by ID:", paymentIntent);
         paymentIntent = await stripe.paymentIntents.retrieve(paymentIntent);
       }
 
       if (!paymentIntent?.client_secret) {
-        throw new Error("Failed to initialize subscription payment");
+        console.error("PaymentIntent missing client_secret:", {
+          paymentIntentId: paymentIntent?.id,
+          paymentIntentStatus: paymentIntent?.status,
+        });
+        throw new Error("Failed to initialize subscription payment: PaymentIntent missing client_secret");
       }
+
+      console.log("Subscription payment initialized successfully:", {
+        subscriptionId: subscription.id,
+        paymentIntentId: paymentIntent.id,
+        hasClientSecret: !!paymentIntent.client_secret,
+      });
 
       return NextResponse.json({
         clientSecret: paymentIntent.client_secret,
