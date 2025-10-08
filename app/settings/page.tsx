@@ -112,7 +112,7 @@ export default function SettingsPage() {
 								</div>
 								{/* Test account link */}
 								<a
-									href="https://billing.stripe.com/p/login/00w4gy3Jbpc_1SG5yPAHeBW9fY4vtGnbwVAW"
+									href="https://billing.stripe.com/p/login/test_eVq4gyfuH1762LYgzH24000"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
