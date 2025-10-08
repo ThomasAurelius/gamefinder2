@@ -16,6 +16,7 @@ export async function listCampaigns(filters?: {
   game?: string;
   date?: string;
   times?: string[];
+  userFilter?: string;
 }): Promise<StoredCampaign[]> {
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
@@ -34,6 +35,16 @@ export async function listCampaigns(filters?: {
   if (filters?.times && filters.times.length > 0) {
     // Find campaigns that have at least one matching time slot
     query.times = { $in: filters.times };
+  }
+
+  // If userFilter is provided, find campaigns where the user is hosting or playing
+  if (filters?.userFilter) {
+    query.$or = [
+      { userId: filters.userFilter }, // Campaigns user is hosting
+      { signedUpPlayers: filters.userFilter }, // Campaigns user is signed up for
+      { waitlist: filters.userFilter }, // Campaigns user is on waitlist for
+      { pendingPlayers: filters.userFilter }, // Campaigns user has requested to join
+    ];
   }
 
   const campaigns = await campaignsCollection

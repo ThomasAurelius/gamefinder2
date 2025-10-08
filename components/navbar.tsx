@@ -35,6 +35,7 @@ const primaryLinks: NavItem[] = [
 		label: "Campaigns",
 		submenu: [
 			{ href: "/find-campaigns", label: "Find Campaigns" },
+			{ href: "/my-campaigns", label: "My Campaigns" },
 			{ href: "/post-campaign", label: "Post Campaign" },
 		],
 	},
