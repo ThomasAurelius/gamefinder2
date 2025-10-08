@@ -144,16 +144,24 @@ export async function POST(request: Request) {
 				await setStripeCustomerId(userId, customerId);
 			}
 
+			// Create product first, then price
+			const product = await stripe.products.create({
+				name: `${campaignName || "Campaign"} Subscription`,
+				metadata: {
+					campaignId: campaignId || "",
+				},
+			});
+
+			console.log("Product created:", {
+				productId: product.id,
+				name: product.name,
+			});
+
 			const price = await stripe.prices.create({
 				unit_amount: Math.round(amount * 100),
 				currency: "usd",
 				recurring: { interval: "week" },
-				product_data: {
-					name: `${campaignName || "Campaign"} Subscription`,
-					metadata: {
-						campaignId: campaignId || "",
-					},
-				},
+				product: product.id,
 			});
 
 			console.log("Price created:", {
