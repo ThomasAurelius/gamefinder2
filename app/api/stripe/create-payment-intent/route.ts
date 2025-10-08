@@ -13,6 +13,14 @@ const getStripe = () => {
 };
 
 export async function POST(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("Error creating payment intent: STRIPE_SECRET_KEY is not configured");
+    return NextResponse.json(
+      { error: "Stripe is not configured on the server." },
+      { status: 500 }
+    );
+  }
+
   try {
     const stripe = getStripe();
     const cookieStore = await cookies();
