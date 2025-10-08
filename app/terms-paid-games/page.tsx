@@ -68,7 +68,7 @@ export default function PaidGamesTermsPage() {
 						</h3>
 						<p>
 							All payments for paid game sessions are processed securely through
-							Stripe. By enabling paid games, you agree to Stripe's terms of
+							Stripe. By enabling paid games, you agree to Stripe&apos;s terms of
 							service and authorize us to process payments on your behalf.
 						</p>
 					</div>
