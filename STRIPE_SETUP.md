@@ -2,6 +2,26 @@
 
 This application uses Stripe embedded components for payment processing. Campaign creators can set up paid campaigns, and players will need to pay when joining.
 
+## Quick Answer: What Do I Need to Configure?
+
+**For subscriptions to work, you only need:**
+
+1. ✅ **Valid Stripe API keys** in your `.env.local` file:
+   - `STRIPE_SECRET_KEY=sk_test_...`
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...`
+
+2. ✅ **Card payments enabled** in your Stripe Dashboard (enabled by default):
+   - Go to [Settings > Payment methods](https://dashboard.stripe.com/settings/payment_methods)
+   - Ensure **Cards** is enabled
+
+**That's it!** The application handles everything else automatically:
+- Products are created dynamically via API (no manual setup needed)
+- Prices are generated based on campaign settings (no price plans required)
+- Customers are created automatically when payments are initiated
+- Subscriptions are managed through the Stripe API
+
+If subscriptions are still failing, see the [Troubleshooting](#troubleshooting) section below.
+
 ## Setup
 
 ### 1. Install Dependencies
@@ -32,6 +52,55 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
 2. Navigate to **Developers** > **API keys**
 3. Copy your **Publishable key** and **Secret key**
 4. Paste them into your `.env.local` file
+
+### 4. Configure Stripe Dashboard for Subscriptions
+
+For subscriptions to work properly in this application, you need to ensure your Stripe account is configured correctly:
+
+#### Required Settings
+
+1. **Enable Card Payments** (Most Important):
+   - Go to [Stripe Dashboard](https://dashboard.stripe.com/)
+   - Navigate to **Settings** > **Payment methods**
+   - Ensure **Cards** is enabled (it should be enabled by default)
+   - This is critical because the code explicitly specifies `payment_method_types: ["card"]` for subscriptions
+
+2. **Billing & Subscriptions** (No Action Required):
+   - Subscriptions are enabled by default on all Stripe accounts
+   - The application dynamically creates subscription products and prices via the API
+   - No manual product or price setup is needed in the dashboard
+
+3. **Customer Settings** (Optional but Recommended):
+   - Navigate to **Settings** > **Customer emails**
+   - Consider enabling email receipts for successful payments
+   - Configure subscription cancellation notifications if desired
+
+#### What You DON'T Need to Configure
+
+- ✅ **No manual product creation required** - Products are created dynamically via API
+- ✅ **No manual price plans required** - Prices are created on-the-fly based on campaign settings
+- ✅ **No payment method collection settings** - Handled automatically by the code
+- ✅ **No invoice template required** - Default invoice settings work fine
+
+#### Verifying Your Setup
+
+After configuring your Stripe keys, you can verify everything is set up correctly:
+
+1. **Test API Access**:
+   - Create a test campaign with multiple sessions (triggers subscription mode)
+   - Try to set up payment during campaign creation
+   - If you see the payment form, your API keys are working
+
+2. **Check Stripe Dashboard**:
+   - After creating a subscription payment, go to your [Stripe Dashboard](https://dashboard.stripe.com/)
+   - Navigate to **Payments** > **Subscriptions** to see test subscriptions
+   - Navigate to **Customers** to see test customers created
+   - Navigate to **Products** to see dynamically created products
+
+3. **Monitor Test Mode**:
+   - Ensure you're in **Test Mode** (toggle in the top right of Stripe Dashboard)
+   - All test data will be clearly marked and can be safely deleted
+   - Switch to **Live Mode** only when ready for production
 
 ## Features
 
@@ -149,6 +218,55 @@ This error occurs when `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` is not properly set 
 3. Verify the key is being loaded by checking the browser console. You should see a warning if the key is missing.
 
 4. The application uses a dedicated `lib/stripe-config.ts` file to properly expose the environment variable to client-side components.
+
+### "Failed to initialize subscription payment" Error
+
+This error typically occurs when a PaymentIntent cannot be created for a subscription. Here's what to check:
+
+1. **Verify Card Payments Are Enabled**:
+   - Go to [Stripe Dashboard](https://dashboard.stripe.com/)
+   - Navigate to **Settings** > **Payment methods**
+   - Ensure **Cards** is enabled
+   - This is the most common cause of subscription initialization failures
+
+2. **Check Your Stripe Account Status**:
+   - Ensure your Stripe account is fully activated (not restricted)
+   - In Test Mode, there should be no restrictions
+   - If using Live Mode, ensure your account verification is complete
+
+3. **Verify API Version Compatibility**:
+   - The code uses Stripe API version `2025-09-30.clover`
+   - This should work with all recent Stripe accounts
+   - If you see API version errors, your account might need updating
+
+4. **Review Server Logs**:
+   - Check the server console for detailed error messages
+   - Look for Stripe API errors that provide more context
+   - Common issues include invalid metadata or configuration errors
+
+5. **Test with a Simple Subscription**:
+   - Create a campaign with just 2 sessions (minimum for subscription mode)
+   - Set a small amount like $1.00 for testing
+   - If this works, the issue might be with specific campaign settings
+
+### Subscriptions Not Appearing in Dashboard
+
+If you've successfully created a subscription but don't see it in your Stripe Dashboard:
+
+1. **Check Test vs Live Mode**:
+   - Ensure you're viewing the correct mode (Test/Live) in the dashboard
+   - Toggle is in the top-right corner of the Stripe Dashboard
+   - Test subscriptions only appear in Test Mode
+
+2. **Refresh and Wait**:
+   - Sometimes it takes a few seconds for subscriptions to appear
+   - Try refreshing the Subscriptions page in the dashboard
+   - Check the **Customers** section to verify the customer was created
+
+3. **Verify Subscription Creation**:
+   - Check the response from the `/api/stripe/create-payment-intent` endpoint
+   - You should see a `subscriptionId` in the response
+   - Use this ID to search directly in the Stripe Dashboard
 
 ### Payment Form Not Appearing
 

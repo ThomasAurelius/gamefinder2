@@ -69,3 +69,10 @@ To test subscription payments:
 - [Stripe Subscriptions API](https://stripe.com/docs/api/subscriptions)
 - [Stripe Payment Element](https://stripe.com/docs/payments/payment-element)
 - [Stripe PaymentIntents](https://stripe.com/docs/api/payment_intents)
+
+## Need Help?
+
+If you're having issues with subscriptions:
+- See [STRIPE_SUBSCRIPTION_FAQ.md](./STRIPE_SUBSCRIPTION_FAQ.md) for answers to common questions
+- See [STRIPE_SETUP.md](./STRIPE_SETUP.md) for detailed setup and configuration instructions
+- Check the Troubleshooting section in [STRIPE_SETUP.md](./STRIPE_SETUP.md#troubleshooting)
