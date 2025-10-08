@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import type { UserDocument } from "@/lib/user-types";
 
 export type UserBasicInfo = {
   id: string;
@@ -83,3 +84,81 @@ export async function getUsersBasicInfo(userIds: string[]): Promise<Map<string, 
   
   return result;
 }
+
+/**
+ * Get Stripe customer ID for a user
+ */
+export async function getStripeCustomerId(userId: string): Promise<string | null> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return null;
+    }
+    
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { stripeCustomerId: 1 } }
+    );
+    
+    return user?.stripeCustomerId || null;
+  } catch (error) {
+    console.error("Failed to get Stripe customer ID:", error);
+    return null;
+  }
+}
+
+/**
+ * Set Stripe customer ID for a user
+ */
+export async function setStripeCustomerId(userId: string, customerId: string): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return false;
+    }
+    
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { 
+          stripeCustomerId: customerId,
+          updatedAt: new Date()
+        } 
+      }
+    );
+    
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error("Failed to set Stripe customer ID:", error);
+    return false;
+  }
+}
+
+/**
+ * Get user email by user ID (needed for Stripe customer creation)
+ */
+export async function getUserEmail(userId: string): Promise<string | null> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return null;
+    }
+    
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { email: 1 } }
+    );
+    
+    return user?.email || null;
+  } catch (error) {
+    console.error("Failed to get user email:", error);
+    return null;
+  }
+}
+

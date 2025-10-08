@@ -12,4 +12,5 @@ export type UserDocument = {
   profile?: ProfileRecord;
   isAdmin?: boolean;
   isHidden?: boolean; // Admin can hide profiles
+  stripeCustomerId?: string; // Stripe customer ID for subscription management
 };
