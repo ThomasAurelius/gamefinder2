@@ -46,9 +46,12 @@ const getStripe = () => {
 	if (!process.env.STRIPE_SECRET_KEY) {
 		throw new Error("STRIPE_SECRET_KEY is not configured");
 	}
-	return new Stripe(process.env.STRIPE_SECRET_KEY, {
-		apiVersion: "2025-09-30.clover",
-	});
+        return new Stripe(process.env.STRIPE_SECRET_KEY, {
+                // The application has been validated against Stripe's
+                // `2025-09-30.clover` version. Keep the client aligned so
+                // behaviour matches the rest of the Stripe integrations.
+                apiVersion: "2025-09-30.clover",
+        });
 };
 
 export async function POST(request: Request) {
@@ -337,29 +340,77 @@ export async function POST(request: Request) {
 					);
 				}
 
-				// If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics
-				if (!paymentIntent) {
-					console.error(
-						"PaymentIntent could not be created even after invoice finalization"
-					);
-					console.error("Possible causes:");
-					console.error(
-						"1. Card payments not enabled in Stripe Dashboard"
-					);
-					console.error("2. Invalid API keys or key mismatch");
-					console.error(
-						"3. Stripe account restrictions or configuration issues"
-					);
-					console.error(
-						"4. Payment method types mismatch in account settings"
-					);
-					console.error(
-						"See TEST_MODE_VERIFICATION.md for troubleshooting steps"
-					);
-					throw new Error(
-						"Failed to initialize subscription payment: No PaymentIntent created on invoice"
-					);
-				}
+                                if (!paymentIntent) {
+                                        console.log(
+                                                "No PaymentIntent found after invoice finalization or retrieval. Creating manually..."
+                                        );
+
+                                        try {
+                                                const createdPaymentIntent =
+                                                        await stripe.paymentIntents.create({
+                                                                amount:
+                                                                        typeof latestInvoice.amount_due ===
+                                                                        "number"
+                                                                                ? latestInvoice.amount_due
+                                                                                : Math.round(amount * 100),
+                                                                currency:
+                                                                        latestInvoice.currency ||
+                                                                        "usd",
+                                                                customer: customerId,
+                                                                payment_method_types: ["card"],
+                                                                metadata: {
+                                                                        invoiceId: latestInvoice.id,
+                                                                        subscriptionId: subscription.id,
+                                                                        campaignId: campaignId || "",
+                                                                        campaignName: campaignName || "",
+                                                                        userId,
+                                                                },
+                                                        });
+
+                                                paymentIntent = createdPaymentIntent;
+
+                                                console.log(
+                                                        "Manually created PaymentIntent for invoice:",
+                                                        {
+                                                                paymentIntentId:
+                                                                        createdPaymentIntent.id,
+                                                                amount:
+                                                                        createdPaymentIntent.amount,
+                                                                currency:
+                                                                        createdPaymentIntent.currency,
+                                                        }
+                                                );
+                                        } catch (creationError) {
+                                                console.error(
+                                                        "Manual PaymentIntent creation failed:",
+                                                        creationError
+                                                );
+                                        }
+                                }
+
+                                // If still no PaymentIntent after all fallbacks, throw error with detailed diagnostics
+                                if (!paymentIntent) {
+                                        console.error(
+                                                "PaymentIntent could not be created after all fallback attempts"
+                                        );
+                                        console.error("Possible causes:");
+                                        console.error(
+                                                "1. Card payments not enabled in Stripe Dashboard"
+                                        );
+                                        console.error("2. Invalid API keys or key mismatch");
+                                        console.error(
+                                                "3. Stripe account restrictions or configuration issues"
+                                        );
+                                        console.error(
+                                                "4. Payment method types mismatch in account settings"
+                                        );
+                                        console.error(
+                                                "See TEST_MODE_VERIFICATION.md for troubleshooting steps"
+                                        );
+                                        throw new Error(
+                                                "Failed to initialize subscription payment: No PaymentIntent created on invoice"
+                                        );
+                                }
 			}
 
 			if (typeof paymentIntent === "string") {

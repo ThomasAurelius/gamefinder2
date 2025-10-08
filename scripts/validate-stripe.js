@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports */
 
 /**
  * Stripe Configuration Validator
@@ -98,6 +99,7 @@ console.log('\n🔌 Testing Stripe API connection...');
 
 const Stripe = require('stripe');
 const stripe = new Stripe(secretKey, {
+  // Match the application Stripe API version for parity with runtime usage.
   apiVersion: '2025-09-30.clover',
 });
 
