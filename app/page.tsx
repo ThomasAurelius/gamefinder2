@@ -9,10 +9,10 @@ export default function HomePage() {
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">
 				<h1 className="text-3xl font-bold sm:text-4xl">Welcome!</h1>
 				<Image
-					src="/logo?color.png"
+					src="/logo_color.png"
 					alt="The Gathering Call Logo"
-					width={240}
-					height={240}
+					width={320}
+					height={320}
 					className="h-60 w-auto"
 				/>
 				<section className="rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-900/30 to-slate-900/50 p-8 shadow-xl max-w-2xl">
