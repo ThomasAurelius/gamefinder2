@@ -11,16 +11,20 @@ export default function TallTalesDisclaimer({ onClose }: TallTalesDisclaimerProp
 
   useEffect(() => {
     // Check if user has already seen the disclaimer
-    const hasSeenDisclaimer = localStorage.getItem("hasSeenTallTalesDisclaimer");
-    if (!hasSeenDisclaimer) {
-      setShowPopup(true);
-    } else {
-      onClose();
+    if (typeof window !== "undefined") {
+      const hasSeenDisclaimer = localStorage.getItem("hasSeenTallTalesDisclaimer");
+      if (!hasSeenDisclaimer) {
+        setShowPopup(true);
+      } else {
+        onClose();
+      }
     }
   }, [onClose]);
 
   const handleClose = () => {
-    localStorage.setItem("hasSeenTallTalesDisclaimer", "true");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hasSeenTallTalesDisclaimer", "true");
+    }
     setShowPopup(false);
     onClose();
   };

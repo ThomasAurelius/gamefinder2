@@ -95,7 +95,12 @@ export async function updateTallTale(
 
   await tallTalesCollection.updateOne(
     { id, userId },
-    { $set: updatedTale }
+    { $set: {
+      title: updatedTale.title,
+      content: updatedTale.content,
+      imageUrls: updatedTale.imageUrls,
+      updatedAt: updatedTale.updatedAt,
+    } }
   );
 
   return updatedTale;

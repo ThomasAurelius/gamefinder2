@@ -6,33 +6,7 @@ import {
   updateTallTale,
   deleteTallTale,
 } from "@/lib/tall-tales/db";
-import { TallTalePayload } from "@/lib/tall-tales/types";
-
-function parseTallTalePayload(data: unknown): TallTalePayload | null {
-  if (!data || typeof data !== "object") {
-    return null;
-  }
-
-  const payload = data as Partial<TallTalePayload>;
-
-  if (
-    typeof payload.title !== "string" ||
-    typeof payload.content !== "string" ||
-    payload.title.trim().length === 0 ||
-    payload.content.trim().length === 0 ||
-    payload.content.length > 5000
-  ) {
-    return null;
-  }
-
-  return {
-    title: payload.title,
-    content: payload.content,
-    imageUrls: Array.isArray(payload.imageUrls) 
-      ? payload.imageUrls.filter((url) => typeof url === "string").slice(0, 5)
-      : undefined,
-  };
-}
+import { parseTallTalePayload } from "@/lib/tall-tales/validation";
 
 export async function GET(
   request: Request,

@@ -331,6 +331,8 @@ export default function TallTalesPage() {
 							
 							<div>
 								<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
+								{/* Content is displayed as plain text with whitespace-pre-line, which is safe from XSS.
+								    For full Markdown rendering, a library like react-markdown with sanitization would be needed. */}
 								<p className="whitespace-pre-line text-slate-300">{tale.content}</p>
 							</div>
 							
