@@ -11,11 +11,11 @@ type Subscription = {
 	amount: number;
 	currency: string;
 	interval: string;
-	currentPeriodStart: number;
-	currentPeriodEnd: number;
+	currentPeriodStart: number | undefined;
+	currentPeriodEnd: number | undefined;
 	cancelAtPeriodEnd: boolean;
 	canceledAt: number | null;
-	created: number;
+	created: number | undefined;
 };
 
 export default function SubscriptionsPage() {
@@ -73,8 +73,15 @@ export default function SubscriptionsPage() {
 		}
 	};
 
-	const formatDate = (timestamp: number) => {
-		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+	const formatDate = (timestamp: number | null | undefined) => {
+		if (!timestamp || timestamp === 0) {
+			return "N/A";
+		}
+		const date = new Date(timestamp * 1000);
+		if (isNaN(date.getTime())) {
+			return "Invalid Date";
+		}
+		return date.toLocaleDateString("en-US", {
 			year: "numeric",
 			month: "long",
 			day: "numeric",
