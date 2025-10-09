@@ -74,7 +74,7 @@ export default function SubscriptionsPage() {
 	};
 
 	const formatDate = (timestamp: number | null | undefined) => {
-		if (timestamp == null || timestamp === 0) {
+		if (timestamp === null || timestamp === undefined || timestamp === 0) {
 			return "N/A";
 		}
 		const date = new Date(timestamp * 1000);
