@@ -63,54 +63,53 @@ export async function POST(request: Request) {
 		const body = await request.json();
 		const returnUrl = body.returnUrl || `${request.headers.get("origin")}/subscriptions`;
 
-		// First, create or get a portal configuration with subscription cancellation enabled
-		// We'll create a configuration if one doesn't exist
+		// Create a portal configuration with subscription cancellation enabled
+		// We create a new configuration to ensure proper settings without affecting existing ones
 		let configId: string | undefined;
 		
 		try {
-			// Try to list existing configurations
-			const configurations = await stripe.billingPortal.configurations.list({ limit: 1 });
-			
-			if (configurations.data.length > 0) {
-				// Use the first existing configuration
-				configId = configurations.data[0].id;
-				
-				// Update it to ensure subscription cancellation is enabled
-				await stripe.billingPortal.configurations.update(configId, {
-					features: {
-						subscription_cancel: {
-							enabled: true,
-							mode: 'at_period_end',
-						},
+			// Create a dedicated configuration with all required features
+			const configuration = await stripe.billingPortal.configurations.create({
+				features: {
+					customer_update: {
+						allowed_updates: ['email', 'address'],
+						enabled: true,
 					},
-				});
-			} else {
-				// Create a new configuration with subscription cancellation enabled
-				const configuration = await stripe.billingPortal.configurations.create({
-					features: {
-						subscription_cancel: {
-							enabled: true,
-							mode: 'at_period_end',
-						},
+					invoice_history: {
+						enabled: true,
 					},
-					business_profile: {
-						headline: 'Manage your subscription',
+					payment_method_update: {
+						enabled: true,
 					},
-				});
-				configId = configuration.id;
-			}
+					subscription_cancel: {
+						enabled: true,
+						mode: 'at_period_end',
+					},
+					subscription_update: {
+						enabled: false,
+						default_allowed_updates: [],
+						products: [],
+					},
+				},
+				business_profile: {
+					headline: 'Manage your subscription',
+				},
+			});
+			configId = configuration.id;
+			console.log("Created portal configuration:", configId);
 		} catch (configError) {
-			console.warn("Error managing portal configuration:", configError);
+			console.error("Error creating portal configuration:", configError);
 			// Continue without configuration - will use default portal settings
+			// This fallback ensures the portal still works even if configuration creation fails
 		}
 
-		// Create a portal session with subscription cancellation enabled
+		// Create a portal session
 		const sessionParams: Stripe.BillingPortal.SessionCreateParams = {
 			customer: customerId,
 			return_url: returnUrl,
 		};
 		
-		// Add configuration if we successfully created/retrieved one
+		// Add configuration if we successfully created one
 		if (configId) {
 			sessionParams.configuration = configId;
 		}
