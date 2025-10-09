@@ -55,9 +55,9 @@ export async function GET() {
 			status: sub.status,
 			campaignId: sub.metadata?.campaignId,
 			campaignName: sub.metadata?.campaignName,
-			amount: sub.items.data[0]?.price?.unit_amount,
-			currency: sub.items.data[0]?.price?.currency,
-			interval: sub.items.data[0]?.price?.recurring?.interval,
+			amount: sub.items.data[0]?.price?.unit_amount ?? null,
+			currency: sub.items.data[0]?.price?.currency ?? null,
+			interval: sub.items.data[0]?.price?.recurring?.interval ?? null,
 		}));
 
 		return NextResponse.json({
