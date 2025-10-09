@@ -130,14 +130,24 @@ Use any future expiration date, any 3-digit CVC, and any ZIP code.
 
 ### Q: How do I cancel a subscription?
 
-**A:** Currently, subscription cancellation must be done through the Stripe Dashboard:
+**A:** Users can cancel their subscriptions directly through the app:
+
+1. **From the Subscriptions page**: Click "Manage Subscription" button
+2. **From a Campaign page**: Click "Manage Subscription" button if you have an active subscription
+3. **From Settings**: Click "Manage Billing" in the billing section
+
+This will open the Stripe Customer Portal where you can:
+- Cancel your subscription (it will remain active until the end of the billing period)
+- Update payment methods
+- View billing history
+- Download invoices
+
+Alternatively, subscription cancellation can also be done through the Stripe Dashboard:
 
 1. Go to [Stripe Dashboard](https://dashboard.stripe.com/)
 2. Navigate to **Payments** > **Subscriptions**
 3. Find the subscription you want to cancel
 4. Click on it and select **Cancel subscription**
-
-You can choose to cancel immediately or at the end of the billing period.
 
 ### Q: I'm getting "STRIPE_SECRET_KEY is not configured" errors
 
