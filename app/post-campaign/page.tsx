@@ -94,7 +94,7 @@ export default function PostCampaignPage() {
 		};
 
 		checkConnectStatus();
-	}, [costPerSession, isCheckingConnect]);
+	}, [costPerSession]);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -548,7 +548,7 @@ export default function PostCampaignPage() {
 										Complete Host Onboarding to Receive Payments
 									</h3>
 									<p className="text-xs text-slate-400 mb-3">
-										To receive payments for this campaign, you need to set up your payout account. 
+										To receive payments for this campaign, you need to set up your payout account.
 										You&apos;ll receive 80% of subscription payments, with 20% going to platform fees.
 									</p>
 									<Link
