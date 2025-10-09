@@ -12,16 +12,16 @@ const nextConfig: NextConfig = {
             value: [
               // Allow resources from same origin
               "default-src 'self'",
-              // Allow scripts from self, Stripe JS SDK, and inline scripts (required for Next.js)
+              // Allow scripts from self, Stripe JS SDK, and inline scripts (required for Next.js hydration)
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.com",
               // Allow styles from self and inline styles (required for styled components)
               "style-src 'self' 'unsafe-inline'",
-              // Allow images from self, data URIs, and any HTTPS source
-              "img-src 'self' data: https:",
+              // Allow images from self, data URIs, Stripe CDN, and common image hosts
+              "img-src 'self' data: https://*.stripe.com https://storage.googleapis.com https://firebasestorage.googleapis.com",
               // Allow fonts from self, data URIs (required for Stripe), and Google Fonts
               "font-src 'self' data: https://fonts.gstatic.com",
-              // Allow connections to self and all Stripe API endpoints
-              "connect-src 'self' https://api.stripe.com https://m.stripe.com https://r.stripe.com https://errors.stripe.com https://*.stripe.com https://t.stripe.com https://edge.stripe.com",
+              // Allow connections to self and all Stripe domains (simplified with wildcard)
+              "connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com",
               // Allow iframes from Stripe (for embedded payment forms)
               "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
               // Disallow object, embed, and applet elements
