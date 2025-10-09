@@ -26,6 +26,8 @@ export async function listTallTales(): Promise<StoredTallTale[]> {
     title: tale.title,
     content: tale.content,
     imageUrls: tale.imageUrls || [],
+    gameSystem: tale.gameSystem,
+    customGameSystem: tale.customGameSystem,
     createdAt: tale.createdAt,
     updatedAt: tale.updatedAt,
     isDeleted: tale.isDeleted,
@@ -50,6 +52,8 @@ export async function getTallTale(id: string): Promise<StoredTallTale | null> {
     title: tale.title,
     content: tale.content,
     imageUrls: tale.imageUrls || [],
+    gameSystem: tale.gameSystem,
+    customGameSystem: tale.customGameSystem,
     createdAt: tale.createdAt,
     updatedAt: tale.updatedAt,
     isDeleted: tale.isDeleted,
@@ -72,6 +76,8 @@ export async function createTallTale(
     title: payload.title,
     content: payload.content,
     imageUrls: payload.imageUrls || [],
+    gameSystem: payload.gameSystem,
+    customGameSystem: payload.customGameSystem,
     createdAt: now,
     updatedAt: now,
     isDeleted: false,
@@ -101,6 +107,8 @@ export async function updateTallTale(
     title: payload.title,
     content: payload.content,
     imageUrls: payload.imageUrls || [],
+    gameSystem: payload.gameSystem,
+    customGameSystem: payload.customGameSystem,
     updatedAt: new Date(),
   };
 
@@ -110,6 +118,8 @@ export async function updateTallTale(
       title: updatedTale.title,
       content: updatedTale.content,
       imageUrls: updatedTale.imageUrls,
+      gameSystem: updatedTale.gameSystem,
+      customGameSystem: updatedTale.customGameSystem,
       updatedAt: updatedTale.updatedAt,
     } }
   );

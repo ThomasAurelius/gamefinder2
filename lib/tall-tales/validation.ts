@@ -25,10 +25,23 @@ export function parseTallTalePayload(data: unknown): TallTalePayload | null {
       .slice(0, 5);
   }
 
+  // Validate game system if provided
+  let validatedGameSystem: string | undefined = undefined;
+  let validatedCustomGameSystem: string | undefined = undefined;
+  if (typeof payload.gameSystem === "string" && payload.gameSystem.trim().length > 0) {
+    validatedGameSystem = payload.gameSystem.trim();
+    // If "Other" is selected, validate custom game system
+    if (validatedGameSystem === "Other" && typeof payload.customGameSystem === "string" && payload.customGameSystem.trim().length > 0) {
+      validatedCustomGameSystem = payload.customGameSystem.trim();
+    }
+  }
+
   return {
     title: payload.title,
     content: payload.content,
     imageUrls: validatedImageUrls,
+    gameSystem: validatedGameSystem,
+    customGameSystem: validatedCustomGameSystem,
   };
 }
 

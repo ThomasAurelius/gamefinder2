@@ -2,6 +2,8 @@ export type TallTalePayload = {
   title: string;
   content: string;
   imageUrls?: string[];
+  gameSystem?: string;
+  customGameSystem?: string;
 };
 
 export type StoredTallTale = {
@@ -10,6 +12,8 @@ export type StoredTallTale = {
   title: string;
   content: string;
   imageUrls: string[];
+  gameSystem?: string;
+  customGameSystem?: string;
   createdAt: Date;
   updatedAt: Date;
   isDeleted?: boolean;
