@@ -23,6 +23,7 @@ export default function SubscriptionsPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isRedirecting, setIsRedirecting] = useState(false);
+	const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
 	useEffect(() => {
 		const fetchSubscriptions = async () => {
@@ -73,6 +74,43 @@ export default function SubscriptionsPage() {
 		}
 	};
 
+	const handleDeleteSubscription = async (subscriptionId: string) => {
+		if (!confirm("Are you sure you want to delete this incomplete subscription?")) {
+			return;
+		}
+
+		try {
+			setDeletingIds(prev => new Set(prev).add(subscriptionId));
+			setError(null);
+
+			const response = await fetch("/api/stripe/delete-incomplete-subscription", {
+				method: "DELETE",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ subscriptionId }),
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || "Failed to delete subscription");
+			}
+
+			// Remove the subscription from the list
+			setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Failed to delete subscription");
+		} finally {
+			setDeletingIds(prev => {
+				const next = new Set(prev);
+				next.delete(subscriptionId);
+				return next;
+			});
+		}
+	};
+
+	const isIncomplete = (status: string) => {
+		return status === "incomplete" || status === "incomplete_expired";
+	};
+
 	const formatDate = (timestamp: number | null | undefined) => {
 		if (timestamp === null || timestamp === undefined || timestamp === 0) {
 			return "N/A";
@@ -95,6 +133,8 @@ export default function SubscriptionsPage() {
 			case "canceled":
 			case "incomplete_expired":
 				return "text-red-400 bg-red-500/10 border-red-500/20";
+			case "incomplete":
+				return "text-amber-400 bg-amber-500/10 border-amber-500/20";
 			case "past_due":
 				return "text-amber-400 bg-amber-500/10 border-amber-500/20";
 			case "trialing":
@@ -235,6 +275,12 @@ export default function SubscriptionsPage() {
 												{formatDate(subscription.currentPeriodEnd)}
 											</div>
 										)}
+
+										{isIncomplete(subscription.status) && (
+											<div className="mt-3 rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+												This subscription was not completed. You can safely delete it.
+											</div>
+										)}
 									</div>
 								</div>
 
@@ -247,13 +293,23 @@ export default function SubscriptionsPage() {
 											View Campaign
 										</Link>
 									)}
-									<button
-										onClick={handleManageSubscription}
-										disabled={isRedirecting}
-										className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-sky-500 hover:text-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
-									>
-										Manage
-									</button>
+									{isIncomplete(subscription.status) ? (
+										<button
+											onClick={() => handleDeleteSubscription(subscription.id)}
+											disabled={deletingIds.has(subscription.id)}
+											className="rounded-lg border border-red-700 bg-red-800/50 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											{deletingIds.has(subscription.id) ? "Deleting..." : "Delete"}
+										</button>
+									) : (
+										<button
+											onClick={handleManageSubscription}
+											disabled={isRedirecting}
+											className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-sky-500 hover:text-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											Manage
+										</button>
+									)}
 								</div>
 							</div>
 						))}
