@@ -378,10 +378,49 @@ export async function POST(request: Request) {
 					);
 				}
 
-				// If still no PaymentIntent after finalization attempt, throw error with detailed diagnostics
+				// Level 3: Manual PaymentIntent creation as last resort
+				if (!paymentIntent) {
+					console.log(
+						"Attempting to manually create PaymentIntent for the invoice..."
+					);
+					try {
+						const createdPaymentIntent = await stripe.paymentIntents.create({
+							amount: latestInvoice.amount_due ?? Math.round(amount * 100),
+							currency: latestInvoice.currency ?? "usd",
+							customer: customerId,
+							payment_method_types: ["card"],
+							metadata: {
+								invoiceId: latestInvoice.id,
+								subscriptionId: subscription.id,
+								campaignId: campaignId || "",
+								campaignName: campaignName || "",
+								userId,
+							},
+						});
+
+						paymentIntent = createdPaymentIntent;
+
+						console.log(
+							"Successfully created PaymentIntent manually:",
+							{
+								paymentIntentId: createdPaymentIntent.id,
+								invoiceId: latestInvoice.id,
+								subscriptionId: subscription.id,
+								amount: createdPaymentIntent.amount,
+							}
+						);
+					} catch (manualCreateError) {
+						console.error(
+							"Failed to manually create PaymentIntent:",
+							manualCreateError
+						);
+					}
+				}
+
+				// If still no PaymentIntent after all fallback attempts, throw error with detailed diagnostics
 				if (!paymentIntent) {
 					console.error(
-						"PaymentIntent could not be created even after invoice finalization"
+						"PaymentIntent could not be created even after all fallback attempts"
 					);
 					console.error("Possible causes:");
 					console.error(

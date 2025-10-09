@@ -83,6 +83,7 @@ export default function CampaignDetailPage() {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
 
   const campaignId = params.id as string;
 
@@ -412,6 +413,32 @@ export default function CampaignDetailPage() {
     }
   };
 
+  const handleManageSubscription = async () => {
+    try {
+      setIsRedirectingToPortal(true);
+
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          returnUrl: `${window.location.origin}/campaigns/${campaignId}`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create portal session");
+      }
+
+      const data = await response.json();
+      
+      // Redirect to Stripe Customer Portal
+      window.location.href = data.url;
+    } catch (error) {
+      console.error("Failed to open billing portal:", error);
+      setIsRedirectingToPortal(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -614,14 +641,13 @@ export default function CampaignDetailPage() {
               <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
                 You have an active subscription for this campaign.
               </div>
-              <a
-                href="https://billing.stripe.com/p/login/00w4gy3Jmad7bDT6k273G00"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+              <button
+                onClick={handleManageSubscription}
+                disabled={isRedirectingToPortal}
+                className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Manage Subscription (Stripe Dashboard)
-              </a>
+                {isRedirectingToPortal ? "Opening Portal..." : "Manage Subscription"}
+              </button>
             </div>
           ) : (
             <Link
