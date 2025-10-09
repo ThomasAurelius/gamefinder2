@@ -19,6 +19,7 @@ export type CampaignPayload = {
   requiresPayment?: boolean;
   meetingFrequency?: string;
   daysOfWeek?: string[];
+  stripeConnectAccountId?: string; // Host's Stripe Connect account ID for payment splitting
 };
 
 export type PlayerSignup = {

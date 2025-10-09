@@ -162,3 +162,119 @@ export async function getUserEmail(userId: string): Promise<string | null> {
   }
 }
 
+/**
+ * Get Stripe Connect account ID for a host user
+ */
+export async function getStripeConnectAccountId(userId: string): Promise<string | null> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return null;
+    }
+    
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { stripeConnectAccountId: 1 } }
+    );
+    
+    return user?.stripeConnectAccountId || null;
+  } catch (error) {
+    console.error("Failed to get Stripe Connect account ID:", error);
+    return null;
+  }
+}
+
+/**
+ * Set Stripe Connect account ID for a host user
+ */
+export async function setStripeConnectAccountId(userId: string, accountId: string): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return false;
+    }
+    
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { 
+          stripeConnectAccountId: accountId,
+          updatedAt: new Date()
+        } 
+      }
+    );
+    
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error("Failed to set Stripe Connect account ID:", error);
+    return false;
+  }
+}
+
+/**
+ * Update Stripe Connect onboarding status for a host user
+ */
+export async function setStripeConnectOnboardingComplete(userId: string, complete: boolean): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return false;
+    }
+    
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: { 
+          stripeConnectOnboardingComplete: complete,
+          updatedAt: new Date()
+        } 
+      }
+    );
+    
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error("Failed to update Stripe Connect onboarding status:", error);
+    return false;
+  }
+}
+
+/**
+ * Get user's Stripe Connect status (account ID and onboarding completion)
+ */
+export async function getStripeConnectStatus(userId: string): Promise<{
+  accountId: string | null;
+  onboardingComplete: boolean;
+} | null> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return null;
+    }
+    
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { stripeConnectAccountId: 1, stripeConnectOnboardingComplete: 1 } }
+    );
+    
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      accountId: user.stripeConnectAccountId || null,
+      onboardingComplete: user.stripeConnectOnboardingComplete || false,
+    };
+  } catch (error) {
+    console.error("Failed to get Stripe Connect status:", error);
+    return null;
+  }
+}
+

@@ -8,6 +8,24 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 This application integrates Stripe for payment processing, including support for both one-time payments and recurring subscriptions.
 
+### 🆕 Stripe Connect Payment Splitting
+
+The platform now supports **automatic payment splitting** for subscription-based campaigns using Stripe Connect:
+
+- **80%** goes directly to campaign hosts (via their Stripe Connect account)
+- **20%** stays with the platform as an application fee
+
+**Host Features:**
+- Simple onboarding flow via Stripe Express
+- Dedicated Host Dashboard at `/host/dashboard`
+- Automatic payout management through Stripe
+- View account status and payment terms
+- One-click access to Stripe Express Dashboard
+
+**Quick Links:**
+- [Stripe Connect Setup Guide](./STRIPE_CONNECT_GUIDE.md) - Complete technical guide
+- [Visual Summary](./STRIPE_CONNECT_VISUAL_SUMMARY.md) - Flowcharts and diagrams
+
 **Quick Links:**
 - [Test Mode Verification](./TEST_MODE_VERIFICATION.md) - ⭐ **YES, subscriptions work in test mode!** Verify your setup here
 - [Stripe Setup Guide](./STRIPE_SETUP.md) - Complete setup instructions

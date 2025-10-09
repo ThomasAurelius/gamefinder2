@@ -6,7 +6,9 @@ import {
 	getStripeCustomerId,
 	setStripeCustomerId,
 	getUserEmail,
+	getStripeConnectAccountId,
 } from "@/lib/users";
+import { getCampaign } from "@/lib/campaigns/db";
 
 type StripeErrorLike = {
 	type?: string;
@@ -121,6 +123,17 @@ export async function POST(request: Request) {
 				userId,
 			});
 
+			// Get campaign to retrieve host information
+			let hostConnectAccountId: string | null = null;
+			if (campaignId) {
+				const campaign = await getCampaign(campaignId);
+				if (campaign) {
+					// Get the host's Connect account ID
+					hostConnectAccountId = await getStripeConnectAccountId(campaign.userId);
+					console.log("Host Connect account ID:", hostConnectAccountId || "Not set");
+				}
+			}
+
 			// Check if user already has a Stripe customer ID
 			let customerId = await getStripeCustomerId(userId);
 
@@ -201,13 +214,20 @@ export async function POST(request: Request) {
 				amount: price.unit_amount,
 			});
 
-			const subscription = await stripe.subscriptions.create({
+			// Calculate application fee (20% of the amount)
+			const applicationFeeAmount = hostConnectAccountId 
+				? Math.round(amount * 100 * 0.20) // 20% platform fee
+				: undefined;
+
+			// Build subscription creation options
+			const subscriptionOptions: Stripe.SubscriptionCreateParams = {
 				customer: customerId,
 				items: [{ price: price.id }],
 				metadata: {
 					campaignId: campaignId || "",
 					campaignName: campaignName || "",
 					userId,
+					hostConnectAccountId: hostConnectAccountId || "",
 				},
 				payment_behavior: "default_incomplete",
 				collection_method: "charge_automatically",
@@ -219,13 +239,30 @@ export async function POST(request: Request) {
 					enabled: false,
 				},
 				expand: ["latest_invoice.payment_intent"],
-			});
+			};
+
+			// Add Connect account and application fee if host has completed onboarding
+			if (hostConnectAccountId && applicationFeeAmount) {
+				subscriptionOptions.application_fee_percent = 20; // Platform takes 20%
+				subscriptionOptions.transfer_data = {
+					destination: hostConnectAccountId,
+				};
+				console.log("Subscription will use Stripe Connect:", {
+					hostAccount: hostConnectAccountId,
+					applicationFeePercent: 20,
+				});
+			} else {
+				console.log("Subscription will use standard payment (no Connect account)");
+			}
+
+			const subscription = await stripe.subscriptions.create(subscriptionOptions);
 
 			console.log("Subscription created:", {
 				subscriptionId: subscription.id,
 				status: subscription.status,
 				collectionMethod: subscription.collection_method,
 				latestInvoiceType: typeof subscription.latest_invoice,
+				usingConnect: !!hostConnectAccountId,
 			});
 
 			// Type guard: ensure latest_invoice is expanded to Invoice object, not string
