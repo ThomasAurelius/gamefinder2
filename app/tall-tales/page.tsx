@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import TallTalesDisclaimer from "@/components/TallTalesDisclaimer";
 import TaleActions from "@/components/TaleActions";
+import { Tale, TaleFromAPI } from "@/lib/tall-tales/client-types";
 
 export default function TallTalesPage() {
 	const [title, setTitle] = useState("");
@@ -14,16 +15,7 @@ export default function TallTalesPage() {
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [showDisclaimer, setShowDisclaimer] = useState(true);
 	const [disclaimerClosed, setDisclaimerClosed] = useState(false);
-	const [tales, setTales] = useState<Array<{
-		id: string;
-		userId: string;
-		title: string;
-		content: string;
-		imageUrls?: string[];
-		createdAt: Date;
-		authorName: string;
-		authorAvatarUrl?: string;
-	}>>([]);
+	const [tales, setTales] = useState<Tale[]>([]);
 	const [isLoadingTales, setIsLoadingTales] = useState(true);
 	const [flagModalOpen, setFlagModalOpen] = useState(false);
 	const [flagTaleId, setFlagTaleId] = useState("");
@@ -69,18 +61,9 @@ export default function TallTalesPage() {
 			setIsLoadingTales(true);
 			const response = await fetch("/api/tall-tales");
 			if (response.ok) {
-				const data = await response.json();
+				const data: TaleFromAPI[] = await response.json();
 				// Convert date strings back to Date objects
-				const talesWithDates = data.map((tale: {
-					id: string;
-					userId: string;
-					title: string;
-					content: string;
-					imageUrls?: string[];
-					createdAt: string;
-					authorName: string;
-					authorAvatarUrl?: string;
-				}) => ({
+				const talesWithDates: Tale[] = data.map((tale) => ({
 					...tale,
 					createdAt: new Date(tale.createdAt),
 				}));

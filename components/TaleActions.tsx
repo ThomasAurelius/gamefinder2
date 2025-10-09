@@ -2,17 +2,7 @@
 
 import { useState } from "react";
 import EditTaleModal from "./EditTaleModal";
-
-interface Tale {
-  id: string;
-  userId: string;
-  title: string;
-  content: string;
-  imageUrls?: string[];
-  createdAt: Date;
-  authorName: string;
-  authorAvatarUrl?: string;
-}
+import { Tale } from "@/lib/tall-tales/client-types";
 
 interface TaleActionsProps {
   tale: Tale;
