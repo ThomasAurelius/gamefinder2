@@ -39,6 +39,7 @@ const primaryLinks: NavItem[] = [
 			{ href: "/post-campaign", label: "Post Campaign" },
 		],
 	},
+	{ href: "/tall-tales", label: "Tall Tales" },
 ];
 
 const accountLinks: NavLink[] = [
