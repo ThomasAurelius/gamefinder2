@@ -64,6 +64,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     primaryRole,
     timezone,
     avatarUrl,
+    bggUsername,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -129,6 +130,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     primaryRole,
     timezone: timezone || "America/New_York",
     avatarUrl: avatarUrl || "",
+    bggUsername: isString(bggUsername) ? bggUsername : undefined,
   };
 };
 

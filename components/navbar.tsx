@@ -39,6 +39,13 @@ const primaryLinks: NavItem[] = [
 			{ href: "/post-campaign", label: "Post Campaign" },
 		],
 	},
+	{
+		label: "BGG",
+		submenu: [
+			{ href: "/bgg/trending", label: "Trending" },
+			{ href: "/bgg/marketplace", label: "Marketplace" },
+		],
+	},
 ];
 
 const accountLinks: NavLink[] = [
@@ -69,6 +76,7 @@ export function Navbar() {
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [gamesOpen, setGamesOpen] = useState(false);
 	const [campaignsOpen, setCampaignsOpen] = useState(false);
+	const [bggOpen, setBggOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [authLoading, setAuthLoading] = useState(true);
 	const [hasIncompleteSettings, setHasIncompleteSettings] = useState(false);
@@ -135,6 +143,7 @@ export function Navbar() {
 	const toggleAccount = () => setAccountOpen((open) => !open);
 	const toggleGames = () => setGamesOpen((open) => !open);
 	const toggleCampaigns = () => setCampaignsOpen((open) => !open);
+	const toggleBgg = () => setBggOpen((open) => !open);
 
 	return (
 		<header className="border-b border-white/10 bg-slate-950/80 backdrop-blur">
@@ -211,16 +220,21 @@ export function Navbar() {
 							);
 							const isGamesMenu = item.label === "Games";
 							const isCampaignsMenu = item.label === "Campaigns";
+							const isBggMenu = item.label === "BGG";
 							const isOpen = isGamesMenu
 								? gamesOpen
 								: isCampaignsMenu
 									? campaignsOpen
-									: false;
+									: isBggMenu
+										? bggOpen
+										: false;
 							const toggleOpen = isGamesMenu
 								? toggleGames
 								: isCampaignsMenu
 									? toggleCampaigns
-									: () => {};
+									: isBggMenu
+										? toggleBgg
+										: () => {};
 
 							return (
 								<div key={item.label} className="relative">
@@ -257,6 +271,7 @@ export function Navbar() {
 														if (isGamesMenu) setGamesOpen(false);
 														if (isCampaignsMenu)
 															setCampaignsOpen(false);
+														if (isBggMenu) setBggOpen(false);
 														closeMenu();
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${

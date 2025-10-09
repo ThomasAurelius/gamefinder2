@@ -65,6 +65,7 @@ type ProfilePayload = {
 	primaryRole: RoleOption | "";
 	timezone?: string;
 	avatarUrl?: string;
+	bggUsername?: string;
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -89,6 +90,7 @@ export default function ProfilePage() {
 	const [avatarUrl, setAvatarUrl] = useState("");
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 	const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+	const [bggUsername, setBggUsername] = useState("");
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -128,6 +130,7 @@ export default function ProfilePage() {
 				setCustomGames(customGames);
 				setTimezone(profile.timezone ?? DEFAULT_TIMEZONE);
 				setAvatarUrl(profile.avatarUrl ?? "");
+				setBggUsername(profile.bggUsername ?? "");
 				setFavoriteGames(
 					(profile.favoriteGames ?? []).filter((game) =>
 						normalizedGames.includes(game)
@@ -357,6 +360,7 @@ export default function ProfilePage() {
 			primaryRole,
 			timezone,
 			avatarUrl,
+			bggUsername,
 		};
 
 		try {
@@ -518,6 +522,25 @@ export default function ProfilePage() {
 						<p className="text-xs text-slate-400">
 							Select your timezone to ensure dates are displayed
 							correctly.
+						</p>
+					</div>
+
+					<div className="space-y-2">
+						<label
+							htmlFor="bgg-username"
+							className="text-sm font-medium text-slate-200"
+						>
+							BoardGameGeek Username
+						</label>
+						<input
+							id="bgg-username"
+							value={bggUsername}
+							onChange={(event) => setBggUsername(event.target.value)}
+							placeholder="Your BGG username"
+							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						<p className="text-xs text-slate-400">
+							Link your BoardGameGeek profile to your account.
 						</p>
 					</div>
 				</section>
