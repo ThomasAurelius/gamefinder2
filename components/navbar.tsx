@@ -22,6 +22,7 @@ function isSubmenu(item: NavItem): item is NavLinkWithSubmenu {
 
 const primaryLinks: NavItem[] = [
 	{ href: "/dashboard", label: "Dashboard" },
+	{ href: "/tall-tales", label: "Tall Tales" },
 	{ href: "/library", label: "Library" },
 	{ href: "/players", label: "Players" },
 	{
@@ -39,7 +40,6 @@ const primaryLinks: NavItem[] = [
 			{ href: "/post-campaign", label: "Post Campaign" },
 		],
 	},
-	{ href: "/tall-tales", label: "Tall Tales" },
 ];
 
 const accountLinks: NavLink[] = [
