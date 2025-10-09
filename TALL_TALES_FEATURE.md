@@ -21,6 +21,8 @@ The Tall Tales feature allows users to share campaign stories, memorable game mo
 - ✅ Disclaimer popup (shown once per user)
 - ✅ Authentication required for posting
 - ✅ Display all tales with author information
+- ✅ **Content flagging system** (see [FLAG_SYSTEM_FEATURE.md](FLAG_SYSTEM_FEATURE.md))
+- ✅ **Admin moderation dashboard**
 
 ## API Endpoints
 
