@@ -12,7 +12,7 @@ const getStripe = () => {
 	});
 };
 
-export async function GET(request: Request) {
+export async function GET() {
 	try {
 		const cookieStore = await cookies();
 		const userId = cookieStore.get("userId")?.value;
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
 		});
 
 		// Map subscriptions to a simpler format
-		const formattedSubscriptions = subscriptions.data.map((sub: any) => ({
+		const formattedSubscriptions = subscriptions.data.map((sub: Stripe.Subscription) => ({
 			id: sub.id,
 			status: sub.status,
 			campaignId: sub.metadata?.campaignId,
