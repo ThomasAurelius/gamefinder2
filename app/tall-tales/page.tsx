@@ -30,6 +30,7 @@ export default function TallTalesPage() {
 	const [flagComment, setFlagComment] = useState("");
 	const [flagSubmitting, setFlagSubmitting] = useState(false);
 	const [flagMessage, setFlagMessage] = useState("");
+	const [isFormOpen, setIsFormOpen] = useState(false);
 
 	const remainingCharacters = 5000 - content.length;
 
@@ -99,6 +100,18 @@ export default function TallTalesPage() {
 		setImageUrls(imageUrls.filter((_, i) => i !== index));
 	};
 
+	const handleToggleForm = () => {
+		if (isFormOpen) {
+			// Reset form when closing
+			setTitle("");
+			setContent("");
+			setImageUrls([]);
+			setError("");
+			setSubmitted(false);
+		}
+		setIsFormOpen(!isFormOpen);
+	};
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError("");
@@ -138,6 +151,9 @@ export default function TallTalesPage() {
 			setTitle("");
 			setContent("");
 			setImageUrls([]);
+			
+			// Close the form after successful submission
+			setIsFormOpen(false);
 			
 			// Reload tales
 			await loadTales();
@@ -216,10 +232,24 @@ export default function TallTalesPage() {
 				</p>
 			</div>
 
-			<form
-				onSubmit={handleSubmit}
-				className="space-y-6 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30"
-			>
+			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
+				<button
+					type="button"
+					onClick={handleToggleForm}
+					className="flex w-full items-center justify-between gap-2 bg-slate-900/50 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:bg-slate-900/80"
+				>
+					<span>
+						{isFormOpen ? "Hide post form" : "Share a Tale"}
+					</span>
+					<span className="text-xs uppercase tracking-wide text-slate-400">
+						{isFormOpen ? "Collapse" : "Expand"}
+					</span>
+				</button>
+				{isFormOpen && (
+					<form
+						onSubmit={handleSubmit}
+						className="space-y-6 border-t border-slate-800 p-6"
+					>
 				<div className="space-y-2">
 					<label
 						htmlFor="title"
@@ -334,6 +364,8 @@ export default function TallTalesPage() {
 					{isSubmitting ? "Posting..." : "Share Your Tale"}
 				</button>
 			</form>
+				)}
+			</div>
 
 			{/* Tales List */}
 			<div className="space-y-6">
