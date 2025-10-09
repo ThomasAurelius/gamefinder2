@@ -153,9 +153,6 @@ export default function TallTalesPage() {
 			setSubmitted(true);
 			resetForm();
 			
-			// Close the form after successful submission
-			setIsFormOpen(false);
-			
 			// Reload tales
 			await loadTales();
 
