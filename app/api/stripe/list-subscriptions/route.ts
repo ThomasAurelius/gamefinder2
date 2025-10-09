@@ -47,38 +47,26 @@ export async function GET() {
 		const subscriptions = await stripe.subscriptions.list({
 			customer: customerId,
 			limit: 100,
-			expand: ["data.items.data.price.product"],
 		});
 
-		// Format subscription data for frontend
-		const formattedSubscriptions = subscriptions.data.map((sub) => {
-			const price = sub.items.data[0]?.price;
-			const product = price?.product as Stripe.Product | undefined;
-
-			return {
-				id: sub.id,
-				status: sub.status,
-				campaignId: sub.metadata.campaignId || null,
-				campaignName: sub.metadata.campaignName || product?.name || "Unknown Campaign",
-				amount: price?.unit_amount ? price.unit_amount / 100 : 0,
-				currency: price?.currency || "usd",
-				interval: price?.recurring?.interval || "week",
-				// These properties exist in the Stripe API response but may not be in the TypeScript types
-				currentPeriodStart: (sub as unknown as { current_period_start?: number }).current_period_start || 0,
-				currentPeriodEnd: (sub as unknown as { current_period_end?: number }).current_period_end || 0,
-				cancelAtPeriodEnd: (sub as unknown as { cancel_at_period_end?: boolean }).cancel_at_period_end || false,
-				canceledAt: (sub as unknown as { canceled_at?: number | null }).canceled_at || null,
-				created: (sub as unknown as { created?: number }).created || 0,
-			};
-		});
+		// Map subscriptions to a simpler format
+		const formattedSubscriptions = subscriptions.data.map((sub: Stripe.Subscription) => ({
+			id: sub.id,
+			status: sub.status,
+			campaignId: sub.metadata?.campaignId,
+			campaignName: sub.metadata?.campaignName,
+			amount: sub.items.data[0]?.price?.unit_amount,
+			currency: sub.items.data[0]?.price?.currency,
+			interval: sub.items.data[0]?.price?.recurring?.interval,
+		}));
 
 		return NextResponse.json({
 			subscriptions: formattedSubscriptions,
 		});
 	} catch (error) {
-		console.error("Error fetching subscriptions:", error);
+		console.error("Error listing subscriptions:", error);
 		return NextResponse.json(
-			{ error: "Failed to fetch subscriptions" },
+			{ error: "Failed to list subscriptions" },
 			{ status: 500 }
 		);
 	}
