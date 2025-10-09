@@ -71,6 +71,17 @@ export default function TallTalesPage() {
 		}
 	};
 
+	// Handle Escape key to close modal
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === 'Escape' && modalImageUrl) {
+				setModalImageUrl(null);
+			}
+		};
+		window.addEventListener('keydown', handleEscape);
+		return () => window.removeEventListener('keydown', handleEscape);
+	}, [modalImageUrl]);
+
 	const loadTales = async () => {
 		try {
 			setIsLoadingTales(true);
@@ -528,7 +539,7 @@ export default function TallTalesPage() {
 											src={tale.imageUrls[0]}
 											alt={tale.title}
 											className="h-32 w-32 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
-											onClick={() => setModalImageUrl(tale.imageUrls![0])}
+											onClick={() => tale.imageUrls && setModalImageUrl(tale.imageUrls[0])}
 										/>
 									</div>
 								)}
