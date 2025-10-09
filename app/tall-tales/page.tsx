@@ -394,8 +394,7 @@ export default function TallTalesPage() {
 										<img
 											src={tale.imageUrls[0]}
 											alt={tale.title}
-											className="h-32 w-32 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
-											title="Click to view full size"
+											className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
 										/>
 									</div>
 								)}
@@ -408,8 +407,7 @@ export default function TallTalesPage() {
 											key={index}
 											src={url}
 											alt={`Tale image ${index + 2}`}
-											className="h-24 w-24 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
-											title="Click to view full size"
+											className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
 										/>
 									))}
 								</div>
