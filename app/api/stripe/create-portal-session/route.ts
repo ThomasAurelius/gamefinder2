@@ -133,7 +133,7 @@ export async function POST(request: Request) {
                                                           subscriptionUpdateFeature.default_allowed_updates ?? undefined,
                                                   products: subscriptionUpdateFeature.products
                                                           ? mapProductsToCreateParams(subscriptionUpdateFeature.products)
-                                                          : undefined,
+                                                          : [],
                                           }
                                         : {
                                                   enabled: false,
