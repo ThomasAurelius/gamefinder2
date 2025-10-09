@@ -382,21 +382,32 @@ export default function TallTalesPage() {
 								</button>
 							</div>
 							
-							<div>
-								<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
-								{/* Content is displayed as plain text with whitespace-pre-line, which is safe from XSS.
-								    For full Markdown rendering, a library like react-markdown with sanitization would be needed. */}
-								<p className="whitespace-pre-line text-slate-300">{tale.content}</p>
+							<div className="flex items-start justify-between gap-4">
+								<div className="flex-1">
+									<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
+									{/* Content is displayed as plain text with whitespace-pre-line, which is safe from XSS.
+									    For full Markdown rendering, a library like react-markdown with sanitization would be needed. */}
+									<p className="whitespace-pre-line text-slate-300">{tale.content}</p>
+								</div>
+								{tale.imageUrls && tale.imageUrls.length > 0 && (
+									<div className="flex-shrink-0">
+										<img
+											src={tale.imageUrls[0]}
+											alt={tale.title}
+											className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
+										/>
+									</div>
+								)}
 							</div>
 							
-							{tale.imageUrls && tale.imageUrls.length > 0 && (
-								<div className="flex flex-wrap gap-3">
-									{tale.imageUrls.map((url: string, index: number) => (
+							{tale.imageUrls && tale.imageUrls.length > 1 && (
+								<div className="flex flex-wrap gap-3 pt-2">
+									{tale.imageUrls.slice(1).map((url: string, index: number) => (
 										<img
 											key={index}
 											src={url}
-											alt={`Tale image ${index + 1}`}
-											className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
+											alt={`Tale image ${index + 2}`}
+											className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
 										/>
 									))}
 								</div>
