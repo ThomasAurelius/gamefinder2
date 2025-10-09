@@ -63,44 +63,61 @@ export async function POST(request: Request) {
 		const body = await request.json();
 		const returnUrl = body.returnUrl || `${request.headers.get("origin")}/subscriptions`;
 
-		// Create a portal configuration with subscription cancellation enabled
-		// We create a new configuration to ensure proper settings without affecting existing ones
+		// Get or create a portal configuration with subscription cancellation enabled
+		// We look for an existing active configuration first to avoid creating duplicates
 		let configId: string | undefined;
 		
 		try {
-			// Create a dedicated configuration with all required features
-			const configuration = await stripe.billingPortal.configurations.create({
-				features: {
-					customer_update: {
-						allowed_updates: ['email', 'address'],
-						enabled: true,
-					},
-					invoice_history: {
-						enabled: true,
-					},
-					payment_method_update: {
-						enabled: true,
-					},
-					subscription_cancel: {
-						enabled: true,
-						mode: 'at_period_end',
-					},
-					subscription_update: {
-						enabled: false,
-						default_allowed_updates: [],
-						products: [],
-					},
-				},
-				business_profile: {
-					headline: 'Manage your subscription',
-				},
+			// List existing configurations to check if we have one already
+			const configurations = await stripe.billingPortal.configurations.list({ 
+				limit: 100,
+				active: true,
 			});
-			configId = configuration.id;
-			console.log("Created portal configuration:", configId);
+			
+			// Look for a configuration with subscription_cancel enabled
+			const existingConfig = configurations.data.find(config => 
+				config.features?.subscription_cancel?.enabled === true
+			);
+			
+			if (existingConfig) {
+				// Reuse existing configuration
+				configId = existingConfig.id;
+				console.log("Using existing portal configuration:", configId);
+			} else {
+				// Create a new configuration with all required features
+				const configuration = await stripe.billingPortal.configurations.create({
+					features: {
+						customer_update: {
+							allowed_updates: ['email', 'address'],
+							enabled: true,
+						},
+						invoice_history: {
+							enabled: true,
+						},
+						payment_method_update: {
+							enabled: true,
+						},
+						subscription_cancel: {
+							enabled: true,
+							mode: 'at_period_end',
+						},
+						subscription_update: {
+							enabled: false,
+							default_allowed_updates: [],
+							products: [],
+						},
+					},
+					business_profile: {
+						headline: 'Manage your subscription',
+					},
+				});
+				configId = configuration.id;
+				console.log("Created new portal configuration:", configId);
+			}
 		} catch (configError) {
-			console.error("Error creating portal configuration:", configError);
+			console.error("Error managing portal configuration:", configError);
 			// Continue without configuration - will use default portal settings
-			// This fallback ensures the portal still works even if configuration creation fails
+			// This fallback ensures the portal still works even if configuration management fails
 		}
 
 		// Create a portal session
@@ -109,7 +126,7 @@ export async function POST(request: Request) {
 			return_url: returnUrl,
 		};
 		
-		// Add configuration if we successfully created one
+		// Add configuration if we successfully created/retrieved one
 		if (configId) {
 			sessionParams.configuration = configId;
 		}
