@@ -385,8 +385,8 @@ export async function POST(request: Request) {
 					);
 					try {
 						const createdPaymentIntent = await stripe.paymentIntents.create({
-							amount: latestInvoice.amount_due || Math.round(amount * 100),
-							currency: latestInvoice.currency || "usd",
+							amount: latestInvoice.amount_due ?? Math.round(amount * 100),
+							currency: latestInvoice.currency ?? "usd",
 							customer: customerId,
 							payment_method_types: ["card"],
 							metadata: {
