@@ -3,6 +3,13 @@ import { cookies } from "next/headers";
 import Stripe from "stripe";
 import { getStripeCustomerId } from "@/lib/users";
 
+// Extended Stripe.Subscription interface to include fields missing from TypeScript types
+// These fields exist in the Stripe API but are not in the TypeScript definitions for v19.1.0
+interface StripeSubscriptionWithPeriod extends Stripe.Subscription {
+	current_period_start: number;
+	current_period_end: number;
+}
+
 const getStripe = () => {
 	if (!process.env.STRIPE_SECRET_KEY) {
 		throw new Error("STRIPE_SECRET_KEY is not configured");
@@ -50,15 +57,25 @@ export async function GET() {
 		});
 
 		// Map subscriptions to a simpler format
-		const formattedSubscriptions = subscriptions.data.map((sub: Stripe.Subscription) => ({
-			id: sub.id,
-			status: sub.status,
-			campaignId: sub.metadata?.campaignId,
-			campaignName: sub.metadata?.campaignName,
-			amount: sub.items.data[0]?.price?.unit_amount,
-			currency: sub.items.data[0]?.price?.currency,
-			interval: sub.items.data[0]?.price?.recurring?.interval,
-		}));
+		const formattedSubscriptions = subscriptions.data.map((sub: Stripe.Subscription) => {
+			// Cast to extended type to access fields missing from TypeScript definitions
+			const subWithPeriod = sub as StripeSubscriptionWithPeriod;
+			
+			return {
+				id: sub.id,
+				status: sub.status,
+				campaignId: sub.metadata?.campaignId,
+				campaignName: sub.metadata?.campaignName,
+				amount: sub.items.data[0]?.price?.unit_amount ? sub.items.data[0].price.unit_amount / 100 : 0,
+				currency: sub.items.data[0]?.price?.currency,
+				interval: sub.items.data[0]?.price?.recurring?.interval,
+				currentPeriodStart: subWithPeriod.current_period_start,
+				currentPeriodEnd: subWithPeriod.current_period_end,
+				cancelAtPeriodEnd: sub.cancel_at_period_end,
+				canceledAt: sub.canceled_at,
+				created: sub.created,
+			};
+		});
 
 		return NextResponse.json({
 			subscriptions: formattedSubscriptions,
