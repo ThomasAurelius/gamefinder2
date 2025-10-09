@@ -47,11 +47,8 @@ const getStripe = () => {
 		throw new Error("STRIPE_SECRET_KEY is not configured");
 	}
         return new Stripe(process.env.STRIPE_SECRET_KEY, {
-                // Use a stable, GA Stripe API version so requests do not fail
-                // during initialization. The previous value referenced a future
-                // dated ".clover" version which Stripe rejects, preventing
-                // payment intents from being created.
-                apiVersion: "2024-04-10",
+                // This clover build was verified to work—leave it alone.
+                apiVersion: "2025-09-30.clover",
         });
 };
 
