@@ -132,7 +132,7 @@ export default async function PlayerDetailPage({
               <div className="flex items-center gap-2">
                 {profile.bggUsername && (
                   <a
-                    href={`https://boardgamegeek.com/user/${profile.bggUsername}`}
+                    href={`https://boardgamegeek.com/user/${encodeURIComponent(profile.bggUsername)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/60"

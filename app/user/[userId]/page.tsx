@@ -40,7 +40,7 @@ export default async function UserProfilePage({
             )}
             {profile.bggUsername && (
               <a
-                href={`https://boardgamegeek.com/user/${profile.bggUsername}`}
+                href={`https://boardgamegeek.com/user/${encodeURIComponent(profile.bggUsername)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 inline-flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
