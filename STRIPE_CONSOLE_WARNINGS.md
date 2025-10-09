@@ -125,13 +125,41 @@ If you see console errors (not warnings) or payment functionality is broken:
 ### Our Application's CSP Configuration
 The CSP headers set in `next.config.ts` allow:
 - **Scripts**: Self, inline, eval, js.stripe.com, m.stripe.com
-- **Styles**: Self, inline
-- **Images**: Self, data URIs, any HTTPS
-- **Fonts**: Self, data URIs, Google Fonts
-- **Connections**: Self, all Stripe API domains, Stripe telemetry
-- **Frames**: Self, Stripe iframe domains
+  - Note: `'unsafe-inline'` and `'unsafe-eval'` are required for Next.js framework functionality (hydration, dynamic imports, and hot module replacement in development)
+  - These are standard requirements for Next.js applications and don't compromise the Stripe integration security
+- **Styles**: Self, inline (required for CSS-in-JS and Tailwind)
+- **Images**: Self, data URIs, Stripe CDN (*.stripe.com), Firebase/Google Cloud Storage
+- **Fonts**: Self, data URIs (required for Stripe custom fonts), Google Fonts
+- **Connections**: Self, all Stripe domains (*.stripe.com), Firebase storage
+- **Frames**: Self, Stripe iframe domains (js.stripe.com, hooks.stripe.com)
+- **Security**: Strict object-src 'none', base-uri 'self', form-action 'self', frame-ancestors 'self'
 
-This configuration ensures Stripe Elements work correctly while maintaining security.
+This configuration ensures Stripe Elements work correctly while maintaining reasonable security for a Next.js application.
+
+### Why Some CSP Directives Are Necessary
+
+### Why Some CSP Directives Are Necessary
+
+**`'unsafe-inline'` and `'unsafe-eval'` in script-src:**
+- Required by Next.js for core functionality:
+  - Client-side hydration (making static HTML interactive)
+  - Dynamic imports and code splitting
+  - Hot module replacement in development
+  - React Fast Refresh
+- These are standard for Next.js applications
+- Next.js 15 doesn't yet have full support for CSP nonces/hashes without additional complexity
+- The security trade-off is necessary for the framework to function
+
+**Data URIs in font-src:**
+- Required by Stripe Elements for custom fonts
+- Stripe embeds font data directly in the page for better performance
+- This is a Stripe requirement, not our choice
+
+**Wildcard `https://*.stripe.com`:**
+- Simplifies configuration and covers all Stripe subdomains
+- Includes: api.stripe.com, m.stripe.com, r.stripe.com, errors.stripe.com, t.stripe.com, edge.stripe.com, and others
+- Stripe uses different subdomains for different services
+- More maintainable than listing each subdomain individually
 
 ### External CSP Policies
 When users navigate to Stripe-hosted pages (billing portal, customer portal), those pages have their own CSP policies that we do not control. Any warnings from those pages are managed by Stripe's infrastructure team and do not indicate problems with our integration.
