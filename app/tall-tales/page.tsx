@@ -105,12 +105,12 @@ export default function TallTalesPage() {
 		setContent("");
 		setImageUrls([]);
 		setError("");
-		setSubmitted(false);
 	};
 
 	const handleToggleForm = () => {
 		if (isFormOpen) {
 			resetForm();
+			setSubmitted(false);
 		}
 		setIsFormOpen(!isFormOpen);
 	};
