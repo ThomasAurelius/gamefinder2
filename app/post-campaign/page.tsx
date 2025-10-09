@@ -53,6 +53,8 @@ export default function PostCampaignPage() {
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
 	const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+	const [hasConnectAccount, setHasConnectAccount] = useState(false);
+	const [isCheckingConnect, setIsCheckingConnect] = useState(false);
 
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -71,6 +73,28 @@ export default function PostCampaignPage() {
 
 		fetchProfile();
 	}, []);
+
+	// Check Stripe Connect status when user sets a cost
+	useEffect(() => {
+		const checkConnectStatus = async () => {
+			if (typeof costPerSession === 'number' && costPerSession > 0 && !isCheckingConnect) {
+				setIsCheckingConnect(true);
+				try {
+					const response = await fetch("/api/stripe/connect/status");
+					if (response.ok) {
+						const data = await response.json();
+						setHasConnectAccount(data.onboardingComplete || false);
+					}
+				} catch (error) {
+					console.error("Failed to check Connect status:", error);
+				} finally {
+					setIsCheckingConnect(false);
+				}
+			}
+		};
+
+		checkConnectStatus();
+	}, [costPerSession, isCheckingConnect]);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -501,6 +525,43 @@ export default function PostCampaignPage() {
 
 			{costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
 				<div className="space-y-4">
+					{!hasConnectAccount && (
+						<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
+							<div className="flex items-start gap-3">
+								<div className="rounded-full bg-amber-600/20 p-2 text-amber-400">
+									<svg
+										className="h-5 w-5"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+										/>
+									</svg>
+								</div>
+								<div className="flex-1">
+									<h3 className="text-sm font-medium text-amber-200 mb-1">
+										Complete Host Onboarding to Receive Payments
+									</h3>
+									<p className="text-xs text-slate-400 mb-3">
+										To receive payments for this campaign, you need to set up your payout account. 
+										You&apos;ll receive 80% of subscription payments, with 20% going to platform fees.
+									</p>
+									<Link
+										href="/host/onboarding"
+										className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+									>
+										Set Up Payouts
+									</Link>
+								</div>
+							</div>
+						</div>
+					)}
+
 					<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
 						<h3 className="text-sm font-medium text-slate-200 mb-2">
 							Payment Setup
