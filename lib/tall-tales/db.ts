@@ -1,9 +1,13 @@
 import { randomUUID } from "crypto";
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { TallTalePayload, StoredTallTale } from "./types";
+import { TallTalePayload, StoredTallTale, ContentFlag, FlagReason } from "./types";
 
 type TallTaleDocument = StoredTallTale & {
+  _id?: ObjectId;
+};
+
+type ContentFlagDocument = ContentFlag & {
   _id?: ObjectId;
 };
 
@@ -12,7 +16,7 @@ export async function listTallTales(): Promise<StoredTallTale[]> {
   const tallTalesCollection = db.collection<TallTaleDocument>("tallTales");
 
   const tales = await tallTalesCollection
-    .find({})
+    .find({ $or: [{ isDeleted: { $exists: false } }, { isDeleted: false }] })
     .sort({ createdAt: -1 })
     .toArray();
 
@@ -24,6 +28,9 @@ export async function listTallTales(): Promise<StoredTallTale[]> {
     imageUrls: tale.imageUrls || [],
     createdAt: tale.createdAt,
     updatedAt: tale.updatedAt,
+    isDeleted: tale.isDeleted,
+    deletedAt: tale.deletedAt,
+    deletedBy: tale.deletedBy,
   }));
 }
 
@@ -45,6 +52,9 @@ export async function getTallTale(id: string): Promise<StoredTallTale | null> {
     imageUrls: tale.imageUrls || [],
     createdAt: tale.createdAt,
     updatedAt: tale.updatedAt,
+    isDeleted: tale.isDeleted,
+    deletedAt: tale.deletedAt,
+    deletedBy: tale.deletedBy,
   };
 }
 
@@ -64,6 +74,7 @@ export async function createTallTale(
     imageUrls: payload.imageUrls || [],
     createdAt: now,
     updatedAt: now,
+    isDeleted: false,
   };
 
   await tallTalesCollection.insertOne(tale as TallTaleDocument);
@@ -116,4 +127,100 @@ export async function deleteTallTale(
   const result = await tallTalesCollection.deleteOne({ id, userId });
 
   return result.deletedCount > 0;
+}
+
+export async function softDeleteTallTale(
+  id: string,
+  deletedBy: string
+): Promise<boolean> {
+  const db = await getDb();
+  const tallTalesCollection = db.collection<TallTaleDocument>("tallTales");
+
+  const result = await tallTalesCollection.updateOne(
+    { id },
+    { 
+      $set: { 
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy,
+      } 
+    }
+  );
+
+  return result.modifiedCount > 0;
+}
+
+// Flag operations
+export async function createFlag(
+  taleId: string,
+  flaggedBy: string,
+  flagReason: FlagReason,
+  flagComment?: string
+): Promise<ContentFlag> {
+  const db = await getDb();
+  const flagsCollection = db.collection<ContentFlagDocument>("contentFlags");
+
+  const flag: ContentFlag = {
+    id: randomUUID(),
+    taleId,
+    flaggedBy,
+    flagReason,
+    flagComment,
+    flaggedAt: new Date(),
+  };
+
+  await flagsCollection.insertOne(flag as ContentFlagDocument);
+
+  return flag;
+}
+
+export async function listUnresolvedFlags(): Promise<Array<ContentFlag & { tale?: StoredTallTale }>> {
+  const db = await getDb();
+  const flagsCollection = db.collection<ContentFlagDocument>("contentFlags");
+
+  const flags = await flagsCollection
+    .find({ resolvedAt: { $exists: false } })
+    .sort({ flaggedAt: -1 })
+    .toArray();
+
+  // Fetch associated tales
+  const taleIds = [...new Set(flags.map(f => f.taleId))];
+  const tallTalesCollection = db.collection<TallTaleDocument>("tallTales");
+  const tales = await tallTalesCollection.find({ id: { $in: taleIds } }).toArray();
+  const talesMap = new Map(tales.map(t => [t.id, t]));
+
+  return flags.map(flag => ({
+    id: flag.id,
+    taleId: flag.taleId,
+    flaggedBy: flag.flaggedBy,
+    flagReason: flag.flagReason,
+    flagComment: flag.flagComment,
+    flaggedAt: flag.flaggedAt,
+    resolvedAt: flag.resolvedAt,
+    resolvedBy: flag.resolvedBy,
+    resolution: flag.resolution,
+    tale: talesMap.get(flag.taleId),
+  }));
+}
+
+export async function resolveFlag(
+  flagId: string,
+  resolvedBy: string,
+  resolution: "allowed" | "deleted"
+): Promise<boolean> {
+  const db = await getDb();
+  const flagsCollection = db.collection<ContentFlagDocument>("contentFlags");
+
+  const result = await flagsCollection.updateOne(
+    { id: flagId },
+    { 
+      $set: { 
+        resolvedAt: new Date(),
+        resolvedBy,
+        resolution,
+      } 
+    }
+  );
+
+  return result.modifiedCount > 0;
 }
