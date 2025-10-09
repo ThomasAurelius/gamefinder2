@@ -13,4 +13,6 @@ export type UserDocument = {
   isAdmin?: boolean;
   isHidden?: boolean; // Admin can hide profiles
   stripeCustomerId?: string; // Stripe customer ID for subscription management
+  stripeConnectAccountId?: string; // Stripe Connect account ID for hosts receiving payments
+  stripeConnectOnboardingComplete?: boolean; // Whether host has completed Connect onboarding
 };
