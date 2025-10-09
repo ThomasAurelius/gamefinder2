@@ -129,6 +129,51 @@ export async function deleteTallTale(
   return result.deletedCount > 0;
 }
 
+export async function deleteTallTaleByAdmin(
+  id: string
+): Promise<boolean> {
+  const db = await getDb();
+  const tallTalesCollection = db.collection<TallTaleDocument>("tallTales");
+
+  const result = await tallTalesCollection.deleteOne({ id });
+
+  return result.deletedCount > 0;
+}
+
+export async function updateTallTaleByAdmin(
+  id: string,
+  payload: TallTalePayload
+): Promise<StoredTallTale | null> {
+  const db = await getDb();
+  const tallTalesCollection = db.collection<TallTaleDocument>("tallTales");
+
+  const existingTale = await tallTalesCollection.findOne({ id });
+
+  if (!existingTale) {
+    return null;
+  }
+
+  const updatedTale: StoredTallTale = {
+    ...existingTale,
+    title: payload.title,
+    content: payload.content,
+    imageUrls: payload.imageUrls || [],
+    updatedAt: new Date(),
+  };
+
+  await tallTalesCollection.updateOne(
+    { id },
+    { $set: {
+      title: updatedTale.title,
+      content: updatedTale.content,
+      imageUrls: updatedTale.imageUrls,
+      updatedAt: updatedTale.updatedAt,
+    } }
+  );
+
+  return updatedTale;
+}
+
 export async function softDeleteTallTale(
   id: string,
   deletedBy: string

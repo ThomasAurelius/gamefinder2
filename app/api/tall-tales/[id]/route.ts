@@ -5,8 +5,11 @@ import {
   getTallTale,
   updateTallTale,
   deleteTallTale,
+  updateTallTaleByAdmin,
+  deleteTallTaleByAdmin,
 } from "@/lib/tall-tales/db";
 import { parseTallTalePayload } from "@/lib/tall-tales/validation";
+import { isAdmin } from "@/lib/admin";
 
 export async function GET(
   request: Request,
@@ -59,7 +62,17 @@ export async function PUT(
       );
     }
 
-    const tale = await updateTallTale(id, userId, payload);
+    // Check if user is admin
+    const userIsAdmin = await isAdmin(userId);
+    
+    let tale;
+    if (userIsAdmin) {
+      // Admin can update any tale
+      tale = await updateTallTaleByAdmin(id, payload);
+    } else {
+      // Regular user can only update their own tale
+      tale = await updateTallTale(id, userId, payload);
+    }
 
     if (!tale) {
       return NextResponse.json(
@@ -94,7 +107,18 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const success = await deleteTallTale(id, userId);
+    
+    // Check if user is admin
+    const userIsAdmin = await isAdmin(userId);
+    
+    let success;
+    if (userIsAdmin) {
+      // Admin can delete any tale
+      success = await deleteTallTaleByAdmin(id);
+    } else {
+      // Regular user can only delete their own tale
+      success = await deleteTallTale(id, userId);
+    }
 
     if (!success) {
       return NextResponse.json(
