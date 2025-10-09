@@ -54,9 +54,6 @@ export async function GET() {
 		const formattedSubscriptions = subscriptions.data.map((sub) => {
 			const price = sub.items.data[0]?.price;
 			const product = price?.product as Stripe.Product | undefined;
-			
-			// Use type assertion for subscription properties that TypeScript doesn't recognize
-			const subscription = sub as any;
 
 			return {
 				id: sub.id,
@@ -66,11 +63,12 @@ export async function GET() {
 				amount: price?.unit_amount ? price.unit_amount / 100 : 0,
 				currency: price?.currency || "usd",
 				interval: price?.recurring?.interval || "week",
-				currentPeriodStart: subscription.current_period_start || 0,
-				currentPeriodEnd: subscription.current_period_end || 0,
-				cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-				canceledAt: subscription.canceled_at || null,
-				created: subscription.created || 0,
+				// These properties exist in the Stripe API response but may not be in the TypeScript types
+				currentPeriodStart: (sub as unknown as { current_period_start?: number }).current_period_start || 0,
+				currentPeriodEnd: (sub as unknown as { current_period_end?: number }).current_period_end || 0,
+				cancelAtPeriodEnd: (sub as unknown as { cancel_at_period_end?: boolean }).cancel_at_period_end || false,
+				canceledAt: (sub as unknown as { canceled_at?: number | null }).canceled_at || null,
+				created: (sub as unknown as { created?: number }).created || 0,
 			};
 		});
 
