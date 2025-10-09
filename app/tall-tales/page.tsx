@@ -40,6 +40,7 @@ export default function TallTalesPage() {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 	const [isAdmin, setIsAdmin] = useState(false);
+	const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
 
 	const remainingCharacters = 5000 - content.length;
 
@@ -526,7 +527,8 @@ export default function TallTalesPage() {
 										<img
 											src={tale.imageUrls[0]}
 											alt={tale.title}
-											className="h-32 w-32 rounded-lg border border-slate-700 object-cover"
+											className="h-32 w-32 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
+											onClick={() => setModalImageUrl(tale.imageUrls![0])}
 										/>
 									</div>
 								)}
@@ -539,7 +541,8 @@ export default function TallTalesPage() {
 											key={index}
 											src={url}
 											alt={`Tale image ${index + 2}`}
-											className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
+											className="h-24 w-24 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
+											onClick={() => setModalImageUrl(url)}
 										/>
 									))}
 								</div>
@@ -548,6 +551,30 @@ export default function TallTalesPage() {
 					))
 				)}
 			</div>
+
+			{/* Image Modal */}
+			{modalImageUrl && (
+				<div 
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-4"
+					onClick={() => setModalImageUrl(null)}
+				>
+					<button
+						onClick={() => setModalImageUrl(null)}
+						className="absolute right-4 top-4 rounded-full bg-slate-800/80 p-2 text-slate-200 transition hover:bg-slate-700"
+						aria-label="Close modal"
+					>
+						<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+					<img
+						src={modalImageUrl}
+						alt="Enlarged view"
+						className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
+						onClick={(e) => e.stopPropagation()}
+					/>
+				</div>
+			)}
 
 			{/* Flag Modal */}
 			{flagModalOpen && (
