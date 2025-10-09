@@ -65,60 +65,116 @@ export async function POST(request: Request) {
 
 		// Get or create a portal configuration with subscription cancellation enabled
 		// We look for an existing active configuration first to avoid creating duplicates
-		let configId: string | undefined;
-		
-		try {
-			// List existing configurations to check if we have one already
-			const configurations = await stripe.billingPortal.configurations.list({ 
-				limit: 100,
-				active: true,
-			});
-			
-			// Look for a configuration with subscription_cancel enabled
-			const existingConfig = configurations.data.find(config => 
-				config.features?.subscription_cancel?.enabled === true
-			);
-			
-			if (existingConfig) {
-				// Reuse existing configuration
-				configId = existingConfig.id;
-				console.log("Using existing portal configuration:", configId);
-			} else {
-				// Create a new configuration with all required features
-				const configuration = await stripe.billingPortal.configurations.create({
-					features: {
-						customer_update: {
-							allowed_updates: ['email', 'address'],
-							enabled: true,
-						},
-						invoice_history: {
-							enabled: true,
-						},
-						payment_method_update: {
-							enabled: true,
-						},
-						subscription_cancel: {
-							enabled: true,
-							mode: 'at_period_end',
-						},
-						subscription_update: {
-							enabled: false,
-							default_allowed_updates: [],
-							products: [],
-						},
-					},
-					business_profile: {
-						headline: 'Manage your subscription',
-					},
-				});
-				configId = configuration.id;
-				console.log("Created new portal configuration:", configId);
-			}
-		} catch (configError) {
-			console.error("Error managing portal configuration:", configError);
-			// Continue without configuration - will use default portal settings
-			// This fallback ensures the portal still works even if configuration management fails
-		}
+                let configId: string | undefined;
+                let configurations: Stripe.ApiList<Stripe.BillingPortal.Configuration> | null = null;
+
+                try {
+                        configurations = await stripe.billingPortal.configurations.list({
+                                limit: 100,
+                                active: true,
+                        });
+                } catch (listError) {
+                        console.error("Failed to list billing portal configurations:", listError);
+                }
+
+                const findConfigurationWithCancellation = (
+                        configs: Stripe.ApiList<Stripe.BillingPortal.Configuration> | null
+                ) =>
+                        configs?.data.find(
+                                (config) => config.features?.subscription_cancel?.enabled === true
+                        );
+
+                const ensureSubscriptionCancelFeature = (
+                        features: Stripe.BillingPortal.Configuration.Features | null | undefined
+                ): Stripe.BillingPortal.ConfigurationCreateParams.Features => {
+                        return {
+                                customer_update: {
+                                        allowed_updates: ['email', 'address'],
+                                        enabled: true,
+                                },
+                                invoice_history: {
+                                        enabled: true,
+                                },
+                                payment_method_update: {
+                                        enabled: true,
+                                },
+                                subscription_cancel: {
+                                        enabled: true,
+                                        mode: 'at_period_end',
+                                },
+                                subscription_update:
+                                        features?.subscription_update?.enabled
+                                                ? {
+                                                          enabled: true,
+                                                          default_allowed_updates:
+                                                                  features.subscription_update.default_allowed_updates ?? [],
+                                                          products: features.subscription_update.products ?? [],
+                                                  }
+                                                : {
+                                                          enabled: false,
+                                                  },
+                        } satisfies Stripe.BillingPortal.ConfigurationCreateParams.Features;
+                };
+
+                const reuseConfig = findConfigurationWithCancellation(configurations);
+
+                if (reuseConfig) {
+                        configId = reuseConfig.id;
+                        console.log("Using existing portal configuration:", configId);
+                } else {
+                        try {
+                                const configuration = await stripe.billingPortal.configurations.create({
+                                        features: ensureSubscriptionCancelFeature(null),
+                                        business_profile: {
+                                                headline: 'Manage your subscription',
+                                        },
+                                });
+                                configId = configuration.id;
+                                console.log("Created new portal configuration:", configId);
+                        } catch (createError) {
+                                console.error("Failed to create billing portal configuration:", createError);
+
+                                // Handle configuration limit or permission errors by updating an existing configuration
+                                if (!configurations) {
+                                        try {
+                                                configurations = await stripe.billingPortal.configurations.list({
+                                                        limit: 100,
+                                                        active: true,
+                                                });
+                                        } catch (refreshError) {
+                                                console.error(
+                                                        "Failed to refresh billing portal configurations:",
+                                                        refreshError
+                                                );
+                                        }
+                                }
+
+                                const configurationToUpdate = configurations?.data[0];
+
+                                if (configurationToUpdate) {
+                                        try {
+                                                const updatedConfig = await stripe.billingPortal.configurations.update(
+                                                        configurationToUpdate.id,
+                                                        {
+                                                                features: ensureSubscriptionCancelFeature(
+                                                                        configurationToUpdate.features ?? undefined
+                                                                ),
+                                                        }
+                                                );
+                                                configId = updatedConfig.id;
+                                                console.log(
+                                                        "Updated existing portal configuration to enable cancellation:",
+                                                        configId
+                                                );
+                                        } catch (updateError) {
+                                                console.error(
+                                                        "Failed to update billing portal configuration:",
+                                                        updateError
+                                                );
+                                        }
+                                }
+                        }
+                }
 
 		// Create a portal session
 		const sessionParams: Stripe.BillingPortal.SessionCreateParams = {
