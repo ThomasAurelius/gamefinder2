@@ -100,7 +100,17 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const body = await request.json();
+		let body;
+		try {
+			body = await request.json();
+		} catch (parseError) {
+			console.error("Failed to parse request body:", parseError);
+			return NextResponse.json(
+				{ error: "Invalid request format" },
+				{ status: 400 }
+			);
+		}
+
 		const {
 			amount,
 			campaignId,
@@ -126,11 +136,18 @@ export async function POST(request: Request) {
 			// Get campaign to retrieve host information
 			let hostConnectAccountId: string | null = null;
 			if (campaignId) {
-				const campaign = await getCampaign(campaignId);
-				if (campaign) {
-					// Get the host's Connect account ID
-					hostConnectAccountId = await getStripeConnectAccountId(campaign.userId);
-					console.log("Host Connect account ID:", hostConnectAccountId || "Not set");
+				try {
+					const campaign = await getCampaign(campaignId);
+					if (campaign) {
+						// Get the host's Connect account ID
+						hostConnectAccountId = await getStripeConnectAccountId(campaign.userId);
+						console.log("Host Connect account ID:", hostConnectAccountId || "Not set");
+					} else {
+						console.warn("Campaign not found:", campaignId);
+					}
+				} catch (campaignError) {
+					console.error("Failed to retrieve campaign or Connect account:", campaignError);
+					// Continue without Connect account - subscription will use standard payment
 				}
 			}
 
@@ -139,32 +156,37 @@ export async function POST(request: Request) {
 
 			// Check if user already has an active subscription for this campaign
 			if (customerId && campaignId) {
-				const existingSubscriptions = await stripe.subscriptions.list({
-					customer: customerId,
-					status: "active",
-					limit: 100,
-				});
+				try {
+					const existingSubscriptions = await stripe.subscriptions.list({
+						customer: customerId,
+						status: "active",
+						limit: 100,
+					});
 
-				const campaignSubscription = existingSubscriptions.data.find(
-					(sub) => sub.metadata.campaignId === campaignId
-				);
+					const campaignSubscription = existingSubscriptions.data.find(
+						(sub) => sub.metadata.campaignId === campaignId
+					);
 
-				if (campaignSubscription) {
-					console.log(
-						"User already has an active subscription for this campaign:",
-						{
-							subscriptionId: campaignSubscription.id,
-							campaignId,
-							userId,
-						}
-					);
-					return NextResponse.json(
-						{
-							error: "You already have an active subscription for this campaign",
-							hasActiveSubscription: true,
-						},
-						{ status: 409 }
-					);
+					if (campaignSubscription) {
+						console.log(
+							"User already has an active subscription for this campaign:",
+							{
+								subscriptionId: campaignSubscription.id,
+								campaignId,
+								userId,
+							}
+						);
+						return NextResponse.json(
+							{
+								error: "You already have an active subscription for this campaign",
+								hasActiveSubscription: true,
+							},
+							{ status: 409 }
+						);
+					}
+				} catch (subscriptionCheckError) {
+					console.error("Failed to check existing subscriptions:", subscriptionCheckError);
+					// Continue - if we can't check, we'll let Stripe handle duplicate subscriptions
 				}
 			}
 
@@ -175,44 +197,70 @@ export async function POST(request: Request) {
 				const userEmail = await getUserEmail(userId);
 
 				// Create new customer
-				const customer = await stripe.customers.create({
-					email: userEmail || undefined,
-					metadata: {
-						userId,
-					},
-				});
+				try {
+					const customer = await stripe.customers.create({
+						email: userEmail || undefined,
+						metadata: {
+							userId,
+						},
+					});
 
-				customerId = customer.id;
-				console.log("Customer created:", customerId);
+					customerId = customer.id;
+					console.log("Customer created:", customerId);
 
-				// Save customer ID to database for future use
-				await setStripeCustomerId(userId, customerId);
+					// Save customer ID to database for future use
+					await setStripeCustomerId(userId, customerId);
+				} catch (customerError) {
+					console.error("Failed to create Stripe customer:", customerError);
+					return NextResponse.json(
+						{ error: "Failed to create payment profile. Please try again later." },
+						{ status: 500 }
+					);
+				}
 			}
 
 			// Create product first, then price
-			const product = await stripe.products.create({
-				name: `${campaignName || "Campaign"} Subscription`,
-				metadata: {
-					campaignId: campaignId || "",
-				},
-			});
+			let product;
+			try {
+				product = await stripe.products.create({
+					name: `${campaignName || "Campaign"} Subscription`,
+					metadata: {
+						campaignId: campaignId || "",
+					},
+				});
 
-			console.log("Product created:", {
-				productId: product.id,
-				name: product.name,
-			});
+				console.log("Product created:", {
+					productId: product.id,
+					name: product.name,
+				});
+			} catch (productError) {
+				console.error("Failed to create Stripe product:", productError);
+				return NextResponse.json(
+					{ error: "Failed to create subscription product. Please try again later." },
+					{ status: 500 }
+				);
+			}
 
-			const price = await stripe.prices.create({
-				unit_amount: Math.round(amount * 100),
-				currency: "usd",
-				recurring: { interval: "week" },
-				product: product.id,
-			});
+			let price;
+			try {
+				price = await stripe.prices.create({
+					unit_amount: Math.round(amount * 100),
+					currency: "usd",
+					recurring: { interval: "week" },
+					product: product.id,
+				});
 
-			console.log("Price created:", {
-				priceId: price.id,
-				amount: price.unit_amount,
-			});
+				console.log("Price created:", {
+					priceId: price.id,
+					amount: price.unit_amount,
+				});
+			} catch (priceError) {
+				console.error("Failed to create Stripe price:", priceError);
+				return NextResponse.json(
+					{ error: "Failed to create subscription pricing. Please try again later." },
+					{ status: 500 }
+				);
+			}
 
 			// Calculate application fee (20% of the amount)
 			const applicationFeeAmount = hostConnectAccountId 
@@ -266,13 +314,34 @@ export async function POST(request: Request) {
 			});
 
 			// Type guard: ensure latest_invoice is expanded to Invoice object, not string
-			const latestInvoice = subscription.latest_invoice;
+			let latestInvoice = subscription.latest_invoice;
 			if (!latestInvoice || typeof latestInvoice === "string") {
 				console.error("Invoice retrieval failed:", {
 					latestInvoice,
 					subscriptionId: subscription.id,
 				});
-				throw new Error("Failed to retrieve invoice for subscription");
+				// Try to retrieve the invoice manually if it's a string ID
+				if (typeof latestInvoice === "string") {
+					try {
+						console.log("Attempting to retrieve invoice by ID:", latestInvoice);
+						latestInvoice = await stripe.invoices.retrieve(latestInvoice, {
+							expand: ["payment_intent"],
+						});
+						console.log("Invoice retrieved successfully:", latestInvoice.id);
+					} catch (invoiceRetrievalError) {
+						console.error("Failed to retrieve invoice:", invoiceRetrievalError);
+						return NextResponse.json(
+							{ error: "Failed to retrieve subscription invoice. Please contact support." },
+							{ status: 500 }
+						);
+					}
+				} else {
+					// latestInvoice is null/undefined
+					return NextResponse.json(
+						{ error: "No invoice created for subscription. Please contact support." },
+						{ status: 500 }
+					);
+				}
 			}
 
 			console.log("Invoice retrieved:", {
@@ -473,24 +542,32 @@ export async function POST(request: Request) {
 		}
 
 		// Create a PaymentIntent with the order amount and currency
-		const paymentIntent = await stripe.paymentIntents.create({
-			amount: Math.round(amount * 100), // Convert to cents
-			currency: "usd",
-			metadata: {
-				campaignId: campaignId || "",
-				campaignName: campaignName || "",
-				userId: userId,
-			},
-			automatic_payment_methods: {
-				enabled: true,
-			},
-		});
+		try {
+			const paymentIntent = await stripe.paymentIntents.create({
+				amount: Math.round(amount * 100), // Convert to cents
+				currency: "usd",
+				metadata: {
+					campaignId: campaignId || "",
+					campaignName: campaignName || "",
+					userId: userId,
+				},
+				automatic_payment_methods: {
+					enabled: true,
+				},
+			});
 
-		return NextResponse.json({
-			clientSecret: paymentIntent.client_secret,
-			paymentIntentId: paymentIntent.id,
-			mode: "payment",
-		});
+			return NextResponse.json({
+				clientSecret: paymentIntent.client_secret,
+				paymentIntentId: paymentIntent.id,
+				mode: "payment",
+			});
+		} catch (paymentIntentError) {
+			console.error("Failed to create one-time payment intent:", paymentIntentError);
+			return NextResponse.json(
+				{ error: "Failed to initialize payment. Please try again later." },
+				{ status: 500 }
+			);
+		}
 	} catch (error) {
 		console.error("Error creating payment intent:", error);
 

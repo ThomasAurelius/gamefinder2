@@ -12,6 +12,9 @@ import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe-config";
 import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
 
 // Load Stripe outside of component to avoid recreating on every render
+// NOTE: You may see "Unable to download payment manifest" warnings in the browser console.
+// These are harmless browser warnings from Google Pay availability checks and do not affect payment functionality.
+// See PAYMENT_ERRORS_GUIDE.md for more information.
 const stripePromise = STRIPE_PUBLISHABLE_KEY
   ? loadStripe(STRIPE_PUBLISHABLE_KEY)
   : null;
