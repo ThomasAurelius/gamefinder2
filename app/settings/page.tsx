@@ -34,6 +34,22 @@ export default function SettingsPage() {
 				if (profileRes.ok) {
 					const profileData = await profileRes.json();
 					setCanPostPaidGames(profileData.canPostPaidGames || false);
+					
+					// If user has paid games enabled, check Stripe onboarding status
+					if (profileData.canPostPaidGames) {
+						setCheckingStripeStatus(true);
+						try {
+							const stripeRes = await fetch("/api/stripe/connect/status");
+							if (stripeRes.ok) {
+								const stripeData = await stripeRes.json();
+								setStripeOnboardingComplete(stripeData.onboardingComplete || false);
+							}
+						} catch (err) {
+							console.error("Failed to check Stripe status:", err);
+						} finally {
+							setCheckingStripeStatus(false);
+						}
+					}
 				}
 			} catch (error) {
 				console.error("Failed to load settings:", error);
