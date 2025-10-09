@@ -33,6 +33,7 @@ export default function CampaignPaymentPage() {
   const [isCheckingSubscription, setIsCheckingSubscription] = useState(false);
   const [subscriptionCheckAttempted, setSubscriptionCheckAttempted] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
 
   const paymentMode: PaymentMode = useMemo(() => {
     if (!campaign || typeof campaign.sessionsLeft !== "number") {
@@ -195,6 +196,33 @@ export default function CampaignPaymentPage() {
     }
   }, [campaign, campaignId, paymentMode, hasActiveSubscription, isCheckingSubscription, subscriptionCheckAttempted]);
 
+  const handleManageSubscription = async () => {
+    try {
+      setIsRedirectingToPortal(true);
+      setError(null);
+
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          returnUrl: `${window.location.origin}/campaigns/${campaignId}/payment`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create portal session");
+      }
+
+      const data = await response.json();
+      
+      // Redirect to Stripe Customer Portal
+      window.location.href = data.url;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to open billing portal");
+      setIsRedirectingToPortal(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="mx-auto mt-10 max-w-2xl rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-slate-300">
@@ -289,14 +317,13 @@ export default function CampaignPaymentPage() {
             <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
               You have an active subscription for this campaign.
             </div>
-            <a
-              href="https://billing.stripe.com/p/login/00w4gy3Jmad7bDT6k273G00"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+            <button
+              onClick={handleManageSubscription}
+              disabled={isRedirectingToPortal}
+              className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Manage Subscription (Stripe Dashboard)
-            </a>
+              {isRedirectingToPortal ? "Opening Portal..." : "Manage Subscription"}
+            </button>
           </div>
         ) : isInitializingPayment && !clientSecret ? (
           <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-6 text-sm text-slate-400">

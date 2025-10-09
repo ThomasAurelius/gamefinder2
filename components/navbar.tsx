@@ -44,6 +44,7 @@ const primaryLinks: NavItem[] = [
 const accountLinks: NavLink[] = [
 	{ href: "/profile", label: "Profile" },
 	{ href: "/host/dashboard", label: "Host Dashboard" },
+	{ href: "/subscriptions", label: "Subscriptions" },
 	{ href: "/messages", label: "Messages" },
 	{ href: "/settings", label: "Settings" },
 	{ href: "/characters", label: "Characters" },
