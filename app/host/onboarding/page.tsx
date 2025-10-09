@@ -133,7 +133,7 @@ export default function HostOnboardingPage() {
 							<ul className="space-y-2 text-sm text-slate-400">
 								<li className="flex items-start">
 									<span className="mr-2">•</span>
-									<span>You receive 80% of subscription payments</span>
+									<span>You receive 80%* of subscription payments *minus fees</span>
 								</li>
 								<li className="flex items-start">
 									<span className="mr-2">•</span>
