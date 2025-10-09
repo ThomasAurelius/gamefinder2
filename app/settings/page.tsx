@@ -11,6 +11,7 @@ export default function SettingsPage() {
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState("");
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
+	const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
@@ -43,6 +44,34 @@ export default function SettingsPage() {
 
 		checkAdminAndLoadAnnouncement();
 	}, []);
+
+	const handleManageBilling = async () => {
+		try {
+			setIsRedirectingToPortal(true);
+			setMessage("");
+
+			const response = await fetch("/api/stripe/create-portal-session", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					returnUrl: `${window.location.origin}/settings`,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to create portal session");
+			}
+
+			const data = await response.json();
+			
+			// Redirect to Stripe Customer Portal
+			window.location.href = data.url;
+		} catch (error) {
+			console.error("Failed to open billing portal:", error);
+			setMessage("Failed to open billing portal. Please try again.");
+			setIsRedirectingToPortal(false);
+		}
+	};
 
 	const handleSaveAnnouncement = async () => {
 		setSaving(true);
@@ -97,6 +126,21 @@ export default function SettingsPage() {
 
 					<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
 						<h2 className="text-sm font-medium text-slate-200">
+							Subscriptions
+						</h2>
+						<p className="mt-2 text-xs text-slate-400">
+							View and manage your campaign subscriptions.
+						</p>
+						<Link
+							href="/subscriptions"
+							className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+						>
+							View Subscriptions
+						</Link>
+					</div>
+
+					<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
+						<h2 className="text-sm font-medium text-slate-200">
 							Paid Games
 						</h2>
 						<p className="mt-2 text-xs text-slate-400">
@@ -110,15 +154,13 @@ export default function SettingsPage() {
 										✓ Paid games enabled
 									</span>
 								</div>
-								{/* Test account link */}
-								<a
-									href="https://billing.stripe.com/p/login/test_eVq4gyfuH1762LYgzH24000"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+								<button
+									onClick={handleManageBilling}
+									disabled={isRedirectingToPortal}
+									className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
 								>
-									Manage Billing (Stripe Dashboard)
-								</a>
+									{isRedirectingToPortal ? "Opening Portal..." : "Manage Billing"}
+								</button>
 							</div>
 						) : (
 							<Link

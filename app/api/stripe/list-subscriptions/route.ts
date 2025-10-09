@@ -1,0 +1,87 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import Stripe from "stripe";
+import { getStripeCustomerId } from "@/lib/users";
+
+const getStripe = () => {
+	if (!process.env.STRIPE_SECRET_KEY) {
+		throw new Error("STRIPE_SECRET_KEY is not configured");
+	}
+	return new Stripe(process.env.STRIPE_SECRET_KEY, {
+		apiVersion: "2025-09-30.clover",
+	});
+};
+
+export async function GET() {
+	try {
+		const cookieStore = await cookies();
+		const userId = cookieStore.get("userId")?.value;
+
+		if (!userId) {
+			return NextResponse.json(
+				{ error: "Authentication required" },
+				{ status: 401 }
+			);
+		}
+
+		// If Stripe is not configured, return empty list
+		if (!process.env.STRIPE_SECRET_KEY) {
+			return NextResponse.json({
+				subscriptions: [],
+			});
+		}
+
+		// Check if user has a Stripe customer ID
+		const customerId = await getStripeCustomerId(userId);
+
+		if (!customerId) {
+			// User doesn't have a customer ID, so they don't have any subscriptions
+			return NextResponse.json({
+				subscriptions: [],
+			});
+		}
+
+		const stripe = getStripe();
+
+		// Fetch all subscriptions for this customer
+		const subscriptions = await stripe.subscriptions.list({
+			customer: customerId,
+			limit: 100,
+			expand: ["data.items.data.price.product"],
+		});
+
+		// Format subscription data for frontend
+		const formattedSubscriptions = subscriptions.data.map((sub) => {
+			const price = sub.items.data[0]?.price;
+			const product = price?.product as Stripe.Product | undefined;
+			
+			// Use type assertion for subscription properties that TypeScript doesn't recognize
+			const subscription = sub as any;
+
+			return {
+				id: sub.id,
+				status: sub.status,
+				campaignId: sub.metadata.campaignId || null,
+				campaignName: sub.metadata.campaignName || product?.name || "Unknown Campaign",
+				amount: price?.unit_amount ? price.unit_amount / 100 : 0,
+				currency: price?.currency || "usd",
+				interval: price?.recurring?.interval || "week",
+				currentPeriodStart: subscription.current_period_start || 0,
+				currentPeriodEnd: subscription.current_period_end || 0,
+				cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+				canceledAt: subscription.canceled_at || null,
+				created: subscription.created || 0,
+			};
+		});
+
+		return NextResponse.json({
+			subscriptions: formattedSubscriptions,
+		});
+	} catch (error) {
+		console.error("Error fetching subscriptions:", error);
+		return NextResponse.json(
+			{ error: "Failed to fetch subscriptions" },
+			{ status: 500 }
+		);
+	}
+}
