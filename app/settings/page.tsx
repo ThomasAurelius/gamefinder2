@@ -12,6 +12,8 @@ export default function SettingsPage() {
 	const [message, setMessage] = useState("");
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
 	const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
+	const [checkingStripeStatus, setCheckingStripeStatus] = useState(false);
+	const [stripeOnboardingComplete, setStripeOnboardingComplete] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
