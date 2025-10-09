@@ -2,6 +2,8 @@
 
 import { useState, FormEvent, useEffect } from "react";
 import TallTalesDisclaimer from "@/components/TallTalesDisclaimer";
+import TaleActions from "@/components/TaleActions";
+import { Tale, TaleFromAPI } from "@/lib/tall-tales/client-types";
 import { GAME_OPTIONS } from "@/lib/constants";
 
 export default function TallTalesPage() {
@@ -36,8 +38,15 @@ export default function TallTalesPage() {
 	const [flagSubmitting, setFlagSubmitting] = useState(false);
 	const [flagMessage, setFlagMessage] = useState("");
 	const [isFormOpen, setIsFormOpen] = useState(false);
+	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+	const [isAdmin, setIsAdmin] = useState(false);
 
 	const remainingCharacters = 5000 - content.length;
+
+	useEffect(() => {
+		// Load user info
+		loadUserInfo();
+	}, []);
 
 	useEffect(() => {
 		// Load tales after disclaimer is shown
@@ -46,13 +55,33 @@ export default function TallTalesPage() {
 		}
 	}, [disclaimerClosed]);
 
+	const loadUserInfo = async () => {
+		try {
+			const response = await fetch("/api/user/me");
+			if (response.ok) {
+				const data = await response.json();
+				if (data.authenticated) {
+					setCurrentUserId(data.userId);
+					setIsAdmin(data.isAdmin || false);
+				}
+			}
+		} catch (error) {
+			console.error("Failed to load user info:", error);
+		}
+	};
+
 	const loadTales = async () => {
 		try {
 			setIsLoadingTales(true);
 			const response = await fetch("/api/tall-tales");
 			if (response.ok) {
-				const data = await response.json();
-				setTales(data);
+				const data: TaleFromAPI[] = await response.json();
+				// Convert date strings back to Date objects
+				const talesWithDates: Tale[] = data.map((tale) => ({
+					...tale,
+					createdAt: new Date(tale.createdAt),
+				}));
+				setTales(talesWithDates);
 			}
 		} catch (error) {
 			console.error("Failed to load tall tales:", error);
@@ -466,15 +495,23 @@ export default function TallTalesPage() {
 										)}
 									</div>
 								</div>
-								<button
-									onClick={() => handleFlagClick(tale.id)}
-									className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-300 transition hover:border-red-500/50 hover:bg-red-900/20 hover:text-red-400"
-									title="Flag content"
-								>
-									<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-									</svg>
-								</button>
+								<div className="flex items-center gap-2">
+									{(currentUserId === tale.userId || isAdmin) && (
+										<TaleActions
+											tale={tale}
+											onUpdate={loadTales}
+										/>
+									)}
+									<button
+										onClick={() => handleFlagClick(tale.id)}
+										className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-300 transition hover:border-red-500/50 hover:bg-red-900/20 hover:text-red-400"
+										title="Flag content"
+									>
+										<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+										</svg>
+									</button>
+								</div>
 							</div>
 							
 							<div className="flex items-start justify-between gap-4">

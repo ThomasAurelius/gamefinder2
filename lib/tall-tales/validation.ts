@@ -56,6 +56,7 @@ function isValidImageUrl(url: string): boolean {
     // Adjust this list based on your storage providers
     const trustedDomains = [
       "firebasestorage.googleapis.com",
+      "storage.googleapis.com",
       // Add other trusted domains as needed
     ];
     return trustedDomains.some(
