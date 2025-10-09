@@ -100,14 +100,17 @@ export default function TallTalesPage() {
 		setImageUrls(imageUrls.filter((_, i) => i !== index));
 	};
 
+	const resetForm = () => {
+		setTitle("");
+		setContent("");
+		setImageUrls([]);
+		setError("");
+		setSubmitted(false);
+	};
+
 	const handleToggleForm = () => {
 		if (isFormOpen) {
-			// Reset form when closing
-			setTitle("");
-			setContent("");
-			setImageUrls([]);
-			setError("");
-			setSubmitted(false);
+			resetForm();
 		}
 		setIsFormOpen(!isFormOpen);
 	};
@@ -148,9 +151,7 @@ export default function TallTalesPage() {
 			}
 
 			setSubmitted(true);
-			setTitle("");
-			setContent("");
-			setImageUrls([]);
+			resetForm();
 			
 			// Close the form after successful submission
 			setIsFormOpen(false);
