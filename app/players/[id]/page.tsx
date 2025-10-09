@@ -130,6 +130,17 @@ export default async function PlayerDetailPage({
             <div className="flex items-center justify-between gap-3">
               <h1 className="text-3xl font-bold">{displayName}</h1>
               <div className="flex items-center gap-2">
+                {profile.bggUsername && (
+                  <a
+                    href={`https://boardgamegeek.com/user/${profile.bggUsername}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/60"
+                    title={`View ${displayName}'s BoardGameGeek profile`}
+                  >
+                    BGG Profile
+                  </a>
+                )}
                 <Link
                   href={`/players/${id}/library`}
                   className="rounded-lg border border-sky-600 bg-sky-600/20 px-4 py-2 text-sm font-medium text-sky-100 transition hover:bg-sky-600/30"
