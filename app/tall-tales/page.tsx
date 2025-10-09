@@ -71,7 +71,16 @@ export default function TallTalesPage() {
 			if (response.ok) {
 				const data = await response.json();
 				// Convert date strings back to Date objects
-				const talesWithDates = data.map((tale: any) => ({
+				const talesWithDates = data.map((tale: {
+					id: string;
+					userId: string;
+					title: string;
+					content: string;
+					imageUrls?: string[];
+					createdAt: string;
+					authorName: string;
+					authorAvatarUrl?: string;
+				}) => ({
 					...tale,
 					createdAt: new Date(tale.createdAt),
 				}));
