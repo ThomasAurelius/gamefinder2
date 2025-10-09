@@ -24,7 +24,7 @@ export default function RootLayout({
 				<footer className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 text-center text-sm text-slate-500">
 					<Link href="/privacy">Privacy Policy</Link> -{" "}
 					<Link href="/terms">Terms of Service</Link> - ©
-					<Link href="https://midnightoil.software">
+					<Link href="http://midnightoil.software">
 						Midnight Oil Software
 					</Link>{" "}
 					2025
