@@ -59,7 +59,7 @@ export default function HostDashboardPage() {
 			}
 
 			const data = await response.json();
-			
+
 			// Open Stripe Express Dashboard in new tab
 			window.open(data.url, "_blank");
 		} catch (err) {
@@ -83,7 +83,9 @@ export default function HostDashboardPage() {
 		<div className="mx-auto max-w-5xl px-4 py-12">
 			<div className="space-y-6">
 				<div>
-					<h1 className="text-3xl font-bold text-slate-100">Host Dashboard</h1>
+					<h1 className="text-3xl font-bold text-slate-100">
+						Host Dashboard
+					</h1>
 					<p className="mt-2 text-slate-400">
 						Manage your payout settings and view your earnings
 					</p>
@@ -168,7 +170,8 @@ export default function HostDashboardPage() {
 									</h3>
 								</div>
 								<p className="mt-1 text-sm text-emerald-400/80">
-									Your payout account is fully set up and ready to receive payments.
+									Your payout account is fully set up and ready to
+									receive payments.
 								</p>
 							</div>
 
@@ -209,10 +212,10 @@ export default function HostDashboardPage() {
 							</div>
 							<div>
 								<div className="font-medium text-slate-300">
-									You Receive: 80%
+									You Receive: 80%*
 								</div>
 								<div className="text-slate-500">
-									Of each subscription payment
+									Of each subscription payment *minus fees
 								</div>
 							</div>
 						</div>
