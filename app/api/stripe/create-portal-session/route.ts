@@ -63,11 +63,59 @@ export async function POST(request: Request) {
 		const body = await request.json();
 		const returnUrl = body.returnUrl || `${request.headers.get("origin")}/subscriptions`;
 
-		// Create a portal session
-		const session = await stripe.billingPortal.sessions.create({
+		// First, create or get a portal configuration with subscription cancellation enabled
+		// We'll create a configuration if one doesn't exist
+		let configId: string | undefined;
+		
+		try {
+			// Try to list existing configurations
+			const configurations = await stripe.billingPortal.configurations.list({ limit: 1 });
+			
+			if (configurations.data.length > 0) {
+				// Use the first existing configuration
+				configId = configurations.data[0].id;
+				
+				// Update it to ensure subscription cancellation is enabled
+				await stripe.billingPortal.configurations.update(configId, {
+					features: {
+						subscription_cancel: {
+							enabled: true,
+							mode: 'at_period_end',
+						},
+					},
+				});
+			} else {
+				// Create a new configuration with subscription cancellation enabled
+				const configuration = await stripe.billingPortal.configurations.create({
+					features: {
+						subscription_cancel: {
+							enabled: true,
+							mode: 'at_period_end',
+						},
+					},
+					business_profile: {
+						headline: 'Manage your subscription',
+					},
+				});
+				configId = configuration.id;
+			}
+		} catch (configError) {
+			console.warn("Error managing portal configuration:", configError);
+			// Continue without configuration - will use default portal settings
+		}
+
+		// Create a portal session with subscription cancellation enabled
+		const sessionParams: Stripe.BillingPortal.SessionCreateParams = {
 			customer: customerId,
 			return_url: returnUrl,
-		});
+		};
+		
+		// Add configuration if we successfully created/retrieved one
+		if (configId) {
+			sessionParams.configuration = configId;
+		}
+		
+		const session = await stripe.billingPortal.sessions.create(sessionParams);
 
 		return NextResponse.json({
 			url: session.url,
