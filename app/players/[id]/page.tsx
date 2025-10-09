@@ -127,12 +127,20 @@ export default async function PlayerDetailPage({
             </div>
           )}
           <div className="space-y-2 flex-1">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <h1 className="text-3xl font-bold">{displayName}</h1>
-              <SendMessageButton
-                recipientId={id}
-                recipientName={displayName}
-              />
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/players/${id}/library`}
+                  className="rounded-lg border border-sky-600 bg-sky-600/20 px-4 py-2 text-sm font-medium text-sky-100 transition hover:bg-sky-600/30"
+                >
+                  View Library
+                </Link>
+                <SendMessageButton
+                  recipientId={id}
+                  recipientName={displayName}
+                />
+              </div>
             </div>
             {profile.location && (
               <p className="text-sm text-slate-400">{profile.location}</p>
