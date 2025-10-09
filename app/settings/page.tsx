@@ -11,6 +11,8 @@ export default function SettingsPage() {
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState("");
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
+	const [stripeOnboardingComplete, setStripeOnboardingComplete] = useState(false);
+	const [checkingStripeStatus, setCheckingStripeStatus] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
@@ -33,6 +35,22 @@ export default function SettingsPage() {
 				if (profileRes.ok) {
 					const profileData = await profileRes.json();
 					setCanPostPaidGames(profileData.canPostPaidGames || false);
+					
+					// If user has paid games enabled, check Stripe onboarding status
+					if (profileData.canPostPaidGames) {
+						setCheckingStripeStatus(true);
+						try {
+							const stripeRes = await fetch("/api/stripe/connect/status");
+							if (stripeRes.ok) {
+								const stripeData = await stripeRes.json();
+								setStripeOnboardingComplete(stripeData.onboardingComplete || false);
+							}
+						} catch (err) {
+							console.error("Failed to check Stripe status:", err);
+						} finally {
+							setCheckingStripeStatus(false);
+						}
+					}
 				}
 			} catch (error) {
 				console.error("Failed to load settings:", error);
@@ -110,15 +128,61 @@ export default function SettingsPage() {
 										✓ Paid games enabled
 									</span>
 								</div>
-								{/* Test account link */}
-								<a
-									href="https://billing.stripe.com/p/login/test_eVq4gyfuH1762LYgzH24000"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-								>
-									Manage Billing (Stripe Dashboard)
-								</a>
+								
+								{checkingStripeStatus ? (
+									<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-3">
+										<p className="text-xs text-slate-400">
+											Checking Stripe onboarding status...
+										</p>
+									</div>
+								) : stripeOnboardingComplete ? (
+									<div className="space-y-3">
+										<div className="rounded-lg border border-emerald-700/50 bg-emerald-900/20 p-3">
+											<div className="flex items-start gap-2">
+												<div className="mt-0.5 h-2 w-2 rounded-full bg-emerald-500" />
+												<div className="flex-1">
+													<p className="text-xs font-medium text-emerald-200">
+														Stripe Onboarding Complete
+													</p>
+													<p className="mt-1 text-xs text-slate-400">
+														You can now host paid campaigns and receive payments.
+													</p>
+												</div>
+											</div>
+										</div>
+										{/* Test account link */}
+										<a
+											href="https://billing.stripe.com/p/login/test_eVq4gyfuH1762LYgzH24000"
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+										>
+											Manage Billing (Stripe Dashboard)
+										</a>
+									</div>
+								) : (
+									<div className="space-y-3">
+										<div className="rounded-lg border border-amber-700/50 bg-amber-900/20 p-3">
+											<div className="flex items-start gap-2">
+												<div className="mt-0.5 h-2 w-2 rounded-full bg-amber-500" />
+												<div className="flex-1">
+													<p className="text-xs font-medium text-amber-200">
+														Action Required: Complete Stripe Onboarding
+													</p>
+													<p className="mt-1 text-xs text-slate-400">
+														You&apos;ve enabled paid games, but you need to complete Stripe onboarding before you can host paid campaigns and receive payments.
+													</p>
+												</div>
+											</div>
+										</div>
+										<Link
+											href="/host/onboarding"
+											className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+										>
+											Complete Stripe Onboarding
+										</Link>
+									</div>
+								)}
 							</div>
 						) : (
 							<Link
