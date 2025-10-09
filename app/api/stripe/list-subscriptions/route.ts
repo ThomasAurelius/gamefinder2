@@ -55,9 +55,14 @@ export async function GET() {
 			status: sub.status,
 			campaignId: sub.metadata?.campaignId,
 			campaignName: sub.metadata?.campaignName,
-			amount: sub.items.data[0]?.price?.unit_amount,
+			amount: sub.items.data[0]?.price?.unit_amount ? sub.items.data[0].price.unit_amount / 100 : 0,
 			currency: sub.items.data[0]?.price?.currency,
 			interval: sub.items.data[0]?.price?.recurring?.interval,
+			currentPeriodStart: (sub as any).current_period_start,
+			currentPeriodEnd: (sub as any).current_period_end,
+			cancelAtPeriodEnd: sub.cancel_at_period_end,
+			canceledAt: sub.canceled_at,
+			created: sub.created,
 		}));
 
 		return NextResponse.json({
