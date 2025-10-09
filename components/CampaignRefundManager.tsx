@@ -62,21 +62,41 @@ export default function CampaignRefundManager({
 
 			for (const payment of data.payments || []) {
 				if (!playerMap.has(payment.playerId)) {
-					// Fetch player info
-					const playerResponse = await fetch(`/api/users/${payment.playerId}`);
-					const playerData = playerResponse.ok
-						? await playerResponse.json()
-						: { name: "Unknown Player" };
-
 					playerMap.set(payment.playerId, {
 						playerId: payment.playerId,
-						playerName: playerData.name || "Unknown Player",
-						avatarUrl: playerData.avatarUrl,
+						playerName: "Loading...",
 						payments: [],
 					});
 				}
 
 				playerMap.get(payment.playerId)!.payments.push(payment);
+			}
+
+			// Fetch all player info in a single batch request
+			const playerIdsToFetch = Array.from(playerMap.keys());
+			if (playerIdsToFetch.length > 0) {
+				const usersResponse = await fetch("/api/users/batch", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ userIds: playerIdsToFetch }),
+				});
+
+				if (usersResponse.ok) {
+					const usersData = await usersResponse.json();
+					
+					// Update player names and avatars
+					for (const [playerId, playerInfo] of playerMap.entries()) {
+						const userData = usersData[playerId];
+						if (userData) {
+							playerInfo.playerName = userData.name || "Unknown Player";
+							playerInfo.avatarUrl = userData.avatarUrl;
+						} else {
+							playerInfo.playerName = "Unknown Player";
+						}
+					}
+				}
 			}
 
 			setPlayersWithPayments(Array.from(playerMap.values()));
@@ -210,6 +230,7 @@ export default function CampaignRefundManager({
 												: "One-Time Payment"}
 										</div>
 										<div className="text-slate-400 text-sm">
+											{/* Amount is already converted from cents to dollars by the API */}
 											${payment.amount.toFixed(2)}{" "}
 											{payment.currency.toUpperCase()} -{" "}
 											{payment.status}
