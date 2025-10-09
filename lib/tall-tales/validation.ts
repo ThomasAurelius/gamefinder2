@@ -45,7 +45,9 @@ function isValidImageUrl(url: string): boolean {
       "firebasestorage.googleapis.com",
       // Add other trusted domains as needed
     ];
-    return trustedDomains.some(domain => parsedUrl.hostname.includes(domain));
+    return trustedDomains.some(
+      domain => parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)
+    );
   } catch {
     return false;
   }
