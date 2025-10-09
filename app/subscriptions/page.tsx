@@ -131,10 +131,11 @@ export default function SubscriptionsPage() {
 			case "active":
 				return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
 			case "canceled":
+				return "text-slate-400 bg-slate-500/10 border-slate-500/20";
 			case "incomplete_expired":
 				return "text-red-400 bg-red-500/10 border-red-500/20";
 			case "incomplete":
-				return "text-amber-400 bg-amber-500/10 border-amber-500/20";
+				return "text-orange-400 bg-orange-500/10 border-orange-500/20";
 			case "past_due":
 				return "text-amber-400 bg-amber-500/10 border-amber-500/20";
 			case "trialing":
@@ -277,7 +278,7 @@ export default function SubscriptionsPage() {
 										)}
 
 										{isIncomplete(subscription.status) && (
-											<div className="mt-3 rounded-md border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+											<div className="mt-3 rounded-md border border-orange-500/20 bg-orange-500/10 px-3 py-2 text-xs text-orange-400">
 												This subscription was not completed. You can safely delete it.
 											</div>
 										)}
