@@ -2,11 +2,14 @@
 
 import { useState, FormEvent, useEffect } from "react";
 import TallTalesDisclaimer from "@/components/TallTalesDisclaimer";
+import { GAME_OPTIONS } from "@/lib/constants";
 
 export default function TallTalesPage() {
 	const [title, setTitle] = useState("");
 	const [content, setContent] = useState("");
 	const [imageUrls, setImageUrls] = useState<string[]>([]);
+	const [gameSystem, setGameSystem] = useState("");
+	const [customGameSystem, setCustomGameSystem] = useState("");
 	const [submitted, setSubmitted] = useState(false);
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,6 +22,8 @@ export default function TallTalesPage() {
 		title: string;
 		content: string;
 		imageUrls?: string[];
+		gameSystem?: string;
+		customGameSystem?: string;
 		createdAt: Date;
 		authorName: string;
 		authorAvatarUrl?: string;
@@ -126,6 +131,8 @@ export default function TallTalesPage() {
 					title: title.trim(),
 					content: content.trim(),
 					imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
+					gameSystem: gameSystem || undefined,
+					customGameSystem: gameSystem === "Other" && customGameSystem ? customGameSystem.trim() : undefined,
 				}),
 			});
 
@@ -138,6 +145,8 @@ export default function TallTalesPage() {
 			setTitle("");
 			setContent("");
 			setImageUrls([]);
+			setGameSystem("");
+			setCustomGameSystem("");
 			
 			// Reload tales
 			await loadTales();
@@ -237,6 +246,53 @@ export default function TallTalesPage() {
 						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
 				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="game-system"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Game System (Optional)
+					</label>
+					<select
+						id="game-system"
+						value={gameSystem}
+						onChange={(e) => setGameSystem(e.target.value)}
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					>
+						<option value="">Choose a game system...</option>
+						{GAME_OPTIONS.map((game) => (
+							<option key={game} value={game}>
+								{game}
+							</option>
+						))}
+					</select>
+					<p className="text-xs text-slate-500">
+						Select the game system your story is about.
+					</p>
+				</div>
+
+				{gameSystem === "Other" && (
+					<div className="space-y-2">
+						<label
+							htmlFor="custom-game-system"
+							className="block text-sm font-medium text-slate-200"
+						>
+							Game System Name
+						</label>
+						<input
+							id="custom-game-system"
+							type="text"
+							value={customGameSystem}
+							onChange={(e) => setCustomGameSystem(e.target.value)}
+							placeholder="Enter the name of the game system"
+							className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						<p className="text-xs text-slate-500">
+							Please enter the specific name of the game system.
+						</p>
+					</div>
+				)}
 
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
@@ -369,6 +425,13 @@ export default function TallTalesPage() {
 									<div>
 										<p className="font-medium text-slate-200">{tale.authorName}</p>
 										<p className="text-xs text-slate-500">{formatDate(tale.createdAt)}</p>
+										{tale.gameSystem && (
+											<p className="text-xs text-slate-400 mt-1">
+												{tale.gameSystem === "Other" && tale.customGameSystem
+													? tale.customGameSystem
+													: tale.gameSystem}
+											</p>
+										)}
 									</div>
 								</div>
 								<button
