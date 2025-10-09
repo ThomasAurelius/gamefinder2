@@ -35,6 +35,8 @@ Creates a Stripe Customer Portal session and returns a URL to redirect the user.
 - Automatically creates a Stripe customer if one doesn't exist
 - Generates a secure session URL
 - Handles return URL for redirecting back after portal session
+- Configures portal with subscription cancellation enabled
+- Allows users to cancel subscriptions at period end (no immediate loss of access)
 
 #### `/api/stripe/list-subscriptions` (GET)
 Fetches and formats all subscriptions for the authenticated user.
@@ -90,7 +92,11 @@ Fetches and formats all subscriptions for the authenticated user.
 1. User clicks "Manage Subscription" or "Manage All Subscriptions"
 2. App requests portal session via `/api/stripe/create-portal-session`
 3. User is redirected to Stripe Customer Portal
-4. User manages subscription (cancel, update payment method, view invoices, etc.)
+4. User can:
+   - **Cancel subscription** (remains active until end of billing period)
+   - Update payment methods
+   - View billing history and invoices
+   - Update billing information
 5. User is redirected back to the app via the return URL
 
 ## Security
