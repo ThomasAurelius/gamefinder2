@@ -70,7 +70,12 @@ export default function TallTalesPage() {
 			const response = await fetch("/api/tall-tales");
 			if (response.ok) {
 				const data = await response.json();
-				setTales(data);
+				// Convert date strings back to Date objects
+				const talesWithDates = data.map((tale: any) => ({
+					...tale,
+					createdAt: new Date(tale.createdAt),
+				}));
+				setTales(talesWithDates);
 			}
 		} catch (error) {
 			console.error("Failed to load tall tales:", error);
