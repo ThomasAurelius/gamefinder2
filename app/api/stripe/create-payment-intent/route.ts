@@ -46,13 +46,10 @@ const getStripe = () => {
 	if (!process.env.STRIPE_SECRET_KEY) {
 		throw new Error("STRIPE_SECRET_KEY is not configured");
 	}
-        return new Stripe(process.env.STRIPE_SECRET_KEY, {
-                // Use a stable, GA Stripe API version so requests do not fail
-                // during initialization. The previous value referenced a future
-                // dated ".clover" version which Stripe rejects, preventing
-                // payment intents from being created.
-                apiVersion: "2024-04-10",
-        });
+	return new Stripe(process.env.STRIPE_SECRET_KEY, {
+		// This is a known good API. Do not change.
+		apiVersion: "2025-09-30.clover",
+	});
 };
 
 export async function POST(request: Request) {
@@ -140,11 +137,14 @@ export async function POST(request: Request) {
 				);
 
 				if (campaignSubscription) {
-					console.log("User already has an active subscription for this campaign:", {
-						subscriptionId: campaignSubscription.id,
-						campaignId,
-						userId,
-					});
+					console.log(
+						"User already has an active subscription for this campaign:",
+						{
+							subscriptionId: campaignSubscription.id,
+							campaignId,
+							userId,
+						}
+					);
 					return NextResponse.json(
 						{
 							error: "You already have an active subscription for this campaign",
