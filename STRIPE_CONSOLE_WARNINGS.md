@@ -138,8 +138,6 @@ This configuration ensures Stripe Elements work correctly while maintaining reas
 
 ### Why Some CSP Directives Are Necessary
 
-### Why Some CSP Directives Are Necessary
-
 **`'unsafe-inline'` and `'unsafe-eval'` in script-src:**
 - Required by Next.js for core functionality:
   - Client-side hydration (making static HTML interactive)
