@@ -1,8 +1,31 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import AnnouncementPopup from "@/components/AnnouncementPopup";
 
 export default function HomePage() {
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [authLoading, setAuthLoading] = useState(true);
+
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const response = await fetch("/api/auth/status");
+				const data = await response.json();
+				setIsAuthenticated(data.isAuthenticated);
+			} catch (error) {
+				console.error("Failed to check auth status:", error);
+				setIsAuthenticated(false);
+			} finally {
+				setAuthLoading(false);
+			}
+		};
+
+		checkAuth();
+	}, []);
+
 	return (
 		<>
 			<AnnouncementPopup />
@@ -22,20 +45,22 @@ export default function HomePage() {
 						explore the dashboard, curate your library, or find the
 						perfect game night.
 					</p>
-					<div className="mt-6 flex gap-4 justify-center">
-						<Link
-							href="/auth/register"
-							className="rounded-md bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
-						>
-							Create an Account
-						</Link>
-						<Link
-							href="/auth/login"
-							className="rounded-md border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
-						>
-							Log In
-						</Link>
-					</div>
+					{!authLoading && !isAuthenticated && (
+						<div className="mt-6 flex gap-4 justify-center">
+							<Link
+								href="/auth/register"
+								className="rounded-md bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+							>
+								Create an Account
+							</Link>
+							<Link
+								href="/auth/login"
+								className="rounded-md border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+							>
+								Log In
+							</Link>
+						</div>
+					)}
 				</section>
 				<section className="grid gap-6 sm:grid-cols-2 max-w-4xl">
 					<article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
