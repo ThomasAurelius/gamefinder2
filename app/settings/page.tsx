@@ -33,6 +33,7 @@ export default function SettingsPage() {
 	const [loadingFlags, setLoadingFlags] = useState(false);
 	const [adImageUrl, setAdImageUrl] = useState("");
 	const [adIsActive, setAdIsActive] = useState(false);
+	const [adZipCode, setAdZipCode] = useState("");
 	const [uploadingAd, setUploadingAd] = useState(false);
 	const [savingAd, setSavingAd] = useState(false);
 
@@ -228,7 +229,7 @@ export default function SettingsPage() {
 			const response = await fetch("/api/advertisements", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ imageUrl: adImageUrl, isActive: adIsActive }),
+				body: JSON.stringify({ imageUrl: adImageUrl, isActive: adIsActive, zipCode: adZipCode }),
 			});
 
 			if (!response.ok) {
@@ -453,6 +454,7 @@ export default function SettingsPage() {
 							</h2>
 							<p className="mt-2 text-xs text-slate-400">
 								Upload and manage the site advertisement (800x800 image).
+								Add a zip code to show the ad only within 100 miles of that location.
 							</p>
 
 							<div className="mt-4 space-y-3">
@@ -467,6 +469,26 @@ export default function SettingsPage() {
 										Display advertisement
 									</span>
 								</label>
+
+								<div className="space-y-2">
+									<label
+										htmlFor="ad-zipcode"
+										className="block text-sm font-medium text-slate-200"
+									>
+										Zip Code (optional)
+									</label>
+									<input
+										id="ad-zipcode"
+										type="text"
+										value={adZipCode}
+										onChange={(e) => setAdZipCode(e.target.value)}
+										placeholder="12345"
+										className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+									/>
+									<p className="text-xs text-slate-500">
+										Leave blank to show to all users. If provided, ad will only show within 100 miles.
+									</p>
+								</div>
 
 								{adImageUrl && (
 									<div className="relative w-full max-w-xs aspect-square">
