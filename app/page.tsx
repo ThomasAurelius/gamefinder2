@@ -39,13 +39,47 @@ export default function HomePage() {
 					className="h-60 w-auto"
 				/>
 				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
+					<ul className="space-y-3 text-left">
+						<li className="flex items-start gap-3">
+							<span className="text-indigo-400 mt-1">✓</span>
+							<p className="text-slate-300">
+								<strong className="text-slate-100">
+									Your Hub for Tabletop & Board Gaming:
+								</strong>{" "}
+								Whether you're a player or a Game Master, The Gathering
+								Call is your go-to platform for all things tabletop and
+								board gaming.
+							</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<span className="text-indigo-400 mt-1">✓</span>
+							<p className="text-slate-300">
+								<strong className="text-slate-100">Free to Use:</strong>{" "}
+								Enjoy a robust set of features at no cost. Optional paid
+								campaigns are available for those seeking premium
+								experiences.
+							</p>
+						</li>
+						<li className="flex items-start gap-3">
+							<span className="text-indigo-400 mt-1">✓</span>
+							<p className="text-slate-300">
+								<strong className="text-slate-100">
+									Find and Join Games:
+								</strong>{" "}
+								Discover new games and campaigns that match your
+								interests.
+							</p>
+						</li>
+					</ul>
+
 					<p className="mt-4 max-w-2xl text-base text-slate-300">
-						Build your tabletop adventures, manage characters, and
-						discover new games with ease. Use the navigation above to
-						explore the dashboard, curate your library, or find the
-						perfect game night.
+						Use the navigation above to explore the dashboard, curate your
+						library, or find the perfect game night.
 					</p>
-					{!authLoading && !isAuthenticated && (
+				</section>
+
+				{!authLoading && !isAuthenticated && (
+					<section>
 						<div className="mt-6 flex gap-4 justify-center">
 							<Link
 								href="/auth/register"
@@ -60,8 +94,9 @@ export default function HomePage() {
 								Log In
 							</Link>
 						</div>
-					)}
-				</section>
+					</section>
+				)}
+
 				<section className="grid gap-6 sm:grid-cols-2 max-w-4xl">
 					<article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
 						<h2 className="text-2xl font-bold text-slate-100 mb-4">
