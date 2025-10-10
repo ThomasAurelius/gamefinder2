@@ -531,7 +531,7 @@ export default function TallTalesPage() {
 							<div className="flex items-start justify-between gap-4">
 								<div className="flex-1">
 									<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
-									<div className="markdown-content text-slate-300">
+									<div className="prose prose-invert prose-slate max-w-none prose-headings:text-slate-100 prose-p:text-slate-300 prose-strong:text-slate-100 prose-em:text-slate-300 prose-li:text-slate-300 prose-blockquote:text-slate-400">
 										<ReactMarkdown remarkPlugins={[remarkGfm]}>
 											{tale.content}
 										</ReactMarkdown>
