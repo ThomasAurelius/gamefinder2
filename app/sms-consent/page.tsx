@@ -6,7 +6,7 @@ export default function SmsConsentPage() {
 					SMS Messaging Consent
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Last updated: {new Date().toLocaleDateString()}
+					Last updated: January 10, 2025
 				</p>
 			</div>
 
