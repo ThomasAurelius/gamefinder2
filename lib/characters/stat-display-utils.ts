@@ -2,15 +2,25 @@
  * Utility functions for displaying character stats
  */
 
+/**
+ * Represents a single stat field with a name and value
+ */
 export type StatField = {
   name: string;
   value: string;
 };
 
+/**
+ * Result of categorizing stats into physical, mental, and other groups
+ */
 export type CategorizedStats = {
+  /** Physical ability scores: Strength, Dexterity, Constitution */
   physical: StatField[];
+  /** Mental ability scores: Intelligence, Wisdom, Charisma */
   mental: StatField[];
+  /** Non-standard stats that don't match the 6 standard D&D abilities */
   other: StatField[];
+  /** Whether any standard D&D stats were found (if false, display should use fallback layout) */
   hasStandardStats: boolean;
 };
 
