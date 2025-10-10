@@ -66,7 +66,7 @@ export async function POST(
     const usersMap = await getUsersBasicInfo(signedUpPlayers);
 
     // Send internal messages to all players
-    const messagePromises: Promise<any>[] = [];
+    const messagePromises: Promise<unknown>[] = [];
     const smsRecipients: Array<{ name: string; phoneNumber: string }> = [];
 
     for (const playerId of signedUpPlayers) {
@@ -104,7 +104,7 @@ export async function POST(
 
     // Send SMS notifications
     let smsSent = 0;
-    let smsErrors = 0;
+    const smsErrors = 0;
 
     if (smsRecipients.length > 0) {
       // Note: SMS functionality is stubbed for now
