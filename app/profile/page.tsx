@@ -65,6 +65,7 @@ type ProfilePayload = {
 	primaryRole: RoleOption | "";
 	timezone?: string;
 	avatarUrl?: string;
+	phoneNumber?: string;
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -77,6 +78,7 @@ export default function ProfilePage() {
 	const [commonName, setCommonName] = useState("");
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
+	const [phoneNumber, setPhoneNumber] = useState("");
 	const [bio, setBio] = useState("");
 	const [selectedGames, setSelectedGames] = useState<string[]>([]);
 	const [customGames, setCustomGames] = useState<string[]>([]);
@@ -119,6 +121,7 @@ export default function ProfilePage() {
 				setCommonName(profile.commonName ?? "");
 				setLocation(profile.location ?? "");
 				setZipCode(profile.zipCode ?? "");
+				setPhoneNumber(profile.phoneNumber ?? "");
 				setBio(profile.bio ?? "");
 				const normalizedGames = profile.games ?? [];
 				// Separate preset games from custom games
@@ -250,6 +253,7 @@ export default function ProfilePage() {
 				primaryRole,
 				timezone,
 				avatarUrl: url,
+				phoneNumber,
 			};
 
 			const saveResponse = await fetch("/api/profile", {
@@ -357,6 +361,7 @@ export default function ProfilePage() {
 			primaryRole,
 			timezone,
 			avatarUrl,
+			phoneNumber,
 		};
 
 		try {
@@ -494,6 +499,26 @@ export default function ProfilePage() {
 							placeholder="Postal code"
 							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 						/>
+					</div>
+
+					<div className="space-y-2">
+						<label
+							htmlFor="phoneNumber"
+							className="text-sm font-medium text-slate-200"
+						>
+							Phone Number
+						</label>
+						<input
+							id="phoneNumber"
+							type="tel"
+							value={phoneNumber}
+							onChange={(event) => setPhoneNumber(event.target.value)}
+							placeholder="(555) 123-4567"
+							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						<p className="text-xs text-slate-400">
+							Optional. Used for SMS notifications from campaign hosts.
+						</p>
 					</div>
 
 					<div className="space-y-2">

@@ -86,6 +86,12 @@ export default function CampaignDetailPage() {
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageContent, setMessageContent] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
+  const [messageSuccess, setMessageSuccess] = useState(false);
 
   const campaignId = params.id as string;
 
@@ -493,6 +499,62 @@ export default function CampaignDetailPage() {
     }
   };
 
+  const handleMessageAll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessageError(null);
+    setMessageSuccess(false);
+
+    if (!messageSubject.trim() || !messageContent.trim()) {
+      setMessageError("Please fill in both subject and message");
+      return;
+    }
+
+    if (!currentUserId || !campaign) {
+      setMessageError("Unable to send message. Please try again.");
+      return;
+    }
+
+    setIsSendingMessage(true);
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/message-all`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: currentUserId,
+          userName: campaign.hostName || "Campaign Host",
+          subject: messageSubject.trim(),
+          content: messageContent.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to send messages");
+      }
+
+      const result = await response.json();
+      setMessageSuccess(true);
+      setMessageSubject("");
+      setMessageContent("");
+      
+      // Show success message and close modal after a delay
+      setTimeout(() => {
+        setShowMessageModal(false);
+        setMessageSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to send messages:", error);
+      setMessageError(
+        error instanceof Error ? error.message : "Failed to send messages"
+      );
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -782,6 +844,33 @@ export default function CampaignDetailPage() {
                     Manage your campaign details, players, and settings here.
                   </p>
                 </div>
+
+                {/* Message All Players Button */}
+                {campaign.signedUpPlayers.length > 0 && (
+                  <div className="rounded-lg border border-indigo-800 bg-indigo-950/40 p-4">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-base font-semibold text-indigo-100">
+                          Message All Players
+                        </h3>
+                        <p className="mt-1 text-sm text-indigo-300">
+                          Send a message to all {campaign.signedUpPlayers.length} signed up player{campaign.signedUpPlayers.length !== 1 ? "s" : ""} simultaneously
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowMessageModal(true)}
+                        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      >
+                        <span className="flex items-center gap-2">
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                          </svg>
+                          Message All
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Campaign Statistics */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -1037,6 +1126,109 @@ export default function CampaignDetailPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Message All Players Modal */}
+      {showMessageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-2xl rounded-lg border border-slate-800 bg-slate-950 p-6">
+            <div className="mb-4 flex items-start justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-100">
+                  Message All Players
+                </h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Send a message to all {campaign?.signedUpPlayers.length} signed up players
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowMessageModal(false);
+                  setMessageError(null);
+                  setMessageSuccess(false);
+                }}
+                className="text-slate-400 hover:text-slate-300"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleMessageAll} className="space-y-4">
+              <div>
+                <label htmlFor="messageSubject" className="block text-sm font-medium text-slate-300">
+                  Subject
+                </label>
+                <input
+                  id="messageSubject"
+                  type="text"
+                  value={messageSubject}
+                  onChange={(e) => setMessageSubject(e.target.value)}
+                  placeholder="e.g., Campaign Cancelled"
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  disabled={isSendingMessage}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="messageContent" className="block text-sm font-medium text-slate-300">
+                  Message
+                </label>
+                <textarea
+                  id="messageContent"
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder="Enter your message to all players..."
+                  rows={6}
+                  className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                  disabled={isSendingMessage}
+                />
+              </div>
+
+              <div className="rounded-lg border border-indigo-800 bg-indigo-950/40 p-3">
+                <p className="text-xs text-indigo-300">
+                  <strong>Note:</strong> This message will be sent to all signed up players via the internal messaging system. 
+                  Players with phone numbers in their profile will also receive an SMS notification.
+                </p>
+              </div>
+
+              {messageError && (
+                <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3">
+                  <p className="text-sm text-red-400">{messageError}</p>
+                </div>
+              )}
+
+              {messageSuccess && (
+                <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-3">
+                  <p className="text-sm text-green-400">Messages sent successfully to all players!</p>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={isSendingMessage || !messageSubject.trim() || !messageContent.trim()}
+                  className="flex-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSendingMessage ? "Sending..." : "Send to All Players"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMessageModal(false);
+                    setMessageError(null);
+                    setMessageSuccess(false);
+                  }}
+                  disabled={isSendingMessage}
+                  className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
