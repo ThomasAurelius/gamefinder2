@@ -1,11 +1,11 @@
 # Advertisement Feature - Implementation Summary
 
 ## Task Completed
-Successfully implemented an advertisement feature that allows administrators to upload and display an 800x800 pixel advertisement on Find Games, Find Campaigns, and My Campaigns pages.
+Successfully implemented an advertisement feature that allows administrators to upload and display an 800x400 pixel advertisement on Find Games, Find Campaigns, and My Campaigns pages.
 
 ## Requirements Met
-✅ Created space for advertisement (800x800 pixels)
-✅ Scales to 80% width on mobile phones
+✅ Created space for advertisement (800x400 pixels)
+✅ Scales to 90% width on mobile phones (under 900px)
 ✅ Appears in Find Games page (under header, before search)
 ✅ Appears in Find Campaigns page (under header, before search)
 ✅ Appears in My Campaigns page (under header, before search)
@@ -38,19 +38,19 @@ Successfully implemented an advertisement feature that allows administrators to 
 ├─────────────────────────────────────┤
 │ ☑ Display advertisement             │
 │                                     │
-│ [Image Preview - 800x800]           │
+│ [Image Preview - 800x400]           │
 │                                     │
-│ [Upload Image (800x800)]            │
-│ Recommended: 800x800px, Max: 5MB    │
+│ [Upload Image (800x400)]            │
+│ Recommended: 800x400px, Max: 5MB    │
 │                                     │
 │ [Save Advertisement]                │
 └─────────────────────────────────────┘
 ```
 
 ### 2. Responsive Display
-- **Desktop**: Full width up to 800px
-- **Mobile**: 80% of screen width
-- **Aspect Ratio**: Maintains 1:1 square
+- **Desktop**: Full width up to 800px (400px height with 2:1 aspect ratio)
+- **Mobile (under 900px)**: 90% of screen width
+- **Aspect Ratio**: Maintains 2:1 (800x400)
 - **Loading**: Optimized with Next.js Image component
 
 ### 3. Integration Pattern
@@ -103,7 +103,7 @@ Successfully implemented an advertisement feature that allows administrators to 
 ### Admin Workflow
 1. Admin navigates to Settings
 2. Scrolls to "Admin: Advertisement" section
-3. Uploads 800x800 image
+3. Uploads 800x400 image
 4. Checks "Display advertisement" checkbox
 5. Clicks "Save Advertisement"
 6. Advertisement appears on Find pages
@@ -111,7 +111,7 @@ Successfully implemented an advertisement feature that allows administrators to 
 ### User Experience
 1. User visits Find Games/Campaigns or My Campaigns
 2. Advertisement displays prominently (if active)
-3. On mobile, scales to 80% width
+3. On mobile (under 900px), scales to 90% width
 4. If disabled, no space is shown
 
 ## Testing & Validation
@@ -125,7 +125,7 @@ Successfully implemented an advertisement feature that allows administrators to 
 - ✅ **Admin Access Control**: Verified only admins can access advertisement settings
 - ✅ **Image Upload**: Tested file validation (type, size limits)
 - ✅ **Display Toggle**: Confirmed advertisement shows/hides based on isActive flag
-- ✅ **Responsive Behavior**: Validated 80% width on mobile, full width on desktop
+- ✅ **Responsive Behavior**: Validated 90% width on mobile (under 900px), full width up to 800px on desktop
 - ✅ **Component Integration**: Verified proper rendering on all three Find pages
 - ✅ **Space Collapse**: Confirmed no empty space when advertisement is disabled
 - ✅ **API Endpoints**: Tested GET (public) and POST (admin-only) operations
