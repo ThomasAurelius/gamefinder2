@@ -1,15 +1,34 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { isAdmin } from "@/lib/admin";
-import { getActiveAdvertisement, setAdvertisement } from "@/lib/advertisements/db";
+import { getActiveAdvertisementForUser, setAdvertisement } from "@/lib/advertisements/db";
+import { readProfile } from "@/lib/profile-db";
 
 /**
  * GET /api/advertisements
- * Get the active advertisement
+ * Get the active advertisement for the current user (based on their location)
  */
 export async function GET() {
   try {
-    const advertisement = await getActiveAdvertisement();
+    // Try to get user's location from their profile
+    let userLatitude: number | undefined;
+    let userLongitude: number | undefined;
+    
+    try {
+      const cookieStore = await cookies();
+      const userId = cookieStore.get("userId")?.value;
+      
+      if (userId) {
+        const profile = await readProfile(userId);
+        userLatitude = profile.latitude;
+        userLongitude = profile.longitude;
+      }
+    } catch (error) {
+      // If we can't get user profile, continue without location filtering
+      console.log("Could not fetch user profile for advertisement filtering:", error);
+    }
+    
+    const advertisement = await getActiveAdvertisementForUser(userLatitude, userLongitude);
     
     if (!advertisement || !advertisement.isActive) {
       return NextResponse.json(
@@ -56,7 +75,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { imageUrl, isActive } = body;
+    const { imageUrl, isActive, zipCode } = body;
 
     if (typeof isActive !== "boolean") {
       return NextResponse.json(
@@ -72,10 +91,18 @@ export async function POST(request: Request) {
       );
     }
 
+    if (zipCode !== undefined && typeof zipCode !== "string") {
+      return NextResponse.json(
+        { error: "zipCode must be a string" },
+        { status: 400 }
+      );
+    }
+
     const advertisement = await setAdvertisement(
       userId,
       imageUrl || "",
-      isActive
+      isActive,
+      zipCode
     );
 
     return NextResponse.json(
