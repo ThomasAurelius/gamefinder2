@@ -95,7 +95,7 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 			<div className="flex items-start justify-between gap-4">
 				<div className="flex-1">
 					<Link
-						href={`/games/${session.id}`}
+						href={`/campaigns/${session.id}`}
 						className="text-lg font-medium text-slate-100 hover:text-sky-300 transition-colors"
 					>
 						{session.game}
