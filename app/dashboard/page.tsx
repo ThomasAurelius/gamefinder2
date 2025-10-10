@@ -242,7 +242,7 @@ export default function DashboardPage() {
         {isLoading ? (
           <p className="mt-4 text-sm text-slate-500">Loading your sessions...</p>
         ) : gameSessions.length > 0 ? (
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3 max-w-3xl">
             {gameSessions.map((session) => (
               <GameSessionCard
                 key={session.id}
