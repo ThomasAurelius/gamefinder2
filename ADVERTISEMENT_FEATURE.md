@@ -1,7 +1,7 @@
 # Advertisement Feature Implementation
 
 ## Overview
-This feature allows administrators to upload and display an 800x800 pixel advertisement across multiple pages in the application. The advertisement can be toggled on/off and is displayed prominently under page headers and before search sections.
+This feature allows administrators to upload and display an 800x400 pixel advertisement across multiple pages in the application. The advertisement can be toggled on/off and is displayed prominently under page headers and before search sections.
 
 ## Features Implemented
 
@@ -35,7 +35,7 @@ Updated `/api/upload` to support advertisement type:
 
 ### 4. Admin Settings Interface
 Added a new section to `/app/settings/page.tsx` (admin only):
-- **Upload Image**: File upload button for 800x800 images
+- **Upload Image**: File upload button for 800x400 images
 - **Image Preview**: Shows uploaded image using Next.js Image component
 - **Display Toggle**: Checkbox to enable/disable advertisement display
 - **Save Button**: Saves configuration to database
@@ -44,9 +44,9 @@ Added a new section to `/app/settings/page.tsx` (admin only):
 ### 5. Advertisement Component
 Created `/components/Advertisement.tsx`:
 - **Responsive Design**:
-  - Mobile (< 640px): 80% of screen width
+  - Mobile (< 900px): 90% of screen width
   - Desktop: Full width up to 800px maximum
-- **Aspect Ratio**: Maintains 1:1 (square) aspect ratio
+- **Aspect Ratio**: Maintains 2:1 (800x400) aspect ratio
 - **Image Optimization**: Uses Next.js Image component with priority loading
 - **Auto-hide**: Returns null if no active advertisement
 - **Lazy Loading**: Fetches advertisement data on component mount
@@ -67,16 +67,17 @@ Advertisement component added to three pages, positioned after header and before
 
 ### Responsive Sizing
 ```tsx
-// Mobile: 80% width, Desktop: 100% width (max 800px)
-<div className="w-[80%] sm:w-full max-w-[800px]">
+// Screens < 1024px: 90% width | Screens ≥ 1024px: 100% width (max 800px)
+// This meets the requirement: 90% width on mobile (under 900px)
+<div className="w-[90%] lg:w-full lg:max-w-[800px]">
 ```
 
 ### Image Sizes Attribute
 ```tsx
-sizes="(max-width: 640px) 80vw, 800px"
+sizes="(max-width: 900px) 90vw, 800px"
 ```
 This tells the browser:
-- On screens ≤640px: use 80% of viewport width
+- On screens ≤900px: use 90% of viewport width
 - On larger screens: use 800px
 
 ### Database Pattern
@@ -97,7 +98,7 @@ Follows the same pattern as the announcements feature:
 ### For Admins
 1. Navigate to Settings page
 2. Scroll to "Admin: Advertisement" section
-3. Click "Upload Image (800x800)" to select an image
+3. Click "Upload Image (800x400)" to select an image
 4. Check "Display advertisement" to enable
 5. Click "Save Advertisement"
 

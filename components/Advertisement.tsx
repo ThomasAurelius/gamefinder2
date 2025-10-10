@@ -32,13 +32,13 @@ export default function Advertisement() {
 
 	return (
 		<div className="w-full flex justify-center mb-6">
-			<div className="relative w-[80%] sm:w-full max-w-[800px]" style={{ aspectRatio: "1/1" }}>
+			<div className="relative w-[90%] lg:w-full lg:max-w-[800px]" style={{ aspectRatio: "2/1" }}>
 				<Image
 					src={advertisement.imageUrl}
 					alt="Advertisement"
 					fill
 					className="object-contain"
-					sizes="(max-width: 640px) 80vw, 800px"
+					sizes="(max-width: 900px) 90vw, 800px"
 					priority
 				/>
 			</div>

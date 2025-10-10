@@ -491,7 +491,7 @@ export default function SettingsPage() {
 								</div>
 
 								{adImageUrl && (
-									<div className="relative w-full max-w-xs aspect-square">
+									<div className="relative w-full max-w-md" style={{ aspectRatio: "2/1" }}>
 										<Image
 											src={adImageUrl}
 											alt="Advertisement preview"
@@ -506,7 +506,7 @@ export default function SettingsPage() {
 										htmlFor="ad-upload"
 										className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
 									>
-										{uploadingAd ? "Uploading..." : "Upload Image (800x800)"}
+										{uploadingAd ? "Uploading..." : "Upload Image (800x400)"}
 									</label>
 									<input
 										id="ad-upload"
@@ -517,7 +517,7 @@ export default function SettingsPage() {
 										className="hidden"
 									/>
 									<p className="text-xs text-slate-500">
-										Recommended size: 800x800 pixels. Max file size: 5MB
+										Recommended size: 800x400 pixels. Max file size: 5MB
 									</p>
 								</div>
 
