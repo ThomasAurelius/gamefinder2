@@ -51,27 +51,25 @@ export async function GET(request: Request) {
       filter["profile.primaryRole"] = role;
     }
 
-    // Add game filter (single game for backward compatibility)
-    if (game) {
-      filter["profile.favoriteGames"] = { $in: [game] };
-    }
-
-    // Add multiple games filter (comma-separated list)
+    // Add game filter (single game for backward compatibility or multiple games)
     if (games) {
+      // Multiple games filter takes precedence
       const gamesList = games.split(",").map((g) => g.trim()).filter(Boolean);
       if (gamesList.length > 0) {
         filter["profile.favoriteGames"] = { $in: gamesList };
       }
+    } else if (game) {
+      // Single game filter for backward compatibility
+      filter["profile.favoriteGames"] = { $in: [game] };
     }
 
-    // Add day of week filter
-    if (dayOfWeek) {
-      filter[`profile.availability.${dayOfWeek}`] = { $exists: true, $ne: [] };
-    }
-
-    // Add time slot filter (must have the specific time on the specific day)
+    // Add day of week and time slot filters
     if (dayOfWeek && timeSlot) {
+      // Both day and specific time slot specified
       filter[`profile.availability.${dayOfWeek}`] = { $in: [timeSlot] };
+    } else if (dayOfWeek) {
+      // Only day specified, find anyone available on that day
+      filter[`profile.availability.${dayOfWeek}`] = { $exists: true, $ne: [] };
     }
 
     const users = await usersCollection

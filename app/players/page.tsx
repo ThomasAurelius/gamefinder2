@@ -113,7 +113,6 @@ export default function PlayersPage() {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedRole, setSelectedRole] = useState("");
-	const [selectedGame, setSelectedGame] = useState("");
 	const [selectedGames, setSelectedGames] = useState<string[]>([]);
 	const [locationSearch, setLocationSearch] = useState("");
 	const [radiusMiles, setRadiusMiles] = useState("50");
@@ -153,7 +152,6 @@ export default function PlayersPage() {
 			const params = new URLSearchParams();
 			if (searchQuery) params.append("search", searchQuery);
 			if (selectedRole) params.append("role", selectedRole);
-			if (selectedGame) params.append("game", selectedGame);
 			if (selectedGames.length > 0) params.append("games", selectedGames.join(","));
 			if (locationSearch) {
 				params.append("location", locationSearch);
@@ -306,29 +304,6 @@ export default function PlayersPage() {
 							</select>
 						</div>
 
-						{/* Game Filter */}
-						<div>
-							<label
-								htmlFor="game"
-								className="mb-2 block text-sm font-medium text-slate-300"
-							>
-								Favorite Game
-							</label>
-							<select
-								id="game"
-								value={selectedGame}
-								onChange={(e) => setSelectedGame(e.target.value)}
-								className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
-							>
-								<option value="">All Games</option>
-								{GAME_OPTIONS.map((game) => (
-									<option key={game} value={game}>
-										{game}
-									</option>
-								))}
-							</select>
-						</div>
-
 						{/* Game Types Filter (Multiple Selection) */}
 						<div>
 							<label className="mb-2 block text-sm font-medium text-slate-300">
@@ -444,7 +419,7 @@ export default function PlayersPage() {
 								Found{" "}
 								<span className="text-sky-400">{players.length}</span>{" "}
 								{players.length === 1 ? "player" : "players"}
-								{(searchQuery || selectedRole || selectedGame) &&
+								{(searchQuery || selectedRole || selectedGames.length > 0) &&
 									" matching your criteria"}
 							</>
 						) : (
