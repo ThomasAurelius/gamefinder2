@@ -68,14 +68,23 @@ function CheckoutForm({
           });
 
           if (!finalizeResponse.ok) {
-            console.error("Failed to finalize subscription payment");
+            const errorData = await finalizeResponse.json().catch(() => ({}));
+            console.error("Failed to finalize subscription payment:", {
+              status: finalizeResponse.status,
+              error: errorData,
+            });
             // Don't show error to user since payment was successful
             // The subscription may still activate automatically
           } else {
-            console.log("Subscription payment finalized successfully");
+            const result = await finalizeResponse.json();
+            console.log("Subscription payment finalized successfully:", result);
           }
         } catch (finalizeError) {
-          console.error("Error finalizing subscription:", finalizeError);
+          console.error("Error finalizing subscription:", {
+            error: finalizeError,
+            type: finalizeError instanceof Error ? finalizeError.constructor.name : typeof finalizeError,
+            message: finalizeError instanceof Error ? finalizeError.message : String(finalizeError),
+          });
           // Don't show error to user since payment was successful
         }
       }

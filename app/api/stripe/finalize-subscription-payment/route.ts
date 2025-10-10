@@ -30,13 +30,13 @@ export async function POST(request: Request) {
 		// Retrieve the PaymentIntent to get payment method and metadata
 		const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-		if (!paymentIntent.metadata.subscriptionId) {
+		if (!paymentIntent.metadata?.subscriptionId) {
 			console.log("PaymentIntent is not associated with a subscription");
 			return NextResponse.json({ success: true, message: "Not a subscription payment" });
 		}
 
 		const subscriptionId = paymentIntent.metadata.subscriptionId;
-		const invoiceId = paymentIntent.metadata.invoiceId;
+		const invoiceId = paymentIntent.metadata?.invoiceId;
 
 		console.log("PaymentIntent details:", {
 			id: paymentIntent.id,
