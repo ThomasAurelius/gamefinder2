@@ -680,8 +680,8 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      {/* Only show payment button for non-creators */}
-      {!isCreator && campaign.costPerSession && campaign.costPerSession > 0 && (
+      {/* Only show payment button for non-creators who are approved (in signedUpPlayers) */}
+      {!isCreator && currentUserId && campaign.costPerSession && campaign.costPerSession > 0 && campaign.signedUpPlayers.includes(currentUserId) && (
         <div className="mt-6">
           {hasActiveSubscription ? (
             <div className="space-y-4">
@@ -703,6 +703,22 @@ export default function CampaignDetailPage() {
             >
               Proceed to payment
             </Link>
+          )}
+        </div>
+      )}
+
+      {/* Show status message for users who are pending or waitlisted */}
+      {!isCreator && currentUserId && campaign.costPerSession && campaign.costPerSession > 0 && !campaign.signedUpPlayers.includes(currentUserId) && (
+        <div className="mt-6">
+          {campaign.pendingPlayers.includes(currentUserId) && (
+            <div className="rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-orange-200">
+              Your request to join this campaign is pending approval from the host. You&apos;ll be able to proceed with payment once you&apos;ve been approved.
+            </div>
+          )}
+          {campaign.waitlist.includes(currentUserId) && (
+            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+              You&apos;re currently on the waitlist for this campaign. You&apos;ll be able to proceed with payment once a spot becomes available and you&apos;re moved to the active players list.
+            </div>
           )}
         </div>
       )}

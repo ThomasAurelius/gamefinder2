@@ -14,6 +14,9 @@ interface Campaign {
   description?: string;
   costPerSession?: number;
   sessionsLeft?: number;
+  signedUpPlayers: string[];
+  waitlist: string[];
+  pendingPlayers: string[];
 }
 
 type PaymentMode = "payment" | "subscription";
@@ -261,6 +264,70 @@ export default function CampaignPaymentPage() {
         </Link>
       </div>
     );
+  }
+
+  // Check if user is pending approval or on waitlist - they can't pay until approved
+  if (currentUserId && campaign.costPerSession && campaign.costPerSession > 0) {
+    const isApproved = campaign.signedUpPlayers.includes(currentUserId);
+    const isPending = campaign.pendingPlayers.includes(currentUserId);
+    const isWaitlisted = campaign.waitlist.includes(currentUserId);
+
+    if (isPending) {
+      return (
+        <div className="mx-auto mt-10 max-w-2xl space-y-4">
+          <div className="rounded-xl border border-orange-500/40 bg-orange-500/10 p-8 text-slate-200">
+            <h1 className="text-xl font-semibold text-slate-100">{campaign.game}</h1>
+            <p className="mt-2 text-sm text-slate-400">
+              Your request to join this campaign is pending approval from the host. You&apos;ll be able to proceed with payment once you&apos;ve been approved.
+            </p>
+          </div>
+          <Link
+            href={`/campaigns/${campaignId}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-sky-400"
+          >
+            ← Back to campaign details
+          </Link>
+        </div>
+      );
+    }
+
+    if (isWaitlisted) {
+      return (
+        <div className="mx-auto mt-10 max-w-2xl space-y-4">
+          <div className="rounded-xl border border-yellow-500/40 bg-yellow-500/10 p-8 text-slate-200">
+            <h1 className="text-xl font-semibold text-slate-100">{campaign.game}</h1>
+            <p className="mt-2 text-sm text-slate-400">
+              You&apos;re currently on the waitlist for this campaign. You&apos;ll be able to proceed with payment once a spot becomes available and you&apos;re moved to the active players list.
+            </p>
+          </div>
+          <Link
+            href={`/campaigns/${campaignId}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-sky-400"
+          >
+            ← Back to campaign details
+          </Link>
+        </div>
+      );
+    }
+
+    if (!isApproved) {
+      return (
+        <div className="mx-auto mt-10 max-w-2xl space-y-4">
+          <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-slate-200">
+            <h1 className="text-xl font-semibold text-slate-100">{campaign.game}</h1>
+            <p className="mt-2 text-sm text-slate-400">
+              You need to join this campaign and be approved by the host before you can proceed with payment.
+            </p>
+          </div>
+          <Link
+            href={`/campaigns/${campaignId}`}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-sky-500 hover:text-sky-400"
+          >
+            ← Back to campaign details
+          </Link>
+        </div>
+      );
+    }
   }
 
   if (!campaign.costPerSession || campaign.costPerSession <= 0) {
