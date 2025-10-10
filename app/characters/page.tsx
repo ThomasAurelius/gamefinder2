@@ -16,6 +16,7 @@ import {
   SkillField,
   StoredCharacter,
 } from "@/lib/characters/types";
+import { SKILL_ATTRIBUTES, getSkillDisplayName } from "@/lib/characters/skill-attributes";
 import AvatarCropper from "@/components/AvatarCropper";
 
 const ROLE_OPTIONS = [
@@ -68,26 +69,7 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Stealth",
       "Survival",
     ],
-    skillAttributes: {
-      "Acrobatics": "Dex",
-      "Animal Handling": "Wis",
-      "Arcana": "Int",
-      "Athletics": "Str",
-      "Deception": "Cha",
-      "History": "Int",
-      "Insight": "Wis",
-      "Intimidation": "Cha",
-      "Investigation": "Int",
-      "Medicine": "Wis",
-      "Nature": "Int",
-      "Perception": "Wis",
-      "Performance": "Cha",
-      "Persuasion": "Cha",
-      "Religion": "Int",
-      "Sleight of Hand": "Dex",
-      "Stealth": "Dex",
-      "Survival": "Wis",
-    },
+    skillAttributes: SKILL_ATTRIBUTES.dnd,
   },
   pathfinder: {
     label: "Pathfinder 2e",
@@ -119,24 +101,7 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Survival",
       "Thievery",
     ],
-    skillAttributes: {
-      "Acrobatics": "Dex",
-      "Arcana": "Int",
-      "Athletics": "Str",
-      "Crafting": "Int",
-      "Deception": "Cha",
-      "Diplomacy": "Cha",
-      "Intimidation": "Cha",
-      "Medicine": "Wis",
-      "Nature": "Wis",
-      "Occultism": "Int",
-      "Performance": "Cha",
-      "Religion": "Wis",
-      "Society": "Int",
-      "Stealth": "Dex",
-      "Survival": "Wis",
-      "Thievery": "Dex",
-    },
+    skillAttributes: SKILL_ATTRIBUTES.pathfinder,
   },
   starfinder: {
     label: "Starfinder",
@@ -172,28 +137,7 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Stealth",
       "Survival",
     ],
-    skillAttributes: {
-      "Acrobatics": "Dex",
-      "Athletics": "Str",
-      "Bluff": "Cha",
-      "Computers": "Int",
-      "Culture": "Int",
-      "Diplomacy": "Cha",
-      "Disguise": "Cha",
-      "Engineering": "Int",
-      "Intimidate": "Cha",
-      "Life Science": "Int",
-      "Medicine": "Int",
-      "Mysticism": "Wis",
-      "Perception": "Wis",
-      "Physical Science": "Int",
-      "Piloting": "Dex",
-      "Profession": "Cha/Int/Wis",
-      "Sense Motive": "Wis",
-      "Sleight of Hand": "Dex",
-      "Stealth": "Dex",
-      "Survival": "Wis",
-    },
+    skillAttributes: SKILL_ATTRIBUTES.starfinder,
   },
   shadowdark: {
     label: "Shadowdark",
@@ -267,17 +211,6 @@ function getSystemLabel(system: GameSystemKey) {
 
 function cloneFieldArray<T extends StatField | SkillField>(fields: T[]): T[] {
   return fields.map((field) => ({ ...field }));
-}
-
-function getSkillDisplayName(skillName: string, system: GameSystemKey): string {
-  const config = GAME_SYSTEMS[system];
-  const attribute = config.skillAttributes?.[skillName];
-  
-  if (attribute) {
-    return `${skillName} (${attribute})`;
-  }
-  
-  return skillName;
 }
 
 export default function CharactersPage() {

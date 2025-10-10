@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
-import type { GameSystemKey } from "@/lib/characters/types";
+import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
 
 function formatGameSystem(system: string): string {
   const systemMap: Record<string, string> = {
@@ -15,84 +15,6 @@ function formatGameSystem(system: string): string {
   };
 
   return systemMap[system] || system;
-}
-
-// Skill-to-attribute mappings for different game systems
-const SKILL_ATTRIBUTES: Record<GameSystemKey, Record<string, string> | undefined> = {
-  dnd: {
-    "Acrobatics": "Dex",
-    "Animal Handling": "Wis",
-    "Arcana": "Int",
-    "Athletics": "Str",
-    "Deception": "Cha",
-    "History": "Int",
-    "Insight": "Wis",
-    "Intimidation": "Cha",
-    "Investigation": "Int",
-    "Medicine": "Wis",
-    "Nature": "Int",
-    "Perception": "Wis",
-    "Performance": "Cha",
-    "Persuasion": "Cha",
-    "Religion": "Int",
-    "Sleight of Hand": "Dex",
-    "Stealth": "Dex",
-    "Survival": "Wis",
-  },
-  pathfinder: {
-    "Acrobatics": "Dex",
-    "Arcana": "Int",
-    "Athletics": "Str",
-    "Crafting": "Int",
-    "Deception": "Cha",
-    "Diplomacy": "Cha",
-    "Intimidation": "Cha",
-    "Medicine": "Wis",
-    "Nature": "Wis",
-    "Occultism": "Int",
-    "Performance": "Cha",
-    "Religion": "Wis",
-    "Society": "Int",
-    "Stealth": "Dex",
-    "Survival": "Wis",
-    "Thievery": "Dex",
-  },
-  starfinder: {
-    "Acrobatics": "Dex",
-    "Athletics": "Str",
-    "Bluff": "Cha",
-    "Computers": "Int",
-    "Culture": "Int",
-    "Diplomacy": "Cha",
-    "Disguise": "Cha",
-    "Engineering": "Int",
-    "Intimidate": "Cha",
-    "Life Science": "Int",
-    "Medicine": "Int",
-    "Mysticism": "Wis",
-    "Perception": "Wis",
-    "Physical Science": "Int",
-    "Piloting": "Dex",
-    "Profession": "Cha/Int/Wis",
-    "Sense Motive": "Wis",
-    "Sleight of Hand": "Dex",
-    "Stealth": "Dex",
-    "Survival": "Wis",
-  },
-  shadowdark: undefined,
-  other: undefined,
-};
-
-function getSkillDisplayName(skillName: string, system: string): string {
-  const systemKey = system as GameSystemKey;
-  const attributes = SKILL_ATTRIBUTES[systemKey];
-  const attribute = attributes?.[skillName];
-  
-  if (attribute) {
-    return `${skillName} (${attribute})`;
-  }
-  
-  return skillName;
 }
 
 function FieldList({
