@@ -67,8 +67,8 @@ Advertisement component added to three pages, positioned after header and before
 
 ### Responsive Sizing
 ```tsx
-// Mobile (< 1024px): 90% width, Desktop (≥1024px): 100% width (max 800px)
-// Using lg: breakpoint (1024px) ensures 90% width for all screens under 900px (requirement met)
+// Screens < 1024px: 90% width | Screens ≥ 1024px: 100% width (max 800px)
+// This meets the requirement: 90% width on mobile (under 900px)
 <div className="w-[90%] lg:w-full lg:max-w-[800px]">
 ```
 
