@@ -458,6 +458,7 @@ export async function POST(request: Request) {
 							currency: latestInvoice.currency ?? "usd",
 							customer: customerId,
 							payment_method_types: ["card"],
+							setup_future_usage: "off_session",
 							metadata: {
 								invoiceId: latestInvoice.id,
 								subscriptionId: subscription.id,
