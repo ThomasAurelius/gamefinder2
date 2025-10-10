@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
 import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import { categorizeStats } from "@/lib/characters/stat-display-utils";
 import type { GameSystemKey } from "@/lib/characters/types";
 
 function formatGameSystem(system: string): string {
@@ -29,6 +30,62 @@ function FieldList({
 }) {
   if (items.length === 0) {
     return null;
+  }
+
+  // For ability scores, split into physical and mental stats if they match standard 6
+  if (title === "Stats") {
+    const { physical: physicalStats, mental: mentalStats, other: otherStats, hasStandardStats } = categorizeStats(items);
+    
+    if (hasStandardStats) {
+      return (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+          <div className="grid gap-2 grid-cols-2">
+            <div className="space-y-2">
+              {physicalStats.map((item) => (
+                <div
+                  key={item.name}
+                  className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
+                >
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    {item.name}
+                  </span>
+                  <span className="text-base font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              {mentalStats.map((item) => (
+                <div
+                  key={item.name}
+                  className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
+                >
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    {item.name}
+                  </span>
+                  <span className="text-base font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {otherStats.length > 0 && (
+            <div className="grid gap-2 md:grid-cols-2 mt-2">
+              {otherStats.map((item) => (
+                <div
+                  key={item.name}
+                  className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
+                >
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    {item.name}
+                  </span>
+                  <span className="text-base font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
   }
 
   return (

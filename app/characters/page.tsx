@@ -17,6 +17,7 @@ import {
   StoredCharacter,
 } from "@/lib/characters/types";
 import { SKILL_ATTRIBUTES, getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import { categorizeStats } from "@/lib/characters/stat-display-utils";
 import AvatarCropper from "@/components/AvatarCropper";
 
 const ROLE_OPTIONS = [
@@ -637,21 +638,84 @@ export default function CharactersPage() {
                       <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                         Ability Scores
                       </h3>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        {item.stats.map((stat, index) => (
-                          <div
-                            key={`${stat.name}-${index}`}
-                            className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-                          >
-                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                              {stat.name || "Stat"}
+                      {(() => {
+                        const { physical: physicalStats, mental: mentalStats, other: otherStats, hasStandardStats } = categorizeStats(item.stats);
+                        
+                        if (hasStandardStats) {
+                          return (
+                            <>
+                              <div className="grid gap-2 grid-cols-2">
+                                <div className="space-y-2">
+                                  {physicalStats.map((stat, index) => (
+                                    <div
+                                      key={`${stat.name}-${index}`}
+                                      className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+                                    >
+                                      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        {stat.name || "Stat"}
+                                      </div>
+                                      <div className="text-lg font-semibold text-slate-100">
+                                        {stat.value || "-"}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="space-y-2">
+                                  {mentalStats.map((stat, index) => (
+                                    <div
+                                      key={`${stat.name}-${index}`}
+                                      className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+                                    >
+                                      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        {stat.name || "Stat"}
+                                      </div>
+                                      <div className="text-lg font-semibold text-slate-100">
+                                        {stat.value || "-"}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                              {otherStats.length > 0 && (
+                                <div className="grid gap-2 sm:grid-cols-2 mt-2">
+                                  {otherStats.map((stat, index) => (
+                                    <div
+                                      key={`${stat.name}-${index}`}
+                                      className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+                                    >
+                                      <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                        {stat.name || "Stat"}
+                                      </div>
+                                      <div className="text-lg font-semibold text-slate-100">
+                                        {stat.value || "-"}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          );
+                        } else {
+                          // For completely custom systems with no standard stats
+                          return (
+                            <div className="grid gap-2 sm:grid-cols-2">
+                              {item.stats.map((stat, index) => (
+                                <div
+                                  key={`${stat.name}-${index}`}
+                                  className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+                                >
+                                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                                    {stat.name || "Stat"}
+                                  </div>
+                                  <div className="text-lg font-semibold text-slate-100">
+                                    {stat.value || "-"}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                            <div className="text-lg font-semibold text-slate-100">
-                              {stat.value || "-"}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                          );
+                        }
+                      })()}
                     </div>
 
                     <div className="space-y-2">
