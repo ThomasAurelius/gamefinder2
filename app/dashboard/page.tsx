@@ -24,6 +24,11 @@ type GameSession = {
   distance?: number;
   hostName?: string;
   hostAvatarUrl?: string;
+  sessionsLeft?: number;
+  costPerSession?: number;
+  meetingFrequency?: string;
+  daysOfWeek?: string[];
+  isCampaign?: boolean;
 };
 
 function GameSessionCard({
@@ -40,6 +45,7 @@ function GameSessionCard({
   const isHost = currentUserId === session.userId;
   const isPlayer = currentUserId && session.signedUpPlayers.includes(currentUserId);
   const isWaitlisted = currentUserId && session.waitlist.includes(currentUserId);
+  const isCampaign = session.isCampaign || false;
 
   let userRole = "";
   if (isHost) {
@@ -50,6 +56,8 @@ function GameSessionCard({
     userRole = "Waitlisted";
   }
 
+  const detailsLink = isCampaign ? `/campaigns/${session.id}` : `/games/${session.id}`;
+
   return (
     <div className={`rounded-lg border p-4 ${
       isHost 
@@ -58,10 +66,15 @@ function GameSessionCard({
     }`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <Link href={`/games/${session.id}`} className="hover:text-sky-300 transition-colors">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href={detailsLink} className="hover:text-sky-300 transition-colors">
               <h3 className="font-medium text-slate-100">{session.game}</h3>
             </Link>
+            {isCampaign && (
+              <span className="text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300">
+                Campaign
+              </span>
+            )}
             {userRole && (
               <span className={`text-xs px-2 py-1 rounded-full ${
                 isHost ? "bg-purple-500/20 text-purple-300" :
@@ -120,6 +133,18 @@ function GameSessionCard({
                 <span className="text-yellow-400">{session.waitlist.length}</span>
               </p>
             )}
+            {isCampaign && session.sessionsLeft !== undefined && (
+              <p>
+                <span className="text-slate-500">Sessions:</span>{" "}
+                <span className="text-slate-300">{session.sessionsLeft}</span>
+              </p>
+            )}
+            {isCampaign && session.costPerSession !== undefined && session.costPerSession > 0 && (
+              <p>
+                <span className="text-slate-500">Cost:</span>{" "}
+                <span className="text-slate-300">${session.costPerSession.toFixed(2)} per session</span>
+              </p>
+            )}
             {session.description && (
               <p className="mt-2 text-slate-300">{session.description}</p>
             )}
@@ -127,7 +152,7 @@ function GameSessionCard({
         </div>
         {session.imageUrl && (
           <div className="flex-shrink-0">
-            <Link href={`/games/${session.id}`}>
+            <Link href={detailsLink}>
               <img
                 src={session.imageUrl}
                 alt={session.game}
@@ -164,12 +189,31 @@ export default function DashboardPage() {
           setCurrentUserId(profileData.userId);
         }
 
-        // Fetch user's game sessions
+        // Fetch user's game sessions (one-time games)
         const gamesResponse = await fetch("/api/games/my-games");
+        let gameSessions: GameSession[] = [];
         if (gamesResponse.ok) {
-          const sessions = await gamesResponse.json();
-          setGameSessions(sessions);
+          gameSessions = await gamesResponse.json();
+          // Mark these as one-time games (not campaigns)
+          gameSessions = gameSessions.map(session => ({ ...session, isCampaign: false }));
         }
+
+        // Fetch user's campaign sessions (multi-session campaigns)
+        const campaignsResponse = await fetch("/api/campaigns/my-campaigns");
+        let campaignSessions: GameSession[] = [];
+        if (campaignsResponse.ok) {
+          campaignSessions = await campaignsResponse.json();
+          // Mark these as campaigns
+          campaignSessions = campaignSessions.map(session => ({ ...session, isCampaign: true }));
+        }
+
+        // Combine both game sessions and campaign sessions
+        const allSessions = [...gameSessions, ...campaignSessions];
+        
+        // Sort by date (earliest first)
+        allSessions.sort((a, b) => a.date.localeCompare(b.date));
+        
+        setGameSessions(allSessions);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
@@ -185,18 +229,18 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Dashboard</h1>
         <p className="mt-2 text-sm text-slate-400">
-          View your upcoming game sessions - games you&apos;re hosting, playing, or waitlisted for.
+          View your upcoming sessions - one-time games and campaigns you&apos;re hosting, playing, or waitlisted for.
         </p>
       </div>
 
       <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-        <h2 className="text-lg font-semibold text-slate-100">My Upcoming Games</h2>
+        <h2 className="text-lg font-semibold text-slate-100">My Upcoming Sessions</h2>
         <p className="mt-2 text-sm text-slate-400">
-          Games you&apos;re hosting or participating in
+          Your one-time games and multi-session campaigns
         </p>
 
         {isLoading ? (
-          <p className="mt-4 text-sm text-slate-500">Loading your games...</p>
+          <p className="mt-4 text-sm text-slate-500">Loading your sessions...</p>
         ) : gameSessions.length > 0 ? (
           <div className="mt-4 space-y-3">
             {gameSessions.map((session) => (
@@ -211,7 +255,7 @@ export default function DashboardPage() {
         ) : (
           <div className="mt-4 space-y-3">
             <p className="text-sm text-slate-500">
-              You don&apos;t have any upcoming games yet.
+              You don&apos;t have any upcoming sessions yet.
             </p>
             <Link
               href="/find"
