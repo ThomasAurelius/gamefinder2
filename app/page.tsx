@@ -15,49 +15,7 @@ export default function HomePage() {
 					height={320}
 					className="h-60 w-auto"
 				/>
-				<section className="rounded-2xl border border-sky-500/20 bg-gradient-to-br from-sky-900/30 to-slate-900/50 p-8 shadow-xl max-w-2xl">
-					<h2 className="text-2xl font-bold text-sky-400 mb-4">
-						Why Choose Paid Campaigns?
-					</h2>
-					<ul className="space-y-3 text-left">
-						<li className="flex items-start gap-3">
-							<span className="text-sky-400 mt-1">✓</span>
-							<p className="text-slate-300">
-								<strong className="text-slate-100">
-									Professional DM Experience:
-								</strong>{" "}
-								A dedicated Game Master brings polish and expertise that
-								elevates your game beyond casual sessions with friends.
-							</p>
-						</li>
-						<li className="flex items-start gap-3">
-							<span className="text-sky-400 mt-1">✓</span>
-							<p className="text-slate-300">
-								<strong className="text-slate-100">
-									High-Quality Sessions:
-								</strong>{" "}
-								Professional preparation, engaging storytelling, and
-								consistent quality ensure memorable adventures every
-								time.
-							</p>
-						</li>
-						<li className="flex items-start gap-3">
-							<span className="text-sky-400 mt-1">✓</span>
-							<p className="text-slate-300">
-								<strong className="text-slate-100">
-									Player Accountability:
-								</strong>{" "}
-								Financial commitment encourages better attendance and
-								more engaged participants, creating a reliable gaming
-								schedule.
-							</p>
-						</li>
-					</ul>
-					<p className="mt-6 text-xs text-slate-400 text-center">
-						Free games and campaigns will always be an option. Paid games are hosted at the discretion of the host, and not required.
-					</p>
-				</section>
-				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
+				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
 					<p className="mt-4 max-w-2xl text-base text-slate-300">
 						Build your tabletop adventures, manage characters, and
 						discover new games with ease. Use the navigation above to
@@ -79,23 +37,111 @@ export default function HomePage() {
 						</Link>
 					</div>
 				</section>
-				<section className="grid gap-6 sm:grid-cols-2">
-					<article className="rounded-xl border border-white/5 bg-slate-900/60 p-6">
-						<h2 className="text-xl font-semibold">Stay Organized</h2>
-						<p className="mt-2 text-sm text-slate-300">
-							Track campaigns, monitor upcoming sessions, and keep your
-							group on the same page from one convenient hub.
-						</p>
+				<section className="grid gap-6 sm:grid-cols-2 max-w-4xl">
+					<article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
+						<h2 className="text-2xl font-bold text-slate-100 mb-4">Stay Organized</h2>
+						<ul className="space-y-3 text-left">
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Campaign Management:
+									</strong>{" "}
+									Track multiple campaigns with detailed notes and player information.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Session Scheduling:
+									</strong>{" "}
+									Monitor upcoming sessions and keep your group synchronized.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Character Library:
+									</strong>{" "}
+									Manage all your characters in one convenient hub.
+								</p>
+							</li>
+						</ul>
 					</article>
-					<article className="rounded-xl border border-white/5 bg-slate-900/60 p-6">
-						<h2 className="text-xl font-semibold">
+					<article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
+						<h2 className="text-2xl font-bold text-slate-100 mb-4">
 							Discover &amp; Share
 						</h2>
-						<p className="mt-2 text-sm text-slate-300">
-							Browse curated game recommendations and share your
-							favorites with friends in just a few clicks.
-						</p>
+						<ul className="space-y-3 text-left">
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Find Games:
+									</strong>{" "}
+									Browse available game sessions and campaigns in your area.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Connect with Players:
+									</strong>{" "}
+									Join groups and make new friends who share your gaming interests.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Share Adventures:
+									</strong>{" "}
+									Tell your epic tales and inspire the community.
+								</p>
+							</li>
+						</ul>
 					</article>
+				</section>
+				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
+					<h2 className="text-2xl font-bold text-slate-100 mb-4">
+						Games vs. Campaigns
+					</h2>
+					<div className="space-y-4 text-left">
+						<div>
+							<h3 className="text-lg font-semibold text-indigo-400 mb-2">
+								Games (One-Time Sessions)
+							</h3>
+							<p className="text-slate-300">
+								Perfect for board game nights or standalone adventures. Games are single-session events that 
+								complete in one sitting. Great for trying new games or playing with different groups.
+							</p>
+						</div>
+						<div>
+							<h3 className="text-lg font-semibold text-indigo-400 mb-2">
+								Campaigns (Multiple Sessions)
+							</h3>
+							<p className="text-slate-300">
+								Ongoing adventures that span multiple sessions. Ideal for TTRPGs like D&amp;D where your 
+								story unfolds over time. Campaigns can be free or paid, depending on the Game Master's preference.
+							</p>
+						</div>
+					</div>
+				</section>
+				<section className="rounded-xl border border-white/5 bg-slate-900/60 p-6 max-w-2xl">
+					<h3 className="text-lg font-semibold text-slate-200 mb-3">
+						Why Choose Paid Campaigns?
+					</h3>
+					<p className="text-sm text-slate-300 mb-3">
+						Professional Game Masters offer dedicated preparation, engaging storytelling, and 
+						consistent quality. Financial commitment also encourages better attendance and more 
+						engaged participants.
+					</p>
+					<p className="text-xs text-slate-400 text-center">
+						Free games and campaigns will always be an option. Paid games are hosted at the discretion of the host, and not required.
+					</p>
 				</section>
 			</div>
 		</>
