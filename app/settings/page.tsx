@@ -14,6 +14,22 @@ export default function SettingsPage() {
 	const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
 	const [checkingStripeStatus, setCheckingStripeStatus] = useState(false);
 	const [stripeOnboardingComplete, setStripeOnboardingComplete] = useState(false);
+	const [flags, setFlags] = useState<Array<{
+		id: string;
+		taleId: string;
+		flaggedBy: string;
+		flaggerName: string;
+		flagReason: string;
+		flagComment?: string;
+		flaggedAt: Date;
+		tale?: {
+			id: string;
+			title: string;
+			content: string;
+			userId: string;
+		};
+	}>>([]);
+	const [loadingFlags, setLoadingFlags] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
@@ -29,6 +45,9 @@ export default function SettingsPage() {
 					const announcementData = await announcementRes.json();
 					setAnnouncement(announcementData.message || "");
 					setIsActive(announcementData.isActive || false);
+
+					// Load flags
+					loadFlags();
 				}
 
 				// Load user profile to check canPostPaidGames
@@ -113,6 +132,46 @@ export default function SettingsPage() {
 			setMessage("Failed to save announcement. Please try again.");
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const loadFlags = async () => {
+		try {
+			setLoadingFlags(true);
+			const response = await fetch("/api/admin/flags");
+			if (response.ok) {
+				const data = await response.json();
+				setFlags(data);
+			}
+		} catch (error) {
+			console.error("Failed to load flags:", error);
+		} finally {
+			setLoadingFlags(false);
+		}
+	};
+
+	const handleFlagAction = async (flagId: string, taleId: string, action: "allow" | "delete") => {
+		setMessage("");
+
+		try {
+			const response = await fetch("/api/admin/flags", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ flagId, taleId, action }),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to resolve flag");
+			}
+
+			setMessage(`Flag ${action === "delete" ? "resolved and content deleted" : "resolved and content allowed"} successfully!`);
+			setTimeout(() => setMessage(""), 3000);
+			
+			// Reload flags
+			loadFlags();
+		} catch (error) {
+			console.error("Failed to resolve flag:", error);
+			setMessage("Failed to resolve flag. Please try again.");
 		}
 	};
 
@@ -248,6 +307,72 @@ export default function SettingsPage() {
 								Additional settings will be available here in the
 								future.
 							</p>
+						</div>
+					)}
+
+					{isAdmin && (
+						<div className="rounded-lg border border-amber-700/50 bg-amber-900/20 p-4">
+							<h2 className="text-sm font-medium text-amber-200">
+								Admin: Content Flags
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								Review and manage flagged Tall Tales content.
+							</p>
+
+							<div className="mt-4 space-y-3">
+								{loadingFlags ? (
+									<p className="text-sm text-slate-400">Loading flags...</p>
+								) : flags.length === 0 ? (
+									<p className="text-sm text-slate-400">No unresolved flags.</p>
+								) : (
+									<div className="space-y-3">
+										{flags.map((flag) => (
+											<div
+												key={flag.id}
+												className="rounded-lg border border-slate-700 bg-slate-950/60 p-3 space-y-2"
+											>
+												<div className="flex items-start justify-between">
+													<div className="flex-1">
+														<p className="text-sm font-medium text-slate-200">
+															{flag.tale?.title || "Tale not found"}
+														</p>
+														<p className="text-xs text-slate-400 mt-1">
+															Reason: <span className="text-amber-400 capitalize">{flag.flagReason}</span>
+														</p>
+														<p className="text-xs text-slate-400">
+															Reported by: {flag.flaggerName}
+														</p>
+														{flag.flagComment && (
+															<p className="text-xs text-slate-300 mt-1 italic">
+																&quot;{flag.flagComment}&quot;
+															</p>
+														)}
+														{flag.tale && (
+															<p className="text-xs text-slate-500 mt-2 line-clamp-2">
+																{flag.tale.content}
+															</p>
+														)}
+													</div>
+												</div>
+												<div className="flex gap-2 pt-2">
+													<button
+														onClick={() => handleFlagAction(flag.id, flag.taleId, "allow")}
+														className="flex-1 rounded bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"
+													>
+														Allow
+													</button>
+													<button
+														onClick={() => handleFlagAction(flag.id, flag.taleId, "delete")}
+														className="flex-1 rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-700"
+													>
+														Delete
+													</button>
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
 						</div>
 					)}
 				</div>

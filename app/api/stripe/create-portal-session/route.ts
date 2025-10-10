@@ -87,6 +87,30 @@ export async function POST(request: Request) {
                 const ensureSubscriptionCancelFeature = (
                         features: Stripe.BillingPortal.Configuration.Features | null | undefined
                 ): Stripe.BillingPortal.ConfigurationCreateParams.Features => {
+                        const mapProductsToCreateParams = (
+                                products: Stripe.BillingPortal.Configuration.Features.SubscriptionUpdate.Product[]
+                        ): Stripe.BillingPortal.ConfigurationCreateParams.Features.SubscriptionUpdate.Product[] => {
+                                return products.map((product) => {
+                                        const mapped: Stripe.BillingPortal.ConfigurationCreateParams.Features.SubscriptionUpdate.Product = {
+                                                product: product.product,
+                                                prices: product.prices ?? [],
+                                        };
+
+                                        if (product.adjustable_quantity) {
+                                                const { enabled, maximum, minimum } = product.adjustable_quantity;
+                                                mapped.adjustable_quantity = {
+                                                        enabled,
+                                                        maximum: maximum ?? undefined,
+                                                        minimum: minimum ?? undefined,
+                                                };
+                                        }
+
+                                        return mapped;
+                                });
+                        };
+
+                        const subscriptionUpdateFeature = features?.subscription_update;
+
                         return {
                                 customer_update: {
                                         allowed_updates: ['email', 'address'],
@@ -102,17 +126,18 @@ export async function POST(request: Request) {
                                         enabled: true,
                                         mode: 'at_period_end',
                                 },
-                                subscription_update:
-                                        features?.subscription_update?.enabled
-                                                ? {
-                                                          enabled: true,
-                                                          default_allowed_updates:
-                                                                  features.subscription_update.default_allowed_updates ?? [],
-                                                          products: features.subscription_update.products ?? [],
-                                                  }
-                                                : {
-                                                          enabled: false,
-                                                  },
+                                subscription_update: subscriptionUpdateFeature?.enabled
+                                        ? {
+                                                  enabled: true,
+                                                  default_allowed_updates:
+                                                          subscriptionUpdateFeature.default_allowed_updates ?? undefined,
+                                                  products: subscriptionUpdateFeature.products
+                                                          ? mapProductsToCreateParams(subscriptionUpdateFeature.products)
+                                                          : [],
+                                          }
+                                        : {
+                                                  enabled: false,
+                                          },
                         } satisfies Stripe.BillingPortal.ConfigurationCreateParams.Features;
                 };
 

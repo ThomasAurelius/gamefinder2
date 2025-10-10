@@ -53,6 +53,9 @@ export default function HomePage() {
 							</p>
 						</li>
 					</ul>
+					<p className="mt-6 text-xs text-slate-400 text-center">
+						Free games and campaigns will always be an option. Paid games are hosted at the discretion of the host, and not required.
+					</p>
 				</section>
 				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
 					<p className="mt-4 max-w-2xl text-base text-slate-300">
