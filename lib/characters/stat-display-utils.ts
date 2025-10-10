@@ -27,35 +27,38 @@ export type CategorizedStats = {
 /**
  * Standard D&D physical ability scores
  */
-const PHYSICAL_STATS = ["Strength", "Dexterity", "Constitution"];
+const PHYSICAL_STATS = ["Strength", "Dexterity", "Constitution"] as const;
 
 /**
  * Standard D&D mental ability scores
  */
-const MENTAL_STATS = ["Intelligence", "Wisdom", "Charisma"];
-
-/**
- * All standard D&D ability scores
- */
-const ALL_STANDARD_STATS = [...PHYSICAL_STATS, ...MENTAL_STATS];
+const MENTAL_STATS = ["Intelligence", "Wisdom", "Charisma"] as const;
 
 /**
  * Categorizes stats into physical, mental, and other categories
  * for display purposes in the character detail view.
+ * Uses a single pass through the stats array for efficiency.
  * 
  * @param stats - Array of stat fields with name and value
  * @returns Categorized stats with flags for display logic
  */
 export function categorizeStats(stats: StatField[]): CategorizedStats {
-  const physical = stats.filter((stat) => PHYSICAL_STATS.includes(stat.name));
-  const mental = stats.filter((stat) => MENTAL_STATS.includes(stat.name));
-  const other = stats.filter((stat) => !ALL_STANDARD_STATS.includes(stat.name));
-  const hasStandardStats = physical.length > 0 || mental.length > 0;
+  const result = stats.reduce(
+    (acc, stat) => {
+      if (PHYSICAL_STATS.includes(stat.name as typeof PHYSICAL_STATS[number])) {
+        acc.physical.push(stat);
+      } else if (MENTAL_STATS.includes(stat.name as typeof MENTAL_STATS[number])) {
+        acc.mental.push(stat);
+      } else {
+        acc.other.push(stat);
+      }
+      return acc;
+    },
+    { physical: [] as StatField[], mental: [] as StatField[], other: [] as StatField[] }
+  );
 
   return {
-    physical,
-    mental,
-    other,
-    hasStandardStats,
+    ...result,
+    hasStandardStats: result.physical.length > 0 || result.mental.length > 0,
   };
 }
