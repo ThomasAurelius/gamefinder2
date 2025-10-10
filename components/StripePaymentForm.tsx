@@ -46,7 +46,7 @@ function CheckoutForm({
     setIsLoading(true);
     setMessage(null);
 
-    const { error } = await stripe.confirmPayment({
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       confirmParams: {
         return_url: `${window.location.origin}/payment/success`,
@@ -58,6 +58,28 @@ function CheckoutForm({
       setMessage(error.message || "An unexpected error occurred.");
       onError?.(error.message || "An unexpected error occurred.");
     } else {
+      // For subscriptions, finalize the payment to activate the subscription
+      if (paymentMode === "subscription" && paymentIntent) {
+        try {
+          const finalizeResponse = await fetch("/api/stripe/finalize-subscription-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paymentIntentId: paymentIntent.id }),
+          });
+
+          if (!finalizeResponse.ok) {
+            console.error("Failed to finalize subscription payment");
+            // Don't show error to user since payment was successful
+            // The subscription may still activate automatically
+          } else {
+            console.log("Subscription payment finalized successfully");
+          }
+        } catch (finalizeError) {
+          console.error("Error finalizing subscription:", finalizeError);
+          // Don't show error to user since payment was successful
+        }
+      }
+
       setMessage(
         paymentMode === "subscription"
           ? "Subscription started successfully!"
