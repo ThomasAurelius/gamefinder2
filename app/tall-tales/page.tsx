@@ -5,6 +5,8 @@ import TallTalesDisclaimer from "@/components/TallTalesDisclaimer";
 import TaleActions from "@/components/TaleActions";
 import { Tale, TaleFromAPI } from "@/lib/tall-tales/client-types";
 import { GAME_OPTIONS } from "@/lib/constants";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function TallTalesPage() {
 	const [title, setTitle] = useState("");
@@ -529,9 +531,11 @@ export default function TallTalesPage() {
 							<div className="flex items-start justify-between gap-4">
 								<div className="flex-1">
 									<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
-									{/* Content is displayed as plain text with whitespace-pre-line, which is safe from XSS.
-									    For full Markdown rendering, a library like react-markdown with sanitization would be needed. */}
-									<p className="whitespace-pre-line text-slate-300">{tale.content}</p>
+									<div className="prose prose-invert prose-slate max-w-none prose-headings:text-slate-100 prose-p:text-slate-300 prose-strong:text-slate-100 prose-em:text-slate-300 prose-li:text-slate-300 prose-blockquote:text-slate-400">
+										<ReactMarkdown remarkPlugins={[remarkGfm]}>
+											{tale.content}
+										</ReactMarkdown>
+									</div>
 								</div>
 								{tale.imageUrls && tale.imageUrls.length > 0 && (
 									<div className="flex-shrink-0">
