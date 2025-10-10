@@ -541,6 +541,19 @@ export default function CampaignDetailPage() {
                 className="mt-4 h-32 w-32 rounded-lg border border-slate-700 object-cover"
               />
             )}
+            
+            {/* Pending Players Manager - shown directly under image */}
+            {pendingPlayersList.length > 0 && (
+              <div className="mt-4">
+                <PendingCampaignPlayersManager
+                  campaignId={campaignId}
+                  pendingPlayers={pendingPlayersList}
+                  onPlayerApproved={handlePlayerApproved}
+                  onPlayerDenied={handlePlayerDenied}
+                />
+              </div>
+            )}
+            
             <div className="mt-4 space-y-2 text-sm text-slate-400">
               <p>
                 <span className="text-slate-500">Date:</span>{" "}
@@ -791,16 +804,6 @@ export default function CampaignDetailPage() {
                     </p>
                   </div>
                 </div>
-                
-                {/* Pending Players Manager */}
-                {pendingPlayersList.length > 0 && (
-                  <PendingCampaignPlayersManager
-                    campaignId={campaignId}
-                    pendingPlayers={pendingPlayersList}
-                    onPlayerApproved={handlePlayerApproved}
-                    onPlayerDenied={handlePlayerDenied}
-                  />
-                )}
                 
                 {/* Current Players Section */}
                 <div className="space-y-3">
