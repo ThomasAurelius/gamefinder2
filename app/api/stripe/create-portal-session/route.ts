@@ -62,6 +62,7 @@ export async function POST(request: Request) {
 		// Get the return URL from the request body
 		const body = await request.json();
 		const returnUrl = body.returnUrl || `${request.headers.get("origin")}/subscriptions`;
+		const subscriptionId = body.subscriptionId;
 
 		// Get or create a portal configuration with subscription cancellation enabled
 		// We look for an existing active configuration first to avoid creating duplicates
@@ -210,6 +211,22 @@ export async function POST(request: Request) {
 		// Add configuration if we successfully created/retrieved one
 		if (configId) {
 			sessionParams.configuration = configId;
+		}
+		
+		// If a subscriptionId is provided, use flow_data to navigate directly to that subscription
+		if (subscriptionId) {
+			sessionParams.flow_data = {
+				type: 'subscription_update',
+				subscription_update: {
+					subscription: subscriptionId,
+				},
+				after_completion: {
+					type: 'redirect',
+					redirect: {
+						return_url: returnUrl,
+					},
+				},
+			};
 		}
 		
 		const session = await stripe.billingPortal.sessions.create(sessionParams);
