@@ -46,9 +46,9 @@ export default function HomePage() {
 								<strong className="text-slate-100">
 									Your Hub for Tabletop & Board Gaming:
 								</strong>{" "}
-								Whether you're a player or a Game Master, The Gathering
-								Call is your go-to platform for all things tabletop and
-								board gaming.
+								Whether you&apos;re a player or a Game Master, The
+								Gathering Call is your go-to platform for all things
+								tabletop and board gaming.
 							</p>
 						</li>
 						<li className="flex items-start gap-3">
