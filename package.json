@@ -29,7 +29,8 @@
     "remark-gfm": "^4.0.1",
     "resend": "^4.0.0",
     "stripe": "^19.1.0",
-    "temporal-polyfill": "^0.3.0"
+    "temporal-polyfill": "^0.3.0",
+    "twilio": "^5.10.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
