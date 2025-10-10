@@ -764,7 +764,7 @@ export default function FindGamesPage() {
 					{isLoading ? (
 						<p className="mt-4 text-sm text-slate-500">Loading...</p>
 					) : gameSessions.length > 0 ? (
-						<div className="mt-4 space-y-3">
+						<div className="mt-4 space-y-3 max-w-3xl">
 							{gameSessions.map((session) => (
 								<GameSessionCard
 									key={session.id}
@@ -797,7 +797,7 @@ export default function FindGamesPage() {
 					{isLoadingEvents ? (
 						<p className="mt-4 text-sm text-slate-500">Loading events...</p>
 					) : allEvents.length > 0 ? (
-						<div className="mt-4 space-y-3">
+						<div className="mt-4 space-y-3 max-w-3xl">
 							{allEvents.map((event) => (
 								<GameSessionCard
 									key={event.id}

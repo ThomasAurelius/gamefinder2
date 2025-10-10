@@ -758,7 +758,7 @@ export default function FindCampaignsPage() {
 					{isLoading ? (
 						<p className="mt-4 text-sm text-slate-500">Loading...</p>
 					) : campaigns.length > 0 ? (
-						<div className="mt-4 space-y-3">
+						<div className="mt-4 space-y-3 max-w-3xl">
 							{campaigns.map((event) => (
 								<CampaignCard
 									key={event.id}
@@ -791,7 +791,7 @@ export default function FindCampaignsPage() {
 					{isLoadingEvents ? (
 						<p className="mt-4 text-sm text-slate-500">Loading events...</p>
 					) : allEvents.length > 0 ? (
-						<div className="mt-4 space-y-3">
+						<div className="mt-4 space-y-3 max-w-3xl">
 							{allEvents.map((event) => (
 								<CampaignCard
 									key={event.id}
