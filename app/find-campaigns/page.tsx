@@ -90,11 +90,6 @@ function CampaignCard({
 						>
 							<h3 className="font-medium text-slate-100">{campaign.game}</h3>
 						</Link>
-						{isHost && campaign.pendingPlayers.length > 0 && (
-							<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
-								{campaign.pendingPlayers.length} pending approval{campaign.pendingPlayers.length !== 1 ? 's' : ''}
-							</span>
-						)}
 					</div>
 					<div className="mt-2 space-y-1 text-sm text-slate-400">
 						{campaign.hostName && (
@@ -232,6 +227,11 @@ function CampaignCard({
 								className="h-36 w-36 md:h-72 md:w-72 rounded-lg border border-slate-700 object-cover"
 							/>
 						</Link>
+					)}
+					{isHost && campaign.pendingPlayers.length > 0 && (
+						<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
+							{campaign.pendingPlayers.length} pending approval{campaign.pendingPlayers.length !== 1 ? 's' : ''}
+						</span>
 					)}
 				</div>
 			</div>
