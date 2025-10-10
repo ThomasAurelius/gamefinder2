@@ -73,32 +73,32 @@ export default function HostDashboardPage() {
 			}
 		};
 
-		const fetchSessions = async () => {
-			setSessionsLoading(true);
-			try {
-				// Fetch upcoming sessions
-				const upcomingResponse = await fetch("/api/host/sessions?type=upcoming");
-				if (upcomingResponse.ok) {
-					const upcomingData: SessionsResponse = await upcomingResponse.json();
-					setUpcomingSessions(upcomingData.sessions);
-				}
-
-				// Fetch recent sessions
-				const recentResponse = await fetch("/api/host/sessions?type=recent");
-				if (recentResponse.ok) {
-					const recentData: SessionsResponse = await recentResponse.json();
-					setRecentSessions(recentData.sessions);
-				}
-			} catch (err) {
-				console.error("Error fetching sessions:", err);
-			} finally {
-				setSessionsLoading(false);
-			}
-		};
-
 		fetchStatus();
 		fetchSessions();
 	}, []);
+
+	const fetchSessions = async () => {
+		setSessionsLoading(true);
+		try {
+			// Fetch upcoming sessions
+			const upcomingResponse = await fetch("/api/host/sessions?type=upcoming");
+			if (upcomingResponse.ok) {
+				const upcomingData: SessionsResponse = await upcomingResponse.json();
+				setUpcomingSessions(upcomingData.sessions);
+			}
+
+			// Fetch recent sessions
+			const recentResponse = await fetch("/api/host/sessions?type=recent");
+			if (recentResponse.ok) {
+				const recentData: SessionsResponse = await recentResponse.json();
+				setRecentSessions(recentData.sessions);
+			}
+		} catch (err) {
+			console.error("Error fetching sessions:", err);
+		} finally {
+			setSessionsLoading(false);
+		}
+	};
 
 	const handleOpenDashboard = async () => {
 		setIsDashboardLoading(true);
@@ -129,24 +129,7 @@ export default function HostDashboardPage() {
 
 	const handleRefund = async () => {
 		// Refetch sessions after a refund is issued
-		setSessionsLoading(true);
-		try {
-			const upcomingResponse = await fetch("/api/host/sessions?type=upcoming");
-			if (upcomingResponse.ok) {
-				const upcomingData: SessionsResponse = await upcomingResponse.json();
-				setUpcomingSessions(upcomingData.sessions);
-			}
-
-			const recentResponse = await fetch("/api/host/sessions?type=recent");
-			if (recentResponse.ok) {
-				const recentData: SessionsResponse = await recentResponse.json();
-				setRecentSessions(recentData.sessions);
-			}
-		} catch (err) {
-			console.error("Error refetching sessions:", err);
-		} finally {
-			setSessionsLoading(false);
-		}
+		await fetchSessions();
 	};
 
 	if (isLoading) {

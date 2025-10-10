@@ -34,7 +34,7 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 	const [success, setSuccess] = useState<string | null>(null);
 
 	const handleRefund = async (playerId: string, playerName: string) => {
-		if (!confirm(`Are you sure you want to issue a refund to ${playerName}?`)) {
+		if (!confirm(`Are you sure you want to issue a refund to ${playerName}? This action cannot be undone.`)) {
 			return;
 		}
 
@@ -134,7 +134,7 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 									{player.avatarUrl && (
 										<img
 											src={player.avatarUrl}
-											alt={player.name}
+											alt={`${player.name}'s avatar`}
 											className="h-8 w-8 rounded-full"
 										/>
 									)}
@@ -167,7 +167,7 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 									{player.avatarUrl && (
 										<img
 											src={player.avatarUrl}
-											alt={player.name}
+											alt={`${player.name}'s avatar`}
 											className="h-8 w-8 rounded-full"
 										/>
 									)}
@@ -200,7 +200,7 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 									{player.avatarUrl && (
 										<img
 											src={player.avatarUrl}
-											alt={player.name}
+											alt={`${player.name}'s avatar`}
 											className="h-8 w-8 rounded-full"
 										/>
 									)}
