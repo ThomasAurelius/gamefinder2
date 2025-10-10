@@ -401,7 +401,14 @@ export default function CampaignPaymentPage() {
           <StripePaymentForm
             clientSecret={clientSecret}
             paymentMode={paymentMode}
-            onSuccess={() => setPaymentComplete(true)}
+            onSuccess={() => {
+              setPaymentComplete(true);
+              // For subscription payments, also update hasActiveSubscription
+              // so the UI switches to "Manage Subscription" button
+              if (paymentMode === "subscription") {
+                setHasActiveSubscription(true);
+              }
+            }}
             onError={(errMsg) => setError(errMsg)}
           />
         ) : (
