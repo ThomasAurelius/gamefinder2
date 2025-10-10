@@ -7,6 +7,7 @@ import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 import CommitmentDialog from "@/components/CommitmentDialog";
+import Advertisement from "@/components/Advertisement";
 
 type Campaign = {
 	id: string;
@@ -507,6 +508,8 @@ export default function FindCampaignsPage() {
 					combination.
 				</p>
 			</div>
+
+			<Advertisement />
 
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
 				<button

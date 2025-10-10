@@ -7,6 +7,7 @@ import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
+import Advertisement from "@/components/Advertisement";
 
 type GameSession = {
 	id: string;
@@ -513,6 +514,8 @@ export default function FindGamesPage() {
 					combination.
 				</p>
 			</div>
+
+			<Advertisement />
 
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
 				<button
