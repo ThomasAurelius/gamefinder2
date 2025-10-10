@@ -1,0 +1,113 @@
+[
+  {
+    "username": "adventurer-jane",
+    "profile": {
+      "displayName": "Adventurer Jane",
+      "bio": "Story-driven GM and occasional player who loves weaving character-focused tales.",
+      "location": "Seattle, WA",
+      "favoriteGames": [
+        "Dungeons & Dragons",
+        "Blades in the Dark",
+        "Monster of the Week"
+      ],
+      "availability": {
+        "Monday": [
+          "7:00 PM"
+        ],
+        "Wednesday": [
+          "6:00 PM",
+          "8:00 PM"
+        ],
+        "Saturday": [
+          "2:00 PM"
+        ]
+      }
+    },
+    "characters": [
+      {
+        "slug": "lirael-the-bold",
+        "id": "lirael-the-bold",
+        "name": "Lirael the Bold",
+        "system": "dnd",
+        "campaign": "Crown of the First Dawn",
+        "stats": [
+          {
+            "name": "Strength",
+            "value": "+2"
+          },
+          {
+            "name": "Dexterity",
+            "value": "+3"
+          },
+          {
+            "name": "Constitution",
+            "value": "+1"
+          },
+          {
+            "name": "Intelligence",
+            "value": "+0"
+          },
+          {
+            "name": "Wisdom",
+            "value": "+1"
+          },
+          {
+            "name": "Charisma",
+            "value": "+4"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Acrobatics",
+            "value": "+5"
+          },
+          {
+            "name": "Persuasion",
+            "value": "+7"
+          },
+          {
+            "name": "Performance",
+            "value": "+6"
+          }
+        ],
+        "notes": "A traveling bard seeking the lost verses of the First Dawn to restore hope to her homeland.",
+        "createdAt": "2024-01-04T18:10:00.000Z",
+        "updatedAt": "2024-04-22T09:45:00.000Z"
+      },
+      {
+        "slug": "professor-ixion",
+        "id": "professor-ixion",
+        "name": "Professor Ixion",
+        "system": "other",
+        "campaign": "Echoes of the Liminal Lab",
+        "stats": [
+          {
+            "name": "Reason",
+            "value": "d10"
+          },
+          {
+            "name": "Courage",
+            "value": "d8"
+          },
+          {
+            "name": "Adaptability",
+            "value": "d6"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Occult Theory",
+            "value": "+3"
+          },
+          {
+            "name": "Temporal Engineering",
+            "value": "+4"
+          }
+        ],
+        "notes": "A scientist-turned-occultist experimenting with planar echoes to seal a growing rift.",
+        "createdAt": "2024-02-15T16:00:00.000Z",
+        "updatedAt": "2024-05-05T12:30:00.000Z"
+      }
+    ]
+  }
+]

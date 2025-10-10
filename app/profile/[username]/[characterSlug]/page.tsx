@@ -18,6 +18,73 @@ function FieldList({
     return null;
   }
 
+  // For ability scores, split into physical and mental stats if they match standard 6
+  if (title === "Stats") {
+    const physicalStats = items.filter((item) =>
+      ["Strength", "Dexterity", "Constitution"].includes(item.name)
+    );
+    const mentalStats = items.filter((item) =>
+      ["Intelligence", "Wisdom", "Charisma"].includes(item.name)
+    );
+    const otherStats = items.filter(
+      (item) =>
+        !["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"].includes(item.name)
+    );
+    
+    const hasStandardStats = physicalStats.length > 0 || mentalStats.length > 0;
+    
+    if (hasStandardStats) {
+      return (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+          <div className="grid gap-2 grid-cols-2">
+            <div className="space-y-2">
+              {physicalStats.map((item) => (
+                <div
+                  key={item.name}
+                  className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
+                >
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    {item.name}
+                  </span>
+                  <span className="text-base font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              {mentalStats.map((item) => (
+                <div
+                  key={item.name}
+                  className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
+                >
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    {item.name}
+                  </span>
+                  <span className="text-base font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {otherStats.length > 0 && (
+            <div className="grid gap-2 md:grid-cols-2 mt-2">
+              {otherStats.map((item) => (
+                <div
+                  key={item.name}
+                  className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
+                >
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    {item.name}
+                  </span>
+                  <span className="text-base font-medium">{item.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
