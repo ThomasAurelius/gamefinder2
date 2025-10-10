@@ -2,13 +2,94 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { formatGameSystem, getPublicCharacter } from "@/lib/public-profiles";
+import type { GameSystemKey } from "@/lib/characters/types";
+
+// Skill-to-attribute mappings for different game systems
+const SKILL_ATTRIBUTES: Record<GameSystemKey, Record<string, string> | undefined> = {
+  dnd: {
+    "Acrobatics": "Dex",
+    "Animal Handling": "Wis",
+    "Arcana": "Int",
+    "Athletics": "Str",
+    "Deception": "Cha",
+    "History": "Int",
+    "Insight": "Wis",
+    "Intimidation": "Cha",
+    "Investigation": "Int",
+    "Medicine": "Wis",
+    "Nature": "Int",
+    "Perception": "Wis",
+    "Performance": "Cha",
+    "Persuasion": "Cha",
+    "Religion": "Int",
+    "Sleight of Hand": "Dex",
+    "Stealth": "Dex",
+    "Survival": "Wis",
+  },
+  pathfinder: {
+    "Acrobatics": "Dex",
+    "Arcana": "Int",
+    "Athletics": "Str",
+    "Crafting": "Int",
+    "Deception": "Cha",
+    "Diplomacy": "Cha",
+    "Intimidation": "Cha",
+    "Medicine": "Wis",
+    "Nature": "Wis",
+    "Occultism": "Int",
+    "Performance": "Cha",
+    "Religion": "Wis",
+    "Society": "Int",
+    "Stealth": "Dex",
+    "Survival": "Wis",
+    "Thievery": "Dex",
+  },
+  starfinder: {
+    "Acrobatics": "Dex",
+    "Athletics": "Str",
+    "Bluff": "Cha",
+    "Computers": "Int",
+    "Culture": "Int",
+    "Diplomacy": "Cha",
+    "Disguise": "Cha",
+    "Engineering": "Int",
+    "Intimidate": "Cha",
+    "Life Science": "Int",
+    "Medicine": "Int",
+    "Mysticism": "Wis",
+    "Perception": "Wis",
+    "Physical Science": "Int",
+    "Piloting": "Dex",
+    "Profession": "Cha/Int/Wis",
+    "Sense Motive": "Wis",
+    "Sleight of Hand": "Dex",
+    "Stealth": "Dex",
+    "Survival": "Wis",
+  },
+  shadowdark: undefined,
+  other: undefined,
+};
+
+function getSkillDisplayName(skillName: string, system: string): string {
+  const systemKey = system as GameSystemKey;
+  const attributes = SKILL_ATTRIBUTES[systemKey];
+  const attribute = attributes?.[skillName];
+  
+  if (attribute) {
+    return `${skillName} (${attribute})`;
+  }
+  
+  return skillName;
+}
 
 function FieldList({
   title,
   items,
+  system,
 }: {
   title: string;
   items: { name: string; value: string }[];
+  system?: string;
 }) {
   if (items.length === 0) {
     return null;
@@ -24,7 +105,7 @@ function FieldList({
             className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
           >
             <span className="block text-xs uppercase tracking-wide text-slate-400">
-              {item.name}
+              {system && title === "Skills" ? getSkillDisplayName(item.name, system) : item.name}
             </span>
             <span className="text-base font-medium">{item.value}</span>
           </div>
@@ -93,7 +174,7 @@ export default async function CharacterPage({
       ) : null}
 
       <FieldList title="Stats" items={character.stats} />
-      <FieldList title="Skills" items={character.skills} />
+      <FieldList title="Skills" items={character.skills} system={character.system} />
     </div>
   );
 }
