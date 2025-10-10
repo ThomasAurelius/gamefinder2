@@ -289,6 +289,13 @@ export default function CampaignDetailPage() {
 
   const isCreator = currentUserId && campaign?.userId === currentUserId;
 
+  // Helper variables for paid campaign logic
+  const isPaidCampaign = campaign && campaign.costPerSession && campaign.costPerSession > 0;
+  const isApprovedPlayer = currentUserId && campaign?.signedUpPlayers.includes(currentUserId);
+  const isPendingPlayer = currentUserId && campaign?.pendingPlayers.includes(currentUserId);
+  const isWaitlistedPlayer = currentUserId && campaign?.waitlist.includes(currentUserId);
+  const showPaymentSection = !isCreator && currentUserId && isPaidCampaign;
+
   // Fetch subscription status for all players when the campaign creator views their campaign
   useEffect(() => {
     const fetchPlayerSubscriptions = async () => {
@@ -681,7 +688,7 @@ export default function CampaignDetailPage() {
       )}
 
       {/* Only show payment button for non-creators who are approved (in signedUpPlayers) */}
-      {!isCreator && currentUserId && campaign.costPerSession && campaign.costPerSession > 0 && campaign.signedUpPlayers.includes(currentUserId) && (
+      {showPaymentSection && isApprovedPlayer && (
         <div className="mt-6">
           {hasActiveSubscription ? (
             <div className="space-y-4">
@@ -708,14 +715,14 @@ export default function CampaignDetailPage() {
       )}
 
       {/* Show status message for users who are pending or waitlisted */}
-      {!isCreator && currentUserId && campaign.costPerSession && campaign.costPerSession > 0 && !campaign.signedUpPlayers.includes(currentUserId) && (
+      {showPaymentSection && !isApprovedPlayer && (
         <div className="mt-6">
-          {campaign.pendingPlayers.includes(currentUserId) && (
+          {isPendingPlayer && (
             <div className="rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-orange-200">
               Your request to join this campaign is pending approval from the host. You&apos;ll be able to proceed with payment once you&apos;ve been approved.
             </div>
           )}
-          {campaign.waitlist.includes(currentUserId) && (
+          {isWaitlistedPlayer && (
             <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
               You&apos;re currently on the waitlist for this campaign. You&apos;ll be able to proceed with payment once a spot becomes available and you&apos;re moved to the active players list.
             </div>

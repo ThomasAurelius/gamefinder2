@@ -246,6 +246,9 @@ export default function CampaignPaymentPage() {
     return null;
   }
 
+  // Helper to check if campaign requires payment
+  const isPaidCampaign = campaign.costPerSession && campaign.costPerSession > 0;
+
   // Redirect campaign creators - they don't need to pay for their own campaigns
   if (currentUserId && campaign.userId === currentUserId) {
     return (
@@ -267,7 +270,7 @@ export default function CampaignPaymentPage() {
   }
 
   // Check if user is pending approval or on waitlist - they can't pay until approved
-  if (currentUserId && campaign.costPerSession && campaign.costPerSession > 0) {
+  if (currentUserId && isPaidCampaign) {
     const isApproved = campaign.signedUpPlayers.includes(currentUserId);
     const isPending = campaign.pendingPlayers.includes(currentUserId);
     const isWaitlisted = campaign.waitlist.includes(currentUserId);
