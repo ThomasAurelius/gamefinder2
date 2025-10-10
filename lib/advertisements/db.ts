@@ -44,7 +44,7 @@ export async function getActiveAdvertisement(): Promise<AdvertisementDocument | 
 
 /**
  * Get the active advertisement for a user based on their location
- * Returns the closest advertisement within 100 miles
+ * Returns the closest advertisement within 50 miles
  */
 export async function getActiveAdvertisementForUser(
   userLatitude?: number,
@@ -58,8 +58,8 @@ export async function getActiveAdvertisementForUser(
       return advertisements[0] || null;
     }
     
-    // Filter advertisements within 100 miles and sort by distance
-    const MAX_DISTANCE_MILES = 100;
+    // Filter advertisements within 50 miles and sort by distance
+    const MAX_DISTANCE_MILES = 50;
     const adsWithDistance = advertisements
       .filter(ad => ad.latitude !== undefined && ad.longitude !== undefined)
       .map(ad => ({
@@ -95,7 +95,8 @@ export async function setAdvertisement(
   userId: string,
   imageUrl: string,
   isActive: boolean,
-  zipCode?: string
+  zipCode?: string,
+  url?: string
 ): Promise<AdvertisementDocument> {
   const db = await getDb();
   const advertisementsCollection = db.collection<AdvertisementDocument>("advertisements");
@@ -115,6 +116,9 @@ export async function setAdvertisement(
       imageUrl: imageUrl.trim(),
       isActive: true,
       zipCode: zipCode?.trim() || undefined,
+      url: url?.trim() || undefined,
+      impressions: [],
+      clicks: 0,
       createdAt: now,
       updatedAt: now,
       createdBy: userId,
@@ -144,8 +148,81 @@ export async function setAdvertisement(
   return {
     imageUrl: "",
     isActive: false,
+    impressions: [],
+    clicks: 0,
     createdAt: now,
     updatedAt: now,
     createdBy: userId,
   };
+}
+
+/**
+ * Track impression for an advertisement
+ * Only counts if the user hasn't been shown this ad in the last hour
+ */
+export async function trackImpression(
+  advertisementId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const advertisementsCollection = db.collection<AdvertisementDocument>("advertisements");
+    const { ObjectId } = await import("mongodb");
+    
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    
+    // Use a single atomic operation to check and update in one go
+    // This prevents race conditions by using MongoDB's atomic operations
+    const result = await advertisementsCollection.updateOne(
+      {
+        _id: new ObjectId(advertisementId),
+        // Only update if user hasn't seen ad in the last hour
+        $nor: [
+          {
+            impressions: {
+              $elemMatch: {
+                userId: userId,
+                timestamp: { $gte: oneHourAgo }
+              }
+            }
+          }
+        ]
+      },
+      {
+        $push: {
+          impressions: { userId, timestamp: new Date() }
+        },
+        $pull: {
+          impressions: { timestamp: { $lt: oneHourAgo } }
+        }
+      }
+    );
+    
+    // If modifiedCount is 0, the user has already seen this ad in the last hour
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error("Error tracking impression:", error);
+    return false;
+  }
+}
+
+/**
+ * Track click for an advertisement
+ */
+export async function trackClick(advertisementId: string): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const advertisementsCollection = db.collection<AdvertisementDocument>("advertisements");
+    const { ObjectId } = await import("mongodb");
+    
+    await advertisementsCollection.updateOne(
+      { _id: new ObjectId(advertisementId) },
+      { $inc: { clicks: 1 } }
+    );
+    
+    return true;
+  } catch (error) {
+    console.error("Error tracking click:", error);
+    return false;
+  }
 }

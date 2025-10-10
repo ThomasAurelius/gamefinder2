@@ -34,6 +34,7 @@ export default function SettingsPage() {
 	const [adImageUrl, setAdImageUrl] = useState("");
 	const [adIsActive, setAdIsActive] = useState(false);
 	const [adZipCode, setAdZipCode] = useState("");
+	const [adUrl, setAdUrl] = useState("");
 	const [uploadingAd, setUploadingAd] = useState(false);
 	const [savingAd, setSavingAd] = useState(false);
 
@@ -229,7 +230,7 @@ export default function SettingsPage() {
 			const response = await fetch("/api/advertisements", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ imageUrl: adImageUrl, isActive: adIsActive, zipCode: adZipCode }),
+				body: JSON.stringify({ imageUrl: adImageUrl, isActive: adIsActive, zipCode: adZipCode, url: adUrl }),
 			});
 
 			if (!response.ok) {
@@ -454,7 +455,7 @@ export default function SettingsPage() {
 							</h2>
 							<p className="mt-2 text-xs text-slate-400">
 								Upload and manage the site advertisement (800x800 image).
-								Add a zip code to show the ad only within 100 miles of that location.
+								Add a zip code to show the ad only within 50 miles of that location.
 							</p>
 
 							<div className="mt-4 space-y-3">
@@ -486,7 +487,27 @@ export default function SettingsPage() {
 										className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 									/>
 									<p className="text-xs text-slate-500">
-										Leave blank to show to all users. If provided, ad will only show within 100 miles.
+										Leave blank to show to all users. If provided, ad will only show within 50 miles.
+									</p>
+								</div>
+
+								<div className="space-y-2">
+									<label
+										htmlFor="ad-url"
+										className="block text-sm font-medium text-slate-200"
+									>
+										URL (optional)
+									</label>
+									<input
+										id="ad-url"
+										type="url"
+										value={adUrl}
+										onChange={(e) => setAdUrl(e.target.value)}
+										placeholder="https://example.com"
+										className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+									/>
+									<p className="text-xs text-slate-500">
+										When users click the ad, they will be taken to this URL in a new window.
 									</p>
 								</div>
 
