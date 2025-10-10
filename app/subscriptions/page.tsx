@@ -47,7 +47,7 @@ export default function SubscriptionsPage() {
 		fetchSubscriptions();
 	}, []);
 
-	const handleManageSubscription = async () => {
+	const handleManageSubscription = async (subscriptionId?: string) => {
 		try {
 			setIsRedirecting(true);
 			setError(null);
@@ -57,6 +57,7 @@ export default function SubscriptionsPage() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					returnUrl: `${window.location.origin}/subscriptions`,
+					subscriptionId,
 				}),
 			});
 
@@ -171,7 +172,7 @@ export default function SubscriptionsPage() {
 				</div>
 				{subscriptions.length > 0 && (
 					<button
-						onClick={handleManageSubscription}
+						onClick={() => handleManageSubscription()}
 						disabled={isRedirecting}
 						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
 					>
@@ -304,7 +305,7 @@ export default function SubscriptionsPage() {
 										</button>
 									) : (
 										<button
-											onClick={handleManageSubscription}
+											onClick={() => handleManageSubscription(subscription.id)}
 											disabled={isRedirecting}
 											className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-sky-500 hover:text-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
 										>
