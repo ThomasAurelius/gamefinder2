@@ -17,6 +17,7 @@ import {
   StoredCharacter,
 } from "@/lib/characters/types";
 import { SKILL_ATTRIBUTES, getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import { categorizeStats } from "@/lib/characters/stat-display-utils";
 import AvatarCropper from "@/components/AvatarCropper";
 
 const ROLE_OPTIONS = [
@@ -638,18 +639,7 @@ export default function CharactersPage() {
                         Ability Scores
                       </h3>
                       {(() => {
-                        const physicalStats = item.stats.filter((stat) =>
-                          ["Strength", "Dexterity", "Constitution"].includes(stat.name)
-                        );
-                        const mentalStats = item.stats.filter((stat) =>
-                          ["Intelligence", "Wisdom", "Charisma"].includes(stat.name)
-                        );
-                        const otherStats = item.stats.filter(
-                          (stat) =>
-                            !["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"].includes(stat.name)
-                        );
-                        
-                        const hasStandardStats = physicalStats.length > 0 || mentalStats.length > 0;
+                        const { physical: physicalStats, mental: mentalStats, other: otherStats, hasStandardStats } = categorizeStats(item.stats);
                         
                         if (hasStandardStats) {
                           return (

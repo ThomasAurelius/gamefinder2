@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
 import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import { categorizeStats } from "@/lib/characters/stat-display-utils";
 import type { GameSystemKey } from "@/lib/characters/types";
 
 function formatGameSystem(system: string): string {
@@ -33,18 +34,7 @@ function FieldList({
 
   // For ability scores, split into physical and mental stats if they match standard 6
   if (title === "Stats") {
-    const physicalStats = items.filter((item) =>
-      ["Strength", "Dexterity", "Constitution"].includes(item.name)
-    );
-    const mentalStats = items.filter((item) =>
-      ["Intelligence", "Wisdom", "Charisma"].includes(item.name)
-    );
-    const otherStats = items.filter(
-      (item) =>
-        !["Strength", "Dexterity", "Constitution", "Intelligence", "Wisdom", "Charisma"].includes(item.name)
-    );
-    
-    const hasStandardStats = physicalStats.length > 0 || mentalStats.length > 0;
+    const { physical: physicalStats, mental: mentalStats, other: otherStats, hasStandardStats } = categorizeStats(items);
     
     if (hasStandardStats) {
       return (
