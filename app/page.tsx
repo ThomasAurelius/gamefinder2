@@ -139,9 +139,17 @@ export default function HomePage() {
 						consistent quality. Financial commitment also encourages better attendance and more
 						engaged participants.
 					</p>
-					<p className="text-xs text-slate-400 text-center">
+					<p className="text-xs text-slate-400 text-center mb-4">
 						Free games and campaigns will always be an option. Paid games are hosted at the discretion of the host, and not required.
 					</p>
+					<div className="text-center">
+						<Link
+							href="/about-hosting-paid-games"
+							className="inline-block text-sm text-sky-400 hover:text-sky-300 hover:underline"
+						>
+							Learn more about hosting paid games →
+						</Link>
+					</div>
 				</section>
 			</div>
 		</>
