@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS } from "@/lib/constants";
+import { GAME_OPTIONS, DAYS_OF_WEEK, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 
 type Player = {
@@ -15,9 +15,27 @@ type Player = {
 	favoriteGames: string[];
 	avatarUrl?: string;
 	distance?: number;
+	availability?: Record<string, string[]>;
 };
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"];
+
+const tagButtonClasses = (
+	active: boolean,
+	options?: { disabled?: boolean; size?: "sm" | "md" }
+) => {
+	const sizeClasses =
+		options?.size === "sm" ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm";
+	const baseClasses = "rounded-full border transition-colors";
+	const activeClasses = active
+		? "border-sky-400 bg-sky-500/20 text-sky-100"
+		: "border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500";
+	const disabledClasses = options?.disabled
+		? "cursor-not-allowed opacity-40 hover:border-slate-700"
+		: "";
+
+	return [sizeClasses, baseClasses, activeClasses, disabledClasses].join(" ");
+};
 
 function PlayerCard({ player }: { player: Player }) {
 	const displayName = player.name;
@@ -95,9 +113,11 @@ export default function PlayersPage() {
 
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedRole, setSelectedRole] = useState("");
-	const [selectedGame, setSelectedGame] = useState("");
+	const [selectedGames, setSelectedGames] = useState<string[]>([]);
 	const [locationSearch, setLocationSearch] = useState("");
 	const [radiusMiles, setRadiusMiles] = useState("50");
+	const [selectedDayOfWeek, setSelectedDayOfWeek] = useState("");
+	const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
 
 	useEffect(() => {
 		// Load all players on initial mount
@@ -132,11 +152,13 @@ export default function PlayersPage() {
 			const params = new URLSearchParams();
 			if (searchQuery) params.append("search", searchQuery);
 			if (selectedRole) params.append("role", selectedRole);
-			if (selectedGame) params.append("game", selectedGame);
+			if (selectedGames.length > 0) params.append("games", selectedGames.join(","));
 			if (locationSearch) {
 				params.append("location", locationSearch);
 				params.append("radius", radiusMiles);
 			}
+			if (selectedDayOfWeek) params.append("dayOfWeek", selectedDayOfWeek);
+			if (selectedTimeSlot) params.append("timeSlot", selectedTimeSlot);
 
 			const response = await fetch(`/api/players?${params.toString()}`);
 			if (!response.ok) {
@@ -153,6 +175,16 @@ export default function PlayersPage() {
 		}
 	};
 
+	const toggleGame = (game: string) => {
+		setSelectedGames((prev) => {
+			if (prev.includes(game)) {
+				return prev.filter((g) => g !== game);
+			} else {
+				return [...prev, game];
+			}
+		});
+	};
+
 	return (
 		<section className="space-y-6">
 			<div>
@@ -160,7 +192,7 @@ export default function PlayersPage() {
 					Find Players
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Search for players by name, location, role, or favorite games.
+					Search for players by name, location, role, favorite games, or availability.
 					Use zip code or city to find players within a specific radius.
 				</p>
 			</div>
@@ -272,28 +304,97 @@ export default function PlayersPage() {
 							</select>
 						</div>
 
-						{/* Game Filter */}
+						{/* Game Types Filter (Multiple Selection) */}
+						<div>
+							<label className="mb-2 block text-sm font-medium text-slate-300">
+								Game Types (Select Multiple)
+							</label>
+							<p className="mb-3 text-xs text-slate-400">
+								Select the types of games you want to find players for
+							</p>
+							<div className="flex flex-wrap gap-2">
+								{GAME_OPTIONS.map((game) => (
+									<button
+										key={game}
+										type="button"
+										onClick={() => toggleGame(game)}
+										className={tagButtonClasses(
+											selectedGames.includes(game),
+											{ size: "sm" }
+										)}
+									>
+										{game}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Day of Week Filter */}
 						<div>
 							<label
-								htmlFor="game"
+								htmlFor="dayOfWeek"
 								className="mb-2 block text-sm font-medium text-slate-300"
 							>
-								Favorite Game
+								Day of Week
 							</label>
 							<select
-								id="game"
-								value={selectedGame}
-								onChange={(e) => setSelectedGame(e.target.value)}
+								id="dayOfWeek"
+								value={selectedDayOfWeek}
+								onChange={(e) => {
+									setSelectedDayOfWeek(e.target.value);
+									// Reset time slot when day changes
+									if (!e.target.value) {
+										setSelectedTimeSlot("");
+									}
+								}}
 								className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
 							>
-								<option value="">All Games</option>
-								{GAME_OPTIONS.map((game) => (
-									<option key={game} value={game}>
-										{game}
+								<option value="">Any Day</option>
+								{DAYS_OF_WEEK.map((day) => (
+									<option key={day} value={day}>
+										{day}
 									</option>
 								))}
 							</select>
 						</div>
+
+						{/* Time Slot Filter */}
+						{selectedDayOfWeek && (
+							<div>
+								<label className="mb-2 block text-sm font-medium text-slate-300">
+									Preferred Time on {selectedDayOfWeek}
+								</label>
+								<p className="mb-3 text-xs text-slate-400">
+									Select a time slot to find players available at that time
+								</p>
+								<div className="space-y-3">
+									{TIME_SLOT_GROUPS.map((group) => (
+										<div key={group.label}>
+											<div className="mb-2 text-xs font-medium text-slate-400">
+												{group.label}:
+											</div>
+											<div className="flex flex-wrap gap-2">
+												{group.slots.map((slot) => {
+													const active = selectedTimeSlot === slot;
+													return (
+														<button
+															key={slot}
+															type="button"
+															onClick={() => setSelectedTimeSlot(active ? "" : slot)}
+															className={tagButtonClasses(active, {
+																size: "sm",
+															})}
+														>
+															{slot}
+														</button>
+													);
+												})}
+											</div>
+										</div>
+									))}
+								</div>
+							</div>
+						)}
 
 						<button
 							type="button"
@@ -318,7 +419,12 @@ export default function PlayersPage() {
 								Found{" "}
 								<span className="text-sky-400">{players.length}</span>{" "}
 								{players.length === 1 ? "player" : "players"}
-								{(searchQuery || selectedRole || selectedGame) &&
+								{(searchQuery || 
+									selectedRole || 
+									selectedGames.length > 0 ||
+									selectedDayOfWeek ||
+									selectedTimeSlot ||
+									locationSearch) &&
 									" matching your criteria"}
 							</>
 						) : (

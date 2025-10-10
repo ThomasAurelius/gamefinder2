@@ -12,6 +12,7 @@ export type PlayerSearchResult = {
   favoriteGames: string[];
   avatarUrl?: string;
   distance?: number; // Distance in miles
+  availability?: Record<string, string[]>; // Day of week to time slots
 };
 
 export async function GET(request: Request) {
@@ -22,6 +23,9 @@ export async function GET(request: Request) {
     const game = searchParams.get("game") || "";
     const locationSearch = searchParams.get("location") || "";
     const radiusMiles = parseFloat(searchParams.get("radius") || "50");
+    const dayOfWeek = searchParams.get("dayOfWeek") || "";
+    const timeSlot = searchParams.get("timeSlot") || "";
+    const games = searchParams.get("games") || ""; // Multiple games comma-separated
 
     const db = await getDb();
     const usersCollection = db.collection("users");
@@ -47,9 +51,25 @@ export async function GET(request: Request) {
       filter["profile.primaryRole"] = role;
     }
 
-    // Add game filter
-    if (game) {
+    // Add game filter (single game for backward compatibility or multiple games)
+    if (games) {
+      // Multiple games filter takes precedence
+      const gamesList = games.split(",").map((g) => g.trim()).filter(Boolean);
+      if (gamesList.length > 0) {
+        filter["profile.favoriteGames"] = { $in: gamesList };
+      }
+    } else if (game) {
+      // Single game filter for backward compatibility
       filter["profile.favoriteGames"] = { $in: [game] };
+    }
+
+    // Add day of week and time slot filters
+    if (dayOfWeek && timeSlot) {
+      // Both day and specific time slot specified
+      filter[`profile.availability.${dayOfWeek}`] = { $in: [timeSlot] };
+    } else if (dayOfWeek) {
+      // Only day specified, find anyone available on that day
+      filter[`profile.availability.${dayOfWeek}`] = { $exists: true, $ne: [] };
     }
 
     const users = await usersCollection
@@ -65,6 +85,7 @@ export async function GET(request: Request) {
           "profile.avatarUrl": 1,
           "profile.latitude": 1,
           "profile.longitude": 1,
+          "profile.availability": 1,
         },
       })
       .toArray();
@@ -79,6 +100,7 @@ export async function GET(request: Request) {
       favoriteGames: user.profile?.favoriteGames || [],
       avatarUrl: user.profile?.avatarUrl || undefined,
       distance: undefined,
+      availability: user.profile?.availability || {},
     }));
 
     // If location search is provided, geocode it and filter by distance
