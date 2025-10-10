@@ -74,9 +74,8 @@ export const SKILL_ATTRIBUTES: Record<GameSystemKey, Record<string, string> | un
  * @param system - The game system key
  * @returns The skill name with attribute in parentheses if applicable
  */
-export function getSkillDisplayName(skillName: string, system: string): string {
-  const systemKey = system as GameSystemKey;
-  const attributes = SKILL_ATTRIBUTES[systemKey];
+export function getSkillDisplayName(skillName: string, system: GameSystemKey): string {
+  const attributes = SKILL_ATTRIBUTES[system];
   const attribute = attributes?.[skillName];
   
   if (attribute) {

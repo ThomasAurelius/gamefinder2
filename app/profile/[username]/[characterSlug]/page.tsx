@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { formatGameSystem, getPublicCharacter } from "@/lib/public-profiles";
 import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import type { GameSystemKey } from "@/lib/characters/types";
 
 function FieldList({
   title,
@@ -11,7 +12,7 @@ function FieldList({
 }: {
   title: string;
   items: { name: string; value: string }[];
-  system?: string;
+  system?: GameSystemKey;
 }) {
   if (items.length === 0) {
     return null;

@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
 import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import type { GameSystemKey } from "@/lib/characters/types";
 
 function formatGameSystem(system: string): string {
   const systemMap: Record<string, string> = {
@@ -24,7 +25,7 @@ function FieldList({
 }: {
   title: string;
   items: { name: string; value: string }[];
-  system?: string;
+  system?: GameSystemKey;
 }) {
   if (items.length === 0) {
     return null;
