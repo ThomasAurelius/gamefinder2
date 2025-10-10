@@ -140,10 +140,10 @@ export default function HomePage() {
 						</div>
 					</div>
 				</section>
-				<section className="rounded-xl border border-white/5 bg-slate-900/60 p-6 max-w-2xl">
-					<h3 className="text-lg font-semibold text-slate-200 mb-3">
+				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
+					<h2 className="text-2xl font-bold text-slate-100 mb-4">
 						Why Choose Paid Campaigns?
-					</h3>
+					</h2>
 					<p className="text-sm text-slate-300 mb-3">
 						Professional Game Masters offer dedicated preparation,
 						engaging storytelling, and consistent quality. Financial
