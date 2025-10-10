@@ -115,7 +115,7 @@ export default function HomePage() {
 								Games (One-Time Sessions)
 							</h3>
 							<p className="text-slate-300">
-								Perfect for board game nights or standalone adventures. Games are single-session events that 
+								Perfect for board game nights or standalone adventures. Games are single-session events that
 								complete in one sitting. Great for trying new games or playing with different groups.
 							</p>
 						</div>
@@ -124,8 +124,8 @@ export default function HomePage() {
 								Campaigns (Multiple Sessions)
 							</h3>
 							<p className="text-slate-300">
-								Ongoing adventures that span multiple sessions. Ideal for TTRPGs like D&amp;D where your 
-								story unfolds over time. Campaigns can be free or paid, depending on the Game Master's preference.
+								Ongoing adventures that span multiple sessions. Ideal for TTRPGs like D&amp;D where your
+								story unfolds over time. Campaigns can be free or paid, depending on the Game Master&apos;s preference.
 							</p>
 						</div>
 					</div>
@@ -135,8 +135,8 @@ export default function HomePage() {
 						Why Choose Paid Campaigns?
 					</h3>
 					<p className="text-sm text-slate-300 mb-3">
-						Professional Game Masters offer dedicated preparation, engaging storytelling, and 
-						consistent quality. Financial commitment also encourages better attendance and more 
+						Professional Game Masters offer dedicated preparation, engaging storytelling, and
+						consistent quality. Financial commitment also encourages better attendance and more
 						engaged participants.
 					</p>
 					<p className="text-xs text-slate-400 text-center">
