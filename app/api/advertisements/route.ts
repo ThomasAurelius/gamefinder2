@@ -38,9 +38,12 @@ export async function GET() {
       );
     }
     
-    // Track impression if we have a userId
+    // Track impression if we have a userId - fire and forget, don't block response
     if (userId && advertisement._id) {
-      await trackImpression(advertisement._id.toString(), userId);
+      // Don't await this - let it run in background
+      trackImpression(advertisement._id.toString(), userId).catch(error => {
+        console.error("Failed to track impression (non-blocking):", error);
+      });
     }
     
     return NextResponse.json(

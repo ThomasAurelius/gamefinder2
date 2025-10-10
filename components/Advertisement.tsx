@@ -30,20 +30,23 @@ export default function Advertisement() {
 	const handleClick = async () => {
 		if (!advertisement?.url || !advertisement?.id) return;
 
-		// Track the click
+		// Track the click - don't block on this
 		try {
-			await fetch("/api/advertisements/click", {
+			fetch("/api/advertisements/click", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({ advertisementId: advertisement.id }),
+			}).catch(error => {
+				// Log but don't show to user - tracking failure shouldn't impact UX
+				console.error("Failed to track click:", error);
 			});
 		} catch (error) {
-			console.error("Failed to track click:", error);
+			console.error("Failed to initiate click tracking:", error);
 		}
 
-		// Open URL in new window
+		// Open URL in new window regardless of tracking status
 		window.open(advertisement.url, "_blank", "noopener,noreferrer");
 	};
 

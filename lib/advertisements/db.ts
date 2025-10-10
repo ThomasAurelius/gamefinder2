@@ -171,38 +171,35 @@ export async function trackImpression(
     
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     
-    // Check if user has seen this ad in the last hour
-    const ad = await advertisementsCollection.findOne({
-      _id: new ObjectId(advertisementId),
-      "impressions.userId": userId,
-      "impressions.timestamp": { $gte: oneHourAgo }
-    });
-    
-    // If user has seen the ad in the last hour, don't count it again
-    if (ad) {
-      return false;
-    }
-    
-    // Clean up old impressions (older than 1 hour) and add new impression
-    await advertisementsCollection.updateOne(
-      { _id: new ObjectId(advertisementId) },
+    // Use a single atomic operation to check and update in one go
+    // This prevents race conditions by using MongoDB's atomic operations
+    const result = await advertisementsCollection.updateOne(
       {
+        _id: new ObjectId(advertisementId),
+        // Only update if user hasn't seen ad in the last hour
+        $nor: [
+          {
+            impressions: {
+              $elemMatch: {
+                userId: userId,
+                timestamp: { $gte: oneHourAgo }
+              }
+            }
+          }
+        ]
+      },
+      {
+        $push: {
+          impressions: { userId, timestamp: new Date() }
+        },
         $pull: {
           impressions: { timestamp: { $lt: oneHourAgo } }
         }
       }
     );
     
-    await advertisementsCollection.updateOne(
-      { _id: new ObjectId(advertisementId) },
-      {
-        $push: {
-          impressions: { userId, timestamp: new Date() }
-        }
-      }
-    );
-    
-    return true;
+    // If modifiedCount is 0, the user has already seen this ad in the last hour
+    return result.modifiedCount > 0;
   } catch (error) {
     console.error("Error tracking impression:", error);
     return false;
