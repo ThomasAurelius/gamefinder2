@@ -10,7 +10,7 @@ export default function HomePage() {
 				<h1 className="text-3xl font-bold sm:text-4xl">Welcome!</h1>
 				<Image
 					src="/newlogo.png"
-					alt="The Gathering Call Logo"
+					alt="The Gathering Call Logo "
 					width={320}
 					height={320}
 					className="h-60 w-auto"
@@ -39,7 +39,9 @@ export default function HomePage() {
 				</section>
 				<section className="grid gap-6 sm:grid-cols-2 max-w-4xl">
 					<article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
-						<h2 className="text-2xl font-bold text-slate-100 mb-4">Stay Organized</h2>
+						<h2 className="text-2xl font-bold text-slate-100 mb-4">
+							Stay Organized
+						</h2>
 						<ul className="space-y-3 text-left">
 							<li className="flex items-start gap-3">
 								<span className="text-indigo-400 mt-1">✓</span>
@@ -47,7 +49,8 @@ export default function HomePage() {
 									<strong className="text-slate-100">
 										Campaign Management:
 									</strong>{" "}
-									Track multiple campaigns with detailed notes and player information.
+									Track multiple campaigns with detailed notes and
+									player information.
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
@@ -56,7 +59,8 @@ export default function HomePage() {
 									<strong className="text-slate-100">
 										Session Scheduling:
 									</strong>{" "}
-									Monitor upcoming sessions and keep your group synchronized.
+									Monitor upcoming sessions and keep your group
+									synchronized.
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
@@ -81,7 +85,8 @@ export default function HomePage() {
 									<strong className="text-slate-100">
 										Find Games:
 									</strong>{" "}
-									Browse available game sessions and campaigns in your area.
+									Browse available game sessions and campaigns in your
+									area.
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
@@ -90,7 +95,8 @@ export default function HomePage() {
 									<strong className="text-slate-100">
 										Connect with Players:
 									</strong>{" "}
-									Join groups and make new friends who share your gaming interests.
+									Join groups and make new friends who share your
+									gaming interests.
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
@@ -115,8 +121,10 @@ export default function HomePage() {
 								Games (One-Time Sessions)
 							</h3>
 							<p className="text-slate-300">
-								Perfect for board game nights or standalone adventures. Games are single-session events that
-								complete in one sitting. Great for trying new games or playing with different groups.
+								Perfect for board game nights or standalone adventures.
+								Games are single-session events that complete in one
+								sitting. Great for trying new games or playing with
+								different groups.
 							</p>
 						</div>
 						<div>
@@ -124,8 +132,10 @@ export default function HomePage() {
 								Campaigns (Multiple Sessions)
 							</h3>
 							<p className="text-slate-300">
-								Ongoing adventures that span multiple sessions. Ideal for TTRPGs like D&amp;D where your
-								story unfolds over time. Campaigns can be free or paid, depending on the Game Master&apos;s preference.
+								Ongoing adventures that span multiple sessions. Ideal
+								for TTRPGs like D&amp;D where your story unfolds over
+								time. Campaigns can be free or paid, depending on the
+								Game Master&apos;s preference.
 							</p>
 						</div>
 					</div>
@@ -135,12 +145,14 @@ export default function HomePage() {
 						Why Choose Paid Campaigns?
 					</h3>
 					<p className="text-sm text-slate-300 mb-3">
-						Professional Game Masters offer dedicated preparation, engaging storytelling, and
-						consistent quality. Financial commitment also encourages better attendance and more
-						engaged participants.
+						Professional Game Masters offer dedicated preparation,
+						engaging storytelling, and consistent quality. Financial
+						commitment also encourages better attendance and more engaged
+						participants.
 					</p>
 					<p className="text-xs text-slate-400 text-center mb-4">
-						Free games and campaigns will always be an option. Paid games are hosted at the discretion of the host, and not required.
+						Free games and campaigns will always be an option. Paid games
+						are hosted at the discretion of the host, and not required.
 					</p>
 					<div className="text-center">
 						<Link
