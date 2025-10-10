@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export default function SettingsPage() {
@@ -30,6 +31,10 @@ export default function SettingsPage() {
 		};
 	}>>([]);
 	const [loadingFlags, setLoadingFlags] = useState(false);
+	const [adImageUrl, setAdImageUrl] = useState("");
+	const [adIsActive, setAdIsActive] = useState(false);
+	const [uploadingAd, setUploadingAd] = useState(false);
+	const [savingAd, setSavingAd] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
@@ -45,6 +50,12 @@ export default function SettingsPage() {
 					const announcementData = await announcementRes.json();
 					setAnnouncement(announcementData.message || "");
 					setIsActive(announcementData.isActive || false);
+
+					// Load advertisement
+					const adRes = await fetch("/api/advertisements");
+					const adData = await adRes.json();
+					setAdImageUrl(adData.imageUrl || "");
+					setAdIsActive(adData.isActive || false);
 
 					// Load flags
 					loadFlags();
@@ -172,6 +183,65 @@ export default function SettingsPage() {
 		} catch (error) {
 			console.error("Failed to resolve flag:", error);
 			setMessage("Failed to resolve flag. Please try again.");
+		}
+	};
+
+	const handleAdImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		setUploadingAd(true);
+		setMessage("");
+
+		try {
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("type", "advertisement");
+
+			const response = await fetch("/api/upload", {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to upload image");
+			}
+
+			const { url } = await response.json();
+			setAdImageUrl(url);
+			setMessage("Image uploaded successfully!");
+			setTimeout(() => setMessage(""), 3000);
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";
+			setMessage(errorMessage);
+		} finally {
+			setUploadingAd(false);
+		}
+	};
+
+	const handleSaveAdvertisement = async () => {
+		setSavingAd(true);
+		setMessage("");
+
+		try {
+			const response = await fetch("/api/advertisements", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ imageUrl: adImageUrl, isActive: adIsActive }),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to save advertisement");
+			}
+
+			setMessage("Advertisement saved successfully!");
+			setTimeout(() => setMessage(""), 3000);
+		} catch (error) {
+			console.error("Failed to save advertisement:", error);
+			setMessage("Failed to save advertisement. Please try again.");
+		} finally {
+			setSavingAd(false);
 		}
 	};
 
@@ -371,6 +441,78 @@ export default function SettingsPage() {
 											</div>
 										))}
 									</div>
+								)}
+							</div>
+						</div>
+					)}
+
+					{isAdmin && (
+						<div className="rounded-lg border border-amber-700/50 bg-amber-900/20 p-4">
+							<h2 className="text-sm font-medium text-amber-200">
+								Admin: Advertisement
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								Upload and manage the site advertisement (800x800 image).
+							</p>
+
+							<div className="mt-4 space-y-3">
+								<label className="flex items-center gap-2">
+									<input
+										type="checkbox"
+										checked={adIsActive}
+										onChange={(e) => setAdIsActive(e.target.checked)}
+										className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-amber-500 outline-none transition focus:ring-2 focus:ring-amber-500/40"
+									/>
+									<span className="text-sm text-slate-200">
+										Display advertisement
+									</span>
+								</label>
+
+								{adImageUrl && (
+									<div className="relative w-full max-w-xs aspect-square">
+										<Image
+											src={adImageUrl}
+											alt="Advertisement preview"
+											fill
+											className="rounded-lg border border-slate-700 object-contain"
+										/>
+									</div>
+								)}
+
+								<div className="space-y-2">
+									<label
+										htmlFor="ad-upload"
+										className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+									>
+										{uploadingAd ? "Uploading..." : "Upload Image (800x800)"}
+									</label>
+									<input
+										id="ad-upload"
+										type="file"
+										accept="image/jpeg,image/png,image/webp,image/gif"
+										onChange={handleAdImageUpload}
+										disabled={uploadingAd}
+										className="hidden"
+									/>
+									<p className="text-xs text-slate-500">
+										Recommended size: 800x800 pixels. Max file size: 5MB
+									</p>
+								</div>
+
+								<button
+									onClick={handleSaveAdvertisement}
+									disabled={savingAd}
+									className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									{savingAd ? "Saving..." : "Save Advertisement"}
+								</button>
+
+								{message && (
+									<p
+										className={`text-sm ${message.includes("success") ? "text-emerald-400" : "text-rose-400"}`}
+									>
+										{message}
+									</p>
 								)}
 							</div>
 						</div>
