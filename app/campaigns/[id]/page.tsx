@@ -54,6 +54,7 @@ type PlayerWithInfo = {
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  hasActiveSubscription?: boolean;
 };
 
 type CampaignNote = {
@@ -287,6 +288,52 @@ export default function CampaignDetailPage() {
   }, [campaign, campaignId]);
 
   const isCreator = currentUserId && campaign?.userId === currentUserId;
+
+  // Fetch subscription status for all players when the campaign creator views their campaign
+  useEffect(() => {
+    const fetchPlayerSubscriptions = async () => {
+      // Only fetch if user is the creator and campaign has a cost
+      if (!isCreator || !campaign || !campaign.costPerSession || campaign.costPerSession <= 0) {
+        return;
+      }
+
+      // Only fetch if there are signed up players
+      if (!signedUpPlayersList || signedUpPlayersList.length === 0) {
+        return;
+      }
+
+      try {
+        const playerIds = signedUpPlayersList.map(player => player.userId);
+        const response = await fetch('/api/stripe/check-players-subscriptions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            campaignId: campaignId,
+            playerIds: playerIds,
+          }),
+        });
+
+        if (response.ok) {
+          const subscriptionStatuses: Record<string, boolean> = await response.json();
+          
+          // Update signed up players list with subscription status
+          setSignedUpPlayersList(prev => 
+            prev.map(player => ({
+              ...player,
+              hasActiveSubscription: subscriptionStatuses[player.userId] || false,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error('Failed to fetch player subscription statuses:', error);
+      }
+    };
+
+    fetchPlayerSubscriptions();
+  }, [isCreator, campaign, campaignId, signedUpPlayersList.length]);
+
 
   const handlePlayerApproved = (player: PendingPlayer) => {
     // Remove from pending list
@@ -749,12 +796,33 @@ export default function CampaignDetailPage() {
                               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-medium">
                                 {index + 1}
                               </span>
-                              <div className="flex flex-col">
-                                <span className="text-sm text-slate-200">{player.name}</span>
-                                {player.characterName && (
-                                  <span className="text-xs text-slate-400">
-                                    Character: {player.characterName}
-                                  </span>
+                              <div className="flex flex-1 items-center justify-between">
+                                <div className="flex flex-col">
+                                  <span className="text-sm text-slate-200">{player.name}</span>
+                                  {player.characterName && (
+                                    <span className="text-xs text-slate-400">
+                                      Character: {player.characterName}
+                                    </span>
+                                  )}
+                                </div>
+                                {campaign.costPerSession && campaign.costPerSession > 0 && (
+                                  <div className="flex items-center gap-2">
+                                    {player.hasActiveSubscription ? (
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400 border border-emerald-500/30">
+                                        <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        Active Sub
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 rounded-full bg-slate-700/50 px-2.5 py-0.5 text-xs font-medium text-slate-400 border border-slate-600/30">
+                                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        No Sub
+                                      </span>
+                                    )}
+                                  </div>
                                 )}
                               </div>
                             </div>
