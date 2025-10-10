@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import StripePaymentForm from "@/components/StripePaymentForm";
 import { STRIPE_PUBLISHABLE_KEY } from "@/lib/stripe-config";
 import { STRIPE_NOT_CONFIGURED_MESSAGE } from "@/lib/stripe-messages";
+import { isPaidCampaign } from "@/lib/campaign-utils";
 
 interface Campaign {
   id: string;
@@ -246,9 +247,6 @@ export default function CampaignPaymentPage() {
     return null;
   }
 
-  // Helper to check if campaign requires payment
-  const isPaidCampaign = campaign.costPerSession && campaign.costPerSession > 0;
-
   // Redirect campaign creators - they don't need to pay for their own campaigns
   if (currentUserId && campaign.userId === currentUserId) {
     return (
@@ -270,7 +268,7 @@ export default function CampaignPaymentPage() {
   }
 
   // Check if user is pending approval or on waitlist - they can't pay until approved
-  if (currentUserId && isPaidCampaign) {
+  if (currentUserId && isPaidCampaign(campaign)) {
     const isApproved = campaign.signedUpPlayers.includes(currentUserId);
     const isPending = campaign.pendingPlayers.includes(currentUserId);
     const isWaitlisted = campaign.waitlist.includes(currentUserId);

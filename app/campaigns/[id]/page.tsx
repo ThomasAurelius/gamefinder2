@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
+import { isPaidCampaign } from "@/lib/campaign-utils";
 
 type PlayerSignup = {
   userId: string;
@@ -290,11 +291,10 @@ export default function CampaignDetailPage() {
   const isCreator = currentUserId && campaign?.userId === currentUserId;
 
   // Helper variables for paid campaign logic
-  const isPaidCampaign = campaign && campaign.costPerSession && campaign.costPerSession > 0;
   const isApprovedPlayer = currentUserId && campaign?.signedUpPlayers.includes(currentUserId);
   const isPendingPlayer = currentUserId && campaign?.pendingPlayers.includes(currentUserId);
   const isWaitlistedPlayer = currentUserId && campaign?.waitlist.includes(currentUserId);
-  const showPaymentSection = !isCreator && currentUserId && isPaidCampaign;
+  const showPaymentSection = !isCreator && currentUserId && isPaidCampaign(campaign);
 
   // Fetch subscription status for all players when the campaign creator views their campaign
   useEffect(() => {
