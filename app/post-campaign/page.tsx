@@ -776,7 +776,7 @@ export default function PostCampaignPage() {
 						{postedCampaignId && (
 							<div className="flex gap-3">
 								<ShareToFacebook
-									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedCampaignId}`}
+									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/${postedCampaignId}`}
 									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
 								/>
 							</div>
