@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
+import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import type { GameSystemKey } from "@/lib/characters/types";
 
 function formatGameSystem(system: string): string {
   const systemMap: Record<string, string> = {
@@ -19,9 +21,11 @@ function formatGameSystem(system: string): string {
 function FieldList({
   title,
   items,
+  system,
 }: {
   title: string;
   items: { name: string; value: string }[];
+  system?: GameSystemKey;
 }) {
   if (items.length === 0) {
     return null;
@@ -37,7 +41,7 @@ function FieldList({
             className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
           >
             <span className="block text-xs uppercase tracking-wide text-slate-400">
-              {item.name}
+              {system && title === "Skills" ? getSkillDisplayName(item.name, system) : item.name}
             </span>
             <span className="text-base font-medium">{item.value}</span>
           </div>
@@ -140,7 +144,7 @@ export default async function CharacterDetailPage({
         ) : null}
 
         <FieldList title="Stats" items={character.stats} />
-        <FieldList title="Skills" items={character.skills} />
+        <FieldList title="Skills" items={character.skills} system={character.system} />
       </div>
     );
   } catch (error) {

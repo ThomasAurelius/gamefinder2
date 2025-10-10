@@ -16,6 +16,7 @@ import {
   SkillField,
   StoredCharacter,
 } from "@/lib/characters/types";
+import { SKILL_ATTRIBUTES, getSkillDisplayName } from "@/lib/characters/skill-attributes";
 import AvatarCropper from "@/components/AvatarCropper";
 
 const ROLE_OPTIONS = [
@@ -32,6 +33,7 @@ type GameSystemConfig = {
   description: string;
   stats: string[];
   skills: string[];
+  skillAttributes?: Record<string, string>;
 };
 
 const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
@@ -67,6 +69,7 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Stealth",
       "Survival",
     ],
+    skillAttributes: SKILL_ATTRIBUTES.dnd,
   },
   pathfinder: {
     label: "Pathfinder 2e",
@@ -98,6 +101,7 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Survival",
       "Thievery",
     ],
+    skillAttributes: SKILL_ATTRIBUTES.pathfinder,
   },
   starfinder: {
     label: "Starfinder",
@@ -133,6 +137,7 @@ const GAME_SYSTEMS: Record<GameSystemKey, GameSystemConfig> = {
       "Stealth",
       "Survival",
     ],
+    skillAttributes: SKILL_ATTRIBUTES.starfinder,
   },
   shadowdark: {
     label: "Shadowdark",
@@ -660,7 +665,7 @@ export default function CharactersPage() {
                             className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
                           >
                             <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                              {skill.name || "Skill"}
+                              {getSkillDisplayName(skill.name, item.system) || "Skill"}
                             </div>
                             <div className="text-lg font-semibold text-slate-100">
                               {skill.value || "-"}
@@ -978,7 +983,7 @@ export default function CharactersPage() {
                             className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
                           />
                         ) : (
-                          skill.name
+                          getSkillDisplayName(skill.name, selectedSystem)
                         )}
                       </span>
                       <input

@@ -2,13 +2,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { formatGameSystem, getPublicCharacter } from "@/lib/public-profiles";
+import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
+import type { GameSystemKey } from "@/lib/characters/types";
 
 function FieldList({
   title,
   items,
+  system,
 }: {
   title: string;
   items: { name: string; value: string }[];
+  system?: GameSystemKey;
 }) {
   if (items.length === 0) {
     return null;
@@ -24,7 +28,7 @@ function FieldList({
             className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100"
           >
             <span className="block text-xs uppercase tracking-wide text-slate-400">
-              {item.name}
+              {system && title === "Skills" ? getSkillDisplayName(item.name, system) : item.name}
             </span>
             <span className="text-base font-medium">{item.value}</span>
           </div>
@@ -93,7 +97,7 @@ export default async function CharacterPage({
       ) : null}
 
       <FieldList title="Stats" items={character.stats} />
-      <FieldList title="Skills" items={character.skills} />
+      <FieldList title="Skills" items={character.skills} system={character.system} />
     </div>
   );
 }
