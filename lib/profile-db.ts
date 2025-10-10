@@ -17,6 +17,7 @@ export type ProfileRecord = {
   latitude?: number;
   longitude?: number;
   canPostPaidGames?: boolean; // Flag to allow posting paid campaigns
+  phoneNumber?: string; // Phone number for SMS notifications
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -85,6 +86,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
     latitude: profile.latitude,
     longitude: profile.longitude,
     canPostPaidGames: profile.canPostPaidGames ?? false,
+    phoneNumber: profile.phoneNumber,
   };
 }
 
