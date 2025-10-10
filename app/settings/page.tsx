@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export default function SettingsPage() {
@@ -468,11 +469,12 @@ export default function SettingsPage() {
 								</label>
 
 								{adImageUrl && (
-									<div className="relative w-full max-w-xs">
-										<img
+									<div className="relative w-full max-w-xs aspect-square">
+										<Image
 											src={adImageUrl}
 											alt="Advertisement preview"
-											className="w-full h-auto rounded-lg border border-slate-700"
+											fill
+											className="rounded-lg border border-slate-700 object-contain"
 										/>
 									</div>
 								)}
