@@ -141,27 +141,63 @@ export default function HomePage() {
 					</div>
 				</section>
 				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
-					<h2 className="text-2xl font-bold text-slate-100 mb-4">
-						Why Choose Paid Campaigns?
-					</h2>
-					<p className="text-sm text-slate-300 mb-3">
-						Professional Game Masters offer dedicated preparation,
-						engaging storytelling, and consistent quality. Financial
-						commitment also encourages better attendance and more engaged
-						participants.
-					</p>
-					<p className="text-xs text-slate-400 text-center mb-4">
-						Free games and campaigns will always be an option. Paid games
-						are hosted at the discretion of the host, and not required.
-					</p>
-					<div className="text-center">
+					<article className="">
+						<h2 className="text-2xl font-bold text-slate-100 mb-4">
+							Why choose Paid Campaigns?
+						</h2>
+						<ul className="space-y-3 text-left">
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Professional Game Masters:
+									</strong>{" "}
+									Offer dedicated preparation, engaging storytelling,
+									and consistent quality.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Financial Commitment:
+									</strong>{" "}
+									Financial commitment encourages better attendance and
+									more engaged participants.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Share Adventures:
+									</strong>{" "}
+									Tell your epic tales and inspire the community.
+								</p>
+							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-indigo-400 mt-1">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Free Games and Campaigns will always be an option.
+									</strong>{" "}
+									Paid games are hosted at the discretion of the host,
+									and not required.
+								</p>
+							</li>
+						</ul>
+
 						<Link
 							href="/about-hosting-paid-games"
-							className="inline-block text-sm text-sky-400 hover:text-sky-300 hover:underline"
+							className="inline-block  text-sm  hover:underline"
 						>
-							Learn more about hosting paid games →
+							<div className="flex justify-center items-center rounded-2xl bg-amber-600/50 p-2 m-4 shadow-xl">
+								<p className="text-amber-200 hover:text-white font-medium">
+									Learn more about hosting paid games →
+								</p>
+							</div>
 						</Link>
-					</div>
+					</article>
 				</section>
 			</div>
 		</>
