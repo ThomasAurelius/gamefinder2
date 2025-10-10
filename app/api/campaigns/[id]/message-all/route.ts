@@ -7,10 +7,10 @@ import { readProfile } from "@/lib/profile-db";
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const campaignId = params.id;
+    const { id: campaignId } = await params;
     const body = await request.json();
     const { userId, userName, subject, content } = body;
 
