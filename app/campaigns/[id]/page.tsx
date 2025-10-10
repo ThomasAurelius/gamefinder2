@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
+import { isPaidCampaign } from "@/lib/campaign-utils";
 
 type PlayerSignup = {
   userId: string;
@@ -288,6 +289,12 @@ export default function CampaignDetailPage() {
   }, [campaign, campaignId]);
 
   const isCreator = currentUserId && campaign?.userId === currentUserId;
+
+  // Helper variables for paid campaign logic
+  const isApprovedPlayer = currentUserId && campaign?.signedUpPlayers.includes(currentUserId);
+  const isPendingPlayer = currentUserId && campaign?.pendingPlayers.includes(currentUserId);
+  const isWaitlistedPlayer = currentUserId && campaign?.waitlist.includes(currentUserId);
+  const showPaymentSection = !isCreator && currentUserId && isPaidCampaign(campaign);
 
   // Fetch subscription status for all players when the campaign creator views their campaign
   useEffect(() => {
@@ -680,8 +687,8 @@ export default function CampaignDetailPage() {
         </div>
       )}
 
-      {/* Only show payment button for non-creators */}
-      {!isCreator && campaign.costPerSession && campaign.costPerSession > 0 && (
+      {/* Only show payment button for non-creators who are approved (in signedUpPlayers) */}
+      {showPaymentSection && isApprovedPlayer && (
         <div className="mt-6">
           {hasActiveSubscription ? (
             <div className="space-y-4">
@@ -703,6 +710,22 @@ export default function CampaignDetailPage() {
             >
               Proceed to payment
             </Link>
+          )}
+        </div>
+      )}
+
+      {/* Show status message for users who are pending or waitlisted */}
+      {showPaymentSection && !isApprovedPlayer && (
+        <div className="mt-6">
+          {isPendingPlayer && (
+            <div className="rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-orange-200">
+              Your request to join this campaign is pending approval from the host. You&apos;ll be able to proceed with payment once you&apos;ve been approved.
+            </div>
+          )}
+          {isWaitlistedPlayer && (
+            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+              You&apos;re currently on the waitlist for this campaign. You&apos;ll be able to proceed with payment once a spot becomes available and you&apos;re moved to the active players list.
+            </div>
           )}
         </div>
       )}
