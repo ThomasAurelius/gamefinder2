@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { isAdmin } from "@/lib/admin";
-import { getActiveAdvertisementForUser, setAdvertisement } from "@/lib/advertisements/db";
+import { getActiveAdvertisementForUser, setAdvertisement, trackImpression } from "@/lib/advertisements/db";
 import { readProfile } from "@/lib/profile-db";
 
 /**
@@ -13,10 +13,11 @@ export async function GET() {
     // Try to get user's location from their profile
     let userLatitude: number | undefined;
     let userLongitude: number | undefined;
+    let userId: string | undefined;
     
     try {
       const cookieStore = await cookies();
-      const userId = cookieStore.get("userId")?.value;
+      userId = cookieStore.get("userId")?.value;
       
       if (userId) {
         const profile = await readProfile(userId);
@@ -37,8 +38,18 @@ export async function GET() {
       );
     }
     
+    // Track impression if we have a userId
+    if (userId && advertisement._id) {
+      await trackImpression(advertisement._id.toString(), userId);
+    }
+    
     return NextResponse.json(
-      { imageUrl: advertisement.imageUrl, isActive: advertisement.isActive },
+      { 
+        id: advertisement._id?.toString(),
+        imageUrl: advertisement.imageUrl, 
+        isActive: advertisement.isActive,
+        url: advertisement.url
+      },
       { status: 200 }
     );
   } catch (error) {
@@ -75,7 +86,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { imageUrl, isActive, zipCode } = body;
+    const { imageUrl, isActive, zipCode, url } = body;
 
     if (typeof isActive !== "boolean") {
       return NextResponse.json(
@@ -98,17 +109,26 @@ export async function POST(request: Request) {
       );
     }
 
+    if (url !== undefined && typeof url !== "string") {
+      return NextResponse.json(
+        { error: "url must be a string" },
+        { status: 400 }
+      );
+    }
+
     const advertisement = await setAdvertisement(
       userId,
       imageUrl || "",
       isActive,
-      zipCode
+      zipCode,
+      url
     );
 
     return NextResponse.json(
       {
         imageUrl: advertisement.imageUrl,
         isActive: advertisement.isActive,
+        url: advertisement.url,
       },
       { status: 200 }
     );
