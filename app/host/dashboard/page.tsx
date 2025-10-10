@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import SessionCard from "@/components/SessionCard";
+import { DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 type ConnectStatus = {
 	hasAccount: boolean;
@@ -13,11 +15,41 @@ type ConnectStatus = {
 	requirements: string[];
 };
 
+type Player = {
+	id: string;
+	name: string;
+	avatarUrl?: string;
+};
+
+type Session = {
+	id: string;
+	game: string;
+	date: string;
+	times: string[];
+	signedUpPlayersDetails: Player[];
+	waitlistDetails: Player[];
+	pendingPlayersDetails: Player[];
+	maxPlayers: number;
+	costPerSession?: number;
+};
+
+type SessionsResponse = {
+	sessions: Session[];
+	dateRange: {
+		start: string;
+		end: string;
+	};
+};
+
 export default function HostDashboardPage() {
 	const [status, setStatus] = useState<ConnectStatus | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [isDashboardLoading, setIsDashboardLoading] = useState(false);
+	const [upcomingSessions, setUpcomingSessions] = useState<Session[]>([]);
+	const [recentSessions, setRecentSessions] = useState<Session[]>([]);
+	const [sessionsLoading, setSessionsLoading] = useState(true);
+	const [userTimezone] = useState(DEFAULT_TIMEZONE);
 
 	useEffect(() => {
 		const fetchStatus = async () => {
@@ -41,7 +73,31 @@ export default function HostDashboardPage() {
 			}
 		};
 
+		const fetchSessions = async () => {
+			setSessionsLoading(true);
+			try {
+				// Fetch upcoming sessions
+				const upcomingResponse = await fetch("/api/host/sessions?type=upcoming");
+				if (upcomingResponse.ok) {
+					const upcomingData: SessionsResponse = await upcomingResponse.json();
+					setUpcomingSessions(upcomingData.sessions);
+				}
+
+				// Fetch recent sessions
+				const recentResponse = await fetch("/api/host/sessions?type=recent");
+				if (recentResponse.ok) {
+					const recentData: SessionsResponse = await recentResponse.json();
+					setRecentSessions(recentData.sessions);
+				}
+			} catch (err) {
+				console.error("Error fetching sessions:", err);
+			} finally {
+				setSessionsLoading(false);
+			}
+		};
+
 		fetchStatus();
+		fetchSessions();
 	}, []);
 
 	const handleOpenDashboard = async () => {
@@ -68,6 +124,28 @@ export default function HostDashboardPage() {
 			);
 		} finally {
 			setIsDashboardLoading(false);
+		}
+	};
+
+	const handleRefund = async () => {
+		// Refetch sessions after a refund is issued
+		setSessionsLoading(true);
+		try {
+			const upcomingResponse = await fetch("/api/host/sessions?type=upcoming");
+			if (upcomingResponse.ok) {
+				const upcomingData: SessionsResponse = await upcomingResponse.json();
+				setUpcomingSessions(upcomingData.sessions);
+			}
+
+			const recentResponse = await fetch("/api/host/sessions?type=recent");
+			if (recentResponse.ok) {
+				const recentData: SessionsResponse = await recentResponse.json();
+				setRecentSessions(recentData.sessions);
+			}
+		} catch (err) {
+			console.error("Error refetching sessions:", err);
+		} finally {
+			setSessionsLoading(false);
 		}
 	};
 
@@ -301,6 +379,64 @@ export default function HostDashboardPage() {
 							</div>
 						</Link>
 					</div>
+				</div>
+
+				{/* Upcoming Sessions */}
+				<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
+					<h2 className="text-xl font-semibold text-slate-100">
+						Upcoming Sessions
+					</h2>
+					<p className="mt-1 text-sm text-slate-400">
+						Sessions scheduled for the next 7 days
+					</p>
+
+					{sessionsLoading ? (
+						<div className="mt-4 text-slate-400">Loading sessions...</div>
+					) : upcomingSessions.length > 0 ? (
+						<div className="mt-4 space-y-4">
+							{upcomingSessions.map((session) => (
+								<SessionCard
+									key={session.id}
+									session={session}
+									userTimezone={userTimezone}
+									onRefund={handleRefund}
+								/>
+							))}
+						</div>
+					) : (
+						<div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-6 text-center text-slate-400">
+							No upcoming sessions in the next 7 days
+						</div>
+					)}
+				</div>
+
+				{/* Recent Sessions */}
+				<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
+					<h2 className="text-xl font-semibold text-slate-100">
+						Recent Sessions
+					</h2>
+					<p className="mt-1 text-sm text-slate-400">
+						Sessions from the past 7 days
+					</p>
+
+					{sessionsLoading ? (
+						<div className="mt-4 text-slate-400">Loading sessions...</div>
+					) : recentSessions.length > 0 ? (
+						<div className="mt-4 space-y-4">
+							{recentSessions.map((session) => (
+								<SessionCard
+									key={session.id}
+									session={session}
+									userTimezone={userTimezone}
+									onRefund={handleRefund}
+								/>
+							))}
+						</div>
+					) : (
+						<div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-6 text-center text-slate-400">
+							No sessions in the past 7 days
+						</div>
+					)}
 				</div>
 			</div>
 		</div>
