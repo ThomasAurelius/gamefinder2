@@ -9,7 +9,7 @@ export default function HomePage() {
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">
 				<h1 className="text-3xl font-bold sm:text-4xl">Welcome!</h1>
 				<Image
-					src="/logo_color.png"
+					src="/newlogo.png"
 					alt="The Gathering Call Logo"
 					width={320}
 					height={320}
