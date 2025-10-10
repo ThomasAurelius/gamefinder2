@@ -419,7 +419,12 @@ export default function PlayersPage() {
 								Found{" "}
 								<span className="text-sky-400">{players.length}</span>{" "}
 								{players.length === 1 ? "player" : "players"}
-								{(searchQuery || selectedRole || selectedGames.length > 0) &&
+								{(searchQuery || 
+									selectedRole || 
+									selectedGames.length > 0 ||
+									selectedDayOfWeek ||
+									selectedTimeSlot ||
+									locationSearch) &&
 									" matching your criteria"}
 							</>
 						) : (
