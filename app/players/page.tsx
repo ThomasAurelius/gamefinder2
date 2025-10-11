@@ -70,9 +70,9 @@ function PlayerCard({ player }: { player: Player }) {
 						</h3>
 						{player.badges && player.badges.length > 0 && (
 							<div className="flex gap-1">
-								{player.badges.map((badge, index) => (
+								{player.badges.map((badge) => (
 									<Badge
-										key={index}
+										key={`${player.id}-${badge.name}-${badge.imageUrl}`}
 										name={badge.name}
 										imageUrl={badge.imageUrl}
 										color={badge.color}

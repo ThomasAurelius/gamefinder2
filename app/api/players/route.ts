@@ -107,7 +107,7 @@ export async function GET(request: Request) {
       avatarUrl: user.profile?.avatarUrl || undefined,
       distance: undefined,
       availability: user.profile?.availability || {},
-      badges: [], // Will be populated below
+      badges: [], // Will be populated in the parallel badge fetching section below
     }));
 
     // Fetch badges for all players
