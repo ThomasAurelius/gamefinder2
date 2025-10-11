@@ -58,6 +58,8 @@ export default function SettingsPage() {
 					const adData = await adRes.json();
 					setAdImageUrl(adData.imageUrl || "");
 					setAdIsActive(adData.isActive || false);
+					setAdZipCode(adData.zipCode || "");
+					setAdUrl(adData.url || "");
 
 					// Load flags
 					loadFlags();
