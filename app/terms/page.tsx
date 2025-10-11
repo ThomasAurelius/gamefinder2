@@ -79,7 +79,33 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							6. Termination
+							6. Non-Discrimination and Community Standards
+						</h2>
+						<p>
+							The Gathering Call is committed to maintaining an inclusive and welcoming community for all users. We have zero tolerance for discrimination or harassment of any kind.
+						</p>
+						<p>
+							Discrimination, harassment, or abusive behavior directed at any user based on the following characteristics is strictly prohibited:
+						</p>
+						<ul className="list-disc list-inside space-y-2 ml-2">
+							<li>Race, ethnicity, or national origin</li>
+							<li>Religion or religious beliefs</li>
+							<li>Sex, gender, or gender identity</li>
+							<li>Sexual orientation</li>
+							<li>Physical appearance or body size</li>
+							<li>Disability or medical condition</li>
+							<li>Age</li>
+							<li>Veteran status</li>
+							<li>Any other protected characteristic under applicable law</li>
+						</ul>
+						<p>
+							Violations of this policy will result in immediate termination of your account and permanent ban from the Service. We reserve the right to take additional legal action as appropriate.
+						</p>
+					</div>
+
+					<div className="space-y-3">
+						<h2 className="text-lg font-semibold text-slate-100">
+							7. Termination
 						</h2>
 						<p>
 							We may terminate or suspend your account and bar access to the Service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever and without limitation, including but not limited to a breach of the Terms.
@@ -91,7 +117,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							7. Limitation of Liability
+							8. Limitation of Liability
 						</h2>
 						<p>
 							In no event shall The Gathering Call, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
@@ -100,7 +126,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							8. Disclaimer
+							9. Disclaimer
 						</h2>
 						<p>
 							Your use of the Service is at your sole risk. The Service is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.
@@ -109,7 +135,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							9. Governing Law
+							10. Governing Law
 						</h2>
 						<p>
 							These Terms shall be governed and construed in accordance with the laws of the jurisdiction in which The Gathering Call operates, without regard to its conflict of law provisions.
@@ -118,7 +144,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							10. Changes to Terms
+							11. Changes to Terms
 						</h2>
 						<p>
 							We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
@@ -130,7 +156,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							11. Contact Us
+							12. Contact Us
 						</h2>
 						<p>
 							If you have any questions about these Terms, please contact us through the platform&apos;s support channels.
