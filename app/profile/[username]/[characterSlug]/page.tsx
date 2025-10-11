@@ -131,6 +131,12 @@ export default async function CharacterPage({
           {character.level ? (
             <span>Level: {character.level}</span>
           ) : null}
+          {character.gold ? (
+            <span>Gold: {character.gold}</span>
+          ) : null}
+          {character.experience ? (
+            <span>XP: {character.experience}</span>
+          ) : null}
           {character.class ? (
             <span>Class: {character.class}</span>
           ) : null}
@@ -150,6 +156,22 @@ export default async function CharacterPage({
         <section className="space-y-2">
           <h2 className="text-lg font-semibold text-slate-100">Character Notes</h2>
           <p className="whitespace-pre-line text-base text-slate-200">{character.notes}</p>
+        </section>
+      ) : null}
+
+      {character.items && character.items.length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-100">Items</h2>
+          <div className="flex flex-wrap gap-2">
+            {character.items.map((item, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+              >
+                {item}
+              </span>
+            ))}
+          </div>
         </section>
       ) : null}
 
