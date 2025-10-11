@@ -16,6 +16,9 @@ export type CharacterDetails = {
   level?: string;
   class?: string;
   role?: string;
+  gold?: string;
+  experience?: string;
+  items?: string[];
   stats: StatField[];
   skills: SkillField[];
   notes: string;

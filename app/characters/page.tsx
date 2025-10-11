@@ -202,6 +202,7 @@ function createInitialCharacter(system: GameSystemKey): CharacterDetails {
     stats,
     skills,
     notes: "",
+    items: [],
     isPublic: false,
   };
 }
@@ -402,6 +403,9 @@ export default function CharactersPage() {
       level: record.level,
       class: record.class,
       role: record.role,
+      gold: record.gold,
+      experience: record.experience,
+      items: record.items ? [...record.items] : [],
       stats: cloneFieldArray(record.stats),
       skills: cloneFieldArray(record.skills),
       notes: record.notes,
@@ -494,6 +498,11 @@ export default function CharactersPage() {
           name: savedCharacter.name,
           campaign: savedCharacter.campaign,
           level: savedCharacter.level,
+          class: savedCharacter.class,
+          role: savedCharacter.role,
+          gold: savedCharacter.gold,
+          experience: savedCharacter.experience,
+          items: savedCharacter.items ? [...savedCharacter.items] : [],
           stats: cloneFieldArray(savedCharacter.stats),
           skills: cloneFieldArray(savedCharacter.skills),
           notes: savedCharacter.notes,
@@ -593,6 +602,16 @@ export default function CharactersPage() {
                     {item.level && (
                       <span className="text-sm text-slate-300">
                         Level: {item.level}
+                      </span>
+                    )}
+                    {item.gold && (
+                      <span className="text-sm text-slate-300">
+                        Gold: {item.gold}
+                      </span>
+                    )}
+                    {item.experience && (
+                      <span className="text-sm text-slate-300">
+                        XP: {item.experience}
                       </span>
                     )}
                     {item.class && (
@@ -750,6 +769,24 @@ export default function CharactersPage() {
                       </p>
                     </div>
                   )}
+
+                  {item.items && item.items.length > 0 && (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Items
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {item.items.map((itemName, index) => (
+                          <span
+                            key={index}
+                            className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+                          >
+                            {itemName}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </details>
             ))}
@@ -857,6 +894,42 @@ export default function CharactersPage() {
 
               <label className="flex flex-col gap-2">
                 <span className="text-sm font-medium text-slate-200">
+                  Gold
+                </span>
+                <input
+                  type="text"
+                  value={character.gold || ""}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      gold: event.target.value,
+                    }))
+                  }
+                  placeholder="100"
+                  className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-200">
+                  Experience
+                </span>
+                <input
+                  type="text"
+                  value={character.experience || ""}
+                  onChange={(event) =>
+                    setCharacter((prev) => ({
+                      ...prev,
+                      experience: event.target.value,
+                    }))
+                  }
+                  placeholder="2500"
+                  className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-200">
                   Class
                 </span>
                 <input
@@ -915,6 +988,76 @@ export default function CharactersPage() {
                   </span>
                 </span>
               </label>
+            </div>
+
+            {/* Items Section */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-slate-100">
+                Items
+              </h2>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Add an item (e.g., Sword of Fire)"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        const value = event.currentTarget.value.trim();
+                        if (value) {
+                          setCharacter((prev) => ({
+                            ...prev,
+                            items: [...(prev.items || []), value],
+                          }));
+                          event.currentTarget.value = "";
+                        }
+                      }
+                    }}
+                    className="flex-1 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      const input = event.currentTarget.previousElementSibling as HTMLInputElement;
+                      const value = input?.value.trim();
+                      if (value) {
+                        setCharacter((prev) => ({
+                          ...prev,
+                          items: [...(prev.items || []), value],
+                        }));
+                        input.value = "";
+                      }
+                    }}
+                    className="rounded-md border border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+                  >
+                    Add
+                  </button>
+                </div>
+                {character.items && character.items.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {character.items.map((item, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+                      >
+                        {item}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCharacter((prev) => ({
+                              ...prev,
+                              items: prev.items?.filter((_, i) => i !== index),
+                            }));
+                          }}
+                          className="text-slate-400 hover:text-slate-200"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Avatar Upload Section */}
