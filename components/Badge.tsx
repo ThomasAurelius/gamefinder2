@@ -31,7 +31,7 @@ export default function Badge({ name, imageUrl, color, size = "md", showTooltip 
           boxShadow: `0 0 0 1px ${borderColor}`,
         }}
       >
-        <div className="relative h-full w-full overflow-hidden rounded-full bg-slate-900">
+        <div className="relative h-full w-full overflow-hidden rounded-full">
           <Image
             src={imageUrl}
             alt={name}
