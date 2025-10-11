@@ -18,6 +18,7 @@ export type PublicCharacterRecord = StoredCharacter & {
 
 export type PublicProfileRecord = {
   username: string;
+  userId?: string; // MongoDB ObjectId for linking to library
   profile: PublicProfileDetails;
   characters: PublicCharacterRecord[];
 };
@@ -28,6 +29,7 @@ const PUBLIC_PROFILE_FILE = path.join(DATA_DIRECTORY, "public-profiles.json");
 const FALLBACK_PROFILES: PublicProfileRecord[] = [
   {
     username: "adventurer-jane",
+    userId: undefined, // No real user ID for demo profiles
     profile: {
       displayName: "Adventurer Jane",
       bio: "Story-driven GM and occasional player who loves weaving character-focused tales.",
@@ -95,6 +97,8 @@ const FALLBACK_PROFILES: PublicProfileRecord[] = [
 function cloneProfiles(source: PublicProfileRecord[]): PublicProfileRecord[] {
   return source.map((entry) => ({
     ...entry,
+    username: entry.username,
+    userId: entry.userId,
     profile: {
       displayName: entry.profile.displayName,
       bio: entry.profile.bio,
