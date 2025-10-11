@@ -2,11 +2,52 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
-import { get } from "http";
+import StructuredData from "@/components/StructuredData";
 
 export const metadata: Metadata = {
-	title: "The Gathering Call",
-	description: "Discover tabletop games and manage your sessions with ease.",
+	title: "The Gathering Call - Find Board Games, D&D, Pathfinder & TTRPG Sessions",
+	description: "Find and host board game nights, D&D, Pathfinder, Shadowdark and TTRPG sessions. Schedule tabletop gaming sessions, connect with players, and manage your campaigns with ease.",
+	keywords: "board games, D&D, Dungeons and Dragons, Pathfinder, Shadowdark, TTRPG, tabletop RPG, game scheduling, find board games, host D&D, campaign management, tabletop gaming, game master, RPG sessions",
+	authors: [{ name: "The Gathering Call" }],
+	creator: "Midnight Oil Software",
+	publisher: "The Gathering Call",
+	metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"),
+	alternates: {
+		canonical: "/",
+	},
+	openGraph: {
+		title: "The Gathering Call - Find Board Games & TTRPG Sessions",
+		description: "Find and host board game nights, D&D, Pathfinder, Shadowdark and TTRPG sessions. Connect with players and manage your campaigns.",
+		url: "/",
+		siteName: "The Gathering Call",
+		locale: "en_US",
+		type: "website",
+		images: [
+			{
+				url: "/newlogo.png",
+				width: 1200,
+				height: 630,
+				alt: "The Gathering Call - Tabletop Gaming Platform",
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "The Gathering Call - Find Board Games & TTRPG Sessions",
+		description: "Find and host board game nights, D&D, Pathfinder, and TTRPG sessions. Connect with players and manage your campaigns.",
+		images: ["/newlogo.png"],
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: {
+			index: true,
+			follow: true,
+			"max-video-preview": -1,
+			"max-image-preview": "large",
+			"max-snippet": -1,
+		},
+	},
 };
 
 export default function RootLayout({
@@ -17,6 +58,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className="bg-slate-950">
 			<body className="min-h-screen bg-slate-950 text-slate-100">
+				<StructuredData />
 				<Navbar />
 				<main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
 					{children}
