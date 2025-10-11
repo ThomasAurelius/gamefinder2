@@ -288,7 +288,7 @@ export default function HostDashboardPage() {
 							</div>
 							<div>
 								<div className="font-medium text-slate-300">
-									You Receive: 80%*
+									You Receive: 85%*
 								</div>
 								<div className="text-slate-500">
 									Of each subscription payment *minus fees
@@ -313,7 +313,7 @@ export default function HostDashboardPage() {
 							</div>
 							<div>
 								<div className="font-medium text-slate-300">
-									Platform Fee: 20%
+									Platform Fee: 15%
 								</div>
 								<div className="text-slate-500">
 									Covers hosting, payment processing, and support

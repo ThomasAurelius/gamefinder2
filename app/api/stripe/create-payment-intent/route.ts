@@ -262,9 +262,9 @@ export async function POST(request: Request) {
 				);
 			}
 
-			// Calculate application fee (20% of the amount)
+			// Calculate application fee (15% of the amount)
 			const applicationFeeAmount = hostConnectAccountId 
-				? Math.round(amount * 100 * 0.20) // 20% platform fee
+				? Math.round(amount * 100 * 0.15) // 15% platform fee
 				: undefined;
 
 			// Build subscription creation options
@@ -291,13 +291,13 @@ export async function POST(request: Request) {
 
 			// Add Connect account and application fee if host has completed onboarding
 			if (hostConnectAccountId && applicationFeeAmount) {
-				subscriptionOptions.application_fee_percent = 20; // Platform takes 20%
+				subscriptionOptions.application_fee_percent = 15; // Platform takes 15%
 				subscriptionOptions.transfer_data = {
 					destination: hostConnectAccountId,
 				};
 				console.log("Subscription will use Stripe Connect:", {
 					hostAccount: hostConnectAccountId,
-					applicationFeePercent: 20,
+					applicationFeePercent: 15,
 				});
 			} else {
 				console.log("Subscription will use standard payment (no Connect account)");

@@ -81,17 +81,17 @@ function PaidGamesTermsContent() {
 						</h3>
 						<p>
 							<strong className="text-slate-100">
-								The platform operator will retain 20% of each paid game
+								The platform operator will retain 15% of each paid game
 								fee.
 							</strong>{" "}
-							The remaining 80% will be paid to you (the game host) after
+							The remaining 85% will be paid to you (the game host) after
 							deducting payment processing fees.
 						</p>
 						<p className="text-slate-400 text-xs">
 							Example: If you charge $10 per session, the platform will
-							retain $2.00 and you will receive the remainder, minus
+							retain $1.50 and you will receive the remainder, minus
 							payment processing fees. Stripe&apos;s fee is $0.30 + 2.9%
-							per transaction, you would receive approximately $7.41 per
+							per transaction, you would receive approximately $7.91 per
 							session.
 						</p>
 					</div>
@@ -181,7 +181,7 @@ function PaidGamesTermsContent() {
 						/>
 						<span className="text-sm text-slate-300">
 							I have read and agree to the Paid Games Terms and
-							Conditions, including the 20% platform fee on all paid game
+							Conditions, including the 15% platform fee on all paid game
 							sessions.
 						</span>
 					</label>
