@@ -88,7 +88,7 @@ export default function HostFeedbackDialog({
               <span className="text-2xl">👍</span>
               <div>
                 <div className="font-medium">Yes</div>
-                <div className="text-xs text-slate-400">I'd recommend this host</div>
+                <div className="text-xs text-slate-400">I&apos;d recommend this host</div>
               </div>
             </div>
           </button>
@@ -105,7 +105,7 @@ export default function HostFeedbackDialog({
               <span className="text-2xl">👎</span>
               <div>
                 <div className="font-medium">No</div>
-                <div className="text-xs text-slate-400">I wouldn't recommend this host</div>
+                <div className="text-xs text-slate-400">I wouldn&apos;t recommend this host</div>
               </div>
             </div>
           </button>

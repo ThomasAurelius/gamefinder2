@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import HostFeedbackDialog from "@/components/HostFeedbackDialog";
 
 type GameSession = {
   id: string;
@@ -46,6 +47,12 @@ function GameSessionCard({
   const isPlayer = currentUserId && session.signedUpPlayers.includes(currentUserId);
   const isWaitlisted = currentUserId && session.waitlist.includes(currentUserId);
   const isCampaign = session.isCampaign || false;
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
+
+  // Check if session is in the past
+  const sessionDate = new Date(session.date);
+  const isPast = sessionDate < new Date();
 
   let userRole = "";
   if (isHost) {
@@ -58,45 +65,77 @@ function GameSessionCard({
 
   const detailsLink = isCampaign ? `/campaigns/${session.id}` : `/games/${session.id}`;
 
+  // Check if user has already rated the host
+  useEffect(() => {
+    if (isPast && isPlayer && currentUserId && session.userId) {
+      const checkIfRated = async () => {
+        try {
+          const response = await fetch(`/api/host-feedback/stats/${session.userId}`);
+          if (response.ok) {
+            // For now, we don't have an API to check if specific player rated
+            // This would need to be enhanced if we want to prevent duplicate ratings
+          }
+        } catch (error) {
+          console.error("Failed to check rating status", error);
+        }
+      };
+      checkIfRated();
+    }
+  }, [isPast, isPlayer, currentUserId, session.userId]);
+
   return (
-    <div className={`rounded-lg border p-4 ${
-      isHost 
-        ? "border-purple-500/50 bg-purple-950/20" 
-        : "border-slate-800 bg-slate-950/40"
-    }`}>
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Link href={detailsLink} className="hover:text-sky-300 transition-colors">
-              <h3 className="font-medium text-slate-100">{session.game}</h3>
-            </Link>
-            {isCampaign && (
-              <span className="text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300">
-                Campaign
-              </span>
-            )}
-            {userRole && (
-              <span className={`text-xs px-2 py-1 rounded-full ${
-                isHost ? "bg-purple-500/20 text-purple-300" :
-                isPlayer ? "bg-green-500/20 text-green-300" :
-                "bg-yellow-500/20 text-yellow-300"
-              }`}>
-                {userRole}
-              </span>
-            )}
-          </div>
-          <div className="mt-2 space-y-1 text-sm text-slate-400">
-            {session.hostName && (
-              <p>
-                <span className="text-slate-500">Host:</span>{" "}
-                <Link
-                  href={`/user/${session.userId}`}
-                  className="text-slate-300 hover:text-sky-300 transition-colors"
+    <>
+      <div className={`rounded-lg border p-4 ${
+        isHost 
+          ? "border-purple-500/50 bg-purple-950/20" 
+          : "border-slate-800 bg-slate-950/40"
+      }`}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link href={detailsLink} className="hover:text-sky-300 transition-colors">
+                <h3 className="font-medium text-slate-100">{session.game}</h3>
+              </Link>
+              {isCampaign && (
+                <span className="text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300">
+                  Campaign
+                </span>
+              )}
+              {isPast && (
+                <span className="text-xs px-2 py-1 rounded-full bg-slate-500/20 text-slate-400">
+                  Past
+                </span>
+              )}
+              {userRole && (
+                <span className={`text-xs px-2 py-1 rounded-full ${
+                  isHost ? "bg-purple-500/20 text-purple-300" :
+                  isPlayer ? "bg-green-500/20 text-green-300" :
+                  "bg-yellow-500/20 text-yellow-300"
+                }`}>
+                  {userRole}
+                </span>
+              )}
+            </div>
+            <div className="mt-2 space-y-1 text-sm text-slate-400">
+              {session.hostName && (
+                <p>
+                  <span className="text-slate-500">Host:</span>{" "}
+                  <Link
+                    href={`/user/${session.userId}`}
+                    className="text-slate-300 hover:text-sky-300 transition-colors"
+                  >
+                    {session.hostName}
+                  </Link>
+                </p>
+              )}
+              {isPast && isPlayer && !isHost && (
+                <button
+                  onClick={() => setShowFeedbackDialog(true)}
+                  className="mt-2 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
                 >
-                  {session.hostName}
-                </Link>
-              </p>
-            )}
+                  {hasRated ? "Update Rating" : "Rate Host"}
+                </button>
+              )}
             <p>
               <span className="text-slate-500">Date:</span>{" "}
               {formatDateInTimezone(session.date, userTimezone)}
@@ -163,6 +202,22 @@ function GameSessionCard({
         )}
       </div>
     </div>
+
+    {showFeedbackDialog && session.hostName && (
+      <HostFeedbackDialog
+        hostId={session.userId}
+        hostName={session.hostName}
+        sessionId={session.id}
+        sessionType={isCampaign ? "campaign" : "game"}
+        isOpen={showFeedbackDialog}
+        onClose={() => setShowFeedbackDialog(false)}
+        onSubmit={() => {
+          setHasRated(true);
+          setShowFeedbackDialog(false);
+        }}
+      />
+    )}
+    </>
   );
 }
 
@@ -171,6 +226,11 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showPastSessions, setShowPastSessions] = useState(false);
+
+  const today = new Date();
+  const upcomingSessions = gameSessions.filter(session => new Date(session.date) >= today);
+  const pastSessions = gameSessions.filter(session => new Date(session.date) < today);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -241,9 +301,9 @@ export default function DashboardPage() {
 
         {isLoading ? (
           <p className="mt-4 text-sm text-slate-500">Loading your sessions...</p>
-        ) : gameSessions.length > 0 ? (
+        ) : upcomingSessions.length > 0 ? (
           <div className="mt-4 space-y-3 max-w-3xl">
-            {gameSessions.map((session) => (
+            {upcomingSessions.map((session) => (
               <GameSessionCard
                 key={session.id}
                 session={session}
@@ -266,6 +326,38 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {!isLoading && pastSessions.length > 0 && (
+        <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-100">Past Sessions</h2>
+              <p className="mt-2 text-sm text-slate-400">
+                Rate your hosts and review past games
+              </p>
+            </div>
+            <button
+              onClick={() => setShowPastSessions(!showPastSessions)}
+              className="text-sm text-sky-400 hover:text-sky-300 transition-colors"
+            >
+              {showPastSessions ? "Hide" : "Show"} ({pastSessions.length})
+            </button>
+          </div>
+
+          {showPastSessions && (
+            <div className="mt-4 space-y-3 max-w-3xl">
+              {pastSessions.map((session) => (
+                <GameSessionCard
+                  key={session.id}
+                  session={session}
+                  userTimezone={userTimezone}
+                  currentUserId={currentUserId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
