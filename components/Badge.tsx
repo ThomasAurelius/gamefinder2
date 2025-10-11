@@ -25,21 +25,18 @@ export default function Badge({ name, imageUrl, color, size = "md", showTooltip 
       title={showTooltip ? name : undefined}
     >
       <div
-        className={`${sizeClasses[size]} rounded-full p-0.5`}
+        className={`${sizeClasses[size]} relative overflow-hidden rounded-full border-2`}
         style={{
-          backgroundColor: borderColor,
-          boxShadow: `0 0 0 1px ${borderColor}`,
+          borderColor: borderColor,
         }}
       >
-        <div className="relative h-full w-full overflow-hidden rounded-full">
-          <Image
-            src={imageUrl}
-            alt={name}
-            fill
-            className="object-cover"
-            sizes="32px"
-          />
-        </div>
+        <Image
+          src={imageUrl}
+          alt={name}
+          fill
+          className="object-cover"
+          sizes="32px"
+        />
       </div>
     </div>
   );
