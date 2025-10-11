@@ -51,7 +51,8 @@ export async function GET() {
         id: advertisement._id?.toString(),
         imageUrl: advertisement.imageUrl, 
         isActive: advertisement.isActive,
-        url: advertisement.url
+        url: advertisement.url,
+        zipCode: advertisement.zipCode
       },
       { status: 200 }
     );
@@ -132,6 +133,7 @@ export async function POST(request: Request) {
         imageUrl: advertisement.imageUrl,
         isActive: advertisement.isActive,
         url: advertisement.url,
+        zipCode: advertisement.zipCode,
       },
       { status: 200 }
     );
