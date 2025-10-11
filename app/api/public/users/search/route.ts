@@ -17,14 +17,17 @@ export async function GET(request: Request) {
       );
     }
 
+    // Escape special regex characters to prevent regex injection
+    const escapedUsername = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
     const db = await getDb();
     const usersCollection = db.collection("users");
 
     // Search for user by name or commonName in profile
     const user = await usersCollection.findOne({
       $or: [
-        { name: { $regex: new RegExp(`^${username}$`, "i") } },
-        { "profile.commonName": { $regex: new RegExp(`^${username}$`, "i") } },
+        { name: { $regex: new RegExp(`^${escapedUsername}$`, "i") } },
+        { "profile.commonName": { $regex: new RegExp(`^${escapedUsername}$`, "i") } },
       ],
     });
 
