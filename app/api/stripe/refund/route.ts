@@ -154,8 +154,8 @@ export async function POST(request: Request) {
 
 							// If the charge has a transfer (used Stripe Connect), 
 							// reverse the transfer so refund is split proportionally:
-							// - Host pays back 80% (reversed from their Connect account)
-							// - Platform pays back 20% (the original application fee)
+							// - Host pays back 85% (reversed from their Connect account)
+							// - Platform pays back 15% (the original application fee)
 							// Stripe automatically calculates the correct amounts when reverse_transfer is true
 							if (charge.transfer) {
 								refundOptions.reverse_transfer = true;
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
 								console.log("Refunding with Connect transfer reversal:", {
 									chargeAmount: charge.amount,
 									transfer: charge.transfer,
-									note: "Stripe will automatically reverse 80% from host and 20% from platform",
+									note: "Stripe will automatically reverse 85% from host and 15% from platform",
 								});
 							}
 
@@ -272,8 +272,8 @@ export async function POST(request: Request) {
 
 					// If the charge has a transfer (used Stripe Connect), 
 					// reverse the transfer so refund is split proportionally:
-					// - Host pays back 80% (reversed from their Connect account)
-					// - Platform pays back 20% (the original application fee)
+					// - Host pays back 85% (reversed from their Connect account)
+					// - Platform pays back 15% (the original application fee)
 					// Stripe automatically calculates the correct amounts when reverse_transfer is true
 					if (charge.transfer) {
 						refundOptions.reverse_transfer = true;
@@ -281,7 +281,7 @@ export async function POST(request: Request) {
 						console.log("Refunding with Connect transfer reversal:", {
 							chargeAmount: charge.amount,
 							transfer: charge.transfer,
-							note: "Stripe will automatically reverse 80% from host and 20% from platform",
+							note: "Stripe will automatically reverse 85% from host and 15% from platform",
 						});
 					}
 

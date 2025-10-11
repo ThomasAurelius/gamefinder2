@@ -57,10 +57,10 @@ export default function AboutHostingPaidGamesPage() {
 					<div className="space-y-4 text-slate-300">
 						<div>
 							<h3 className="text-lg font-medium text-slate-200 mb-2">
-								Platform Fee: 20%
+								Platform Fee: 15%
 							</h3>
 							<p className="text-sm">
-								The platform retains 20% of each paid session fee. You receive 80% of the payment, 
+								The platform retains 15% of each paid session fee. You receive 85% of the payment, 
 								minus payment processing fees.
 							</p>
 						</div>
@@ -69,9 +69,9 @@ export default function AboutHostingPaidGamesPage() {
 							<div className="space-y-1 text-sm text-slate-400">
 								<p>If you charge <strong className="text-slate-300">$10.00</strong> per session:</p>
 								<ul className="ml-4 space-y-1">
-									<li>• Platform fee (20%): <strong className="text-slate-300">$2.00</strong></li>
+									<li>• Platform fee (15%): <strong className="text-slate-300">$1.50</strong></li>
 									<li>• Stripe processing fee: <strong className="text-slate-300">$0.59</strong> ($0.30 + 2.9%)</li>
-									<li>• Your payout: <strong className="text-emerald-400">~$7.41</strong></li>
+									<li>• Your payout: <strong className="text-emerald-400">~$7.91</strong></li>
 								</ul>
 							</div>
 						</div>
