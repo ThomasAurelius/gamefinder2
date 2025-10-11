@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { GAME_OPTIONS, DAYS_OF_WEEK, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import Badge from "@/components/Badge";
 
 type Player = {
 	id: string;
@@ -16,6 +17,11 @@ type Player = {
 	avatarUrl?: string;
 	distance?: number;
 	availability?: Record<string, string[]>;
+	badges?: Array<{
+		name: string;
+		imageUrl: string;
+		color?: string;
+	}>;
 };
 
 const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"];
@@ -58,9 +64,25 @@ function PlayerCard({ player }: { player: Player }) {
 					</div>
 				)}
 				<div className="flex-1">
-					<h3 className="text-xl font-semibold text-slate-100 group-hover:text-sky-100">
-						{displayName}
-					</h3>
+					<div className="flex items-center gap-2">
+						<h3 className="text-xl font-semibold text-slate-100 group-hover:text-sky-100">
+							{displayName}
+						</h3>
+						{player.badges && player.badges.length > 0 && (
+							<div className="flex gap-1">
+								{player.badges.map((badge) => (
+									<Badge
+										key={`${player.id}-${badge.name}-${badge.imageUrl}`}
+										name={badge.name}
+										imageUrl={badge.imageUrl}
+										color={badge.color}
+										size="sm"
+										showTooltip={true}
+									/>
+								))}
+							</div>
+						)}
+					</div>
 					{player.location && (
 						<p className="mt-1 text-sm text-slate-400">
 							{player.location}

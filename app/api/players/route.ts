@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { geocodeLocation, calculateDistance } from "@/lib/geolocation";
+import { getDisplayedUserBadges } from "@/lib/badges/db";
 
 export type PlayerSearchResult = {
   id: string;
@@ -13,6 +14,11 @@ export type PlayerSearchResult = {
   avatarUrl?: string;
   distance?: number; // Distance in miles
   availability?: Record<string, string[]>; // Day of week to time slots
+  badges?: Array<{
+    name: string;
+    imageUrl: string;
+    color?: string;
+  }>;
 };
 
 export async function GET(request: Request) {
@@ -101,6 +107,37 @@ export async function GET(request: Request) {
       avatarUrl: user.profile?.avatarUrl || undefined,
       distance: undefined,
       availability: user.profile?.availability || {},
+      badges: [], // Will be populated in the parallel badge fetching section below
+    }));
+
+    // Fetch badges for all players
+    const userIds = players.map(p => p.id);
+    const badgesMap = new Map<string, Array<{ name: string; imageUrl: string; color?: string }>>();
+    
+    // Fetch badges in parallel for all users
+    await Promise.all(
+      userIds.map(async (userId) => {
+        try {
+          const userBadges = await getDisplayedUserBadges(userId);
+          badgesMap.set(
+            userId,
+            userBadges.map(({ badge }) => ({
+              name: badge.name,
+              imageUrl: badge.imageUrl,
+              color: badge.color,
+            }))
+          );
+        } catch (error) {
+          console.error(`Failed to fetch badges for user ${userId}:`, error);
+          badgesMap.set(userId, []);
+        }
+      })
+    );
+
+    // Add badges to players
+    players = players.map(player => ({
+      ...player,
+      badges: badgesMap.get(player.id) || [],
     }));
 
     // If location search is provided, geocode it and filter by distance

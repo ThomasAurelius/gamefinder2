@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getUserBasicInfo } from "@/lib/users";
 import { readProfile } from "@/lib/profile-db";
+import { getDisplayedUserBadges } from "@/lib/badges/db";
+import Badge from "@/components/Badge";
 
 export default async function UserProfilePage({
   params,
@@ -16,6 +18,7 @@ export default async function UserProfilePage({
   }
 
   const profile = await readProfile(userId);
+  const userBadges = await getDisplayedUserBadges(userId);
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
@@ -34,7 +37,23 @@ export default async function UserProfilePage({
             </div>
           )}
           <div>
-            <h1 className="text-3xl font-bold">{profile.commonName || userInfo.name}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">{profile.commonName || userInfo.name}</h1>
+              {userBadges.length > 0 && (
+                <div className="flex gap-1">
+                  {userBadges.map(({ badge }) => (
+                    <Badge
+                      key={badge._id?.toString()}
+                      name={badge.name}
+                      imageUrl={badge.imageUrl}
+                      color={badge.color}
+                      size="lg"
+                      showTooltip={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
             {profile.location && (
               <p className="mt-1 text-sm text-slate-400">{profile.location}</p>
             )}
