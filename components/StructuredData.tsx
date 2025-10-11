@@ -18,7 +18,7 @@ export default function StructuredData() {
     publisher: {
       '@type': 'Organization',
       name: 'Midnight Oil Software',
-      url: 'http://midnightoil.software'
+      url: 'https://midnightoil.software'
     }
   }
 
