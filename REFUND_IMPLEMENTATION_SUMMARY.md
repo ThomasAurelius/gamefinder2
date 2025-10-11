@@ -17,9 +17,11 @@ This implementation adds a complete refund system that allows game hosts (DMs) t
   - Cancels subscription immediately (no waiting for period end)
   - Retrieves latest invoice
   - Issues refund for paid invoices
+  - Automatically splits refund cost: 80% from host, 20% from platform (when using Stripe Connect)
 - One-time payment handling:
   - Searches for payment intents
   - Issues refunds for all successful charges
+  - Automatically splits refund cost: 80% from host, 20% from platform (when using Stripe Connect)
 - Comprehensive error handling with detailed logging
 - TypeScript type casting for Stripe API properties not in type definitions
 
@@ -153,12 +155,16 @@ Comprehensive documentation covering:
    - Verify in Stripe Dashboard:
      - Subscription is canceled
      - Refund is created with status "succeeded"
+     - For Stripe Connect payments: Check that transfer reversal shows 80% from host account
+     - Platform automatically absorbs the 20% application fee
 
 3. **Test One-Time Payment Refund:**
    - Create a paid campaign with one-time payment
    - Have a test player join and pay
    - Use refund API or UI to issue refund
    - Verify refund in Stripe Dashboard
+   - For Stripe Connect payments: Check that transfer reversal shows 80% from host account
+   - Platform automatically absorbs the 20% application fee
 
 4. **Test Authorization:**
    - Try to issue refund as non-host (should fail with 403)
@@ -184,6 +190,35 @@ Consider adding:
 1. **Batch API Usage:** Component uses `/api/users/batch` to fetch all player data in one request
 2. **Efficient Queries:** Stripe API calls are optimized to minimize requests
 3. **Caching:** Consider implementing caching for payment data if needed
+
+## Refund Fee Split Mechanism
+
+When a payment is processed using Stripe Connect (host has completed onboarding):
+
+### Payment Flow
+- Customer pays: $10.00
+- Platform receives: $2.00 (20% application fee)
+- Host receives: $8.00 (80% via transfer_data)
+
+### Refund Flow
+When issuing a refund, the cost is split proportionally:
+
+- Customer receives back: $10.00 (full refund)
+- Host pays: $8.00 (80% - reversed from Connect account via `reverse_transfer`)
+- Platform pays: $2.00 (20% - original application fee)
+
+### Implementation Details
+
+The refund API automatically:
+1. Retrieves the original charge to check if it has a `transfer` property
+2. If a transfer exists (Stripe Connect was used):
+   - Sets `reverse_transfer: true` in the refund options
+   - Stripe automatically calculates and reverses 80% from the host's Connect account
+   - Stripe automatically refunds the 20% application fee from the platform account
+3. If no transfer exists (standard payment):
+   - The entire refund comes from the platform account
+
+This ensures fair cost distribution where each party pays back their proportional share of the original payment.
 
 ## Future Enhancements
 
