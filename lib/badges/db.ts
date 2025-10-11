@@ -25,7 +25,8 @@ export interface UserBadgeWithBadge {
 /**
  * Get all badges for a user
  */
-export async function getUserBadges(userId: string): Promise<UserBadgeWithBadge[]> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getUserBadges(_userId: string): Promise<UserBadgeWithBadge[]> {
   // TODO: Implement badge retrieval logic
   return [];
 }
@@ -34,9 +35,12 @@ export async function getUserBadges(userId: string): Promise<UserBadgeWithBadge[
  * Update badge display preference
  */
 export async function updateBadgeDisplayPreference(
-  userId: string,
-  badgeId: string,
-  isDisplayed: boolean
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _userId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _badgeId: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _isDisplayed: boolean
 ): Promise<boolean> {
   // TODO: Implement badge display preference update logic
   return false;
