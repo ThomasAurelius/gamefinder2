@@ -38,6 +38,44 @@ export default function SettingsPage() {
 	const [uploadingAd, setUploadingAd] = useState(false);
 	const [savingAd, setSavingAd] = useState(false);
 
+	// Badge management state
+	const [badges, setBadges] = useState<Array<{
+		id: string;
+		name: string;
+		description: string;
+		imageUrl: string;
+		color?: string;
+	}>>([]);
+	const [userBadges, setUserBadges] = useState<Array<{
+		id: string;
+		badgeId: string;
+		name: string;
+		description: string;
+		imageUrl: string;
+		color?: string;
+		awardedAt: Date;
+		isDisplayed: boolean;
+	}>>([]);
+	const [loadingBadges, setLoadingBadges] = useState(false);
+	const [editingBadge, setEditingBadge] = useState<{
+		id?: string;
+		name: string;
+		description: string;
+		imageUrl: string;
+		color: string;
+	} | null>(null);
+	const [savingBadge, setSavingBadge] = useState(false);
+	const [uploadingBadgeImage, setUploadingBadgeImage] = useState(false);
+	const [badgeMessage, setBadgeMessage] = useState("");
+	const [searchUsername, setSearchUsername] = useState("");
+	const [searchedUser, setSearchedUser] = useState<{
+		userId: string;
+		name: string;
+		commonName: string;
+	} | null>(null);
+	const [searchingUser, setSearchingUser] = useState(false);
+	const [awardingBadge, setAwardingBadge] = useState(false);
+
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
 			try {
@@ -63,7 +101,13 @@ export default function SettingsPage() {
 
 					// Load flags
 					loadFlags();
+					
+					// Load badges for admin
+					loadBadges();
 				}
+
+				// Load user badges (for all users)
+				loadUserBadges();
 
 				// Load user profile to check canPostPaidGames
 				const profileRes = await fetch("/api/profile");
@@ -246,6 +290,224 @@ export default function SettingsPage() {
 			setMessage("Failed to save advertisement. Please try again.");
 		} finally {
 			setSavingAd(false);
+		}
+	};
+
+	async function loadBadges() {
+		setLoadingBadges(true);
+		try {
+			const response = await fetch("/api/badges");
+			if (response.ok) {
+				const data = await response.json();
+				setBadges(data);
+			}
+		} catch (error) {
+			console.error("Failed to load badges:", error);
+		} finally {
+			setLoadingBadges(false);
+		}
+	}
+
+	async function loadUserBadges() {
+		try {
+			const response = await fetch("/api/user-badges");
+			if (response.ok) {
+				const data = await response.json();
+				setUserBadges(data);
+			}
+		} catch (error) {
+			console.error("Failed to load user badges:", error);
+		}
+	}
+
+	const handleBadgeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		setUploadingBadgeImage(true);
+		setBadgeMessage("");
+
+		try {
+			const formData = new FormData();
+			formData.append("file", file);
+			formData.append("type", "badge");
+
+			const response = await fetch("/api/upload", {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to upload image");
+			}
+
+			const { url } = await response.json();
+			if (editingBadge) {
+				setEditingBadge({ ...editingBadge, imageUrl: url });
+			}
+			setBadgeMessage("Image uploaded successfully!");
+			setTimeout(() => setBadgeMessage(""), 3000);
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";
+			setBadgeMessage(errorMessage);
+		} finally {
+			setUploadingBadgeImage(false);
+		}
+	};
+
+	const handleSaveBadge = async () => {
+		if (!editingBadge) return;
+
+		setSavingBadge(true);
+		setBadgeMessage("");
+
+		try {
+			const method = editingBadge.id ? "PUT" : "POST";
+			const body = editingBadge.id 
+				? { id: editingBadge.id, name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color }
+				: { name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color };
+
+			const response = await fetch("/api/badges", {
+				method,
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to save badge");
+			}
+
+			setBadgeMessage("Badge saved successfully!");
+			setTimeout(() => setBadgeMessage(""), 3000);
+			setEditingBadge(null);
+			loadBadges();
+		} catch (error) {
+			console.error("Failed to save badge:", error);
+			setBadgeMessage("Failed to save badge. Please try again.");
+		} finally {
+			setSavingBadge(false);
+		}
+	};
+
+	const handleDeleteBadge = async (badgeId: string) => {
+		if (!confirm("Are you sure you want to delete this badge? This will remove it from all users.")) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/badges?id=${badgeId}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to delete badge");
+			}
+
+			setBadgeMessage("Badge deleted successfully!");
+			setTimeout(() => setBadgeMessage(""), 3000);
+			loadBadges();
+		} catch (error) {
+			console.error("Failed to delete badge:", error);
+			setBadgeMessage("Failed to delete badge. Please try again.");
+		}
+	};
+
+	const handleToggleBadgeDisplay = async (badgeId: string, isDisplayed: boolean) => {
+		try {
+			const response = await fetch("/api/user-badges", {
+				method: "PUT",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ badgeId, isDisplayed }),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to update badge display preference");
+			}
+
+			// Update local state
+			setUserBadges(prevBadges => 
+				prevBadges.map(b => 
+					b.badgeId === badgeId ? { ...b, isDisplayed } : b
+				)
+			);
+		} catch (error) {
+			console.error("Failed to update badge display:", error);
+		}
+	};
+
+	const handleSearchUser = async () => {
+		if (!searchUsername.trim()) {
+			setBadgeMessage("Please enter a username");
+			return;
+		}
+
+		setSearchingUser(true);
+		setBadgeMessage("");
+
+		try {
+			const response = await fetch(`/api/public/users/search?username=${encodeURIComponent(searchUsername)}`);
+			if (!response.ok) {
+				throw new Error("User not found");
+			}
+
+			const userData = await response.json();
+			setSearchedUser(userData);
+		} catch (error) {
+			console.error("Failed to search user:", error);
+			setBadgeMessage("User not found. Please check the username.");
+			setSearchedUser(null);
+		} finally {
+			setSearchingUser(false);
+		}
+	};
+
+	const handleAwardBadge = async (badgeId: string) => {
+		if (!searchedUser) return;
+
+		setAwardingBadge(true);
+		setBadgeMessage("");
+
+		try {
+			const response = await fetch("/api/admin/user-badges", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId: searchedUser.userId, badgeId }),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to award badge");
+			}
+
+			setBadgeMessage(`Badge awarded to ${searchedUser.commonName || searchedUser.name} successfully!`);
+			setTimeout(() => setBadgeMessage(""), 3000);
+		} catch (error) {
+			console.error("Failed to award badge:", error);
+			setBadgeMessage("Failed to award badge. User may already have this badge.");
+		} finally {
+			setAwardingBadge(false);
+		}
+	};
+
+	const handleRemoveBadge = async (userId: string, badgeId: string, userName: string) => {
+		if (!confirm(`Are you sure you want to remove this badge from ${userName}?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/admin/user-badges?userId=${userId}&badgeId=${badgeId}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to remove badge");
+			}
+
+			setBadgeMessage("Badge removed successfully!");
+			setTimeout(() => setBadgeMessage(""), 3000);
+		} catch (error) {
+			console.error("Failed to remove badge:", error);
+			setBadgeMessage("Failed to remove badge. Please try again.");
 		}
 	};
 
@@ -559,6 +821,289 @@ export default function SettingsPage() {
 										{message}
 									</p>
 								)}
+							</div>
+						</div>
+					)}
+
+					{isAdmin && (
+						<div className="rounded-lg border border-amber-700/50 bg-amber-900/20 p-4">
+							<h2 className="text-sm font-medium text-amber-200">
+								Admin: Badge Management
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								Create and manage badges that can be awarded to users.
+							</p>
+
+							<div className="mt-4 space-y-4">
+								{/* Badge Creation/Edit Form */}
+								{editingBadge && (
+									<div className="rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
+										<h3 className="text-sm font-medium text-slate-200">
+											{editingBadge.id ? "Edit Badge" : "Create New Badge"}
+										</h3>
+										
+										<div className="space-y-2">
+											<label className="block text-sm font-medium text-slate-200">
+												Name
+											</label>
+											<input
+												type="text"
+												value={editingBadge.name}
+												onChange={(e) => setEditingBadge({ ...editingBadge, name: e.target.value })}
+												placeholder="Badge Name"
+												className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="block text-sm font-medium text-slate-200">
+												Description
+											</label>
+											<textarea
+												value={editingBadge.description}
+												onChange={(e) => setEditingBadge({ ...editingBadge, description: e.target.value })}
+												placeholder="Badge Description"
+												rows={2}
+												className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="block text-sm font-medium text-slate-200">
+												Color (hex code, optional)
+											</label>
+											<input
+												type="text"
+												value={editingBadge.color}
+												onChange={(e) => setEditingBadge({ ...editingBadge, color: e.target.value })}
+												placeholder="#94a3b8"
+												className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											/>
+										</div>
+
+										{editingBadge.imageUrl && (
+											<div className="flex items-center gap-3">
+												<div className="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-700">
+													<Image
+														src={editingBadge.imageUrl}
+														alt="Badge preview"
+														fill
+														className="object-cover"
+													/>
+												</div>
+											</div>
+										)}
+
+										<div className="space-y-2">
+											<label
+												htmlFor="badge-image-upload"
+												className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+											>
+												{uploadingBadgeImage ? "Uploading..." : "Upload Badge Image"}
+											</label>
+											<input
+												id="badge-image-upload"
+												type="file"
+												accept="image/jpeg,image/png,image/webp,image/gif"
+												onChange={handleBadgeImageUpload}
+												disabled={uploadingBadgeImage}
+												className="hidden"
+											/>
+											<p className="text-xs text-slate-500">
+												Recommended: square image, 64x64 to 256x256 pixels
+											</p>
+										</div>
+
+										<div className="flex gap-2">
+											<button
+												onClick={handleSaveBadge}
+												disabled={savingBadge || !editingBadge.name || !editingBadge.description || !editingBadge.imageUrl}
+												className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+											>
+												{savingBadge ? "Saving..." : "Save Badge"}
+											</button>
+											<button
+												onClick={() => setEditingBadge(null)}
+												className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600"
+											>
+												Cancel
+											</button>
+										</div>
+									</div>
+								)}
+
+								{!editingBadge && (
+									<button
+										onClick={() => setEditingBadge({ name: "", description: "", imageUrl: "", color: "" })}
+										className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+									>
+										Create New Badge
+									</button>
+								)}
+
+								{/* Badge List */}
+								{loadingBadges ? (
+									<p className="text-sm text-slate-400">Loading badges...</p>
+								) : badges.length === 0 ? (
+									<p className="text-sm text-slate-400">No badges created yet.</p>
+								) : (
+									<div className="space-y-2">
+										<h3 className="text-sm font-medium text-slate-200">Existing Badges</h3>
+										<div className="grid gap-2">
+											{badges.map((badge) => (
+												<div
+													key={badge.id}
+													className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
+												>
+													<div className="flex items-center gap-3">
+														<div className="relative h-10 w-10 overflow-hidden rounded-full border-2" style={{ borderColor: badge.color || "#94a3b8" }}>
+															<Image
+																src={badge.imageUrl}
+																alt={badge.name}
+																fill
+																className="object-cover"
+															/>
+														</div>
+														<div>
+															<p className="text-sm font-medium text-slate-200">{badge.name}</p>
+															<p className="text-xs text-slate-400">{badge.description}</p>
+														</div>
+													</div>
+													<div className="flex gap-2">
+														<button
+															onClick={() => setEditingBadge({ id: badge.id, name: badge.name, description: badge.description, imageUrl: badge.imageUrl, color: badge.color || "" })}
+															className="rounded bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
+														>
+															Edit
+														</button>
+														<button
+															onClick={() => handleDeleteBadge(badge.id)}
+															className="rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-700"
+														>
+															Delete
+														</button>
+													</div>
+												</div>
+											))}
+										</div>
+									</div>
+								)}
+
+								{/* Award Badge to User Section */}
+								<div className="mt-6 rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
+									<h3 className="text-sm font-medium text-slate-200">Award Badge to User</h3>
+									
+									<div className="flex gap-2">
+										<input
+											type="text"
+											value={searchUsername}
+											onChange={(e) => setSearchUsername(e.target.value)}
+											placeholder="Enter username"
+											className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													handleSearchUser();
+												}
+											}}
+										/>
+										<button
+											onClick={handleSearchUser}
+											disabled={searchingUser}
+											className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											{searchingUser ? "Searching..." : "Search"}
+										</button>
+									</div>
+
+									{searchedUser && (
+										<div className="space-y-2">
+											<p className="text-sm text-slate-300">
+												Found user: <span className="font-medium text-slate-100">{searchedUser.commonName || searchedUser.name}</span>
+											</p>
+											
+											<div className="grid gap-2">
+												{badges.map((badge) => (
+													<div
+														key={badge.id}
+														className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/40 p-2"
+													>
+														<div className="flex items-center gap-2">
+															<div className="relative h-8 w-8 overflow-hidden rounded-full border" style={{ borderColor: badge.color || "#94a3b8" }}>
+																<Image
+																	src={badge.imageUrl}
+																	alt={badge.name}
+																	fill
+																	className="object-cover"
+																/>
+															</div>
+															<span className="text-sm text-slate-200">{badge.name}</span>
+														</div>
+														<button
+															onClick={() => handleAwardBadge(badge.id)}
+															disabled={awardingBadge}
+															className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+														>
+															Award
+														</button>
+													</div>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
+
+								{badgeMessage && (
+									<p
+										className={`text-sm ${badgeMessage.includes("success") ? "text-emerald-400" : "text-rose-400"}`}
+									>
+										{badgeMessage}
+									</p>
+								)}
+							</div>
+						</div>
+					)}
+
+					{/* User Badge Selection */}
+					{userBadges.length > 0 && (
+						<div className="rounded-lg border border-sky-700/50 bg-sky-900/20 p-4">
+							<h2 className="text-sm font-medium text-sky-200">
+								My Badges
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								Select which badges to display on your profile. Unchecked badges will be hidden from other users.
+							</p>
+
+							<div className="mt-4 space-y-2">
+								{userBadges.map((badge) => (
+									<div
+										key={badge.id}
+										className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
+									>
+										<div className="flex items-center gap-3">
+											<div className="relative h-10 w-10 overflow-hidden rounded-full border-2" style={{ borderColor: badge.color || "#94a3b8" }}>
+												<Image
+													src={badge.imageUrl}
+													alt={badge.name}
+													fill
+													className="object-cover"
+												/>
+											</div>
+											<div>
+												<p className="text-sm font-medium text-slate-200">{badge.name}</p>
+												<p className="text-xs text-slate-400">{badge.description}</p>
+											</div>
+										</div>
+										<label className="flex items-center gap-2 cursor-pointer">
+											<input
+												type="checkbox"
+												checked={badge.isDisplayed}
+												onChange={(e) => handleToggleBadgeDisplay(badge.badgeId, e.target.checked)}
+												className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-sky-500 outline-none transition focus:ring-2 focus:ring-sky-500/40"
+											/>
+											<span className="text-sm text-slate-300">Display</span>
+										</label>
+									</div>
+								))}
 							</div>
 						</div>
 					)}

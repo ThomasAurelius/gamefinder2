@@ -30,7 +30,11 @@ export default function HomePage() {
 		<>
 			<AnnouncementPopup />
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">
-				<h1 className="text-3xl font-bold sm:text-4xl">Welcome!</h1>
+				<h1 className="text-3xl font-bold sm:text-4xl">Find Board Games, D&amp;D &amp; TTRPG Sessions</h1>
+				<p className="text-lg text-slate-300 max-w-3xl">
+					Schedule board game nights, host D&amp;D campaigns, join Pathfinder adventures, and discover Shadowdark sessions. 
+					The Gathering Call connects tabletop gamers, game masters, and players for unforgettable gaming experiences.
+				</p>
 				<Image
 					src="/newlogo.png"
 					alt="The Gathering Call Logo "
