@@ -3,6 +3,7 @@ import { getUserBasicInfo } from "@/lib/users";
 import { readProfile } from "@/lib/profile-db";
 import { getDisplayedUserBadges } from "@/lib/badges/db";
 import Badge from "@/components/Badge";
+import HostRatingDisplay from "@/components/HostRatingDisplay";
 
 export default async function UserProfilePage({
   params,
@@ -57,6 +58,9 @@ export default async function UserProfilePage({
             {profile.location && (
               <p className="mt-1 text-sm text-slate-400">{profile.location}</p>
             )}
+            <div className="mt-2">
+              <HostRatingDisplay hostId={userId} showDetails={true} />
+            </div>
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import SessionCard from "@/components/SessionCard";
 import { DEFAULT_TIMEZONE } from "@/lib/timezone";
+import HostFeedbackSection from "@/components/HostFeedbackSection";
 
 type ConnectStatus = {
 	hasAccount: boolean;
@@ -50,6 +51,7 @@ export default function HostDashboardPage() {
 	const [recentSessions, setRecentSessions] = useState<Session[]>([]);
 	const [sessionsLoading, setSessionsLoading] = useState(true);
 	const [userTimezone] = useState(DEFAULT_TIMEZONE);
+	const [userId, setUserId] = useState<string | null>(null);
 
 	useEffect(() => {
 		const fetchStatus = async () => {
@@ -73,7 +75,20 @@ export default function HostDashboardPage() {
 			}
 		};
 
+		const fetchUserId = async () => {
+			try {
+				const response = await fetch("/api/auth/me");
+				if (response.ok) {
+					const data = await response.json();
+					setUserId(data.userId);
+				}
+			} catch (err) {
+				console.error("Failed to fetch user ID", err);
+			}
+		};
+
 		fetchStatus();
+		fetchUserId();
 		fetchSessions();
 	}, []);
 
@@ -363,6 +378,9 @@ export default function HostDashboardPage() {
 						</Link>
 					</div>
 				</div>
+
+				{/* Host Feedback */}
+				{userId && <HostFeedbackSection hostId={userId} />}
 
 				{/* Upcoming Sessions */}
 				<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
