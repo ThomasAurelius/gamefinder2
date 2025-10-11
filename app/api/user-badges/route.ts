@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     let userId = targetUserId;
     if (!userId) {
       const cookieStore = await cookies();
-      userId = cookieStore.get("userId")?.value;
+      userId = cookieStore.get("userId")?.value ?? null;
     }
 
     if (!userId) {
