@@ -67,6 +67,14 @@ export default function SettingsPage() {
 	const [savingBadge, setSavingBadge] = useState(false);
 	const [uploadingBadgeImage, setUploadingBadgeImage] = useState(false);
 	const [badgeMessage, setBadgeMessage] = useState("");
+	const [searchUsername, setSearchUsername] = useState("");
+	const [searchedUser, setSearchedUser] = useState<{
+		userId: string;
+		name: string;
+		commonName: string;
+	} | null>(null);
+	const [searchingUser, setSearchingUser] = useState(false);
+	const [awardingBadge, setAwardingBadge] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
@@ -425,6 +433,81 @@ export default function SettingsPage() {
 			);
 		} catch (error) {
 			console.error("Failed to update badge display:", error);
+		}
+	};
+
+	const handleSearchUser = async () => {
+		if (!searchUsername.trim()) {
+			setBadgeMessage("Please enter a username");
+			return;
+		}
+
+		setSearchingUser(true);
+		setBadgeMessage("");
+
+		try {
+			const response = await fetch(`/api/public/users/search?username=${encodeURIComponent(searchUsername)}`);
+			if (!response.ok) {
+				throw new Error("User not found");
+			}
+
+			const userData = await response.json();
+			setSearchedUser(userData);
+		} catch (error) {
+			console.error("Failed to search user:", error);
+			setBadgeMessage("User not found. Please check the username.");
+			setSearchedUser(null);
+		} finally {
+			setSearchingUser(false);
+		}
+	};
+
+	const handleAwardBadge = async (badgeId: string) => {
+		if (!searchedUser) return;
+
+		setAwardingBadge(true);
+		setBadgeMessage("");
+
+		try {
+			const response = await fetch("/api/admin/user-badges", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ userId: searchedUser.userId, badgeId }),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to award badge");
+			}
+
+			setBadgeMessage(`Badge awarded to ${searchedUser.commonName || searchedUser.name} successfully!`);
+			setTimeout(() => setBadgeMessage(""), 3000);
+		} catch (error) {
+			console.error("Failed to award badge:", error);
+			setBadgeMessage("Failed to award badge. User may already have this badge.");
+		} finally {
+			setAwardingBadge(false);
+		}
+	};
+
+	const handleRemoveBadge = async (userId: string, badgeId: string, userName: string) => {
+		if (!confirm(`Are you sure you want to remove this badge from ${userName}?`)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/admin/user-badges?userId=${userId}&badgeId=${badgeId}`, {
+				method: "DELETE",
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to remove badge");
+			}
+
+			setBadgeMessage("Badge removed successfully!");
+			setTimeout(() => setBadgeMessage(""), 3000);
+		} catch (error) {
+			console.error("Failed to remove badge:", error);
+			setBadgeMessage("Failed to remove badge. Please try again.");
 		}
 	};
 
@@ -905,6 +988,69 @@ export default function SettingsPage() {
 										</div>
 									</div>
 								)}
+
+								{/* Award Badge to User Section */}
+								<div className="mt-6 rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
+									<h3 className="text-sm font-medium text-slate-200">Award Badge to User</h3>
+									
+									<div className="flex gap-2">
+										<input
+											type="text"
+											value={searchUsername}
+											onChange={(e) => setSearchUsername(e.target.value)}
+											placeholder="Enter username"
+											className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													handleSearchUser();
+												}
+											}}
+										/>
+										<button
+											onClick={handleSearchUser}
+											disabled={searchingUser}
+											className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											{searchingUser ? "Searching..." : "Search"}
+										</button>
+									</div>
+
+									{searchedUser && (
+										<div className="space-y-2">
+											<p className="text-sm text-slate-300">
+												Found user: <span className="font-medium text-slate-100">{searchedUser.commonName || searchedUser.name}</span>
+											</p>
+											
+											<div className="grid gap-2">
+												{badges.map((badge) => (
+													<div
+														key={badge.id}
+														className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/40 p-2"
+													>
+														<div className="flex items-center gap-2">
+															<div className="relative h-8 w-8 overflow-hidden rounded-full border" style={{ borderColor: badge.color || "#94a3b8" }}>
+																<Image
+																	src={badge.imageUrl}
+																	alt={badge.name}
+																	fill
+																	className="object-cover"
+																/>
+															</div>
+															<span className="text-sm text-slate-200">{badge.name}</span>
+														</div>
+														<button
+															onClick={() => handleAwardBadge(badge.id)}
+															disabled={awardingBadge}
+															className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+														>
+															Award
+														</button>
+													</div>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
 
 								{badgeMessage && (
 									<p
