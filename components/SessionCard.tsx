@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatDateInTimezone } from "@/lib/timezone";
 
@@ -32,6 +32,50 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 	const [processingPlayerId, setProcessingPlayerId] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
+	const [playerSubscriptions, setPlayerSubscriptions] = useState<Record<string, boolean>>({});
+
+	useEffect(() => {
+		// Fetch subscription status for all players when the component mounts
+		const fetchSubscriptionStatus = async () => {
+			// Only check subscriptions if this is a paid session
+			if (!session.costPerSession || session.costPerSession <= 0) {
+				return;
+			}
+
+			const allPlayers = [
+				...session.signedUpPlayersDetails,
+				...session.waitlistDetails,
+				...session.pendingPlayersDetails,
+			];
+
+			if (allPlayers.length === 0) {
+				return;
+			}
+
+			try {
+				const playerIds = allPlayers.map((player) => player.id);
+				const response = await fetch("/api/stripe/check-players-subscriptions", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						campaignId: session.id,
+						playerIds: playerIds,
+					}),
+				});
+
+				if (response.ok) {
+					const subscriptionStatuses: Record<string, boolean> = await response.json();
+					setPlayerSubscriptions(subscriptionStatuses);
+				}
+			} catch (err) {
+				console.error("Failed to fetch player subscription statuses:", err);
+			}
+		};
+
+		fetchSubscriptionStatus();
+	}, [session.id, session.costPerSession, session.signedUpPlayersDetails, session.waitlistDetails, session.pendingPlayersDetails]);
 
 	const handleRefund = async (playerId: string, playerName: string) => {
 		if (!confirm(`Are you sure you want to issue a refund to ${playerName}? This action cannot be undone.`)) {
@@ -148,13 +192,15 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 										<p className="text-xs text-green-400">Signed Up</p>
 									</div>
 								</div>
-								<button
-									onClick={() => handleRefund(player.id, player.name)}
-									disabled={processingPlayerId === player.id}
-									className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-								>
-									{processingPlayerId === player.id ? "Processing..." : "Refund"}
-								</button>
+								{playerSubscriptions[player.id] && (
+									<button
+										onClick={() => handleRefund(player.id, player.name)}
+										disabled={processingPlayerId === player.id}
+										className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										{processingPlayerId === player.id ? "Processing..." : "Refund"}
+									</button>
+								)}
 							</div>
 						))}
 
@@ -181,13 +227,15 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 										<p className="text-xs text-yellow-400">Waitlisted</p>
 									</div>
 								</div>
-								<button
-									onClick={() => handleRefund(player.id, player.name)}
-									disabled={processingPlayerId === player.id}
-									className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-								>
-									{processingPlayerId === player.id ? "Processing..." : "Refund"}
-								</button>
+								{playerSubscriptions[player.id] && (
+									<button
+										onClick={() => handleRefund(player.id, player.name)}
+										disabled={processingPlayerId === player.id}
+										className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										{processingPlayerId === player.id ? "Processing..." : "Refund"}
+									</button>
+								)}
 							</div>
 						))}
 
@@ -214,13 +262,15 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 										<p className="text-xs text-slate-400">Pending</p>
 									</div>
 								</div>
-								<button
-									onClick={() => handleRefund(player.id, player.name)}
-									disabled={processingPlayerId === player.id}
-									className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-								>
-									{processingPlayerId === player.id ? "Processing..." : "Refund"}
-								</button>
+								{playerSubscriptions[player.id] && (
+									<button
+										onClick={() => handleRefund(player.id, player.name)}
+										disabled={processingPlayerId === player.id}
+										className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+									>
+										{processingPlayerId === player.id ? "Processing..." : "Refund"}
+									</button>
+								)}
 							</div>
 						))}
 					</div>
