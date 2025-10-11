@@ -45,6 +45,7 @@ export default function SettingsPage() {
 		description: string;
 		imageUrl: string;
 		color?: string;
+		isSelfAssignable?: boolean;
 	}>>([]);
 	const [userBadges, setUserBadges] = useState<Array<{
 		id: string;
@@ -63,6 +64,7 @@ export default function SettingsPage() {
 		description: string;
 		imageUrl: string;
 		color: string;
+		isSelfAssignable: boolean;
 	} | null>(null);
 	const [savingBadge, setSavingBadge] = useState(false);
 	const [uploadingBadgeImage, setUploadingBadgeImage] = useState(false);
@@ -75,6 +77,7 @@ export default function SettingsPage() {
 	} | null>(null);
 	const [searchingUser, setSearchingUser] = useState(false);
 	const [awardingBadge, setAwardingBadge] = useState(false);
+	const [assigningSelfBadge, setAssigningSelfBadge] = useState(false);
 
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
@@ -365,8 +368,8 @@ export default function SettingsPage() {
 		try {
 			const method = editingBadge.id ? "PUT" : "POST";
 			const body = editingBadge.id 
-				? { id: editingBadge.id, name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color }
-				: { name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color };
+				? { id: editingBadge.id, name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color, isSelfAssignable: editingBadge.isSelfAssignable }
+				: { name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color, isSelfAssignable: editingBadge.isSelfAssignable };
 
 			const response = await fetch("/api/badges", {
 				method,
@@ -486,6 +489,33 @@ export default function SettingsPage() {
 			setBadgeMessage("Failed to award badge. User may already have this badge.");
 		} finally {
 			setAwardingBadge(false);
+		}
+	};
+
+	const handleSelfAssignBadge = async (badgeId: string) => {
+		setAssigningSelfBadge(true);
+		setBadgeMessage("");
+
+		try {
+			const response = await fetch("/api/user-badges", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ badgeId }),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to assign badge");
+			}
+
+			setBadgeMessage("Badge assigned successfully!");
+			setTimeout(() => setBadgeMessage(""), 3000);
+			// Reload user badges to show the newly assigned badge
+			loadUserBadges();
+		} catch (error) {
+			console.error("Failed to self-assign badge:", error);
+			setBadgeMessage("Failed to assign badge. You may already have this badge.");
+		} finally {
+			setAssigningSelfBadge(false);
 		}
 	};
 
@@ -881,6 +911,19 @@ export default function SettingsPage() {
 											/>
 										</div>
 
+										<div className="flex items-center gap-2">
+											<input
+												type="checkbox"
+												id="self-assignable"
+												checked={editingBadge.isSelfAssignable}
+												onChange={(e) => setEditingBadge({ ...editingBadge, isSelfAssignable: e.target.checked })}
+												className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-amber-500 outline-none transition focus:ring-2 focus:ring-amber-500/40"
+											/>
+											<label htmlFor="self-assignable" className="text-sm text-slate-300">
+												Allow users to self-assign this badge
+											</label>
+										</div>
+
 										{editingBadge.imageUrl && (
 											<div className="flex items-center gap-3">
 												<div className="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-700">
@@ -934,7 +977,7 @@ export default function SettingsPage() {
 
 								{!editingBadge && (
 									<button
-										onClick={() => setEditingBadge({ name: "", description: "", imageUrl: "", color: "" })}
+										onClick={() => setEditingBadge({ name: "", description: "", imageUrl: "", color: "", isSelfAssignable: false })}
 										className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
 									>
 										Create New Badge
@@ -971,7 +1014,7 @@ export default function SettingsPage() {
 													</div>
 													<div className="flex gap-2">
 														<button
-															onClick={() => setEditingBadge({ id: badge.id, name: badge.name, description: badge.description, imageUrl: badge.imageUrl, color: badge.color || "" })}
+															onClick={() => setEditingBadge({ id: badge.id, name: badge.name, description: badge.description, imageUrl: badge.imageUrl, color: badge.color || "", isSelfAssignable: badge.isSelfAssignable || false })}
 															className="rounded bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
 														>
 															Edit
@@ -1105,6 +1148,59 @@ export default function SettingsPage() {
 									</div>
 								))}
 							</div>
+						</div>
+					)}
+
+					{/* Self-Assignable Badges */}
+					{badges.filter(badge => badge.isSelfAssignable && !userBadges.some(ub => ub.badgeId === badge.id)).length > 0 && (
+						<div className="rounded-lg border border-emerald-700/50 bg-emerald-900/20 p-4">
+							<h2 className="text-sm font-medium text-emerald-200">
+								Available Badges
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								These badges can be assigned to yourself to indicate your role or status.
+							</p>
+
+							<div className="mt-4 space-y-2">
+								{badges
+									.filter(badge => badge.isSelfAssignable && !userBadges.some(ub => ub.badgeId === badge.id))
+									.map((badge) => (
+										<div
+											key={badge.id}
+											className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
+										>
+											<div className="flex items-center gap-3">
+												<div className="relative h-10 w-10 overflow-hidden rounded-full border-2" style={{ borderColor: badge.color || "#94a3b8" }}>
+													<Image
+														src={badge.imageUrl}
+														alt={badge.name}
+														fill
+														className="object-cover"
+													/>
+												</div>
+												<div>
+													<p className="text-sm font-medium text-slate-200">{badge.name}</p>
+													<p className="text-xs text-slate-400">{badge.description}</p>
+												</div>
+											</div>
+											<button
+												onClick={() => handleSelfAssignBadge(badge.id)}
+												disabled={assigningSelfBadge}
+												className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+											>
+												{assigningSelfBadge ? "Assigning..." : "Assign to Me"}
+											</button>
+										</div>
+									))}
+							</div>
+
+							{badgeMessage && (
+								<p
+									className={`mt-2 text-sm ${badgeMessage.includes("success") ? "text-emerald-400" : "text-rose-400"}`}
+								>
+									{badgeMessage}
+								</p>
+							)}
 						</div>
 					)}
 				</div>

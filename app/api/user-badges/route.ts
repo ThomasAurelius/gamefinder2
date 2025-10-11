@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import {
   getUserBadges,
   updateBadgeDisplayPreference,
+  selfAssignBadge,
 } from "@/lib/badges/db";
 
 /**
@@ -102,6 +103,60 @@ export async function PUT(request: Request) {
     console.error("Failed to update badge display preference:", error);
     return NextResponse.json(
       { error: "Failed to update badge display preference" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * POST /api/user-badges
+ * Self-assign a badge to the authenticated user (only for self-assignable badges)
+ */
+export async function POST(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { badgeId } = body;
+
+    if (!badgeId || typeof badgeId !== "string") {
+      return NextResponse.json(
+        { error: "badgeId is required and must be a string" },
+        { status: 400 }
+      );
+    }
+
+    const userBadge = await selfAssignBadge(userId, badgeId);
+
+    if (!userBadge) {
+      return NextResponse.json(
+        { error: "Badge not found, not self-assignable, or failed to assign" },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        id: userBadge._id?.toString(),
+        userId: userBadge.userId,
+        badgeId: userBadge.badgeId,
+        awardedAt: userBadge.awardedAt,
+        isDisplayed: userBadge.isDisplayed,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Failed to self-assign badge:", error);
+    return NextResponse.json(
+      { error: "Failed to self-assign badge" },
       { status: 500 }
     );
   }
