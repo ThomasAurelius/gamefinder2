@@ -254,7 +254,8 @@ export default function CampaignRefundManager({
 										disabled={
 											processingPlayerId === player.playerId ||
 											payment.status === "canceled" ||
-											payment.status === "incomplete"
+											payment.status === "incomplete" ||
+											(payment.type === "subscription" && payment.status !== "active")
 										}
 										className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 									>
