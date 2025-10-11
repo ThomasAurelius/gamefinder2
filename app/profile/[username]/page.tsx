@@ -57,7 +57,17 @@ export default async function PublicProfilePage({
         <p className="text-sm uppercase tracking-wide text-sky-400">
           @{profile.username}
         </p>
-        <h1 className="text-3xl font-bold">{details.displayName}</h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold">{details.displayName}</h1>
+          {profile.userId && (
+            <Link
+              href={`/players/${profile.userId}/library`}
+              className="rounded-lg border border-sky-600 bg-sky-600/20 px-4 py-2 text-sm font-medium text-sky-100 transition hover:bg-sky-600/30"
+            >
+              View Library
+            </Link>
+          )}
+        </div>
         {details.location ? (
           <p className="text-sm text-slate-400">{details.location}</p>
         ) : null}

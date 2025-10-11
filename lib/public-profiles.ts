@@ -18,6 +18,7 @@ export type PublicCharacterRecord = StoredCharacter & {
 
 export type PublicProfileRecord = {
   username: string;
+  userId?: string; // MongoDB ObjectId for linking to library
   profile: PublicProfileDetails;
   characters: PublicCharacterRecord[];
 };
@@ -28,6 +29,7 @@ const PUBLIC_PROFILE_FILE = path.join(DATA_DIRECTORY, "public-profiles.json");
 const FALLBACK_PROFILES: PublicProfileRecord[] = [
   {
     username: "adventurer-jane",
+    userId: "507f1f77bcf86cd799439011", // Sample MongoDB ObjectId
     profile: {
       displayName: "Adventurer Jane",
       bio: "Story-driven GM and occasional player who loves weaving character-focused tales.",
