@@ -153,20 +153,17 @@ export async function POST(request: Request) {
 							};
 
 							// If the charge has a transfer (used Stripe Connect), 
-							// we need to reverse 80% from the host's account
-							// The platform will automatically absorb the 20% application fee
+							// reverse the transfer so refund is split proportionally:
+							// - Host pays back 80% (reversed from their Connect account)
+							// - Platform pays back 20% (the original application fee)
+							// Stripe automatically calculates the correct amounts when reverse_transfer is true
 							if (charge.transfer) {
-								const refundAmount = charge.amount; // Full refund amount
-								const hostReverseAmount = Math.round(refundAmount * 0.80); // 80% from host
-								
 								refundOptions.reverse_transfer = true;
-								// Optionally specify exact amount to reverse (defaults to full refund amount minus app fee)
-								// refundOptions.amount = refundAmount; // Full refund to customer
 								
 								console.log("Refunding with Connect transfer reversal:", {
-									fullRefundAmount: refundAmount,
-									hostReverseAmount: hostReverseAmount,
-									platformAbsorbs: refundAmount - hostReverseAmount,
+									chargeAmount: charge.amount,
+									transfer: charge.transfer,
+									note: "Stripe will automatically reverse 80% from host and 20% from platform",
 								});
 							}
 
@@ -274,18 +271,17 @@ export async function POST(request: Request) {
 					};
 
 					// If the charge has a transfer (used Stripe Connect), 
-					// we need to reverse 80% from the host's account
-					// The platform will automatically absorb the 20% application fee
+					// reverse the transfer so refund is split proportionally:
+					// - Host pays back 80% (reversed from their Connect account)
+					// - Platform pays back 20% (the original application fee)
+					// Stripe automatically calculates the correct amounts when reverse_transfer is true
 					if (charge.transfer) {
-						const refundAmount = charge.amount; // Full refund amount
-						const hostReverseAmount = Math.round(refundAmount * 0.80); // 80% from host
-						
 						refundOptions.reverse_transfer = true;
 						
 						console.log("Refunding with Connect transfer reversal:", {
-							fullRefundAmount: refundAmount,
-							hostReverseAmount: hostReverseAmount,
-							platformAbsorbs: refundAmount - hostReverseAmount,
+							chargeAmount: charge.amount,
+							transfer: charge.transfer,
+							note: "Stripe will automatically reverse 80% from host and 20% from platform",
 						});
 					}
 
