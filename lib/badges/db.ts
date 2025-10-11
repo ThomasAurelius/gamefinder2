@@ -47,7 +47,8 @@ export async function createBadge(
   name: string,
   description: string,
   imageUrl: string,
-  color?: string
+  color?: string,
+  isSelfAssignable?: boolean
 ): Promise<BadgeDocument> {
   const db = await getDb();
   const badgesCollection = db.collection<BadgeDocument>("badges");
@@ -61,6 +62,7 @@ export async function createBadge(
     createdAt: now,
     updatedAt: now,
     createdBy: userId,
+    isSelfAssignable: isSelfAssignable || false,
   };
   
   const result = await badgesCollection.insertOne(badge);
@@ -77,7 +79,8 @@ export async function updateBadge(
   name: string,
   description: string,
   imageUrl: string,
-  color?: string
+  color?: string,
+  isSelfAssignable?: boolean
 ): Promise<boolean> {
   try {
     const db = await getDb();
@@ -91,6 +94,7 @@ export async function updateBadge(
           description: description.trim(),
           imageUrl: imageUrl.trim(),
           color: color?.trim() || undefined,
+          isSelfAssignable: isSelfAssignable || false,
           updatedAt: new Date(),
         }
       }
@@ -158,6 +162,48 @@ export async function awardBadgeToUser(
     return userBadge;
   } catch (error) {
     console.error("Error awarding badge:", error);
+    return null;
+  }
+}
+
+/**
+ * Self-assign a badge to a user (only for self-assignable badges)
+ */
+export async function selfAssignBadge(
+  userId: string,
+  badgeId: string
+): Promise<UserBadgeDocument | null> {
+  try {
+    const db = await getDb();
+    const badgesCollection = db.collection<BadgeDocument>("badges");
+    const userBadgesCollection = db.collection<UserBadgeDocument>("userBadges");
+    
+    // Check if badge is self-assignable
+    const badge = await badgesCollection.findOne({ _id: new ObjectId(badgeId) });
+    if (!badge || !badge.isSelfAssignable) {
+      return null; // Badge doesn't exist or is not self-assignable
+    }
+    
+    // Check if user already has this badge
+    const existing = await userBadgesCollection.findOne({ userId, badgeId });
+    if (existing) {
+      return existing; // Already has the badge
+    }
+    
+    const userBadge: UserBadgeDocument = {
+      userId,
+      badgeId,
+      awardedAt: new Date(),
+      awardedBy: userId, // Self-assigned
+      isDisplayed: true, // Default to displayed
+    };
+    
+    const result = await userBadgesCollection.insertOne(userBadge);
+    userBadge._id = result.insertedId;
+    
+    return userBadge;
+  } catch (error) {
+    console.error("Error self-assigning badge:", error);
     return null;
   }
 }

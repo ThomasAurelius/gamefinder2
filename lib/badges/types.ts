@@ -12,6 +12,7 @@ export type BadgeDocument = {
   createdAt: Date;
   updatedAt: Date;
   createdBy: string; // Admin user ID who created the badge
+  isSelfAssignable?: boolean; // Whether users can assign this badge to themselves
 };
 
 /**
