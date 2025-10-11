@@ -35,13 +35,19 @@ Allows campaign hosts to issue refunds to players who have paid for the campaign
 2. Cancels the subscription immediately (no waiting for period end)
 3. Retrieves the latest invoice for the subscription
 4. Issues a refund if the invoice has been paid
-5. Returns details about the canceled subscription and refund
+5. If the payment used Stripe Connect (host has completed onboarding), the refund is automatically split:
+   - 80% is reversed from the host's Connect account
+   - 20% is absorbed by the platform (the application fee portion)
+6. Returns details about the canceled subscription and refund
 
 **For One-Time Payments:**
 1. Searches for payment intents for the campaign and player
 2. Finds all successful payments
 3. Issues refunds for all successful charges
-4. Returns details about all refunds issued
+4. If the payment used Stripe Connect (host has completed onboarding), the refund is automatically split:
+   - 80% is reversed from the host's Connect account
+   - 20% is absorbed by the platform (the application fee portion)
+5. Returns details about all refunds issued
 
 #### Response Format
 
@@ -82,6 +88,27 @@ Allows campaign hosts to issue refunds to players who have paid for the campaign
 - `403 Forbidden` - User is not the campaign host
 - `404 Not Found` - Campaign, player, or payment not found
 - `500 Internal Server Error` - Stripe API error or other server error
+
+#### Refund Fee Split
+
+When a refund is issued for a payment that used Stripe Connect (i.e., the host has completed onboarding):
+
+- **Customer receives:** 100% of the original payment amount back
+- **Host pays:** 80% of the refund amount (reversed from their Connect account)
+- **Platform pays:** 20% of the refund amount (the original application fee)
+
+This ensures that the refund cost is split proportionally to match how the payment was originally distributed between the host (80%) and the platform (20%).
+
+**Example:**
+- Original payment: $10.00
+  - Host received: $8.00 (80%)
+  - Platform received: $2.00 (20% application fee)
+- Refund issued: $10.00
+  - Customer receives: $10.00
+  - Host pays back: $8.00
+  - Platform pays back: $2.00
+
+**Note:** If the payment did not use Stripe Connect (host has not completed onboarding), the entire refund comes from the platform account.
 
 ### 2. Campaign Payments API Endpoint
 

@@ -137,7 +137,11 @@ export async function POST(request: Request) {
 							: invoiceWithCharge.charge.id;
 
 						try {
-							const refund = await stripe.refunds.create({
+							// Retrieve the charge to check if it used Stripe Connect
+							const charge = await stripe.charges.retrieve(chargeId);
+							
+							// Build refund options
+							const refundOptions: Stripe.RefundCreateParams = {
 								charge: chargeId,
 								reason: "requested_by_customer",
 								metadata: {
@@ -146,7 +150,24 @@ export async function POST(request: Request) {
 									hostId: userId,
 									refundReason: reason || "Campaign canceled by host",
 								},
-							});
+							};
+
+							// If the charge has a transfer (used Stripe Connect), 
+							// reverse the transfer so refund is split proportionally:
+							// - Host pays back 80% (reversed from their Connect account)
+							// - Platform pays back 20% (the original application fee)
+							// Stripe automatically calculates the correct amounts when reverse_transfer is true
+							if (charge.transfer) {
+								refundOptions.reverse_transfer = true;
+								
+								console.log("Refunding with Connect transfer reversal:", {
+									chargeAmount: charge.amount,
+									transfer: charge.transfer,
+									note: "Stripe will automatically reverse 80% from host and 20% from platform",
+								});
+							}
+
+							const refund = await stripe.refunds.create(refundOptions);
 
 							console.log("Refund issued:", {
 								refundId: refund.id,
@@ -232,8 +253,14 @@ export async function POST(request: Request) {
 			
 			if (paymentWithCharges.charges?.data?.[0]?.id) {
 				try {
-					const refund = await stripe.refunds.create({
-						charge: paymentWithCharges.charges.data[0].id,
+					const chargeId = paymentWithCharges.charges.data[0].id;
+					
+					// Retrieve the charge to check if it used Stripe Connect
+					const charge = await stripe.charges.retrieve(chargeId);
+					
+					// Build refund options
+					const refundOptions: Stripe.RefundCreateParams = {
+						charge: chargeId,
 						reason: "requested_by_customer",
 						metadata: {
 							campaignId,
@@ -241,7 +268,24 @@ export async function POST(request: Request) {
 							hostId: userId,
 							refundReason: reason || "Campaign canceled by host",
 						},
-					});
+					};
+
+					// If the charge has a transfer (used Stripe Connect), 
+					// reverse the transfer so refund is split proportionally:
+					// - Host pays back 80% (reversed from their Connect account)
+					// - Platform pays back 20% (the original application fee)
+					// Stripe automatically calculates the correct amounts when reverse_transfer is true
+					if (charge.transfer) {
+						refundOptions.reverse_transfer = true;
+						
+						console.log("Refunding with Connect transfer reversal:", {
+							chargeAmount: charge.amount,
+							transfer: charge.transfer,
+							note: "Stripe will automatically reverse 80% from host and 20% from platform",
+						});
+					}
+
+					const refund = await stripe.refunds.create(refundOptions);
 
 					refunds.push({
 						id: refund.id,
