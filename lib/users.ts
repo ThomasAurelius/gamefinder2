@@ -278,3 +278,44 @@ export async function getStripeConnectStatus(userId: string): Promise<{
   }
 }
 
+/**
+ * Search for users by name (partial match, case-insensitive)
+ */
+export async function searchUsersByName(searchTerm: string): Promise<UserBasicInfo[]> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!searchTerm || searchTerm.trim().length === 0) {
+      return [];
+    }
+    
+    // Escape special regex characters to prevent regex injection
+    const escapedSearchTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    
+    // Search by name or commonName (case-insensitive)
+    const users = await usersCollection
+      .find(
+        {
+          $or: [
+            { name: { $regex: new RegExp(escapedSearchTerm, "i") } },
+            { "profile.commonName": { $regex: new RegExp(escapedSearchTerm, "i") } },
+          ],
+        },
+        { projection: { _id: 1, name: 1, email: 1, "profile.avatarUrl": 1, "profile.commonName": 1 } }
+      )
+      .limit(10) // Limit results to prevent large result sets
+      .toArray();
+    
+    return users.map(user => ({
+      id: user._id?.toString() || "",
+      name: user.profile?.commonName || user.name || user.email?.split("@")[0] || "Unknown User",
+      email: user.email || "",
+      avatarUrl: user.profile?.avatarUrl || undefined,
+    }));
+  } catch (error) {
+    console.error("Failed to search users by name:", error);
+    return [];
+  }
+}
+

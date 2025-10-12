@@ -52,8 +52,9 @@ export async function GET(request: Request) {
     const times = timesParam ? timesParam.split(",") : undefined;
     const locationSearch = searchParams.get("location") || "";
     const radiusMiles = parseFloat(searchParams.get("radius") || "25");
+    const hostId = searchParams.get("hostId") || undefined;
 
-    const sessions = await listGameSessions({ game, date, times });
+    const sessions = await listGameSessions({ game, date, times, hostId });
 
     // Fetch host information for all sessions
     const hostIds = [...new Set(sessions.map(s => s.userId))];

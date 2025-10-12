@@ -17,6 +17,7 @@ export async function listCampaigns(filters?: {
   date?: string;
   times?: string[];
   userFilter?: string;
+  hostId?: string;
 }): Promise<StoredCampaign[]> {
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
@@ -37,7 +38,13 @@ export async function listCampaigns(filters?: {
     query.times = { $in: filters.times };
   }
 
+  // If hostId is provided, filter by host
+  if (filters?.hostId) {
+    query.userId = filters.hostId;
+  }
+
   // If userFilter is provided, find campaigns where the user is hosting or playing
+  // Note: userFilter is used for "My Campaigns" type features
   if (filters?.userFilter) {
     query.$or = [
       { userId: filters.userFilter }, // Campaigns user is hosting

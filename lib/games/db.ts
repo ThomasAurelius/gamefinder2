@@ -11,6 +11,7 @@ export async function listGameSessions(filters?: {
   game?: string;
   date?: string;
   times?: string[];
+  hostId?: string;
 }): Promise<StoredGameSession[]> {
   const db = await getDb();
   const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
@@ -29,6 +30,10 @@ export async function listGameSessions(filters?: {
   if (filters?.times && filters.times.length > 0) {
     // Find sessions that have at least one matching time slot
     query.times = { $in: filters.times };
+  }
+  
+  if (filters?.hostId) {
+    query.userId = filters.hostId;
   }
 
   const sessions = await gamesCollection
