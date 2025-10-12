@@ -75,7 +75,6 @@ function PlayerCard({ player }: { player: Player }) {
 										key={`${player.id}-${badge.name}-${badge.imageUrl}`}
 										name={badge.name}
 										imageUrl={badge.imageUrl}
-										color={badge.color}
 										size="sm"
 										showTooltip={true}
 									/>

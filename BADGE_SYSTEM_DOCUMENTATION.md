@@ -170,7 +170,6 @@ import Badge from "@/components/Badge";
 <Badge
   name="Badge Name"           // Required: Badge name for tooltip
   imageUrl="/badge.png"       // Required: Badge image URL
-  color="#94a3b8"            // Optional: Border color (hex)
   size="sm" | "md" | "lg"    // Optional: Badge size (default: "md")
   showTooltip={true}         // Optional: Show name on hover (default: true)
 />
