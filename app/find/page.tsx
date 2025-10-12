@@ -223,6 +223,11 @@ export default function FindGamesPage() {
 	const [showCharacterDialog, setShowCharacterDialog] = useState(false);
 	const [sessionToJoin, setSessionToJoin] = useState<GameSession | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+	const [hostSearch, setHostSearch] = useState("");
+	const [hostSearchResults, setHostSearchResults] = useState<{ id: string; name: string; avatarUrl?: string }[]>([]);
+	const [selectedHostId, setSelectedHostId] = useState<string>("");
+	const [selectedHostName, setSelectedHostName] = useState<string>("");
+	const [showHostResults, setShowHostResults] = useState(false);
 
 	useEffect(() => {
 		const fetchTimezone = async () => {
@@ -276,6 +281,47 @@ export default function FindGamesPage() {
 		fetchTimezone();
 		fetchUserProfileAndEvents();
 	}, []);
+
+	// Search for hosts as user types
+	useEffect(() => {
+		const searchHosts = async () => {
+			if (!hostSearch || hostSearch.trim().length < 2) {
+				setHostSearchResults([]);
+				setShowHostResults(false);
+				return;
+			}
+
+			try {
+				const response = await fetch(`/api/users/search?name=${encodeURIComponent(hostSearch)}`);
+				if (response.ok) {
+					const users = await response.json();
+					setHostSearchResults(users);
+					setShowHostResults(true);
+				}
+			} catch (error) {
+				console.error("Failed to search hosts:", error);
+			}
+		};
+
+		const debounceTimer = setTimeout(searchHosts, 300);
+		return () => clearTimeout(debounceTimer);
+	}, [hostSearch]);
+
+	// Close host search dropdown when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			const hostSearchInput = document.getElementById("host-search");
+			if (hostSearchInput && !hostSearchInput.contains(target) && !target.closest(".host-results-dropdown")) {
+				setShowHostResults(false);
+			}
+		};
+
+		if (showHostResults) {
+			document.addEventListener("mousedown", handleClickOutside);
+			return () => document.removeEventListener("mousedown", handleClickOutside);
+		}
+	}, [showHostResults]);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -337,6 +383,9 @@ export default function FindGamesPage() {
 			if (locationSearch) {
 				params.append("location", locationSearch);
 				params.append("radius", radiusMiles);
+			}
+			if (selectedHostId) {
+				params.append("hostId", selectedHostId);
 			}
 
 			const response = await fetch(`/api/games?${params.toString()}`);
@@ -598,6 +647,82 @@ export default function FindGamesPage() {
 							/>
 						</div>
 
+						<div className="space-y-2 relative">
+							<label
+								htmlFor="host-search"
+								className="block text-sm font-medium text-slate-200"
+							>
+								Host Name
+							</label>
+							<input
+								id="host-search"
+								type="text"
+								value={selectedHostId ? selectedHostName : hostSearch}
+								onChange={(e) => {
+									const value = e.target.value;
+									setHostSearch(value);
+									if (selectedHostId) {
+										setSelectedHostId("");
+										setSelectedHostName("");
+									}
+								}}
+								onFocus={() => {
+									if (hostSearchResults.length > 0) {
+										setShowHostResults(true);
+									}
+								}}
+								placeholder="Search for a host by name..."
+								className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+							/>
+							{showHostResults && hostSearchResults.length > 0 && (
+								<div className="host-results-dropdown absolute z-10 w-full mt-1 rounded-lg border border-slate-700 bg-slate-900 shadow-lg max-h-60 overflow-y-auto">
+									{hostSearchResults.map((host) => (
+										<button
+											key={host.id}
+											type="button"
+											onClick={() => {
+												setSelectedHostId(host.id);
+												setSelectedHostName(host.name);
+												setHostSearch("");
+												setShowHostResults(false);
+											}}
+											className="w-full px-4 py-2 text-left text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2"
+										>
+											{host.avatarUrl && (
+												<img
+													src={host.avatarUrl}
+													alt={host.name}
+													className="w-6 h-6 rounded-full"
+												/>
+											)}
+											<span>{host.name}</span>
+										</button>
+									))}
+								</div>
+							)}
+							{selectedHostId && (
+								<div className="flex items-center gap-2 mt-2">
+									<span className="text-xs text-slate-400">
+										Filtering by: <span className="text-sky-400">{selectedHostName}</span>
+									</span>
+									<button
+										type="button"
+										onClick={() => {
+											setSelectedHostId("");
+											setSelectedHostName("");
+											setHostSearch("");
+										}}
+										className="text-xs text-red-400 hover:text-red-300"
+									>
+										Clear
+									</button>
+								</div>
+							)}
+							<p className="text-xs text-slate-500">
+								Find games hosted by a specific person
+							</p>
+						</div>
+
 						<div className="space-y-2">
 							<label
 								htmlFor="location-search"
@@ -686,7 +811,8 @@ export default function FindGamesPage() {
 								(!selectedGame &&
 									!selectedDate &&
 									selectedTimes.length === 0 &&
-									!locationSearch) ||
+									!locationSearch &&
+									!selectedHostId) ||
 								(selectedGame === "Other" && !customGameName.trim()) ||
 								isLoading
 							}
@@ -712,7 +838,8 @@ export default function FindGamesPage() {
 						{selectedGame ||
 						selectedDate ||
 						selectedTimes.length > 0 ||
-						locationSearch ? (
+						locationSearch ||
+						selectedHostId ? (
 							<>
 								Showing games
 								{selectedGame && (
@@ -724,6 +851,15 @@ export default function FindGamesPage() {
 											customGameName.trim()
 												? customGameName
 												: selectedGame}
+										</span>
+									</>
+								)}
+								{selectedHostId && (
+									<>
+										{" "}
+										hosted by{" "}
+										<span className="text-sky-400">
+											{selectedHostName}
 										</span>
 									</>
 								)}
