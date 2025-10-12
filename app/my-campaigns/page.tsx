@@ -260,7 +260,7 @@ function CampaignCard({
 							<img
 								src={campaign.imageUrl}
 								alt={campaign.game}
-								className="h-36 w-36 md:h-72 md:w-72 rounded-lg border border-slate-700 object-cover"
+								className="h-36 w-36 md:h-[576px] md:w-[576px] rounded-lg border border-slate-700 object-cover"
 							/>
 						</Link>
 					)}
