@@ -999,7 +999,7 @@ export default function SettingsPage() {
 													className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
 												>
 													<div className="flex items-center gap-3">
-														<div className="relative h-10 w-10 overflow-hidden rounded-full border-2" style={{ borderColor: badge.color || "#94a3b8" }}>
+														<div className="relative h-10 w-10 overflow-hidden">
 															<Image
 																src={badge.imageUrl}
 																alt={badge.name}
@@ -1071,7 +1071,7 @@ export default function SettingsPage() {
 														className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/40 p-2"
 													>
 														<div className="flex items-center gap-2">
-															<div className="relative h-8 w-8 overflow-hidden rounded-full border" style={{ borderColor: badge.color || "#94a3b8" }}>
+															<div className="relative h-8 w-8 overflow-hidden">
 																<Image
 																	src={badge.imageUrl}
 																	alt={badge.name}
@@ -1123,7 +1123,7 @@ export default function SettingsPage() {
 										className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
 									>
 										<div className="flex items-center gap-3">
-											<div className="relative h-10 w-10 overflow-hidden rounded-full border-2" style={{ borderColor: badge.color || "#94a3b8" }}>
+											<div className="relative h-10 w-10 overflow-hidden">
 												<Image
 													src={badge.imageUrl}
 													alt={badge.name}
@@ -1170,7 +1170,7 @@ export default function SettingsPage() {
 											className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
 										>
 											<div className="flex items-center gap-3">
-												<div className="relative h-10 w-10 overflow-hidden rounded-full border-2" style={{ borderColor: badge.color || "#94a3b8" }}>
+												<div className="relative h-10 w-10 overflow-hidden">
 													<Image
 														src={badge.imageUrl}
 														alt={badge.name}
