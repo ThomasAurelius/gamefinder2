@@ -293,6 +293,28 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* Quick Actions */}
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/post"
+          className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-sky-600 hover:bg-slate-800 hover:text-sky-300"
+        >
+          Post Game
+        </Link>
+        <Link
+          href="/post-campaign"
+          className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-sky-600 hover:bg-slate-800 hover:text-sky-300"
+        >
+          Post Campaign
+        </Link>
+        <Link
+          href="/tall-tales"
+          className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-sky-600 hover:bg-slate-800 hover:text-sky-300"
+        >
+          Post Tall Tale
+        </Link>
+      </div>
+
       <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
         <h2 className="text-lg font-semibold text-slate-100">My Upcoming Sessions</h2>
         <p className="mt-2 text-sm text-slate-400">
