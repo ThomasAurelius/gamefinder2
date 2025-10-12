@@ -360,7 +360,6 @@ export default function FindCampaignsPage() {
 			return () => document.removeEventListener("mousedown", handleClickOutside);
 		}
 	}, [showHostResults]);
-	}, []);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
