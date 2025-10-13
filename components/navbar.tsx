@@ -64,7 +64,14 @@ function NotificationBadge({ count }: { count?: number }) {
 	);
 }
 
-// Delay before closing menus/dropdowns to ensure navigation completes
+/**
+ * Delay in milliseconds before closing navigation menus/dropdowns after a link is clicked.
+ * This delay ensures that Next.js Link component has time to initiate navigation before
+ * the menu DOM element is removed. Without this delay, navigation can fail, especially
+ * after the app has been running for an extended period.
+ * 
+ * @constant {number}
+ */
 const NAVIGATION_DELAY_MS = 100;
 
 export function Navbar() {
