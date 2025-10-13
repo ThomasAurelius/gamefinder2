@@ -76,7 +76,7 @@ export default function SubscriptionsPage() {
 	};
 
 	const handleDeleteSubscription = async (subscriptionId: string) => {
-		if (!confirm("Are you sure you want to delete this incomplete subscription?")) {
+		if (!confirm("Are you sure you want to delete this incomplete subscription? This action cannot be undone.")) {
 			return;
 		}
 
