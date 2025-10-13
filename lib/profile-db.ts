@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 export type ProfileRecord = {
 	name: string;
@@ -38,7 +39,7 @@ const DEFAULT_PROFILE: ProfileRecord = {
 		Sunday: [],
 	},
 	primaryRole: "",
-	timezone: "America/Chicago",
+	timezone: DEFAULT_TIMEZONE,
 	avatarUrl: "",
 	canPostPaidGames: false,
 };
@@ -80,7 +81,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
 			...(profile.availability ?? {}),
 		},
 		primaryRole: profile.primaryRole ?? "",
-		timezone: profile.timezone ?? "America/Chicago",
+		timezone: profile.timezone ?? DEFAULT_TIMEZONE,
 		avatarUrl: profile.avatarUrl ?? "",
 		userName: user.name || "",
 		latitude: profile.latitude,

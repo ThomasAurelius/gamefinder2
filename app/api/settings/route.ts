@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { readProfile, writeProfile } from "@/lib/profile-db";
-import { isValidTimezone } from "@/lib/timezone";
+import { isValidTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const profile = await readProfile(userId);
     
     return NextResponse.json({
-      timezone: profile.timezone || "America/Chicago",
+      timezone: profile.timezone || DEFAULT_TIMEZONE,
     });
   } catch (error) {
     console.error("Error fetching settings:", error);
