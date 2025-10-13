@@ -116,6 +116,11 @@ The payment flow for paid games works as follows:
 - No schema changes required
 - Games collection already supports flexible fields
 - New fields are optional and backward compatible
+- **Payment Field Behavior**:
+  - `costPerSession = undefined` - Free game (default)
+  - `costPerSession = 0` - Explicitly free game
+  - `costPerSession > 0` - Paid game requiring payment
+  - Both undefined and 0 are treated as free games in the UI
 
 ### API Compatibility
 - All changes are backward compatible
@@ -139,20 +144,15 @@ The payment flow for paid games works as follows:
 
 ## Screenshots
 
-### Game Creation Form with Payment Option
-![Game Creation Form](screenshots/game-creation-form.png)
+**Note**: Screenshots will be added after manual testing of the complete flow.
 
-### Game Detail Page with Cost
-![Game Detail Page](screenshots/game-detail-cost.png)
+### Planned Screenshots
 
-### Payment Page
-![Payment Page](screenshots/game-payment-page.png)
-
-### Dashboard with Paid Games
-![Dashboard](screenshots/dashboard-paid-games.png)
-
-### Game Edit Page
-![Edit Page](screenshots/game-edit-page.png)
+1. **Game Creation Form with Payment Option** - Shows the cost per session field and payment-related UI
+2. **Game Detail Page with Cost** - Displays the cost badge and payment section
+3. **Payment Page** - Shows the Stripe payment interface for game sessions
+4. **Dashboard with Paid Games** - Demonstrates cost display on game cards
+5. **Game Edit Page** - Shows the edit interface with payment fields
 
 ## Notes
 
