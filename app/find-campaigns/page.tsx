@@ -80,121 +80,128 @@ function CampaignCard({
 	return (
 		<div
 			key={campaign.id}
-			className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
+			className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden"
 		>
-			<div className="flex items-start justify-between gap-4">
-				<div className="flex-1">
-					<div className="flex items-center gap-2">
-						<Link
-							href={`/campaigns/${campaign.id}`}
-							className="hover:text-sky-300 transition-colors"
-						>
-							<h3 className="font-medium text-slate-100">{campaign.game}</h3>
-						</Link>
-					</div>
-					<div className="mt-2 space-y-1 text-sm text-slate-400">
-						{campaign.hostName && (
-							<p>
-								<span className="text-slate-500">Host:</span>{" "}
-								<Link
-									href={`/user/${campaign.userId}`}
-									className="text-slate-300 hover:text-sky-300 transition-colors"
-								>
-									{campaign.hostName}
-								</Link>
-							</p>
-						)}
+			{campaign.imageUrl && (
+				<Link href={`/campaigns/${campaign.id}`}>
+					<img
+						src={campaign.imageUrl}
+						alt={campaign.game}
+						className="w-full h-auto object-cover"
+					/>
+				</Link>
+			)}
+			<div className="p-4">
+				<div className="flex items-center gap-2">
+					<Link
+						href={`/campaigns/${campaign.id}`}
+						className="hover:text-sky-300 transition-colors"
+					>
+						<h3 className="font-medium text-slate-100">{campaign.game}</h3>
+					</Link>
+				</div>
+				<div className="mt-2 space-y-1 text-sm text-slate-400">
+					{campaign.hostName && (
 						<p>
-							<span className="text-slate-500">Start Date:</span>{" "}
-							{formatDateInTimezone(campaign.date, userTimezone)}
-						</p>
-						{campaign.meetingFrequency && (
-							<p>
-								<span className="text-slate-500">Meets:</span>{" "}
-								{campaign.meetingFrequency}
-							</p>
-						)}
-						{campaign.daysOfWeek && campaign.daysOfWeek.length > 0 && (
-							<p>
-								<span className="text-slate-500">Days:</span>{" "}
-								{campaign.daysOfWeek.join(", ")}
-							</p>
-						)}
-						<p>
-							<span className="text-slate-500">Times:</span>{" "}
-							{campaign.times.join(", ")}
-						</p>
-						{campaign.sessionsLeft && (
-							<p>
-								<span className="text-slate-500">Sessions Left:</span>{" "}
-								<span className="text-green-400">{campaign.sessionsLeft}</span>
-							</p>
-						)}
-						{campaign.classesNeeded && campaign.classesNeeded.length > 0 && (
-							<p>
-								<span className="text-slate-500">Classes Needed:</span>{" "}
-								<span className="flex flex-wrap gap-1 mt-1">
-									{campaign.classesNeeded.map((cls) => (
-										<span
-											key={cls}
-											className="inline-flex items-center rounded-full border border-sky-400 bg-sky-500/20 px-2 py-0.5 text-xs text-sky-100"
-										>
-											{cls}
-										</span>
-									))}
-								</span>
-							</p>
-						)}
-						{campaign.costPerSession !== undefined && (
-							<p>
-								<span className="text-slate-500">Cost per Session:</span>{" "}
-								<span className="text-green-400">
-									${campaign.costPerSession}
-								</span>
-							</p>
-						)}
-						{(campaign.location || campaign.zipCode) && (
-							<p>
-								<span className="text-slate-500">Location:</span>{" "}
-								{campaign.location || campaign.zipCode}
-								{campaign.distance !== undefined && (
-									<span className="ml-2 text-sky-400">
-										({campaign.distance.toFixed(1)} mi away)
-									</span>
-								)}
-							</p>
-						)}
-						<p>
-							<span className="text-slate-500">Players:</span>{" "}
-							<span
-								className={
-									isFull ? "text-orange-400" : "text-green-400"
-								}
+							<span className="text-slate-500">Host:</span>{" "}
+							<Link
+								href={`/user/${campaign.userId}`}
+								className="text-slate-300 hover:text-sky-300 transition-colors"
 							>
-								{campaign.signedUpPlayers.length}/{campaign.maxPlayers}
+								{campaign.hostName}
+							</Link>
+						</p>
+					)}
+					<p>
+						<span className="text-slate-500">Start Date:</span>{" "}
+						{formatDateInTimezone(campaign.date, userTimezone)}
+					</p>
+					{campaign.meetingFrequency && (
+						<p>
+							<span className="text-slate-500">Meets:</span>{" "}
+							{campaign.meetingFrequency}
+						</p>
+					)}
+					{campaign.daysOfWeek && campaign.daysOfWeek.length > 0 && (
+						<p>
+							<span className="text-slate-500">Days:</span>{" "}
+							{campaign.daysOfWeek.join(", ")}
+						</p>
+					)}
+					<p>
+						<span className="text-slate-500">Times:</span>{" "}
+						{campaign.times.join(", ")}
+					</p>
+					{campaign.sessionsLeft && (
+						<p>
+							<span className="text-slate-500">Sessions Left:</span>{" "}
+							<span className="text-green-400">{campaign.sessionsLeft}</span>
+						</p>
+					)}
+					{campaign.classesNeeded && campaign.classesNeeded.length > 0 && (
+						<p>
+							<span className="text-slate-500">Classes Needed:</span>{" "}
+							<span className="flex flex-wrap gap-1 mt-1">
+								{campaign.classesNeeded.map((cls) => (
+									<span
+										key={cls}
+										className="inline-flex items-center rounded-full border border-sky-400 bg-sky-500/20 px-2 py-0.5 text-xs text-sky-100"
+									>
+										{cls}
+									</span>
+								))}
 							</span>
-							{isFull && (
-								<span className="ml-2 text-xs text-orange-400">
-									(Full - Joining adds you to waitlist)
+						</p>
+					)}
+					{campaign.costPerSession !== undefined && (
+						<p>
+							<span className="text-slate-500">Cost per Session:</span>{" "}
+							<span className="text-green-400">
+								${campaign.costPerSession}
+							</span>
+						</p>
+					)}
+					{(campaign.location || campaign.zipCode) && (
+						<p>
+							<span className="text-slate-500">Location:</span>{" "}
+							{campaign.location || campaign.zipCode}
+							{campaign.distance !== undefined && (
+								<span className="ml-2 text-sky-400">
+									({campaign.distance.toFixed(1)} mi away)
 								</span>
 							)}
 						</p>
-						{campaign.waitlist.length > 0 && (
-							<p>
-								<span className="text-slate-500">Waitlist:</span>{" "}
-								<span className="text-yellow-400">
-									{campaign.waitlist.length}
-								</span>
-							</p>
+					)}
+					<p>
+						<span className="text-slate-500">Players:</span>{" "}
+						<span
+							className={
+								isFull ? "text-orange-400" : "text-green-400"
+							}
+						>
+							{campaign.signedUpPlayers.length}/{campaign.maxPlayers}
+						</span>
+						{isFull && (
+							<span className="ml-2 text-xs text-orange-400">
+								(Full - Joining adds you to waitlist)
+							</span>
 						)}
-						{campaign.description && (
-							<p className="mt-2 text-slate-300">
-								{campaign.description}
-							</p>
-						)}
-					</div>
+					</p>
+					{campaign.waitlist.length > 0 && (
+						<p>
+							<span className="text-slate-500">Waitlist:</span>{" "}
+							<span className="text-yellow-400">
+								{campaign.waitlist.length}
+							</span>
+						</p>
+					)}
+					{campaign.description && (
+						<p className="mt-2 text-slate-300">
+							{campaign.description}
+						</p>
+					)}
 				</div>
-				<div className="flex flex-col items-end gap-2 flex-shrink-0">
+				<div className="flex gap-2 mt-4 flex-wrap">
 					{isHost ? (
 						<Link
 							href={`/campaigns/${campaign.id}`}
@@ -220,15 +227,6 @@ function CampaignCard({
 					>
 						Details
 					</Link>
-					{campaign.imageUrl && (
-						<Link href={`/campaigns/${campaign.id}`}>
-							<img
-								src={campaign.imageUrl}
-								alt={campaign.game}
-								className="h-36 w-36 md:h-[576px] md:w-[576px] rounded-lg border border-slate-700 object-cover"
-							/>
-						</Link>
-					)}
 					{isHost && campaign.pendingPlayers.length > 0 && (
 						<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
 							{campaign.pendingPlayers.length} pending approval{campaign.pendingPlayers.length !== 1 ? 's' : ''}

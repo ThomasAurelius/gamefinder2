@@ -85,57 +85,57 @@ function GameSessionCard({
 
   return (
     <>
-      <div className={`rounded-lg border p-4 ${
+      <div className={`rounded-lg border overflow-hidden ${
         isHost 
           ? "border-purple-500/50 bg-purple-950/20" 
           : "border-slate-800 bg-slate-950/40"
       }`}>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link href={detailsLink} className="hover:text-sky-300 transition-colors">
-                <h3 className="font-medium text-slate-100">{session.game}</h3>
-              </Link>
-              {isCampaign && (
-                <span className="text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300">
-                  Campaign
-                </span>
-              )}
-              {isPast && (
-                <span className="text-xs px-2 py-1 rounded-full bg-slate-500/20 text-slate-400">
-                  Past
-                </span>
-              )}
-              {userRole && (
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  isHost ? "bg-purple-500/20 text-purple-300" :
-                  isPlayer ? "bg-green-500/20 text-green-300" :
-                  "bg-yellow-500/20 text-yellow-300"
-                }`}>
-                  {userRole}
-                </span>
-              )}
-            </div>
-            <div className="mt-2 space-y-1 text-sm text-slate-400">
-              {session.hostName && (
-                <p>
-                  <span className="text-slate-500">Host:</span>{" "}
-                  <Link
-                    href={`/user/${session.userId}`}
-                    className="text-slate-300 hover:text-sky-300 transition-colors"
-                  >
-                    {session.hostName}
-                  </Link>
-                </p>
-              )}
-              {isPast && isPlayer && !isHost && (
-                <button
-                  onClick={() => setShowFeedbackDialog(true)}
-                  className="mt-2 rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
+        {session.imageUrl && (
+          <Link href={detailsLink}>
+            <img
+              src={session.imageUrl}
+              alt={session.game}
+              className="w-full h-auto object-cover"
+            />
+          </Link>
+        )}
+        <div className="p-4">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href={detailsLink} className="hover:text-sky-300 transition-colors">
+              <h3 className="font-medium text-slate-100">{session.game}</h3>
+            </Link>
+            {isCampaign && (
+              <span className="text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300">
+                Campaign
+              </span>
+            )}
+            {isPast && (
+              <span className="text-xs px-2 py-1 rounded-full bg-slate-500/20 text-slate-400">
+                Past
+              </span>
+            )}
+            {userRole && (
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                isHost ? "bg-purple-500/20 text-purple-300" :
+                isPlayer ? "bg-green-500/20 text-green-300" :
+                "bg-yellow-500/20 text-yellow-300"
+              }`}>
+                {userRole}
+              </span>
+            )}
+          </div>
+          <div className="mt-2 space-y-1 text-sm text-slate-400">
+            {session.hostName && (
+              <p>
+                <span className="text-slate-500">Host:</span>{" "}
+                <Link
+                  href={`/user/${session.userId}`}
+                  className="text-slate-300 hover:text-sky-300 transition-colors"
                 >
-                  {hasRated ? "Update Rating" : "Rate Host"}
-                </button>
-              )}
+                  {session.hostName}
+                </Link>
+              </p>
+            )}
             <p>
               <span className="text-slate-500">Date:</span>{" "}
               {formatDateInTimezone(session.date, userTimezone)}
@@ -188,20 +188,24 @@ function GameSessionCard({
               <p className="mt-2 text-slate-300">{session.description}</p>
             )}
           </div>
-        </div>
-        {session.imageUrl && (
-          <div className="flex-shrink-0">
-            <Link href={detailsLink}>
-              <img
-                src={session.imageUrl}
-                alt={session.game}
-                className="h-24 w-24 md:h-48 md:w-48 rounded-lg border border-slate-700 object-cover"
-              />
+          <div className="flex gap-2 mt-4 flex-wrap items-center">
+            <Link
+              href={detailsLink}
+              className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 bg-slate-600 hover:bg-slate-700 focus:ring-slate-500"
+            >
+              Details
             </Link>
+            {isPast && isPlayer && !isHost && (
+              <button
+                onClick={() => setShowFeedbackDialog(true)}
+                className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
+              >
+                {hasRated ? "Update Rating" : "Rate Host"}
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
-    </div>
 
     {showFeedbackDialog && session.hostName && (
       <HostFeedbackDialog
