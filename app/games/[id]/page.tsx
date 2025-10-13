@@ -237,6 +237,17 @@ export default async function GameDetailPage({
 							{session.signedUpPlayers.length}/{session.maxPlayers}
 						</span>
 					</div>
+
+					{session.costPerSession !== undefined && session.costPerSession > 0 && (
+						<div className="rounded-lg border border-sky-600/40 bg-sky-900/20 px-4 py-2">
+							<span className="block text-xs uppercase tracking-wide text-sky-400">
+								Cost
+							</span>
+							<span className="text-base font-medium text-sky-100">
+								${session.costPerSession.toFixed(2)}
+							</span>
+						</div>
+					)}
 				</div>
 			</header>
 

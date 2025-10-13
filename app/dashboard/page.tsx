@@ -178,7 +178,7 @@ function GameSessionCard({
                 <span className="text-slate-300">{session.sessionsLeft}</span>
               </p>
             )}
-            {isCampaign && session.costPerSession !== undefined && session.costPerSession > 0 && (
+            {session.costPerSession !== undefined && session.costPerSession > 0 && (
               <p>
                 <span className="text-slate-500">Cost:</span>{" "}
                 <span className="text-slate-300">${session.costPerSession.toFixed(2)} per session</span>
