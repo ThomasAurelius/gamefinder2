@@ -255,10 +255,13 @@ export function Navbar() {
 													key={link.href}
 													href={link.href}
 													onClick={() => {
-														if (isGamesMenu) setGamesOpen(false);
-														if (isCampaignsMenu)
-															setCampaignsOpen(false);
-														closeMenu();
+														// Delay closing dropdown to ensure navigation completes
+														setTimeout(() => {
+															if (isGamesMenu) setGamesOpen(false);
+															if (isCampaignsMenu)
+																setCampaignsOpen(false);
+															closeMenu();
+														}, 100);
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
 														isActive(pathname, link.href)
@@ -327,8 +330,11 @@ export function Navbar() {
 													key={link.href}
 													href={link.href}
 													onClick={() => {
-														setAccountOpen(false);
-														closeMenu();
+														// Delay closing dropdown to ensure navigation completes
+														setTimeout(() => {
+															setAccountOpen(false);
+															closeMenu();
+														}, 100);
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
 														isActive(pathname, link.href)
@@ -394,7 +400,10 @@ export function Navbar() {
 											<Link
 												key={link.href}
 												href={link.href}
-												onClick={closeMenu}
+												onClick={() => {
+													// Delay closing menu to ensure navigation completes
+													setTimeout(closeMenu, 100);
+												}}
 												className={`flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 													isActive(pathname, link.href)
 														? "bg-white/10 text-white"
@@ -417,7 +426,10 @@ export function Navbar() {
 									<Link
 										key={item.href}
 										href={item.href}
-										onClick={closeMenu}
+										onClick={() => {
+											// Delay closing menu to ensure navigation completes
+											setTimeout(closeMenu, 100);
+										}}
 										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, item.href)
 												? "bg-white/10 text-white"
@@ -457,7 +469,10 @@ export function Navbar() {
 										<Link
 											key={link.href}
 											href={link.href}
-											onClick={closeMenu}
+											onClick={() => {
+												// Delay closing menu to ensure navigation completes
+												setTimeout(closeMenu, 100);
+											}}
 											className={`mt-1 flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 												isActive(pathname, link.href)
 													? "bg-white/10 text-white"
@@ -482,7 +497,10 @@ export function Navbar() {
 								<div className="border-t border-white/5 pt-2">
 									<Link
 										href="/auth/login"
-										onClick={closeMenu}
+										onClick={() => {
+											// Delay closing menu to ensure navigation completes
+											setTimeout(closeMenu, 100);
+										}}
 										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, "/auth/login")
 												? "bg-white/10 text-white"
