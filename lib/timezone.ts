@@ -27,7 +27,7 @@ export const TIMEZONE_OPTIONS = [
   { value: "Pacific/Auckland", label: "New Zealand (NZDT/NZST)" },
 ] as const;
 
-export const DEFAULT_TIMEZONE = "America/New_York";
+export const DEFAULT_TIMEZONE = "America/Chicago";
 
 /**
  * Format a date string (YYYY-MM-DD) for display in the user's timezone

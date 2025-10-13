@@ -512,7 +512,7 @@ export default function PostCampaignPage() {
 						Want to charge for game sessions?
 					</h3>
 					<p className="text-xs text-slate-400 mb-3">
-						Enable paid games to charge players for sessions. The platform will keep 20% of fees.
+						Enable paid games to charge players for sessions. The platform will keep 15% of fees.
 					</p>
 					<Link
 						href="/terms-paid-games"
@@ -549,7 +549,7 @@ export default function PostCampaignPage() {
 									</h3>
 									<p className="text-xs text-slate-400 mb-3">
 										To receive payments for this campaign, you need to set up your payout account.
-										You&apos;ll receive 80% of subscription payments, with 20% going to platform fees.
+										You&apos;ll receive 85% of subscription payments, with 15% going to platform fees.
 									</p>
 									<Link
 										href="/host/onboarding"

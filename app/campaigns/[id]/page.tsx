@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
 import { isPaidCampaign } from "@/lib/campaign-utils";
+import ShareToFacebook from "@/components/ShareToFacebook";
 
 type PlayerSignup = {
   userId: string;
@@ -421,7 +422,7 @@ export default function CampaignDetailPage() {
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!confirm("Are you sure you want to delete this note?")) return;
+    if (!confirm("Are you sure you want to delete this note? This action cannot be undone.")) return;
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/notes/${noteId}`, {
@@ -440,7 +441,7 @@ export default function CampaignDetailPage() {
   };
 
   const handleWithdraw = async () => {
-    if (!confirm("Are you sure you want to withdraw from this campaign?")) return;
+    if (!confirm("Are you sure you want to withdraw from this campaign? This action cannot be undone.")) return;
 
     setIsWithdrawing(true);
     setWithdrawError(null);
@@ -574,6 +575,10 @@ export default function CampaignDetailPage() {
   const availableSlots = campaign.maxPlayers - campaign.signedUpPlayers.length;
   const isFull = availableSlots <= 0;
 
+  // Get the full URL for sharing
+  const campaignUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://thegatheringcall.com'}/campaigns/${campaignId}`;
+  const shareQuote = `Join me for ${campaign.game} on ${formatDateInTimezone(campaign.date, userTimezone)}!`;
+
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
       <Link
@@ -596,6 +601,12 @@ export default function CampaignDetailPage() {
                 Edit Campaign
               </Link>
             </div>
+            
+            {/* Share to Facebook button */}
+            <div className="mt-4">
+              <ShareToFacebook url={campaignUrl} quote={shareQuote} />
+            </div>
+            
             {campaign.imageUrl && (
               <img
                 src={campaign.imageUrl}
@@ -679,6 +690,12 @@ export default function CampaignDetailPage() {
                   </Link>
                 </p>
               )}
+              
+              {/* Share to Facebook button */}
+              <div className="mt-4">
+                <ShareToFacebook url={campaignUrl} quote={shareQuote} />
+              </div>
+              
               <div className="mt-4 space-y-2 text-sm text-slate-400">
                 <p>
                   <span className="text-slate-500">Date:</span>{" "}

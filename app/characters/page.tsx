@@ -419,7 +419,7 @@ export default function CharactersPage() {
 
   const handleDeleteCharacter = async (id: string) => {
     const confirmation = window.confirm(
-      "Are you sure you want to delete this character?"
+      "Are you sure you want to delete this character? This action cannot be undone."
     );
 
     if (!confirmation) {

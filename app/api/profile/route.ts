@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
-import { isValidTimezone } from "@/lib/timezone";
+import { isValidTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import { geocodeLocation } from "@/lib/geolocation";
 
-const ROLE_OPTIONS = new Set(["Healer", "Damage", "Support", "DM", "Other", ""]);
+const ROLE_OPTIONS = new Set(["Healer", "Damage", "Caster", "Support", "DM", "Other", ""]);
 const MAX_BIO_LENGTH = 2000;
 
 const isString = (value: unknown): value is string => typeof value === "string";
@@ -127,7 +127,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     favoriteGames: normalizedFavorites,
     availability: normalizeAvailability(availability),
     primaryRole,
-    timezone: timezone || "America/New_York",
+    timezone: timezone || DEFAULT_TIMEZONE,
     avatarUrl: avatarUrl || "",
   };
 };

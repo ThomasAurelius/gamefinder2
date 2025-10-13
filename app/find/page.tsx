@@ -75,80 +75,87 @@ function GameSessionCard({
 	return (
 		<div
 			key={session.id}
-			className="rounded-lg border border-slate-800 bg-slate-950/40 p-4"
+			className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden"
 		>
-			<div className="flex items-start justify-between gap-4">
-				<div className="flex-1">
-					<div className="flex items-center gap-2">
-						<Link
-							href={`/games/${session.id}`}
-							className="hover:text-sky-300 transition-colors"
-						>
-							<h3 className="font-medium text-slate-100">{session.game}</h3>
-						</Link>
-					</div>
-					<div className="mt-2 space-y-1 text-sm text-slate-400">
-						{session.hostName && (
-							<p>
-								<span className="text-slate-500">Host:</span>{" "}
-								<Link
-									href={`/user/${session.userId}`}
-									className="text-slate-300 hover:text-sky-300 transition-colors"
-								>
-									{session.hostName}
-								</Link>
-							</p>
-						)}
+			{session.imageUrl && (
+				<Link href={`/games/${session.id}`}>
+					<img
+						src={session.imageUrl}
+						alt={session.game}
+						className="w-full h-auto object-cover"
+					/>
+				</Link>
+			)}
+			<div className="p-4">
+				<div className="flex items-center gap-2">
+					<Link
+						href={`/games/${session.id}`}
+						className="hover:text-sky-300 transition-colors"
+					>
+						<h3 className="font-medium text-slate-100">{session.game}</h3>
+					</Link>
+				</div>
+				<div className="mt-2 space-y-1 text-sm text-slate-400">
+					{session.hostName && (
 						<p>
-							<span className="text-slate-500">Date:</span>{" "}
-							{formatDateInTimezone(session.date, userTimezone)}
-						</p>
-						<p>
-							<span className="text-slate-500">Times:</span>{" "}
-							{session.times.join(", ")}
-						</p>
-						{(session.location || session.zipCode) && (
-							<p>
-								<span className="text-slate-500">Location:</span>{" "}
-								{session.location || session.zipCode}
-								{session.distance !== undefined && (
-									<span className="ml-2 text-sky-400">
-										({session.distance.toFixed(1)} mi away)
-									</span>
-								)}
-							</p>
-						)}
-						<p>
-							<span className="text-slate-500">Players:</span>{" "}
-							<span
-								className={
-									isFull ? "text-orange-400" : "text-green-400"
-								}
+							<span className="text-slate-500">Host:</span>{" "}
+							<Link
+								href={`/user/${session.userId}`}
+								className="text-slate-300 hover:text-sky-300 transition-colors"
 							>
-								{session.signedUpPlayers.length}/{session.maxPlayers}
-							</span>
-							{isFull && (
-								<span className="ml-2 text-xs text-orange-400">
-									(Full - Joining adds you to waitlist)
+								{session.hostName}
+							</Link>
+						</p>
+					)}
+					<p>
+						<span className="text-slate-500">Date:</span>{" "}
+						{formatDateInTimezone(session.date, userTimezone)}
+					</p>
+					<p>
+						<span className="text-slate-500">Times:</span>{" "}
+						{session.times.join(", ")}
+					</p>
+					{(session.location || session.zipCode) && (
+						<p>
+							<span className="text-slate-500">Location:</span>{" "}
+							{session.location || session.zipCode}
+							{session.distance !== undefined && (
+								<span className="ml-2 text-sky-400">
+									({session.distance.toFixed(1)} mi away)
 								</span>
 							)}
 						</p>
-						{session.waitlist.length > 0 && (
-							<p>
-								<span className="text-slate-500">Waitlist:</span>{" "}
-								<span className="text-yellow-400">
-									{session.waitlist.length}
-								</span>
-							</p>
+					)}
+					<p>
+						<span className="text-slate-500">Players:</span>{" "}
+						<span
+							className={
+								isFull ? "text-orange-400" : "text-green-400"
+							}
+						>
+							{session.signedUpPlayers.length}/{session.maxPlayers}
+						</span>
+						{isFull && (
+							<span className="ml-2 text-xs text-orange-400">
+								(Full - Joining adds you to waitlist)
+							</span>
 						)}
-						{session.description && (
-							<p className="mt-2 text-slate-300">
-								{session.description}
-							</p>
-						)}
-					</div>
+					</p>
+					{session.waitlist.length > 0 && (
+						<p>
+							<span className="text-slate-500">Waitlist:</span>{" "}
+							<span className="text-yellow-400">
+								{session.waitlist.length}
+							</span>
+						</p>
+					)}
+					{session.description && (
+						<p className="mt-2 text-slate-300">
+							{session.description}
+						</p>
+					)}
 				</div>
-				<div className="flex flex-col items-end gap-2 flex-shrink-0">
+				<div className="flex gap-2 mt-4 flex-wrap">
 					{isHost ? (
 						<Link
 							href={`/games/${session.id}`}
@@ -180,15 +187,12 @@ function GameSessionCard({
 									: "Request to Join"}
 						</button>
 					)}
-					{session.imageUrl && (
-						<Link href={`/games/${session.id}`}>
-							<img
-								src={session.imageUrl}
-								alt={session.game}
-								className="h-36 w-36 rounded-lg border border-slate-700 object-cover"
-							/>
-						</Link>
-					)}
+					<Link
+						href={`/games/${session.id}`}
+						className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 bg-slate-600 hover:bg-slate-700 focus:ring-slate-500"
+					>
+						Details
+					</Link>
 					{isHost && session.pendingPlayers.length > 0 && (
 						<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
 							{session.pendingPlayers.length} pending approval{session.pendingPlayers.length !== 1 ? 's' : ''}
@@ -223,6 +227,11 @@ export default function FindGamesPage() {
 	const [showCharacterDialog, setShowCharacterDialog] = useState(false);
 	const [sessionToJoin, setSessionToJoin] = useState<GameSession | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+	const [hostSearch, setHostSearch] = useState("");
+	const [hostSearchResults, setHostSearchResults] = useState<{ id: string; name: string; avatarUrl?: string }[]>([]);
+	const [selectedHostId, setSelectedHostId] = useState<string>("");
+	const [selectedHostName, setSelectedHostName] = useState<string>("");
+	const [showHostResults, setShowHostResults] = useState(false);
 
 	useEffect(() => {
 		const fetchTimezone = async () => {
@@ -276,6 +285,47 @@ export default function FindGamesPage() {
 		fetchTimezone();
 		fetchUserProfileAndEvents();
 	}, []);
+
+	// Search for hosts as user types
+	useEffect(() => {
+		const searchHosts = async () => {
+			if (!hostSearch || hostSearch.trim().length < 2) {
+				setHostSearchResults([]);
+				setShowHostResults(false);
+				return;
+			}
+
+			try {
+				const response = await fetch(`/api/users/search?name=${encodeURIComponent(hostSearch)}`);
+				if (response.ok) {
+					const users = await response.json();
+					setHostSearchResults(users);
+					setShowHostResults(true);
+				}
+			} catch (error) {
+				console.error("Failed to search hosts:", error);
+			}
+		};
+
+		const debounceTimer = setTimeout(searchHosts, 300);
+		return () => clearTimeout(debounceTimer);
+	}, [hostSearch]);
+
+	// Close host search dropdown when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			const hostSearchInput = document.getElementById("host-search");
+			if (hostSearchInput && !hostSearchInput.contains(target) && !target.closest(".host-results-dropdown")) {
+				setShowHostResults(false);
+			}
+		};
+
+		if (showHostResults) {
+			document.addEventListener("mousedown", handleClickOutside);
+			return () => document.removeEventListener("mousedown", handleClickOutside);
+		}
+	}, [showHostResults]);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -337,6 +387,9 @@ export default function FindGamesPage() {
 			if (locationSearch) {
 				params.append("location", locationSearch);
 				params.append("radius", radiusMiles);
+			}
+			if (selectedHostId) {
+				params.append("hostId", selectedHostId);
 			}
 
 			const response = await fetch(`/api/games?${params.toString()}`);
@@ -598,6 +651,82 @@ export default function FindGamesPage() {
 							/>
 						</div>
 
+						<div className="space-y-2 relative">
+							<label
+								htmlFor="host-search"
+								className="block text-sm font-medium text-slate-200"
+							>
+								Host Name
+							</label>
+							<input
+								id="host-search"
+								type="text"
+								value={selectedHostId ? selectedHostName : hostSearch}
+								onChange={(e) => {
+									const value = e.target.value;
+									setHostSearch(value);
+									if (selectedHostId) {
+										setSelectedHostId("");
+										setSelectedHostName("");
+									}
+								}}
+								onFocus={() => {
+									if (hostSearchResults.length > 0) {
+										setShowHostResults(true);
+									}
+								}}
+								placeholder="Search for a host by name..."
+								className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+							/>
+							{showHostResults && hostSearchResults.length > 0 && (
+								<div className="host-results-dropdown absolute z-10 w-full mt-1 rounded-lg border border-slate-700 bg-slate-900 shadow-lg max-h-60 overflow-y-auto">
+									{hostSearchResults.map((host) => (
+										<button
+											key={host.id}
+											type="button"
+											onClick={() => {
+												setSelectedHostId(host.id);
+												setSelectedHostName(host.name);
+												setHostSearch("");
+												setShowHostResults(false);
+											}}
+											className="w-full px-4 py-2 text-left text-sm text-slate-200 hover:bg-slate-800 transition-colors flex items-center gap-2"
+										>
+											{host.avatarUrl && (
+												<img
+													src={host.avatarUrl}
+													alt={host.name}
+													className="w-6 h-6 rounded-full"
+												/>
+											)}
+											<span>{host.name}</span>
+										</button>
+									))}
+								</div>
+							)}
+							{selectedHostId && (
+								<div className="flex items-center gap-2 mt-2">
+									<span className="text-xs text-slate-400">
+										Filtering by: <span className="text-sky-400">{selectedHostName}</span>
+									</span>
+									<button
+										type="button"
+										onClick={() => {
+											setSelectedHostId("");
+											setSelectedHostName("");
+											setHostSearch("");
+										}}
+										className="text-xs text-red-400 hover:text-red-300"
+									>
+										Clear
+									</button>
+								</div>
+							)}
+							<p className="text-xs text-slate-500">
+								Find games hosted by a specific person
+							</p>
+						</div>
+
 						<div className="space-y-2">
 							<label
 								htmlFor="location-search"
@@ -686,7 +815,8 @@ export default function FindGamesPage() {
 								(!selectedGame &&
 									!selectedDate &&
 									selectedTimes.length === 0 &&
-									!locationSearch) ||
+									!locationSearch &&
+									!selectedHostId) ||
 								(selectedGame === "Other" && !customGameName.trim()) ||
 								isLoading
 							}
@@ -712,7 +842,8 @@ export default function FindGamesPage() {
 						{selectedGame ||
 						selectedDate ||
 						selectedTimes.length > 0 ||
-						locationSearch ? (
+						locationSearch ||
+						selectedHostId ? (
 							<>
 								Showing games
 								{selectedGame && (
@@ -724,6 +855,15 @@ export default function FindGamesPage() {
 											customGameName.trim()
 												? customGameName
 												: selectedGame}
+										</span>
+									</>
+								)}
+								{selectedHostId && (
+									<>
+										{" "}
+										hosted by{" "}
+										<span className="text-sky-400">
+											{selectedHostName}
 										</span>
 									</>
 								)}
