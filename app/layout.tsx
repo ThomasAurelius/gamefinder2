@@ -6,27 +6,32 @@ import StructuredData from "@/components/StructuredData";
 
 export const metadata: Metadata = {
 	title: "The Gathering Call - Find Board Games, D&D, Pathfinder & TTRPG Sessions",
-	description: "Find and host board game nights, D&D, Pathfinder, Shadowdark and TTRPG sessions. Schedule tabletop gaming sessions, connect with players, and manage your campaigns with ease.",
-	keywords: "board games, D&D, Dungeons and Dragons, Pathfinder, Shadowdark, TTRPG, tabletop RPG, game scheduling, find board games, host D&D, campaign management, tabletop gaming, game master, RPG sessions",
+	description:
+		"Find and host board game nights, D&D, Pathfinder, Shadowdark and TTRPG sessions. Schedule tabletop gaming sessions, connect with players, and manage your campaigns with ease.",
+	keywords:
+		"board games, D&D, Dungeons and Dragons, Pathfinder, Shadowdark, TTRPG, tabletop RPG, game scheduling, find board games, host D&D, campaign management, tabletop gaming, game master, RPG sessions",
 	authors: [{ name: "The Gathering Call" }],
 	creator: "Midnight Oil Software",
 	publisher: "The Gathering Call",
-	metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"),
+	metadataBase: new URL(
+		process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"
+	),
 	alternates: {
 		canonical: "/",
 	},
 	openGraph: {
 		title: "The Gathering Call - Find Board Games & TTRPG Sessions",
-		description: "Find and host board game nights, D&D, Pathfinder, Shadowdark and TTRPG sessions. Connect with players and manage your campaigns.",
+		description:
+			"Find and host board game nights, D&D, Pathfinder, Shadowdark and TTRPG sessions. Connect with players and manage your campaigns.",
 		url: "/",
 		siteName: "The Gathering Call",
 		locale: "en_US",
 		type: "website",
 		images: [
 			{
-				url: "/newlogo.png",
-				width: 1200,
-				height: 630,
+				url: "/answerlogo.png",
+				width: 1000,
+				height: 1000,
 				alt: "The Gathering Call - Tabletop Gaming Platform",
 			},
 		],
@@ -34,7 +39,8 @@ export const metadata: Metadata = {
 	twitter: {
 		card: "summary_large_image",
 		title: "The Gathering Call - Find Board Games & TTRPG Sessions",
-		description: "Find and host board game nights, D&D, Pathfinder, and TTRPG sessions. Connect with players and manage your campaigns.",
+		description:
+			"Find and host board game nights, D&D, Pathfinder, and TTRPG sessions. Connect with players and manage your campaigns.",
 		images: ["/newlogo.png"],
 	},
 	robots: {
