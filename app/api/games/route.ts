@@ -7,7 +7,7 @@ import {
 } from "@/lib/games/db";
 import { GameSessionPayload } from "@/lib/games/types";
 import { geocodeLocation, calculateDistance } from "@/lib/geolocation";
-import { getUsersBasicInfo } from "@/lib/users";
+import { getUsersBasicInfo, getStripeConnectAccountId } from "@/lib/users";
 
 function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
   if (!data || typeof data !== "object") {
@@ -38,6 +38,8 @@ function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
     zipCode: typeof payload.zipCode === "string" ? payload.zipCode : undefined,
     latitude: typeof payload.latitude === "number" ? payload.latitude : undefined,
     longitude: typeof payload.longitude === "number" ? payload.longitude : undefined,
+    costPerSession: typeof payload.costPerSession === "number" && payload.costPerSession >= 0 ? payload.costPerSession : undefined,
+    stripeConnectAccountId: typeof payload.stripeConnectAccountId === "string" ? payload.stripeConnectAccountId : undefined,
   };
 }
 
@@ -155,6 +157,19 @@ export async function POST(request: Request) {
       } catch (error) {
         // Log the error but don't fail the game session creation
         console.error("Failed to geocode location:", error);
+      }
+    }
+
+    // If the game has a cost, get the host's Stripe Connect account ID
+    if (payload.costPerSession && payload.costPerSession > 0) {
+      try {
+        const connectAccountId = await getStripeConnectAccountId(userId);
+        if (connectAccountId) {
+          payload.stripeConnectAccountId = connectAccountId;
+        }
+      } catch (error) {
+        console.error("Failed to get Stripe Connect account ID:", error);
+        // Continue without Connect account - payment will still work but won't use Connect
       }
     }
 

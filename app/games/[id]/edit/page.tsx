@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
-import ShareToFacebook from "@/components/ShareToFacebook";
-import Link from "next/link";
 
 const tagButtonClasses = (
 	active: boolean,
@@ -20,49 +20,80 @@ const tagButtonClasses = (
 	return [sizeClasses, baseClasses, activeClasses].join(" ");
 };
 
-export default function PostGamePage() {
+export default function EditGamePage() {
+	const params = useParams();
+	const router = useRouter();
+	const gameId = params.id as string;
+
 	const [selectedGame, setSelectedGame] = useState("");
 	const [customGameName, setCustomGameName] = useState("");
 	const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 	const [selectedDate, setSelectedDate] = useState("");
 	const [description, setDescription] = useState("");
 	const [maxPlayers, setMaxPlayers] = useState<number | ''>(4);
-	const [submitted, setSubmitted] = useState(false);
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [imageUrl, setImageUrl] = useState("");
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
-	const [postedGameId, setPostedGameId] = useState<string | null>(null);
 	
 	// Payment-related state
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
-	
+
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
-	const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 	const [hasConnectAccount, setHasConnectAccount] = useState(false);
 	const [isCheckingConnect, setIsCheckingConnect] = useState(false);
 
 	useEffect(() => {
-		const fetchProfile = async () => {
+		const fetchGame = async () => {
 			try {
-				const response = await fetch("/api/profile");
-				if (response.ok) {
-					const profileData = await response.json();
+				const response = await fetch(`/api/games/${gameId}`);
+				if (!response.ok) {
+					throw new Error("Failed to fetch game");
+				}
+				const game = await response.json();
+
+				// Check if the user is the creator
+				const profileResponse = await fetch("/api/profile");
+				if (profileResponse.ok) {
+					const profileData = await profileResponse.json();
+					if (game.userId !== profileData.userId) {
+						router.push(`/games/${gameId}`);
+						return;
+					}
+					// Set the canPostPaidGames flag
 					setCanPostPaidGames(profileData.canPostPaidGames || false);
 				}
-			} catch (error) {
-				console.error("Failed to load profile:", error);
+
+				// Populate form with existing game data
+				const isOtherGame = !GAME_OPTIONS.includes(game.game);
+				setSelectedGame(isOtherGame ? "Other" : game.game);
+				if (isOtherGame) {
+					setCustomGameName(game.game);
+				}
+				setSelectedTimes(game.times || []);
+				setSelectedDate(game.date || "");
+				setDescription(game.description || "");
+				setMaxPlayers(game.maxPlayers || 4);
+				setImageUrl(game.imageUrl || "");
+				setLocation(game.location || "");
+				setZipCode(game.zipCode || "");
+				setCostPerSession(game.costPerSession || '');
+			} catch (err) {
+				setError(
+					err instanceof Error ? err.message : "Failed to load game"
+				);
 			} finally {
-				setIsLoadingProfile(false);
+				setIsLoading(false);
 			}
 		};
 
-		fetchProfile();
-	}, []);
+		fetchGame();
+	}, [gameId, router]);
 
 	// Check Stripe Connect status when user sets a cost
 	useEffect(() => {
@@ -180,7 +211,7 @@ export default function PostGamePage() {
 				times: string[];
 				description: string;
 				maxPlayers: number;
-				imageUrl: string;
+				imageUrl?: string;
 				location: string;
 				zipCode: string;
 				costPerSession?: number;
@@ -190,18 +221,18 @@ export default function PostGamePage() {
 				times: selectedTimes,
 				description: description,
 				maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
-				imageUrl: imageUrl,
+				imageUrl: imageUrl || undefined,
 				location: location,
 				zipCode: zipCode,
 			};
 
 			// Add costPerSession if it's set and greater than 0
-			if (typeof costPerSession === 'number' && costPerSession > 0) {
+			if (typeof costPerSession === 'number' && costPerSession >= 0) {
 				requestBody.costPerSession = costPerSession;
 			}
 
-			const response = await fetch("/api/games", {
-				method: "POST",
+			const response = await fetch(`/api/games/${gameId}`, {
+				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
 				},
@@ -210,43 +241,41 @@ export default function PostGamePage() {
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to post game session");
+				throw new Error(errorData.error || "Failed to update game");
 			}
 
-			const data = await response.json();
-			setPostedGameId(data.id || null);
-			setSubmitted(true);
-			// Reset form
-			setSelectedGame("");
-			setCustomGameName("");
-			setSelectedTimes([]);
-			setSelectedDate("");
-			setDescription("");
-			setMaxPlayers(4);
-			setImageUrl("");
-			setLocation("");
-			setZipCode("");
-			setCostPerSession('');
-			setPostedGameId(null);
-
-			setTimeout(() => setSubmitted(false), 5000);
+			// Redirect to game detail page
+			router.push(`/games/${gameId}`);
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to post game session"
+				err instanceof Error ? err.message : "Failed to update game"
 			);
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
+	if (isLoading) {
+		return (
+			<section className="space-y-6">
+				<div>
+					<h1 className="text-2xl font-semibold text-slate-100">
+						Edit Game
+					</h1>
+					<p className="mt-2 text-sm text-slate-400">Loading...</p>
+				</div>
+			</section>
+		);
+	}
+
 	return (
 		<section className="space-y-6">
 			<div>
 				<h1 className="text-2xl font-semibold text-slate-100">
-					Post a Game
+					Edit Game
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Create a new game session and invite players to join.
+					Update your game session details.
 				</p>
 			</div>
 
@@ -552,39 +581,31 @@ export default function PostGamePage() {
 					/>
 				</div>
 
-				<button
-					type="submit"
-					className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
-					disabled={
-						!selectedGame ||
-						(selectedGame === "Other" && !customGameName.trim()) ||
-						selectedTimes.length === 0 ||
-						!selectedDate ||
-						isSubmitting
-					}
-				>
-					{isSubmitting ? "Posting..." : "Post Game Session"}
-				</button>
+				<div className="flex gap-4">
+					<button
+						type="submit"
+						className="flex-1 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+						disabled={
+							!selectedGame ||
+							(selectedGame === "Other" && !customGameName.trim()) ||
+							selectedTimes.length === 0 ||
+							!selectedDate ||
+							isSubmitting
+						}
+					>
+						{isSubmitting ? "Saving..." : "Save Changes"}
+					</button>
+					<Link
+						href={`/games/${gameId}`}
+						className="flex-shrink-0 rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+					>
+						Cancel
+					</Link>
+				</div>
 
 				{error && (
 					<div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
 						{error}
-					</div>
-				)}
-
-				{submitted && (
-					<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 space-y-3">
-						<p className="text-sm text-green-400">
-							Game session posted successfully!
-						</p>
-						{postedGameId && (
-							<div className="flex gap-3">
-								<ShareToFacebook
-									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
-									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
-								/>
-							</div>
-						)}
 					</div>
 				)}
 			</form>

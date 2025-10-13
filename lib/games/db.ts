@@ -62,6 +62,8 @@ export async function listGameSessions(filters?: {
     zipCode: session.zipCode,
     latitude: session.latitude,
     longitude: session.longitude,
+    costPerSession: session.costPerSession,
+    stripeConnectAccountId: session.stripeConnectAccountId,
   }));
 }
 
@@ -96,6 +98,8 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     zipCode: session.zipCode,
     latitude: session.latitude,
     longitude: session.longitude,
+    costPerSession: session.costPerSession,
+    stripeConnectAccountId: session.stripeConnectAccountId,
   };
 }
 
@@ -129,6 +133,8 @@ export async function createGameSession(
     zipCode: payload.zipCode,
     latitude: payload.latitude,
     longitude: payload.longitude,
+    costPerSession: payload.costPerSession,
+    stripeConnectAccountId: payload.stripeConnectAccountId,
   };
 
   await gamesCollection.insertOne(newSession);
@@ -154,6 +160,8 @@ export async function createGameSession(
     zipCode: newSession.zipCode,
     latitude: newSession.latitude,
     longitude: newSession.longitude,
+    costPerSession: newSession.costPerSession,
+    stripeConnectAccountId: newSession.stripeConnectAccountId,
   };
 }
 
@@ -203,6 +211,8 @@ export async function updateGameSession(
     zipCode: result.zipCode,
     latitude: result.latitude,
     longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
   };
 }
 
@@ -287,6 +297,8 @@ export async function joinGameSession(
     zipCode: result.zipCode,
     latitude: result.latitude,
     longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
   };
 }
 
@@ -328,6 +340,8 @@ export async function listUserGameSessions(userId: string): Promise<StoredGameSe
     zipCode: session.zipCode,
     latitude: session.latitude,
     longitude: session.longitude,
+    costPerSession: session.costPerSession,
+    stripeConnectAccountId: session.stripeConnectAccountId,
   }));
 }
 
@@ -428,6 +442,8 @@ export async function approvePlayer(
     zipCode: result.zipCode,
     latitude: result.latitude,
     longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
   };
 }
 
@@ -490,6 +506,8 @@ export async function denyPlayer(
     zipCode: result.zipCode,
     latitude: result.latitude,
     longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
   };
 }
 
@@ -555,6 +573,8 @@ export async function leaveGameSession(
     zipCode: result.zipCode,
     latitude: result.latitude,
     longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
   };
 }
 
