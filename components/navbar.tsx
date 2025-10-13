@@ -64,6 +64,9 @@ function NotificationBadge({ count }: { count?: number }) {
 	);
 }
 
+// Delay before closing menus/dropdowns to ensure navigation completes
+const NAVIGATION_DELAY_MS = 100;
+
 export function Navbar() {
 	const pathname = usePathname();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -261,7 +264,7 @@ export function Navbar() {
 															if (isCampaignsMenu)
 																setCampaignsOpen(false);
 															closeMenu();
-														}, 100);
+														}, NAVIGATION_DELAY_MS);
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
 														isActive(pathname, link.href)
@@ -334,7 +337,7 @@ export function Navbar() {
 														setTimeout(() => {
 															setAccountOpen(false);
 															closeMenu();
-														}, 100);
+														}, NAVIGATION_DELAY_MS);
 													}}
 													className={`flex items-center justify-between px-4 py-2 text-sm transition hover:bg-white/10 ${
 														isActive(pathname, link.href)
@@ -402,7 +405,7 @@ export function Navbar() {
 												href={link.href}
 												onClick={() => {
 													// Delay closing menu to ensure navigation completes
-													setTimeout(closeMenu, 100);
+													setTimeout(closeMenu, NAVIGATION_DELAY_MS);
 												}}
 												className={`flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 													isActive(pathname, link.href)
@@ -428,7 +431,7 @@ export function Navbar() {
 										href={item.href}
 										onClick={() => {
 											// Delay closing menu to ensure navigation completes
-											setTimeout(closeMenu, 100);
+											setTimeout(closeMenu, NAVIGATION_DELAY_MS);
 										}}
 										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, item.href)
@@ -471,7 +474,7 @@ export function Navbar() {
 											href={link.href}
 											onClick={() => {
 												// Delay closing menu to ensure navigation completes
-												setTimeout(closeMenu, 100);
+												setTimeout(closeMenu, NAVIGATION_DELAY_MS);
 											}}
 											className={`mt-1 flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 												isActive(pathname, link.href)
@@ -499,7 +502,7 @@ export function Navbar() {
 										href="/auth/login"
 										onClick={() => {
 											// Delay closing menu to ensure navigation completes
-											setTimeout(closeMenu, 100);
+											setTimeout(closeMenu, NAVIGATION_DELAY_MS);
 										}}
 										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, "/auth/login")
