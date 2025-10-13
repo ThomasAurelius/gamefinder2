@@ -482,54 +482,64 @@ export default function TallTalesPage() {
 					tales.map((tale) => (
 						<article 
 							key={tale.id}
-							className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30"
+							className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 overflow-hidden shadow-lg shadow-slate-900/30"
 						>
-							<div className="flex items-start justify-between gap-4">
-								<div className="flex items-center gap-3">
-									{tale.authorAvatarUrl ? (
-										<img
-											src={tale.authorAvatarUrl}
-											alt={tale.authorName}
-											className="h-10 w-10 rounded-full border border-slate-700 object-cover"
-										/>
-									) : (
-										<div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-sm font-semibold text-slate-300">
-											{tale.authorName.charAt(0).toUpperCase()}
-										</div>
-									)}
-									<div>
-										<p className="font-medium text-slate-200">{tale.authorName}</p>
-										<p className="text-xs text-slate-500">{formatDate(tale.createdAt)}</p>
-										{tale.gameSystem && (
-											<p className="text-xs text-slate-400 mt-1">
-												{tale.gameSystem === "Other" && tale.customGameSystem
-													? tale.customGameSystem
-													: tale.gameSystem}
-											</p>
+							{/* Primary image at the top, full width */}
+							{tale.imageUrls && tale.imageUrls.length > 0 && (
+								<img
+									src={tale.imageUrls[0]}
+									alt={tale.title}
+									className="w-full max-h-96 object-cover cursor-pointer transition hover:opacity-90"
+									onClick={() => tale.imageUrls && setModalImageUrl(tale.imageUrls[0])}
+								/>
+							)}
+							
+							<div className="p-6 space-y-4">
+								<div className="flex items-start justify-between gap-4">
+									<div className="flex items-center gap-3">
+										{tale.authorAvatarUrl ? (
+											<img
+												src={tale.authorAvatarUrl}
+												alt={tale.authorName}
+												className="h-10 w-10 rounded-full border border-slate-700 object-cover"
+											/>
+										) : (
+											<div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-sm font-semibold text-slate-300">
+												{tale.authorName.charAt(0).toUpperCase()}
+											</div>
 										)}
+										<div>
+											<p className="font-medium text-slate-200">{tale.authorName}</p>
+											<p className="text-xs text-slate-500">{formatDate(tale.createdAt)}</p>
+											{tale.gameSystem && (
+												<p className="text-xs text-slate-400 mt-1">
+													{tale.gameSystem === "Other" && tale.customGameSystem
+														? tale.customGameSystem
+														: tale.gameSystem}
+												</p>
+											)}
+										</div>
+									</div>
+									<div className="flex items-center gap-2">
+										{(currentUserId === tale.userId || isAdmin) && (
+											<TaleActions
+												tale={tale}
+												onUpdate={loadTales}
+											/>
+										)}
+										<button
+											onClick={() => handleFlagClick(tale.id)}
+											className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-300 transition hover:border-red-500/50 hover:bg-red-900/20 hover:text-red-400"
+											title="Flag content"
+										>
+											<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+											</svg>
+										</button>
 									</div>
 								</div>
-								<div className="flex items-center gap-2">
-									{(currentUserId === tale.userId || isAdmin) && (
-										<TaleActions
-											tale={tale}
-											onUpdate={loadTales}
-										/>
-									)}
-									<button
-										onClick={() => handleFlagClick(tale.id)}
-										className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-300 transition hover:border-red-500/50 hover:bg-red-900/20 hover:text-red-400"
-										title="Flag content"
-									>
-										<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-										</svg>
-									</button>
-								</div>
-							</div>
-							
-							<div className="flex items-start justify-between gap-4">
-								<div className="flex-1">
+								
+								<div>
 									<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
 									<div className="prose prose-invert prose-slate max-w-none prose-headings:text-slate-100 prose-p:text-slate-300 prose-strong:text-slate-100 prose-em:text-slate-300 prose-li:text-slate-300 prose-blockquote:text-slate-400">
 										<ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -537,31 +547,22 @@ export default function TallTalesPage() {
 										</ReactMarkdown>
 									</div>
 								</div>
-								{tale.imageUrls && tale.imageUrls.length > 0 && (
-									<div className="flex-shrink-0">
-										<img
-											src={tale.imageUrls[0]}
-											alt={tale.title}
-											className="h-32 w-32 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
-											onClick={() => tale.imageUrls && setModalImageUrl(tale.imageUrls[0])}
-										/>
+								
+								{/* Additional images after the content */}
+								{tale.imageUrls && tale.imageUrls.length > 1 && (
+									<div className="flex flex-wrap gap-3 pt-2">
+										{tale.imageUrls.slice(1).map((url: string, index: number) => (
+											<img
+												key={index}
+												src={url}
+												alt={`Tale image ${index + 2}`}
+												className="h-24 w-24 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
+												onClick={() => setModalImageUrl(url)}
+											/>
+										))}
 									</div>
 								)}
 							</div>
-							
-							{tale.imageUrls && tale.imageUrls.length > 1 && (
-								<div className="flex flex-wrap gap-3 pt-2">
-									{tale.imageUrls.slice(1).map((url: string, index: number) => (
-										<img
-											key={index}
-											src={url}
-											alt={`Tale image ${index + 2}`}
-											className="h-24 w-24 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
-											onClick={() => setModalImageUrl(url)}
-										/>
-									))}
-								</div>
-							)}
 						</article>
 					))
 				)}
