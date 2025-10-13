@@ -482,7 +482,7 @@ export default function TallTalesPage() {
 					tales.map((tale) => (
 						<article 
 							key={tale.id}
-							className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 overflow-hidden shadow-lg shadow-slate-900/30"
+							className="rounded-2xl border border-slate-800/60 bg-slate-900/40 overflow-hidden shadow-lg shadow-slate-900/30"
 						>
 							{/* Primary image at the top, full width */}
 							{tale.imageUrls && tale.imageUrls.length > 0 && (
