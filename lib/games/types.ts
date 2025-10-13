@@ -9,6 +9,9 @@ export type GameSessionPayload = {
   zipCode?: string;
   latitude?: number;
   longitude?: number;
+  // Payment-related fields (similar to campaigns)
+  costPerSession?: number;
+  stripeConnectAccountId?: string; // Host's Stripe Connect account ID for payment splitting
 };
 
 export type PlayerSignup = {
