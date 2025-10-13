@@ -422,7 +422,7 @@ export default function CampaignDetailPage() {
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!confirm("Are you sure you want to delete this note?")) return;
+    if (!confirm("Are you sure you want to delete this note? This action cannot be undone.")) return;
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/notes/${noteId}`, {
@@ -441,7 +441,7 @@ export default function CampaignDetailPage() {
   };
 
   const handleWithdraw = async () => {
-    if (!confirm("Are you sure you want to withdraw from this campaign?")) return;
+    if (!confirm("Are you sure you want to withdraw from this campaign? This action cannot be undone.")) return;
 
     setIsWithdrawing(true);
     setWithdrawError(null);

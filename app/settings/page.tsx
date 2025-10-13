@@ -394,7 +394,7 @@ export default function SettingsPage() {
 	};
 
 	const handleDeleteBadge = async (badgeId: string) => {
-		if (!confirm("Are you sure you want to delete this badge? This will remove it from all users.")) {
+		if (!confirm("Are you sure you want to delete this badge? This will remove it from all users. This action cannot be undone.")) {
 			return;
 		}
 
@@ -520,7 +520,7 @@ export default function SettingsPage() {
 	};
 
 	const handleRemoveBadge = async (userId: string, badgeId: string, userName: string) => {
-		if (!confirm(`Are you sure you want to remove this badge from ${userName}?`)) {
+		if (!confirm(`Are you sure you want to remove this badge from ${userName}? This action cannot be undone.`)) {
 			return;
 		}
 
