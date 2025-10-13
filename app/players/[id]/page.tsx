@@ -127,7 +127,7 @@ export default async function PlayerDetailPage({
             </div>
           )}
           <div className="space-y-2 flex-1">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <h1 className="text-3xl font-bold">{displayName}</h1>
               <div className="flex items-center gap-2">
                 <Link
