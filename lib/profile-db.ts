@@ -38,7 +38,7 @@ const DEFAULT_PROFILE: ProfileRecord = {
 		Sunday: [],
 	},
 	primaryRole: "",
-	timezone: "America/New_York",
+	timezone: "America/Chicago",
 	avatarUrl: "",
 	canPostPaidGames: false,
 };
@@ -80,7 +80,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
 			...(profile.availability ?? {}),
 		},
 		primaryRole: profile.primaryRole ?? "",
-		timezone: profile.timezone ?? "America/New_York",
+		timezone: profile.timezone ?? "America/Chicago",
 		avatarUrl: profile.avatarUrl ?? "",
 		userName: user.name || "",
 		latitude: profile.latitude,

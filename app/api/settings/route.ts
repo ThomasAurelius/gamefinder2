@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const profile = await readProfile(userId);
     
     return NextResponse.json({
-      timezone: profile.timezone || "America/New_York",
+      timezone: profile.timezone || "America/Chicago",
     });
   } catch (error) {
     console.error("Error fetching settings:", error);

@@ -127,7 +127,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     favoriteGames: normalizedFavorites,
     availability: normalizeAvailability(availability),
     primaryRole,
-    timezone: timezone || "America/New_York",
+    timezone: timezone || "America/Chicago",
     avatarUrl: avatarUrl || "",
   };
 };
