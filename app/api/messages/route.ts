@@ -5,6 +5,7 @@ import {
   getUserMessages,
   type MessagePayload,
 } from "@/lib/messages";
+import { getUserDisplayName } from "@/lib/user-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,23 +52,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Get sender info from database using authenticated user ID
-    const { getDb } = await import("@/lib/mongodb");
-    const { ObjectId } = await import("mongodb");
-    const db = await getDb();
-    const usersCollection = db.collection("users");
-    const sender = await usersCollection.findOne(
-      { _id: new ObjectId(authenticatedUserId) },
-      { projection: { name: 1, email: 1 } }
-    );
+    const senderName = await getUserDisplayName(authenticatedUserId);
 
-    if (!sender) {
+    if (!senderName) {
       return NextResponse.json(
         { error: "Sender not found" },
         { status: 404 }
       );
     }
-
-    const senderName = sender.name || (sender.email as string).split("@")[0];
 
     const payload: MessagePayload = {
       senderId: authenticatedUserId,

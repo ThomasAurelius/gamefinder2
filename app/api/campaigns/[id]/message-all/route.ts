@@ -5,6 +5,7 @@ import { getDb } from "@/lib/mongodb";
 import { createMessage } from "@/lib/messages";
 import { getUsersBasicInfo } from "@/lib/users";
 import { readProfile } from "@/lib/profile-db";
+import { getUserDisplayName } from "@/lib/user-utils";
 
 export async function POST(
   request: Request,
@@ -26,8 +27,9 @@ export async function POST(
     const body = await request.json();
     const { subject, content, message } = body;
 
-    // Accept either "content" or "message" field name for backward compatibility
-    const messageContent = content || message;
+    // Accept either "content" or "message" field name for backward compatibility with existing clients
+    // Frontend currently sends "message" field, but API expects "content" - this allows both during transition
+    const messageContent = content !== undefined ? content : message;
 
     // Validate required fields
     if (!subject || !messageContent) {
@@ -68,20 +70,14 @@ export async function POST(
     }
 
     // Get authenticated user's name from database
-    const usersCollection = db.collection("users");
-    const user = await usersCollection.findOne(
-      { _id: new ObjectId(authenticatedUserId) },
-      { projection: { name: 1, email: 1 } }
-    );
+    const userName = await getUserDisplayName(authenticatedUserId);
 
-    if (!user) {
+    if (!userName) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
       );
     }
-
-    const userName = user.name || (user.email as string).split("@")[0];
 
     // Get signed up players
     const signedUpPlayers: string[] = campaign.signedUpPlayers || [];
