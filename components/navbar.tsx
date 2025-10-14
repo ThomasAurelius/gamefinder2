@@ -215,7 +215,7 @@ export function Navbar() {
 						)}
 					</button>
 				</div>
-				<nav className="hidden items-center gap-6 text-sm font-medium text-slate-200 md:flex">
+				<nav className="hidden items-center gap-2 text-sm font-medium text-slate-200 md:flex">
 					{primaryLinks.map((item) => {
 						if (isSubmenu(item)) {
 							const isAnySubmenuActive = item.submenu.some((link) =>
@@ -238,7 +238,7 @@ export function Navbar() {
 								<div key={item.label} className="relative">
 									<button
 										type="button"
-										className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
+										className={`flex items-center gap-1 rounded-md px-2 py-2 text-slate-200 transition hover:bg-white/10 ${
 											isOpen || isAnySubmenuActive
 												? "bg-white/10 text-white"
 												: ""
@@ -298,7 +298,7 @@ export function Navbar() {
 								<Link
 									key={item.href}
 									href={item.href}
-									className={`rounded-md px-3 py-2 transition hover:bg-white/10 ${
+									className={`rounded-md px-2 py-2 transition hover:bg-white/10 ${
 										isActive(pathname, item.href)
 											? "bg-white/10 text-white"
 											: "text-slate-200"
@@ -315,7 +315,7 @@ export function Navbar() {
 								<div className="relative">
 									<button
 										type="button"
-										className={`flex items-center gap-1 rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10 ${
+										className={`flex items-center gap-1 rounded-md px-2 py-2 text-slate-200 transition hover:bg-white/10 ${
 											accountOpen ? "bg-white/10 text-white" : ""
 										}`}
 										onClick={toggleAccount}
@@ -388,7 +388,7 @@ export function Navbar() {
 						) : (
 							<Link
 								href="/auth/login"
-								className={`rounded-md px-3 py-2 transition hover:bg-white/10 ${
+								className={`rounded-md px-2 py-2 transition hover:bg-white/10 ${
 									isActive(pathname, "/auth/login")
 										? "bg-white/10 text-white"
 										: "text-slate-200"
