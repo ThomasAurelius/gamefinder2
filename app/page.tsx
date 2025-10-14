@@ -104,9 +104,9 @@ export default function HomePage() {
 						</div>
 					</section>
 				)}
-
+				{/*
 				<section className="grid gap-6 sm:grid-cols-2 max-w-4xl">
-					<article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
+					 <article className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl">
 						<h2 className="text-2xl font-bold text-slate-100 mb-4">
 							Stay Organized
 						</h2>
@@ -177,8 +177,8 @@ export default function HomePage() {
 								</p>
 							</li>
 						</ul>
-					</article>
-				</section>
+					</article> 
+				</section> */}
 				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
 					<h2 className="text-2xl font-bold text-slate-100 mb-4">
 						Games vs. Campaigns
