@@ -25,6 +25,7 @@ const primaryLinks: NavItem[] = [
 	{ href: "/tall-tales", label: "Tall Tales" },
 	{ href: "/library", label: "Library" },
 	{ href: "/players", label: "Players" },
+	{ href: "/marketplace", label: "Marketplace" },
 	{
 		label: "Games",
 		submenu: [
