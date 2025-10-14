@@ -39,9 +39,10 @@ export default function EditMarketplaceListingPage() {
   const [condition, setCondition] = useState("");
   const [location, setLocation] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [imageUrls, setImageUrls] = useState<string[]>([""]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [contactInfo, setContactInfo] = useState("");
   const [status, setStatus] = useState<"active" | "sold" | "closed">("active");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const COMMON_TAGS = [
     "Core Rulebooks",
@@ -76,7 +77,7 @@ export default function EditMarketplaceListingPage() {
         setCondition(data.condition || "");
         setLocation(data.location || "");
         setZipCode(data.zipCode || "");
-        setImageUrls(data.imageUrls && data.imageUrls.length > 0 ? data.imageUrls : [""]);
+        setImageUrls(data.imageUrls && data.imageUrls.length > 0 ? data.imageUrls : []);
         setContactInfo(data.contactInfo || "");
         setStatus(data.status as "active" | "sold" | "closed");
 
@@ -118,17 +119,47 @@ export default function EditMarketplaceListingPage() {
     setTags(tags.filter((t) => t !== tag));
   };
 
-  const addImageUrl = () => {
-    setImageUrls([...imageUrls, ""]);
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (imageUrls.length >= 5) {
+      setError("Maximum 5 images allowed per listing");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "marketplace");
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to upload image");
+      }
+
+      const { url } = await response.json();
+      setImageUrls([...imageUrls, url]);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to upload image"
+      );
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
-  const updateImageUrl = (index: number, value: string) => {
-    const newUrls = [...imageUrls];
-    newUrls[index] = value;
-    setImageUrls(newUrls);
-  };
-
-  const removeImageUrl = (index: number) => {
+  const removeImage = (index: number) => {
     setImageUrls(imageUrls.filter((_, i) => i !== index));
   };
 
@@ -148,8 +179,6 @@ export default function EditMarketplaceListingPage() {
         selectedGameSystem === "Other"
           ? customGameSystem.trim()
           : selectedGameSystem;
-
-      const filteredImageUrls = imageUrls.filter((url) => url.trim() !== "");
 
       const requestBody: {
         title: string;
@@ -186,8 +215,8 @@ export default function EditMarketplaceListingPage() {
         requestBody.condition = condition;
       }
 
-      if (filteredImageUrls.length > 0) {
-        requestBody.imageUrls = filteredImageUrls;
+      if (imageUrls.length > 0) {
+        requestBody.imageUrls = imageUrls;
       }
 
       if (contactInfo.trim()) {
@@ -505,38 +534,72 @@ export default function EditMarketplaceListingPage() {
 
           <div className="space-y-2">
             <label className="block text-sm font-medium text-slate-200">
-              Image URLs
+              Images
             </label>
             <p className="text-xs text-slate-500">
-              Provide URLs to images hosted elsewhere
+              Upload images of your item. Multiple images are supported (max 5).
             </p>
-            {imageUrls.map((url, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => updateImageUrl(index, e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="flex-1 rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-                {imageUrls.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeImageUrl(index)}
-                    className="rounded-xl border border-red-600 bg-red-600/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-600/20"
-                  >
-                    Remove
-                  </button>
-                )}
+            {imageUrls.length > 0 && (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                {imageUrls.map((url, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={url}
+                      alt={`Upload ${index + 1}`}
+                      className="aspect-video w-full rounded-lg border border-slate-800 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute right-2 top-2 rounded-full bg-red-600 p-1.5 text-white transition hover:bg-red-700"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={addImageUrl}
-              className="rounded-xl border border-sky-600 bg-sky-600/10 px-4 py-2 text-sm font-medium text-sky-400 transition hover:bg-sky-600/20"
-            >
-              Add Another Image
-            </button>
+            )}
+            <div>
+              <label
+                htmlFor="marketplace-images"
+                className={`inline-block cursor-pointer rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-3 text-sm font-medium text-slate-300 transition hover:border-sky-500 hover:text-sky-400 ${
+                  isUploadingImage || imageUrls.length >= 5
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                }`}
+              >
+                {isUploadingImage
+                  ? "Uploading..."
+                  : imageUrls.length >= 5
+                    ? "Maximum images reached"
+                    : imageUrls.length > 0
+                      ? "Add Another Image"
+                      : "Upload Images"}
+              </label>
+              <input
+                id="marketplace-images"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleImageUpload}
+                disabled={isUploadingImage || imageUrls.length >= 5}
+                className="hidden"
+              />
+              <p className="mt-2 text-xs text-slate-500">
+                JPG, PNG, WebP or GIF. Max 5MB per image.
+              </p>
+            </div>
           </div>
 
           <div className="space-y-2">
