@@ -181,7 +181,9 @@ function GameSessionCard({
             {session.costPerSession !== undefined && session.costPerSession > 0 && (
               <p>
                 <span className="text-slate-500">Cost:</span>{" "}
-                <span className="text-slate-300">${session.costPerSession.toFixed(2)} per session</span>
+                <span className="text-slate-300">
+                  ${session.costPerSession.toFixed(2)}{isCampaign ? " per session" : ""}
+                </span>
               </p>
             )}
             {session.description && (

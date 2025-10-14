@@ -525,7 +525,7 @@ export default function EditCampaignPage() {
 						Payment Method
 					</h3>
 					<p className="text-xs text-slate-500">
-						Players will be required to pay ${costPerSession} per session using Stripe when they join this campaign.
+						Players will be required to pay ${costPerSession} {typeof sessionsLeft === 'number' && sessionsLeft > 1 ? 'per session via subscription' : 'as a one-time payment'} using Stripe when they join this campaign.
 					</p>
 				</div>
 			)}

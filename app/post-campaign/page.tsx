@@ -567,7 +567,7 @@ export default function PostCampaignPage() {
 							Payment Setup
 						</h3>
 						<p className="text-xs text-slate-500 mb-4">
-							Players will be required to pay ${costPerSession} per session using Stripe when they join this campaign.
+							Players will be required to pay ${costPerSession} {typeof sessionsLeft === 'number' && sessionsLeft > 1 ? 'per session via subscription' : 'as a one-time payment'} using Stripe when they join this campaign.
 						</p>
                                                 {!showPaymentForm && (
                                                         <button
