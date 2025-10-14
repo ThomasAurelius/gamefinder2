@@ -454,7 +454,7 @@ export default function EditGamePage() {
 							htmlFor="costPerSession"
 							className="block text-sm font-medium text-slate-200"
 						>
-							Cost per Session
+							Cost for Game
 						</label>
 						<input
 							id="costPerSession"
@@ -470,7 +470,7 @@ export default function EditGamePage() {
 							className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 						/>
 						<p className="text-xs text-slate-500">
-							The cost per session in dollars (0 for free games)
+							The cost for this single-session game in dollars (0 for free games)
 						</p>
 					</div>
 				)}
@@ -498,7 +498,7 @@ export default function EditGamePage() {
 							Payment Method
 						</h3>
 						<p className="text-xs text-slate-500">
-							Players will be required to pay ${costPerSession.toFixed(2)} per session using Stripe when they join this game.
+							Players will be required to pay ${costPerSession.toFixed(2)} for this single-session game using Stripe when they join.
 						</p>
 						{!hasConnectAccount && (
 							<div className="mt-3 rounded-lg border border-amber-700/50 bg-amber-900/20 p-3">

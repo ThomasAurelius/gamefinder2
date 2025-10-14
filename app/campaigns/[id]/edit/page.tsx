@@ -426,7 +426,7 @@ export default function EditCampaignPage() {
 					htmlFor="sessionsLeft"
 					className="block text-sm font-medium text-slate-200"
 				>
-					Approximate Sessions Left
+					Number of Sessions
 				</label>
 				<input
 					id="sessionsLeft"
@@ -441,7 +441,7 @@ export default function EditCampaignPage() {
 					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 				/>
 				<p className="text-xs text-slate-500">
-					How many sessions do you expect this campaign to run?
+					How many sessions do you expect this campaign to run? Enter 1 for a single-session campaign, or a higher number for a multi-session campaign that requires a subscription.
 				</p>
 			</div>
 

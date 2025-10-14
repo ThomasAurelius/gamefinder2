@@ -252,7 +252,7 @@ export default function PostCampaignPage() {
 					Post a Campaign
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Create a new campaign and invite players to join.
+					Create a multi-session campaign (1 or more sessions) and invite players to join.
 				</p>
 			</div>
 
@@ -430,7 +430,7 @@ export default function PostCampaignPage() {
 					htmlFor="sessionsLeft"
 					className="block text-sm font-medium text-slate-200"
 				>
-					Approximate Sessions Left
+					Number of Sessions
 				</label>
 				<input
 					id="sessionsLeft"
@@ -445,7 +445,7 @@ export default function PostCampaignPage() {
 					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 				/>
 				<p className="text-xs text-slate-500">
-					How many sessions do you expect this campaign to run?
+					How many sessions do you expect this campaign to run? Enter 1 for a single-session campaign, or a higher number for a multi-session campaign that requires a subscription.
 				</p>
 			</div>
 
