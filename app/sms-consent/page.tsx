@@ -85,8 +85,8 @@ export default function SmsConsentPage() {
 						<ul className="list-disc list-inside space-y-2 ml-2">
 							<li><strong>What we collect:</strong> Your mobile phone number</li>
 							<li><strong>How we use it:</strong> Only to send campaign-related SMS notifications</li>
-							<li><strong>Who can see it:</strong> Campaign hosts can see that you have a phone number on file but cannot view the number itself</li>
-							<li><strong>How we protect it:</strong> Your phone number is stored securely in our database and never shared publicly</li>
+							<li><strong>Who can see it:</strong> Your phone number is never visible to anyone, including campaign hosts. It is stored securely and used only for SMS delivery.</li>
+							<li><strong>How we protect it:</strong> Your phone number is stored securely in our database and never shared publicly or displayed in the application</li>
 							<li><strong>Retention:</strong> We keep your phone number until you remove it from your profile or delete your account</li>
 						</ul>
 					</div>

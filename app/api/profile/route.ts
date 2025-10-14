@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-import { readProfile, writeProfile, type ProfileRecord } from "@/lib/profile-db";
+import { readProfile, writeProfile, sanitizeProfile, type ProfileRecord } from "@/lib/profile-db";
 import { isValidTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import { geocodeLocation } from "@/lib/geolocation";
 
@@ -64,6 +64,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     primaryRole,
     timezone,
     avatarUrl,
+    phoneNumber,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -107,6 +108,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     throw new Error("Invalid timezone");
   }
 
+  // Validate phoneNumber if provided (optional field, kept in backend only)
+  if (phoneNumber !== undefined && phoneNumber !== "" && !isString(phoneNumber)) {
+    throw new Error("Phone number must be a string");
+  }
+
   const normalizedGames = dedupe(games);
   const normalizedFavorites = dedupe(favoriteGames);
 
@@ -129,6 +135,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     primaryRole,
     timezone: timezone || DEFAULT_TIMEZONE,
     avatarUrl: avatarUrl || "",
+    phoneNumber: phoneNumber || undefined,
   };
 };
 
@@ -146,7 +153,9 @@ export async function GET(request: Request) {
     }
     
     const profile = await readProfile(userId);
-    return NextResponse.json({ ...profile, userId });
+    // Sanitize profile to remove phone number - it should never be visible to users
+    const sanitizedProfile = sanitizeProfile(profile);
+    return NextResponse.json({ ...sanitizedProfile, userId });
   } catch (error) {
     console.error(error);
     return new NextResponse("Unable to read profile", { status: 500 });
@@ -186,7 +195,9 @@ export async function POST(request: Request) {
     }
     
     await writeProfile(userId, profile);
-    return NextResponse.json(profile, { status: 200 });
+    // Sanitize profile before returning - phone number should never be visible
+    const sanitizedProfile = sanitizeProfile(profile);
+    return NextResponse.json(sanitizedProfile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
       return new NextResponse(error.message, { status: 400 });
