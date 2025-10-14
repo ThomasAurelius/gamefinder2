@@ -11,6 +11,7 @@ type ShareButtonsProps = {
 export default function ShareButtons({ url, title, description }: ShareButtonsProps) {
 	const [isCopied, setIsCopied] = useState(false);
 	const [isSharing, setIsSharing] = useState(false);
+	const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
 	const handleFacebookShare = () => {
 		setIsSharing(true);
@@ -42,16 +43,19 @@ export default function ShareButtons({ url, title, description }: ShareButtonsPr
 		const discordMessage = `**${title}**\n${description || ""}\n${url}`;
 		
 		navigator.clipboard.writeText(discordMessage).then(() => {
-			alert("Discord message copied to clipboard! Paste it in your Discord channel.");
+			setFeedbackMessage("Discord message copied to clipboard!");
+			setTimeout(() => setFeedbackMessage(null), 3000);
 		}).catch(() => {
-			alert("Failed to copy to clipboard");
+			setFeedbackMessage("Failed to copy to clipboard");
+			setTimeout(() => setFeedbackMessage(null), 3000);
 		});
 	};
 
 	const handleEmailShare = () => {
 		const subject = encodeURIComponent(title);
 		const body = encodeURIComponent(`${description || ""}\n\n${url}`);
-		window.location.href = `mailto:?subject=${subject}&body=${body}`;
+		// Use window.open to avoid interfering with SPA navigation
+		window.open(`mailto:?subject=${subject}&body=${body}`, '_self');
 	};
 
 	const handleCopyLink = async () => {
@@ -60,12 +64,21 @@ export default function ShareButtons({ url, title, description }: ShareButtonsPr
 			setIsCopied(true);
 			setTimeout(() => setIsCopied(false), 2000);
 		} catch (err) {
-			alert("Failed to copy link");
+			setFeedbackMessage("Failed to copy link");
+			setTimeout(() => setFeedbackMessage(null), 3000);
 		}
 	};
 
 	return (
-		<div className="flex flex-wrap gap-2">
+		<div className="space-y-2">
+			{/* Feedback message */}
+			{feedbackMessage && (
+				<div className="rounded-lg bg-sky-600/20 border border-sky-600/40 px-3 py-2 text-sm text-sky-200">
+					{feedbackMessage}
+				</div>
+			)}
+			
+			<div className="flex flex-wrap gap-2">
 			{/* Facebook Share Button */}
 			<button
 				onClick={handleFacebookShare}
@@ -172,6 +185,7 @@ export default function ShareButtons({ url, title, description }: ShareButtonsPr
 					</>
 				)}
 			</button>
+		</div>
 		</div>
 	);
 }
