@@ -36,6 +36,8 @@ export default function MarketplaceListingDetailPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -66,12 +68,14 @@ export default function MarketplaceListingDetailPage() {
     }
   }, [params.id]);
 
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this listing? This action cannot be undone.")) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setDeleteError("");
+    setShowDeleteConfirm(true);
+  };
 
+  const handleDeleteConfirm = async () => {
     setIsDeleting(true);
+    setDeleteError("");
     try {
       const response = await fetch(`/api/marketplace/${params.id}`, {
         method: "DELETE",
@@ -84,9 +88,15 @@ export default function MarketplaceListingDetailPage() {
       // Redirect to marketplace page after successful deletion
       router.push("/marketplace");
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Failed to delete listing");
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete listing");
       setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setDeleteError("");
   };
 
   if (isLoading) {
@@ -174,7 +184,7 @@ export default function MarketplaceListingDetailPage() {
             Edit Listing
           </Link>
           <button
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={isDeleting}
             className="inline-flex items-center gap-2 rounded-xl border border-red-600 bg-red-600/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-600/20 disabled:opacity-50"
           >
@@ -193,6 +203,41 @@ export default function MarketplaceListingDetailPage() {
             </svg>
             {isDeleting ? "Deleting..." : "Delete Listing"}
           </button>
+        </div>
+      )}
+
+      {/* Delete error message */}
+      {deleteError && (
+        <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-400">
+          {deleteError}
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-100">Delete Listing</h3>
+            <p className="mt-2 text-sm text-slate-400">
+              Are you sure you want to delete this listing? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="flex-1 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-900/60 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
