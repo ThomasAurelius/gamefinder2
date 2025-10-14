@@ -157,7 +157,7 @@ export default function PostMarketplaceListingPage() {
           Post a Marketplace Listing
         </h1>
         <p className="mt-2 text-sm text-slate-400">
-          List items for sale or post a want ad for items you're looking for.
+          List items for sale or post a want ad for items you&apos;re looking for.
           Payment is handled off-site.
         </p>
       </div>

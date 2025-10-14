@@ -185,7 +185,7 @@ export default function MarketplacePage() {
           Game Marketplace
         </h1>
         <p className="mt-2 text-sm text-slate-400">
-          Buy and sell games, accessories, and more. Post want ads for items you're looking for.
+          Buy and sell games, accessories, and more. Post want ads for items you&apos;re looking for.
         </p>
       </div>
 
