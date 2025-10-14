@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const type = formData.get("type") as string; // "avatar", "game", "character", "tale", "campaign", or "advertisement"
+    const type = formData.get("type") as string; // "avatar", "game", "character", "tale", "campaign", "advertisement", or "marketplace"
 
     if (!file) {
       return NextResponse.json(
@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       path = `tall-tales/${userId}/${filename}`;
     } else if (type === "advertisement") {
       path = `advertisements/${filename}`;
+    } else if (type === "marketplace") {
+      path = `marketplace/${userId}/${filename}`;
     } else {
       path = `games/${userId}/${filename}`;
     }
