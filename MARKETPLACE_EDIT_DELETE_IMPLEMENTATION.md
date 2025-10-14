@@ -40,7 +40,7 @@ Enhanced the listing detail page with:
 - Added `isDeleting` state for delete operation feedback
 - Added `showDeleteConfirm` state for confirmation modal
 - Added `deleteError` state for error display
-- Fetches user's admin status from `/api/auth/user` endpoint
+- Fetches user's admin status from `/api/user/me` endpoint
 - Calculates `canEdit` permission: `currentUserId && (currentUserId === listing.userId || isAdmin)`
 - Added Edit and Delete buttons that only show when user can edit
 - Edit button navigates to `/marketplace/${id}/edit`

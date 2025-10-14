@@ -50,7 +50,7 @@ export default function MarketplaceListingDetailPage() {
         setListing(data);
 
         // Fetch current user ID and admin status
-        const userResponse = await fetch("/api/auth/user");
+        const userResponse = await fetch("/api/user/me");
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setCurrentUserId(userData.userId);
