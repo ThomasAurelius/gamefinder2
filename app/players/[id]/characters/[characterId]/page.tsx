@@ -5,6 +5,7 @@ import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
 import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
 import { categorizeStats } from "@/lib/characters/stat-display-utils";
+import ShareButtons from "@/components/ShareButtons";
 import type { GameSystemKey } from "@/lib/characters/types";
 
 function formatGameSystem(system: string): string {
@@ -139,6 +140,8 @@ export default async function CharacterDetailPage({
 
     const displayName = profile.commonName || profile.userName;
     const updatedAt = character.updatedAt ? new Date(character.updatedAt) : null;
+    const characterUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/players/${id}/characters/${characterId}`;
+    const characterDescription = `Check out ${character.name}${character.class ? `, a ${character.class}` : ""}${character.level ? ` (Level ${character.level})` : ""} character!`;
 
     return (
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
@@ -198,6 +201,15 @@ export default async function CharacterDetailPage({
             </div>
           </div>
         </header>
+
+        {/* Share buttons */}
+        <section>
+          <ShareButtons 
+            url={characterUrl}
+            title={`${character.name} - Character`}
+            description={characterDescription}
+          />
+        </section>
 
         {character.notes ? (
           <section className="space-y-2">

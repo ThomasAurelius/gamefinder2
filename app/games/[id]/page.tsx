@@ -8,7 +8,7 @@ import { formatTimeSlotsByGroup } from "@/lib/constants";
 import PendingPlayersManager from "@/components/PendingPlayersManager";
 import GameActions from "@/components/GameActions";
 import { getCharactersPublicStatus } from "@/lib/characters/db";
-import ShareToFacebook from "@/components/ShareToFacebook";
+import ShareButtons from "@/components/ShareButtons";
 import GameDetailActions from "@/components/GameDetailActions";
 import { isPaidGame } from "@/lib/game-utils";
 import type { Metadata } from "next";
@@ -161,7 +161,7 @@ export default async function GameDetailPage({
 
 	// Get the full URL for sharing
 	const gameUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
-	const shareQuote = `Join me for ${session.game} on ${formatDateInTimezone(session.date, DEFAULT_TIMEZONE)}!`;
+	const shareDescription = `Join me for ${session.game} on ${formatDateInTimezone(session.date, DEFAULT_TIMEZONE)}!`;
 
 	return (
 		<div className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-4 py-8 text-slate-100">
@@ -200,9 +200,13 @@ export default async function GameDetailPage({
 					{isHost && <GameActions session={session} />}
 				</div>
 
-				{/* Share to Facebook button */}
-				<div className="flex gap-3">
-					<ShareToFacebook url={gameUrl} quote={shareQuote} />
+				{/* Share buttons */}
+				<div className="flex flex-col gap-3">
+					<ShareButtons 
+						url={gameUrl} 
+						title={`${session.game} - Game Session`}
+						description={shareDescription}
+					/>
 					<GameDetailActions
 						sessionId={id}
 						currentUserId={currentUserId ?? null}
