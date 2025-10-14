@@ -34,7 +34,9 @@ export async function generateMetadata({
 		? `${session.description.substring(0, 150)}${session.description.length > 150 ? "..." : ""}`
 		: `Join us for ${session.game}. ${session.maxPlayers - session.signedUpPlayers.length} spots available!`;
 	
-	const description = `${baseDescription} | Date: ${formattedDate}`;
+	// Format times for display
+	const timesStr = session.times.length > 0 ? ` | Times: ${session.times.join(", ")}` : "";
+	const description = `${baseDescription} | Date: ${formattedDate}${timesStr}`;
 
 	const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
 
