@@ -577,13 +577,17 @@ export default function PostGamePage() {
 						<p className="text-sm text-green-400">
 							Game session posted successfully!
 						</p>
-						{postedGameId && (
-							<ShareButtons
-								url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
-								title={`${selectedGame === "Other" && customGameName ? customGameName : selectedGame} - Game Session`}
-								description={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
-							/>
-						)}
+						{postedGameId && (() => {
+							const gameName = selectedGame === "Other" && customGameName ? customGameName : selectedGame;
+							const formattedDate = selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD';
+							return (
+								<ShareButtons
+									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
+									title={`${gameName} - Game Session`}
+									description={`Join me for ${gameName} on ${formattedDate}!`}
+								/>
+							);
+						})()}
 					</div>
 				)}
 			</form>

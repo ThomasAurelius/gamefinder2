@@ -773,13 +773,17 @@ export default function PostCampaignPage() {
 						<p className="text-sm text-green-400">
 							Campaign posted successfully!
 						</p>
-						{postedCampaignId && (
-							<ShareButtons
-								url={`${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/${postedCampaignId}`}
-								title={`${selectedGame === "Other" && customGameName ? customGameName : selectedGame} - Campaign`}
-								description={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
-							/>
-						)}
+						{postedCampaignId && (() => {
+							const gameName = selectedGame === "Other" && customGameName ? customGameName : selectedGame;
+							const formattedDate = selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD';
+							return (
+								<ShareButtons
+									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/${postedCampaignId}`}
+									title={`${gameName} - Campaign`}
+									description={`Join me for ${gameName} on ${formattedDate}!`}
+								/>
+							);
+						})()}
 					</div>
 				)}
 			</form>
