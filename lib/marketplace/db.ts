@@ -188,3 +188,53 @@ export async function deleteMarketplaceListing(
   const result = await marketplaceCollection.deleteOne({ id, userId });
   return result.deletedCount === 1;
 }
+
+export async function updateMarketplaceListingByAdmin(
+  id: string,
+  updates: Partial<MarketplaceListingPayload> & { status?: "active" | "sold" | "closed" }
+): Promise<StoredMarketplaceListing | null> {
+  const db = await getDb();
+  const marketplaceCollection = db.collection<MarketplaceListingDocument>("marketplaceListings");
+
+  const now = new Date().toISOString();
+  const result = await marketplaceCollection.findOneAndUpdate(
+    { id },
+    { $set: { ...updates, updatedAt: now } },
+    { returnDocument: "after" }
+  );
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    id: result.id,
+    userId: result.userId,
+    title: result.title,
+    description: result.description,
+    gameSystem: result.gameSystem,
+    tags: result.tags || [],
+    price: result.price,
+    condition: result.condition,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    imageUrls: result.imageUrls || [],
+    listingType: result.listingType,
+    contactInfo: result.contactInfo,
+    status: result.status,
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+  };
+}
+
+export async function deleteMarketplaceListingByAdmin(
+  id: string
+): Promise<boolean> {
+  const db = await getDb();
+  const marketplaceCollection = db.collection<MarketplaceListingDocument>("marketplaceListings");
+
+  const result = await marketplaceCollection.deleteOne({ id });
+  return result.deletedCount === 1;
+}
