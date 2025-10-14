@@ -90,7 +90,6 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
-  const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageSubject, setMessageSubject] = useState("");
   const [messageContent, setMessageContent] = useState("");
@@ -151,9 +150,9 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     fetchData();
   }, [campaignId]);
 
-  const handlePlayerApproved = (playerId: string) => {
+  const handlePlayerApproved = (player: PendingPlayer) => {
     setPendingPlayersList((prev) =>
-      prev.filter((player) => player.id !== playerId)
+      prev.filter((p) => p.id !== player.id)
     );
     
     // Refresh campaign data to get updated player lists
@@ -311,36 +310,6 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     } catch (error) {
       console.error("Error deleting note:", error);
       alert("Failed to delete note");
-    }
-  };
-
-  const handlePortalAccess = async () => {
-    if (!currentUserId) {
-      return;
-    }
-
-    setIsRedirectingToPortal(true);
-
-    try {
-      const response = await fetch("/api/stripe/customer-portal", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const { url } = await response.json();
-        window.location.href = url;
-      } else {
-        const error = await response.json();
-        alert(error.error || "Failed to access customer portal");
-        setIsRedirectingToPortal(false);
-      }
-    } catch (error) {
-      console.error("Error accessing customer portal:", error);
-      alert("Failed to access customer portal");
-      setIsRedirectingToPortal(false);
     }
   };
 
