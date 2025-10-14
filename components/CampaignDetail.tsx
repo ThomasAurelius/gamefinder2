@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
 import { isPaidCampaign } from "@/lib/campaign-utils";
-import ShareToFacebook from "@/components/ShareToFacebook";
+import ShareButtons from "@/components/ShareButtons";
 
 type PlayerSignup = {
   userId: string;
@@ -374,7 +374,7 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
   const availableSlots = campaign.maxPlayers - campaign.signedUpPlayers.length;
   const isFull = availableSlots <= 0;
 
-  const shareQuote = `Join me for ${campaign.game} on ${formatDateInTimezone(campaign.date, userTimezone)}!`;
+  const shareDescription = `Join me for ${campaign.game} on ${formatDateInTimezone(campaign.date, userTimezone)}!`;
 
   const isCreator = currentUserId === campaign.userId;
   const isSignedUp = currentUserId && campaign.signedUpPlayers.includes(currentUserId);
@@ -405,9 +405,13 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
               </Link>
             </div>
             
-            {/* Share to Facebook button */}
+            {/* Share buttons */}
             <div className="mt-4">
-              <ShareToFacebook url={campaignUrl} quote={shareQuote} />
+              <ShareButtons 
+                url={campaignUrl} 
+                title={`${campaign.game} - Campaign`}
+                description={shareDescription}
+              />
             </div>
             
             {campaign.imageUrl && (
@@ -494,9 +498,13 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                 </p>
               )}
               
-              {/* Share to Facebook button */}
+              {/* Share buttons */}
               <div className="mt-4">
-                <ShareToFacebook url={campaignUrl} quote={shareQuote} />
+                <ShareButtons 
+                  url={campaignUrl} 
+                  title={`${campaign.game} - Campaign`}
+                  description={shareDescription}
+                />
               </div>
               
               <div className="mt-4 space-y-2 text-sm text-slate-400">

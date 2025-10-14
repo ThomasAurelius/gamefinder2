@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import ShareButtons from "@/components/ShareButtons";
 
 type MarketplaceListing = {
   id: string;
@@ -32,6 +33,7 @@ export default function MarketplaceListingDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -42,6 +44,13 @@ export default function MarketplaceListingDetailPage() {
         }
         const data = await response.json();
         setListing(data);
+
+        // Fetch current user ID
+        const userResponse = await fetch("/api/auth/user");
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          setCurrentUserId(userData.userId);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch listing");
       } finally {
@@ -78,6 +87,8 @@ export default function MarketplaceListingDetailPage() {
   }
 
   const images = listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls : [];
+  const listingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/marketplace/${params.id}`;
+  const isOwner = currentUserId === listing.userId;
 
   return (
     <section className="space-y-6">
@@ -101,15 +112,26 @@ export default function MarketplaceListingDetailPage() {
           </svg>
           Back
         </button>
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            listing.listingType === "sell"
-              ? "bg-green-600/20 text-green-400"
-              : "bg-amber-600/20 text-amber-400"
-          }`}
-        >
-          {listing.listingType === "sell" ? "For Sale" : "Want Ad"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-medium ${
+              listing.listingType === "sell"
+                ? "bg-green-600/20 text-green-400"
+                : "bg-amber-600/20 text-amber-400"
+            }`}
+          >
+            {listing.listingType === "sell" ? "For Sale" : "Want Ad"}
+          </span>
+        </div>
+      </div>
+
+      {/* Share buttons */}
+      <div className="mt-4">
+        <ShareButtons 
+          url={listingUrl}
+          title={listing.title}
+          description={`${listing.description.substring(0, 100)}${listing.description.length > 100 ? "..." : ""}`}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

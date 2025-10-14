@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
-import ShareToFacebook from "@/components/ShareToFacebook";
+import ShareButtons from "@/components/ShareButtons";
 import StripePaymentForm from "@/components/StripePaymentForm";
 import Link from "next/link";
 
@@ -773,14 +773,17 @@ export default function PostCampaignPage() {
 						<p className="text-sm text-green-400">
 							Campaign posted successfully!
 						</p>
-						{postedCampaignId && (
-							<div className="flex gap-3">
-								<ShareToFacebook
+						{postedCampaignId && (() => {
+							const gameName = selectedGame === "Other" && customGameName ? customGameName : selectedGame;
+							const formattedDate = selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD';
+							return (
+								<ShareButtons
 									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/${postedCampaignId}`}
-									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
+									title={`${gameName} - Campaign`}
+									description={`Join me for ${gameName} on ${formattedDate}!`}
 								/>
-							</div>
-						)}
+							);
+						})()}
 					</div>
 				)}
 			</form>

@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
-import ShareToFacebook from "@/components/ShareToFacebook";
+import ShareButtons from "@/components/ShareButtons";
 import Link from "next/link";
 
 const tagButtonClasses = (
@@ -577,14 +577,17 @@ export default function PostGamePage() {
 						<p className="text-sm text-green-400">
 							Game session posted successfully!
 						</p>
-						{postedGameId && (
-							<div className="flex gap-3">
-								<ShareToFacebook
+						{postedGameId && (() => {
+							const gameName = selectedGame === "Other" && customGameName ? customGameName : selectedGame;
+							const formattedDate = selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD';
+							return (
+								<ShareButtons
 									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/games/${postedGameId}`}
-									quote={`Join me for ${selectedGame === "Other" && customGameName ? customGameName : selectedGame} on ${selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD'}!`}
+									title={`${gameName} - Game Session`}
+									description={`Join me for ${gameName} on ${formattedDate}!`}
 								/>
-							</div>
-						)}
+							);
+						})()}
 					</div>
 				)}
 			</form>
