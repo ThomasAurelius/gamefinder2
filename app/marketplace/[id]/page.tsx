@@ -34,6 +34,10 @@ export default function MarketplaceListingDetailPage() {
   const [error, setError] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -45,11 +49,12 @@ export default function MarketplaceListingDetailPage() {
         const data = await response.json();
         setListing(data);
 
-        // Fetch current user ID
+        // Fetch current user ID and admin status
         const userResponse = await fetch("/api/auth/user");
         if (userResponse.ok) {
           const userData = await userResponse.json();
           setCurrentUserId(userData.userId);
+          setIsAdmin(userData.isAdmin || false);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch listing");
@@ -62,6 +67,37 @@ export default function MarketplaceListingDetailPage() {
       fetchListing();
     }
   }, [params.id]);
+
+  const handleDeleteClick = () => {
+    setDeleteError("");
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    setDeleteError("");
+    try {
+      const response = await fetch(`/api/marketplace/${params.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete listing");
+      }
+
+      // Redirect to marketplace page after successful deletion
+      router.push("/marketplace");
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Failed to delete listing");
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setDeleteError("");
+  };
 
   if (isLoading) {
     return (
@@ -88,7 +124,7 @@ export default function MarketplaceListingDetailPage() {
 
   const images = listing.imageUrls && listing.imageUrls.length > 0 ? listing.imageUrls : [];
   const listingUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/marketplace/${params.id}`;
-  const isOwner = currentUserId === listing.userId;
+  const canEdit = currentUserId && (currentUserId === listing.userId || isAdmin);
 
   return (
     <section className="space-y-6">
@@ -124,6 +160,86 @@ export default function MarketplaceListingDetailPage() {
           </span>
         </div>
       </div>
+
+      {/* Edit and Delete buttons */}
+      {canEdit && (
+        <div className="flex gap-3">
+          <Link
+            href={`/marketplace/${params.id}/edit`}
+            className="inline-flex items-center gap-2 rounded-xl border border-sky-600 bg-sky-600/10 px-4 py-2 text-sm font-medium text-sky-400 transition hover:bg-sky-600/20"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Edit Listing
+          </Link>
+          <button
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            className="inline-flex items-center gap-2 rounded-xl border border-red-600 bg-red-600/10 px-4 py-2 text-sm font-medium text-red-400 transition hover:bg-red-600/20 disabled:opacity-50"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+            {isDeleting ? "Deleting..." : "Delete Listing"}
+          </button>
+        </div>
+      )}
+
+      {/* Delete error message */}
+      {deleteError && (
+        <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-4 text-sm text-red-400">
+          {deleteError}
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-100">Delete Listing</h3>
+            <p className="mt-2 text-sm text-slate-400">
+              Are you sure you want to delete this listing? This action cannot be undone.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="flex-1 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                className="flex-1 rounded-xl border border-slate-700 bg-slate-900/40 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-900/60 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Share buttons */}
       <div className="mt-4">
