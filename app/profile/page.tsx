@@ -518,7 +518,7 @@ export default function ProfilePage() {
 							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 						/>
 						<p className="text-xs text-slate-400">
-							Optional. Used for SMS notifications from campaign hosts.{" "}
+							Optional. Used for SMS notifications from campaign hosts. For privacy, your phone number is never displayed after saving.{" "}
 							<Link href="/sms-consent" className="text-sky-400 hover:text-sky-300 underline">
 								Learn more about SMS notifications
 							</Link>
