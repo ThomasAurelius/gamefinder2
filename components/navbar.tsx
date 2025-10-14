@@ -377,7 +377,7 @@ export function Navbar() {
 											className="h-12 w-12 rounded-full border border-white/20 object-cover"
 										/>
 									) : (
-										<div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-xs font-semibold text-slate-300">
+										<div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-sm font-semibold text-slate-300">
 											{userCommonName
 												? userCommonName.charAt(0).toUpperCase()
 												: "U"}
