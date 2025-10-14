@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { cookies } from "next/headers";
 import {
   createMessage,
   getUserMessages,
@@ -7,22 +8,19 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user from cookie
+    const cookieStore = await cookies();
+    const authenticatedUserId = cookieStore.get("userId")?.value;
+
+    if (!authenticatedUserId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { senderId, senderName, recipientId, recipientName, subject, content } = body;
-
-    if (!senderId || typeof senderId !== "string") {
-      return NextResponse.json(
-        { error: "Sender ID is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!senderName || typeof senderName !== "string") {
-      return NextResponse.json(
-        { error: "Sender name is required" },
-        { status: 400 }
-      );
-    }
+    const { recipientId, recipientName, subject, content } = body;
 
     if (!recipientId || typeof recipientId !== "string") {
       return NextResponse.json(
@@ -52,9 +50,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get sender info from database using authenticated user ID
+    const { getDb } = await import("@/lib/mongodb");
+    const { ObjectId } = await import("mongodb");
+    const db = await getDb();
+    const usersCollection = db.collection("users");
+    const sender = await usersCollection.findOne(
+      { _id: new ObjectId(authenticatedUserId) },
+      { projection: { name: 1, email: 1 } }
+    );
+
+    if (!sender) {
+      return NextResponse.json(
+        { error: "Sender not found" },
+        { status: 404 }
+      );
+    }
+
+    const senderName = sender.name || (sender.email as string).split("@")[0];
+
     const payload: MessagePayload = {
-      senderId: senderId.trim(),
-      senderName: senderName.trim(),
+      senderId: authenticatedUserId,
+      senderName: senderName,
       recipientId: recipientId.trim(),
       recipientName: recipientName.trim(),
       subject: subject.trim(),
@@ -75,19 +92,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId");
+    // Get authenticated user from cookie
+    const cookieStore = await cookies();
+    const authenticatedUserId = cookieStore.get("userId")?.value;
 
-    if (!userId || typeof userId !== "string") {
+    if (!authenticatedUserId) {
       return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
+        { error: "Authentication required" },
+        { status: 401 }
       );
     }
 
-    const messages = await getUserMessages(userId);
+    // Only allow users to fetch their own messages
+    const messages = await getUserMessages(authenticatedUserId);
 
     return NextResponse.json({
       messages,

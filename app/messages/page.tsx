@@ -35,14 +35,29 @@ function MessagesContent() {
   const [isSending, setIsSending] = useState(false);
   const [isReplyingSending, setIsReplyingSending] = useState(false);
 
-  // Simulating user authentication - in a real app, this would come from auth context
+  // Fetch current user from authentication API
   useEffect(() => {
-    // For demo purposes, we'll use a simple user ID
-    // In production, this should come from an authentication context
-    const demoUserId = "demo-user-1";
-    const demoUserName = "Demo User";
-    setCurrentUserId(demoUserId);
-    setCurrentUserName(demoUserName);
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch("/api/user/me");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.authenticated) {
+            setCurrentUserId(data.userId);
+            setCurrentUserName(data.userName);
+          } else {
+            setError("You must be logged in to view messages");
+          }
+        } else {
+          setError("You must be logged in to view messages");
+        }
+      } catch (err) {
+        console.error("Failed to fetch current user", err);
+        setError("Failed to load user information");
+      }
+    };
+    
+    fetchCurrentUser();
   }, []);
 
   // Handle URL parameters for pre-filling compose form
@@ -68,7 +83,7 @@ function MessagesContent() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/messages?userId=${currentUserId}`, {
+      const response = await fetch("/api/messages", {
         cache: "no-store",
       });
 
@@ -148,8 +163,6 @@ function MessagesContent() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          senderId: currentUserId,
-          senderName: currentUserName,
           recipientId: newMessage.recipientId,
           recipientName: newMessage.recipientName,
           subject: newMessage.subject,
@@ -227,8 +240,6 @@ function MessagesContent() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          senderId: currentUserId,
-          senderName: currentUserName,
           recipientId: selectedConversation,
           recipientName: selectedConv.userName,
           subject: replyMessage.subject,
