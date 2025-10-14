@@ -121,6 +121,15 @@ export async function writeProfile(
 }
 
 /**
+ * Sanitize profile data by removing sensitive information like phone numbers
+ * Phone numbers should never be visible to users, only used internally for SMS
+ */
+export function sanitizeProfile(profile: ProfileRecord): ProfileRecord {
+	const { phoneNumber, ...sanitizedProfile } = profile;
+	return sanitizedProfile as ProfileRecord;
+}
+
+/**
  * Get the isHidden status for a user profile
  */
 export async function getProfileHiddenStatus(userId: string): Promise<boolean> {

@@ -136,7 +136,8 @@ export async function POST(
     if (smsRecipients.length > 0) {
       // Note: SMS functionality is stubbed for now
       // In the future, integrate with Twilio or similar service
-      console.log(`Would send SMS to ${smsRecipients.length} recipients:`, smsRecipients);
+      // Log count only, not actual phone numbers for privacy
+      console.log(`Would send SMS to ${smsRecipients.length} recipients`);
       
       // Stub: mark all as "sent" for now
       smsSent = smsRecipients.length;
