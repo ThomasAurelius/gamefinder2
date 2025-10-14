@@ -9,6 +9,12 @@ import { ObjectId } from "mongodb";
  */
 export async function getUserDisplayName(userId: string): Promise<string | null> {
   try {
+    // Validate ObjectId format before database query
+    if (!ObjectId.isValid(userId)) {
+      console.error("Invalid ObjectId format:", userId);
+      return null;
+    }
+
     const db = await getDb();
     const usersCollection = db.collection("users");
     const user = await usersCollection.findOne(
