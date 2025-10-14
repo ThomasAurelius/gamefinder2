@@ -29,10 +29,34 @@ export default function HomePage() {
 	return (
 		<>
 			<AnnouncementPopup />
+			{/* Hero Section */}
+			<section 
+				className="relative min-h-screen flex flex-col items-center justify-center"
+				style={{
+					backgroundImage: 'url(/hero.jpg)',
+					backgroundSize: 'cover',
+					backgroundPosition: 'center',
+					backgroundRepeat: 'no-repeat'
+				}}
+			>
+				<div className="absolute inset-0 bg-black/50" />
+				<div className="relative z-10 text-center px-4">
+					<h1 className="text-6xl md:text-8xl font-bold text-white mb-6">
+						Answer the call
+					</h1>
+				</div>
+				<div className="relative z-10 text-center px-4">
+					<h3 className="text-2xl md:text-4xl text-white">
+						Find and Host local games
+					</h3>
+				</div>
+			</section>
+
+			{/* Main Content Section */}
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">
-				<h1 className="text-3xl font-bold sm:text-4xl">
+				<h2 className="text-3xl font-bold sm:text-4xl">
 					Find Board Games, D&amp;D &amp; TTRPG Sessions
-				</h1>
+				</h2>
 				<p className="text-lg text-slate-300 max-w-3xl">
 					Schedule board game nights, host D&amp;D campaigns, join
 					Pathfinder adventures, and discover Shadowdark sessions. The
