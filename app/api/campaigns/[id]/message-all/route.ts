@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
+import { cookies } from "next/headers";
 import { getDb } from "@/lib/mongodb";
 import { createMessage } from "@/lib/messages";
 import { getUsersBasicInfo } from "@/lib/users";
@@ -10,12 +11,26 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Get authenticated user from cookie
+    const cookieStore = await cookies();
+    const authenticatedUserId = cookieStore.get("userId")?.value;
+
+    if (!authenticatedUserId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const { id: campaignId } = await context.params;
     const body = await request.json();
-    const { userId, userName, subject, content } = body;
+    const { subject, content, message } = body;
+
+    // Accept either "content" or "message" field name for backward compatibility
+    const messageContent = content || message;
 
     // Validate required fields
-    if (!userId || !userName || !subject || !content) {
+    if (!subject || !messageContent) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -44,13 +59,29 @@ export async function POST(
       );
     }
 
-    // Verify that the user is the campaign host
-    if (campaign.userId !== userId) {
+    // Verify that the authenticated user is the campaign host
+    if (campaign.userId !== authenticatedUserId) {
       return NextResponse.json(
         { error: "Only the campaign host can send messages to all players" },
         { status: 403 }
       );
     }
+
+    // Get authenticated user's name from database
+    const usersCollection = db.collection("users");
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(authenticatedUserId) },
+      { projection: { name: 1, email: 1 } }
+    );
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const userName = user.name || (user.email as string).split("@")[0];
 
     // Get signed up players
     const signedUpPlayers: string[] = campaign.signedUpPlayers || [];
@@ -76,12 +107,12 @@ export async function POST(
       // Send internal message
       messagePromises.push(
         createMessage({
-          senderId: userId,
+          senderId: authenticatedUserId,
           senderName: userName,
           recipientId: playerId,
           recipientName: playerInfo.name,
           subject,
-          content,
+          content: messageContent,
         })
       );
 
