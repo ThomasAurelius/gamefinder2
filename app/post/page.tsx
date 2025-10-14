@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import ShareToFacebook from "@/components/ShareToFacebook";
+import Link from "next/link";
 
 const tagButtonClasses = (
 	active: boolean,
@@ -35,6 +36,55 @@ export default function PostGamePage() {
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
 	const [postedGameId, setPostedGameId] = useState<string | null>(null);
+	
+	// Payment-related state
+	const [costPerSession, setCostPerSession] = useState<number | ''>('');
+	
+	// User profile state
+	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
+	const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+	const [hasConnectAccount, setHasConnectAccount] = useState(false);
+	const [isCheckingConnect, setIsCheckingConnect] = useState(false);
+
+	useEffect(() => {
+		const fetchProfile = async () => {
+			try {
+				const response = await fetch("/api/profile");
+				if (response.ok) {
+					const profileData = await response.json();
+					setCanPostPaidGames(profileData.canPostPaidGames || false);
+				}
+			} catch (error) {
+				console.error("Failed to load profile:", error);
+			} finally {
+				setIsLoadingProfile(false);
+			}
+		};
+
+		fetchProfile();
+	}, []);
+
+	// Check Stripe Connect status when user sets a cost
+	useEffect(() => {
+		const checkConnectStatus = async () => {
+			if (typeof costPerSession === 'number' && costPerSession > 0 && !isCheckingConnect) {
+				setIsCheckingConnect(true);
+				try {
+					const response = await fetch("/api/stripe/connect/status");
+					if (response.ok) {
+						const data = await response.json();
+						setHasConnectAccount(data.onboardingComplete || false);
+					}
+				} catch (error) {
+					console.error("Failed to check Connect status:", error);
+				} finally {
+					setIsCheckingConnect(false);
+				}
+			}
+		};
+
+		checkConnectStatus();
+	}, [costPerSession]);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -124,21 +174,38 @@ export default function PostGamePage() {
 					? customGameName.trim()
 					: selectedGame;
 
+			const requestBody: {
+				game: string;
+				date: string;
+				times: string[];
+				description: string;
+				maxPlayers: number;
+				imageUrl: string;
+				location: string;
+				zipCode: string;
+				costPerSession?: number;
+			} = {
+				game: gameName,
+				date: selectedDate,
+				times: selectedTimes,
+				description: description,
+				maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
+				imageUrl: imageUrl,
+				location: location,
+				zipCode: zipCode,
+			};
+
+			// Add costPerSession if it's set and greater than 0
+			if (typeof costPerSession === 'number' && costPerSession > 0) {
+				requestBody.costPerSession = costPerSession;
+			}
+
 			const response = await fetch("/api/games", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({
-					game: gameName,
-					date: selectedDate,
-					times: selectedTimes,
-					description: description,
-					maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
-					imageUrl: imageUrl,
-					location: location,
-					zipCode: zipCode,
-				}),
+				body: JSON.stringify(requestBody),
 			});
 
 			if (!response.ok) {
@@ -159,6 +226,7 @@ export default function PostGamePage() {
 			setImageUrl("");
 			setLocation("");
 			setZipCode("");
+			setCostPerSession('');
 			setPostedGameId(null);
 
 			setTimeout(() => setSubmitted(false), 5000);
@@ -178,7 +246,7 @@ export default function PostGamePage() {
 					Post a Game
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Create a new game session and invite players to join.
+					Create a single-session game and invite players to join.
 				</p>
 			</div>
 
@@ -350,6 +418,74 @@ export default function PostGamePage() {
 						Maximum number of players that can join this session
 					</p>
 				</div>
+
+				{canPostPaidGames && (
+					<div className="space-y-2">
+						<label
+							htmlFor="costPerSession"
+							className="block text-sm font-medium text-slate-200"
+						>
+							Cost for Game
+						</label>
+						<input
+							id="costPerSession"
+							type="number"
+							min="0"
+							step="0.01"
+							value={costPerSession}
+							onChange={(e) => {
+								const value = e.target.value;
+								setCostPerSession(value === '' ? '' : parseFloat(value));
+							}}
+							placeholder="e.g., 0 for free, 5.00 for paid"
+							className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						<p className="text-xs text-slate-500">
+							The cost for this single-session game in dollars (0 for free games)
+						</p>
+					</div>
+				)}
+
+				{!canPostPaidGames && (
+					<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
+						<h3 className="text-sm font-medium text-amber-200 mb-2">
+							Want to charge for game sessions?
+						</h3>
+						<p className="text-xs text-slate-400 mb-3">
+							Enable paid games to charge players for sessions. The platform will keep 15% of fees.
+						</p>
+						<Link
+							href="/terms-paid-games"
+							className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+						>
+							Enable Paid Games
+						</Link>
+					</div>
+				)}
+
+				{canPostPaidGames && costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
+					<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+						<h3 className="text-sm font-medium text-slate-200 mb-2">
+							Payment Method
+						</h3>
+						<p className="text-xs text-slate-500">
+							Players will be required to pay ${costPerSession.toFixed(2)} for this single-session game using Stripe when they join.
+						</p>
+						{!hasConnectAccount && (
+							<div className="mt-3 rounded-lg border border-amber-700/50 bg-amber-900/20 p-3">
+								<p className="text-xs text-amber-200 mb-2">
+									⚠️ Complete Stripe onboarding to receive payments
+								</p>
+								<Link
+									href="/host/onboarding"
+									className="inline-block rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-700"
+								>
+									Complete Onboarding
+								</Link>
+							</div>
+						)}
+					</div>
+				)}
 
 				<div className="space-y-2">
 					<label

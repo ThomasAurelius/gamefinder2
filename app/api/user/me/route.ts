@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { isAdmin } from "@/lib/admin";
+import { getUserDisplayName } from "@/lib/user-utils";
 
 /**
  * GET /api/user/me - Get current user's basic info
@@ -18,9 +19,13 @@ export async function GET() {
     
     const userIsAdmin = await isAdmin(userId);
     
+    // Fetch user name from database
+    const userName = await getUserDisplayName(userId) || "User";
+    
     return NextResponse.json({ 
       authenticated: true,
       userId,
+      userName,
       isAdmin: userIsAdmin 
     });
   } catch (error) {

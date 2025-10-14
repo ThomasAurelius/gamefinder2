@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 
 const tagButtonClasses = (
@@ -20,10 +20,10 @@ const tagButtonClasses = (
 	return [sizeClasses, baseClasses, activeClasses].join(" ");
 };
 
-export default function EditCampaignPage() {
+export default function EditGamePage() {
 	const params = useParams();
 	const router = useRouter();
-	const campaignId = params.id as string;
+	const gameId = params.id as string;
 
 	const [selectedGame, setSelectedGame] = useState("");
 	const [customGameName, setCustomGameName] = useState("");
@@ -40,66 +40,82 @@ export default function EditCampaignPage() {
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
 	
-	// Campaign-specific state
-	const [sessionsLeft, setSessionsLeft] = useState<number | ''>('');
-	const [classesNeeded, setClassesNeeded] = useState<string[]>([]);
+	// Payment-related state
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
-	const [meetingFrequency, setMeetingFrequency] = useState("");
-	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
 
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
+	const [hasConnectAccount, setHasConnectAccount] = useState(false);
+	const [isCheckingConnect, setIsCheckingConnect] = useState(false);
 
 	useEffect(() => {
-		const fetchCampaign = async () => {
+		const fetchGame = async () => {
 			try {
-				const response = await fetch(`/api/campaigns/${campaignId}`);
+				const response = await fetch(`/api/games/${gameId}`);
 				if (!response.ok) {
-					throw new Error("Failed to fetch campaign");
+					throw new Error("Failed to fetch game");
 				}
-				const campaign = await response.json();
+				const game = await response.json();
 
 				// Check if the user is the creator
 				const profileResponse = await fetch("/api/profile");
 				if (profileResponse.ok) {
 					const profileData = await profileResponse.json();
-					if (campaign.userId !== profileData.userId) {
-						router.push(`/campaigns/${campaignId}`);
+					if (game.userId !== profileData.userId) {
+						router.push(`/games/${gameId}`);
 						return;
 					}
 					// Set the canPostPaidGames flag
 					setCanPostPaidGames(profileData.canPostPaidGames || false);
 				}
 
-				// Populate form with existing campaign data
-				const isOtherGame = !GAME_OPTIONS.includes(campaign.game);
-				setSelectedGame(isOtherGame ? "Other" : campaign.game);
+				// Populate form with existing game data
+				const isOtherGame = !GAME_OPTIONS.includes(game.game);
+				setSelectedGame(isOtherGame ? "Other" : game.game);
 				if (isOtherGame) {
-					setCustomGameName(campaign.game);
+					setCustomGameName(game.game);
 				}
-				setSelectedTimes(campaign.times || []);
-				setSelectedDate(campaign.date || "");
-				setDescription(campaign.description || "");
-				setMaxPlayers(campaign.maxPlayers || 4);
-				setImageUrl(campaign.imageUrl || "");
-				setLocation(campaign.location || "");
-				setZipCode(campaign.zipCode || "");
-				setSessionsLeft(campaign.sessionsLeft || '');
-				setClassesNeeded(campaign.classesNeeded || []);
-				setCostPerSession(campaign.costPerSession || '');
-				setMeetingFrequency(campaign.meetingFrequency || "");
-				setDaysOfWeek(campaign.daysOfWeek || []);
+				setSelectedTimes(game.times || []);
+				setSelectedDate(game.date || "");
+				setDescription(game.description || "");
+				setMaxPlayers(game.maxPlayers || 4);
+				setImageUrl(game.imageUrl || "");
+				setLocation(game.location || "");
+				setZipCode(game.zipCode || "");
+				setCostPerSession(game.costPerSession || '');
 			} catch (err) {
 				setError(
-					err instanceof Error ? err.message : "Failed to load campaign"
+					err instanceof Error ? err.message : "Failed to load game"
 				);
 			} finally {
 				setIsLoading(false);
 			}
 		};
 
-		fetchCampaign();
-	}, [campaignId, router]);
+		fetchGame();
+	}, [gameId, router]);
+
+	// Check Stripe Connect status when user sets a cost
+	useEffect(() => {
+		const checkConnectStatus = async () => {
+			if (typeof costPerSession === 'number' && costPerSession > 0 && !isCheckingConnect) {
+				setIsCheckingConnect(true);
+				try {
+					const response = await fetch("/api/stripe/connect/status");
+					if (response.ok) {
+						const data = await response.json();
+						setHasConnectAccount(data.onboardingComplete || false);
+					}
+				} catch (error) {
+					console.error("Failed to check Connect status:", error);
+				} finally {
+					setIsCheckingConnect(false);
+				}
+			}
+		};
+
+		checkConnectStatus();
+	}, [costPerSession]);
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -154,7 +170,7 @@ export default function EditCampaignPage() {
 		try {
 			const formData = new FormData();
 			formData.append("file", file);
-			formData.append("type", "campaign");
+			formData.append("type", "game");
 
 			const response = await fetch("/api/upload", {
 				method: "POST",
@@ -189,38 +205,50 @@ export default function EditCampaignPage() {
 					? customGameName.trim()
 					: selectedGame;
 
-			const response = await fetch(`/api/campaigns/${campaignId}`, {
+			const requestBody: {
+				game: string;
+				date: string;
+				times: string[];
+				description: string;
+				maxPlayers: number;
+				imageUrl?: string;
+				location: string;
+				zipCode: string;
+				costPerSession?: number;
+			} = {
+				game: gameName,
+				date: selectedDate,
+				times: selectedTimes,
+				description: description,
+				maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
+				imageUrl: imageUrl || undefined,
+				location: location,
+				zipCode: zipCode,
+			};
+
+			// Add costPerSession if it's set and greater than 0
+			if (typeof costPerSession === 'number' && costPerSession >= 0) {
+				requestBody.costPerSession = costPerSession;
+			}
+
+			const response = await fetch(`/api/games/${gameId}`, {
 				method: "PUT",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({
-					game: gameName,
-					date: selectedDate,
-					times: selectedTimes,
-					description: description,
-					maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
-					imageUrl: imageUrl,
-					location: location,
-					zipCode: zipCode,
-					sessionsLeft: typeof sessionsLeft === 'number' ? sessionsLeft : (sessionsLeft ? parseInt(String(sessionsLeft)) : undefined),
-					classesNeeded: classesNeeded.length > 0 ? classesNeeded : undefined,
-					costPerSession: typeof costPerSession === 'number' ? costPerSession : (costPerSession ? parseFloat(String(costPerSession)) : undefined),
-					requiresPayment: (typeof costPerSession === 'number' && costPerSession > 0) || false,
-					meetingFrequency: meetingFrequency || undefined,
-					daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
-				}),
+				body: JSON.stringify(requestBody),
 			});
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to update campaign");
+				throw new Error(errorData.error || "Failed to update game");
 			}
 
-			router.push(`/campaigns/${campaignId}`);
+			// Redirect to game detail page
+			router.push(`/games/${gameId}`);
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to update campaign"
+				err instanceof Error ? err.message : "Failed to update game"
 			);
 		} finally {
 			setIsSubmitting(false);
@@ -229,26 +257,25 @@ export default function EditCampaignPage() {
 
 	if (isLoading) {
 		return (
-			<div className="flex min-h-screen items-center justify-center">
-				<p className="text-slate-400">Loading campaign...</p>
-			</div>
+			<section className="space-y-6">
+				<div>
+					<h1 className="text-2xl font-semibold text-slate-100">
+						Edit Game
+					</h1>
+					<p className="mt-2 text-sm text-slate-400">Loading...</p>
+				</div>
+			</section>
 		);
 	}
 
 	return (
 		<section className="space-y-6">
 			<div>
-				<Link
-					href={`/campaigns/${campaignId}`}
-					className="inline-block text-sm text-sky-400 hover:text-sky-300"
-				>
-					← Back to campaign
-				</Link>
-				<h1 className="mt-4 text-2xl font-semibold text-slate-100">
-					Edit Campaign
+				<h1 className="text-2xl font-semibold text-slate-100">
+					Edit Game
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Update your campaign details.
+					Update your game session details.
 				</p>
 			</div>
 
@@ -417,187 +444,91 @@ export default function EditCampaignPage() {
 						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
 					<p className="text-xs text-slate-500">
-						Maximum number of players that can join this campaign
+						Maximum number of players that can join this session
 					</p>
 				</div>
 
-			<div className="space-y-2">
-				<label
-					htmlFor="sessionsLeft"
-					className="block text-sm font-medium text-slate-200"
-				>
-					Number of Sessions
-				</label>
-				<input
-					id="sessionsLeft"
-					type="number"
-					min="1"
-					value={sessionsLeft}
-					onChange={(e) => {
-						const value = e.target.value;
-						setSessionsLeft(value === '' ? '' : parseInt(value));
-					}}
-					placeholder="e.g., 10"
-					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-				/>
-				<p className="text-xs text-slate-500">
-					How many sessions do you expect this campaign to run? Enter 1 for a single-session campaign, or a higher number for a multi-session campaign that requires a subscription.
-				</p>
-			</div>
-
-			<div className="space-y-2">
-				<label className="block text-sm font-medium text-slate-200">
-					Classes/Roles Needed
-				</label>
-				<p className="text-xs text-slate-400 mb-2">
-					Select the character classes or roles you&apos;re looking for
-				</p>
-				<div className="flex flex-wrap gap-2">
-					{ROLE_OPTIONS.map((role) => (
-						<button
-							key={role}
-							type="button"
-							onClick={() => {
-								setClassesNeeded((prev) =>
-									prev.includes(role)
-										? prev.filter((r) => r !== role)
-										: [...prev, role]
-								);
-							}}
-							className={tagButtonClasses(classesNeeded.includes(role))}
+				{canPostPaidGames && (
+					<div className="space-y-2">
+						<label
+							htmlFor="costPerSession"
+							className="block text-sm font-medium text-slate-200"
 						>
-							{role}
-						</button>
-					))}
-				</div>
-				<p className="text-xs text-slate-500">
-					{classesNeeded.length} class(es) selected
-				</p>
-			</div>
-
-			{canPostPaidGames && (
-				<div className="space-y-2">
-					<label
-						htmlFor="costPerSession"
-						className="block text-sm font-medium text-slate-200"
-					>
-						Cost per Session
-					</label>
-					<input
-						id="costPerSession"
-						type="number"
-						min="0"
-						step="0.01"
-						value={costPerSession}
-						onChange={(e) => {
-							const value = e.target.value;
-							setCostPerSession(value === '' ? '' : parseFloat(value));
-						}}
-						placeholder="e.g., 0 for free, 5.00 for paid"
-						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					/>
-					<p className="text-xs text-slate-500">
-						The cost per session in dollars (0 for free campaigns)
-					</p>
-				</div>
-			)}
-
-			{!canPostPaidGames && (
-				<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
-					<h3 className="text-sm font-medium text-amber-200 mb-2">
-						Want to charge for game sessions?
-					</h3>
-					<p className="text-xs text-slate-400 mb-3">
-						Enable paid games to charge players for sessions. The platform will keep 15% of fees.
-					</p>
-					<Link
-						href="/terms-paid-games"
-						className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
-					>
-						Enable Paid Games
-					</Link>
-				</div>
-			)}
-
-			{canPostPaidGames && costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
-				<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-					<h3 className="text-sm font-medium text-slate-200 mb-2">
-						Payment Method
-					</h3>
-					<p className="text-xs text-slate-500">
-						Players will be required to pay ${costPerSession} {typeof sessionsLeft === 'number' && sessionsLeft > 1 ? 'per session via subscription' : 'as a one-time payment'} using Stripe when they join this campaign.
-					</p>
-				</div>
-			)}
-
-			<div className="space-y-2">
-				<label
-					htmlFor="meetingFrequency"
-					className="block text-sm font-medium text-slate-200"
-				>
-					Meeting Frequency
-				</label>
-				<select
-					id="meetingFrequency"
-					value={meetingFrequency}
-					onChange={(e) => setMeetingFrequency(e.target.value)}
-					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-				>
-					<option value="">Select frequency...</option>
-					{MEETING_FREQUENCY_OPTIONS.map((freq) => (
-						<option key={freq} value={freq}>
-							{freq}
-						</option>
-					))}
-				</select>
-				<p className="text-xs text-slate-500">
-					How often does this campaign meet?
-				</p>
-			</div>
-
-			<div className="space-y-2">
-				<label className="block text-sm font-medium text-slate-200">
-					Days of the Week
-				</label>
-				<p className="text-xs text-slate-400 mb-2">
-					Select which days the campaign typically meets
-				</p>
-				<div className="flex flex-wrap gap-2">
-					{DAYS_OF_WEEK.map((day) => (
-						<button
-							key={day}
-							type="button"
-							onClick={() => {
-								setDaysOfWeek((prev) =>
-									prev.includes(day)
-										? prev.filter((d) => d !== day)
-										: [...prev, day]
-								);
+							Cost for Game
+						</label>
+						<input
+							id="costPerSession"
+							type="number"
+							min="0"
+							step="0.01"
+							value={costPerSession}
+							onChange={(e) => {
+								const value = e.target.value;
+								setCostPerSession(value === '' ? '' : parseFloat(value));
 							}}
-							className={tagButtonClasses(daysOfWeek.includes(day))}
+							placeholder="e.g., 0 for free, 5.00 for paid"
+							className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						<p className="text-xs text-slate-500">
+							The cost for this single-session game in dollars (0 for free games)
+						</p>
+					</div>
+				)}
+
+				{!canPostPaidGames && (
+					<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
+						<h3 className="text-sm font-medium text-amber-200 mb-2">
+							Want to charge for game sessions?
+						</h3>
+						<p className="text-xs text-slate-400 mb-3">
+							Enable paid games to charge players for sessions. The platform will keep 15% of fees.
+						</p>
+						<Link
+							href="/terms-paid-games"
+							className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
 						>
-							{day}
-						</button>
-					))}
-				</div>
-				<p className="text-xs text-slate-500">
-					{daysOfWeek.length} day(s) selected
-				</p>
-			</div>
+							Enable Paid Games
+						</Link>
+					</div>
+				)}
+
+				{canPostPaidGames && costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
+					<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+						<h3 className="text-sm font-medium text-slate-200 mb-2">
+							Payment Method
+						</h3>
+						<p className="text-xs text-slate-500">
+							Players will be required to pay ${costPerSession.toFixed(2)} for this single-session game using Stripe when they join.
+						</p>
+						{!hasConnectAccount && (
+							<div className="mt-3 rounded-lg border border-amber-700/50 bg-amber-900/20 p-3">
+								<p className="text-xs text-amber-200 mb-2">
+									⚠️ Complete Stripe onboarding to receive payments
+								</p>
+								<Link
+									href="/host/onboarding"
+									className="inline-block rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-700"
+								>
+									Complete Onboarding
+								</Link>
+							</div>
+						)}
+					</div>
+				)}
 
 				<div className="space-y-2">
 					<label
 						htmlFor="game-image"
 						className="block text-sm font-medium text-slate-200"
 					>
-						Campaign Image
+						Game Image
 					</label>
 					<div className="space-y-3">
 						{imageUrl && (
 							<div className="relative">
 								<img
 									src={imageUrl}
-									alt="Campaign"
+									alt="Game session"
 									className="h-66 w-auto rounded-lg border border-slate-800 object-cover"
 								/>
 								<button
@@ -645,12 +576,12 @@ export default function EditCampaignPage() {
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
 						rows={4}
-						placeholder="Describe your campaign, experience level requirements, or any additional details..."
+						placeholder="Describe your game session, experience level requirements, or any additional details..."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
 				</div>
 
-				<div className="flex gap-3">
+				<div className="flex gap-4">
 					<button
 						type="submit"
 						className="flex-1 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
@@ -665,8 +596,8 @@ export default function EditCampaignPage() {
 						{isSubmitting ? "Saving..." : "Save Changes"}
 					</button>
 					<Link
-						href={`/campaigns/${campaignId}`}
-						className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm font-medium text-slate-100 transition hover:bg-slate-700"
+						href={`/games/${gameId}`}
+						className="flex-shrink-0 rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900"
 					>
 						Cancel
 					</Link>

@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { StoredGameSession } from "@/lib/games/types";
-import EditGameModal from "./EditGameModal";
 
 interface GameActionsProps {
   session: StoredGameSession;
 }
 
 export default function GameActions({ session }: GameActionsProps) {
-  const [showEditModal, setShowEditModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
@@ -45,38 +44,22 @@ export default function GameActions({ session }: GameActionsProps) {
     }
   };
 
-  const handleEditSuccess = () => {
-    setShowEditModal(false);
-    router.refresh();
-  };
-
   return (
-    <>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setShowEditModal(true)}
-          className="rounded-md border border-indigo-500/70 px-4 py-2 text-sm font-medium text-indigo-200 transition hover:bg-indigo-500/10"
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="rounded-md border border-rose-600/70 px-4 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-600/10 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isDeleting ? "Deleting..." : "Delete"}
-        </button>
-      </div>
-
-      {showEditModal && (
-        <EditGameModal
-          session={session}
-          onClose={() => setShowEditModal(false)}
-          onSuccess={handleEditSuccess}
-        />
-      )}
-    </>
+    <div className="flex flex-wrap gap-2">
+      <Link
+        href={`/games/${session.id}/edit`}
+        className="rounded-md border border-indigo-500/70 px-4 py-2 text-sm font-medium text-indigo-200 transition hover:bg-indigo-500/10"
+      >
+        Edit
+      </Link>
+      <button
+        type="button"
+        onClick={handleDelete}
+        disabled={isDeleting}
+        className="rounded-md border border-rose-600/70 px-4 py-2 text-sm font-medium text-rose-200 transition hover:bg-rose-600/10 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isDeleting ? "Deleting..." : "Delete"}
+      </button>
+    </div>
   );
 }

@@ -10,6 +10,7 @@ import GameActions from "@/components/GameActions";
 import { getCharactersPublicStatus } from "@/lib/characters/db";
 import ShareToFacebook from "@/components/ShareToFacebook";
 import GameDetailActions from "@/components/GameDetailActions";
+import { isPaidGame } from "@/lib/game-utils";
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -33,7 +34,9 @@ export async function generateMetadata({
 		? `${session.description.substring(0, 150)}${session.description.length > 150 ? "..." : ""}`
 		: `Join us for ${session.game}. ${session.maxPlayers - session.signedUpPlayers.length} spots available!`;
 	
-	const description = `${baseDescription} | Date: ${formattedDate}`;
+	// Format times for display
+	const timesStr = session.times.length > 0 ? ` | Times: ${session.times.join(", ")}` : "";
+	const description = `${baseDescription} | Date: ${formattedDate}${timesStr}`;
 
 	const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
 
@@ -208,6 +211,38 @@ export default async function GameDetailPage({
 					/>
 				</div>
 
+				{/* Payment Section for non-hosts */}
+				{!isHost && currentUserId && isPaidGame(session) && (
+					<div className="mt-4">
+						{session.signedUpPlayers.includes(currentUserId) ? (
+							<div className="rounded-xl border border-sky-600/40 bg-sky-900/20 px-4 py-3">
+								<div className="flex items-center justify-between gap-4">
+									<div>
+										<p className="text-sm font-medium text-sky-200">Payment Required</p>
+										<p className="text-xs text-slate-400 mt-1">
+											Complete payment to confirm your spot (${session.costPerSession?.toFixed(2)})
+										</p>
+									</div>
+									<Link
+										href={`/games/${id}/payment`}
+										className="inline-flex items-center gap-2 rounded-lg border border-sky-500/40 bg-sky-500/20 px-4 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-500 hover:bg-sky-500/30"
+									>
+										Proceed to payment
+									</Link>
+								</div>
+							</div>
+						) : session.pendingPlayers.includes(currentUserId) ? (
+							<div className="rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-sm text-orange-200">
+								Your request to join this game is pending approval from the host. You&apos;ll be able to proceed with payment once you&apos;ve been approved.
+							</div>
+						) : session.waitlist.includes(currentUserId) ? (
+							<div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
+								You&apos;re currently on the waitlist for this game. You&apos;ll be able to proceed with payment once a spot becomes available.
+							</div>
+						) : null}
+					</div>
+				)}
+
 				<div className="flex flex-wrap items-center gap-4 text-sm">
 					<div className="rounded-lg border border-slate-800 bg-slate-900/70 px-4 py-2">
 						<span className="block text-xs uppercase tracking-wide text-slate-400">
@@ -237,6 +272,17 @@ export default async function GameDetailPage({
 							{session.signedUpPlayers.length}/{session.maxPlayers}
 						</span>
 					</div>
+
+					{session.costPerSession !== undefined && session.costPerSession > 0 && (
+						<div className="rounded-lg border border-sky-600/40 bg-sky-900/20 px-4 py-2">
+							<span className="block text-xs uppercase tracking-wide text-sky-400">
+								Cost
+							</span>
+							<span className="text-base font-medium text-sky-100">
+								${session.costPerSession.toFixed(2)}
+							</span>
+						</div>
+					)}
 				</div>
 			</header>
 
