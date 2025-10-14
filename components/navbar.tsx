@@ -166,7 +166,7 @@ export function Navbar() {
 				<div className="flex items-center gap-3">
 					{/* Mobile avatar - shown only on mobile when authenticated */}
 					{!authLoading && isAuthenticated && (
-						<div className="md:hidden">
+						<Link href="/profile" className="md:hidden">
 							{userAvatarUrl ? (
 								<img
 									src={userAvatarUrl}
@@ -180,7 +180,7 @@ export function Navbar() {
 										: "U"}
 								</div>
 							)}
-						</div>
+						</Link>
 					)}
 					<button
 						type="button"
@@ -369,19 +369,21 @@ export function Navbar() {
 										</div>
 									) : null}
 								</div>
-								{userAvatarUrl ? (
-									<img
-										src={userAvatarUrl}
-										alt={userCommonName || "User avatar"}
-										className="h-12 w-12 rounded-full border border-white/20 object-cover"
-									/>
-								) : (
-									<div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-xs font-semibold text-slate-300">
-										{userCommonName
-											? userCommonName.charAt(0).toUpperCase()
-											: "U"}
-									</div>
-								)}
+								<Link href="/profile">
+									{userAvatarUrl ? (
+										<img
+											src={userAvatarUrl}
+											alt={userCommonName || "User avatar"}
+											className="h-12 w-12 rounded-full border border-white/20 object-cover"
+										/>
+									) : (
+										<div className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-slate-800 text-sm font-semibold text-slate-300">
+											{userCommonName
+												? userCommonName.charAt(0).toUpperCase()
+												: "U"}
+										</div>
+									)}
+								</Link>
 							</>
 						) : (
 							<Link
