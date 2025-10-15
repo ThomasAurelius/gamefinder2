@@ -63,7 +63,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" className="bg-slate-950">
-			<body className="min-h-screen bg-slate-950 text-slate-100">
+			<body className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
 				<StructuredData />
 				<Navbar />
 				<main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
