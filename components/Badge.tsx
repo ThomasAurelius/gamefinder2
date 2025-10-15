@@ -11,9 +11,9 @@ interface BadgeProps {
 
 export default function Badge({ name, imageUrl, size = "md", showTooltip = true }: BadgeProps) {
   const sizeClasses = {
-    sm: "h-5 w-5",
-    md: "h-6 w-6",
-    lg: "h-8 w-8",
+    sm: "h-6 w-6",
+    md: "h-7 w-7",
+    lg: "h-10 w-10",
   };
 
   return (
@@ -29,7 +29,7 @@ export default function Badge({ name, imageUrl, size = "md", showTooltip = true 
           alt={name}
           fill
           className="object-cover"
-          sizes="32px"
+          sizes="40px"
         />
       </div>
     </div>
