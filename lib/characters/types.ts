@@ -13,6 +13,9 @@ export type SkillField = {
 export type CharacterDetails = {
   name: string;
   campaign: string;
+  alignment?: string;
+  race?: string;
+  background?: string;
   level?: string;
   class?: string;
   role?: string;
