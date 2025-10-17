@@ -23,7 +23,7 @@ export async function GET(
       );
     }
 
-    // Verify that the user is the campaign creator
+    // Verify that the campaign exists
     const campaign = await getCampaign(id);
     if (!campaign) {
       return NextResponse.json(
@@ -32,11 +32,10 @@ export async function GET(
       );
     }
 
+    // Only the campaign creator can view notes
+    // Return empty array for non-creators instead of 403 error
     if (campaign.userId !== userId) {
-      return NextResponse.json(
-        { error: "Only the campaign creator can view notes" },
-        { status: 403 }
-      );
+      return NextResponse.json([]);
     }
 
     const notes = await getCampaignNotes(id);
@@ -98,8 +97,11 @@ export async function POST(
       content: content.trim(),
     };
 
-    const note = await createCampaignNote(payload);
-    return NextResponse.json(note, { status: 201 });
+    await createCampaignNote(payload);
+    
+    // Return all notes after creating a new one
+    const notes = await getCampaignNotes(id);
+    return NextResponse.json(notes, { status: 201 });
   } catch (error) {
     console.error("Error creating campaign note:", error);
     return NextResponse.json(
