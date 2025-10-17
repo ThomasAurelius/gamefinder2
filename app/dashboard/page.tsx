@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import HostFeedbackDialog from "@/components/HostFeedbackDialog";
+import HostFeedbackSection from "@/components/HostFeedbackSection";
+import PlayerFeedbackSection from "@/components/PlayerFeedbackSection";
 
 type GameSession = {
   id: string;
@@ -320,6 +322,14 @@ export default function DashboardPage() {
           Post Tall Tale
         </Link>
       </div>
+
+      {/* My Ratings */}
+      {currentUserId && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <HostFeedbackSection hostId={currentUserId} />
+          <PlayerFeedbackSection playerId={currentUserId} />
+        </div>
+      )}
 
       <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
         <h2 className="text-lg font-semibold text-slate-100">My Upcoming Sessions</h2>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import SessionCard from "@/components/SessionCard";
 import { DEFAULT_TIMEZONE } from "@/lib/timezone";
 import HostFeedbackSection from "@/components/HostFeedbackSection";
+import PlayerFeedbackSection from "@/components/PlayerFeedbackSection";
 
 type ConnectStatus = {
 	hasAccount: boolean;
@@ -381,6 +382,9 @@ export default function HostDashboardPage() {
 
 				{/* Host Feedback */}
 				{userId && <HostFeedbackSection hostId={userId} />}
+
+				{/* Player Feedback */}
+				{userId && <PlayerFeedbackSection playerId={userId} />}
 
 				{/* Upcoming Sessions */}
 				<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
