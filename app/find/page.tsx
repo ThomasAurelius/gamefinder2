@@ -558,14 +558,24 @@ export default function FindGamesPage() {
 					gameSystem={mapGameToSystemKey(sessionToJoin.game)}
 				/>
 			)}
-			<div>
-				<h1 className="text-2xl font-semibold text-slate-100">
-					Find Games
-				</h1>
-				<p className="mt-2 text-sm text-slate-400">
-					Search for available game sessions by game, date, time, or any
-					combination.
-				</p>
+			<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
+				<div>
+					<h1 className="text-2xl font-semibold text-slate-100">
+						Find Games
+					</h1>
+					<p className="mt-2 text-sm text-slate-400">
+						Search for available game sessions by game, date, time, or any
+						combination.
+					</p>
+				</div>
+				<div className="flex gap-2 flex-shrink-0">
+					<Link
+						href="/post"
+						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+					>
+						Post Game
+					</Link>
+				</div>
 			</div>
 
 			<Advertisement />
