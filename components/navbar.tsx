@@ -50,6 +50,7 @@ const accountLinks: NavLink[] = [
 	{ href: "/messages", label: "Messages" },
 	{ href: "/settings", label: "Settings" },
 	{ href: "/characters", label: "Characters" },
+	{ href: "/settings/games-history", label: "Sessions History" },
 	{ href: "/auth/login", label: "Logout" },
 ];
 
