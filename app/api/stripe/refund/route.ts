@@ -251,14 +251,12 @@ export async function POST(request: Request) {
 			
 			if (latestChargeId) {
 				try {
-					const chargeId = latestChargeId;
-					
 					// Retrieve the charge to check if it used Stripe Connect
-					const charge = await stripe.charges.retrieve(chargeId);
+					const charge = await stripe.charges.retrieve(latestChargeId);
 					
 					// Build refund options
 					const refundOptions: Stripe.RefundCreateParams = {
-						charge: chargeId,
+						charge: latestChargeId,
 						reason: "requested_by_customer",
 						metadata: {
 							campaignId,
