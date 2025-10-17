@@ -803,7 +803,7 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
 
           {activeTab === "notes" && (
             <div className="space-y-4">
-              {(isCreator || isParticipant) && (
+              {isCreator && (
                 <form onSubmit={handleAddNote} className="space-y-3">
                   <textarea
                     value={newNoteContent}

@@ -108,7 +108,10 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({ success: true });
+    // Return all notes after deleting one
+    const { getCampaignNotes } = await import("@/lib/campaigns/notes");
+    const notes = await getCampaignNotes(id);
+    return NextResponse.json(notes);
   } catch (error) {
     console.error("Error deleting campaign note:", error);
     return NextResponse.json(
