@@ -569,6 +569,21 @@ export default function SettingsPage() {
 
 					<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
 						<h2 className="text-sm font-medium text-slate-200">
+							Games History
+						</h2>
+						<p className="mt-2 text-xs text-slate-400">
+							View your past game sessions and campaigns. Rate hosts and players.
+						</p>
+						<Link
+							href="/settings/games-history"
+							className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+						>
+							View Games History
+						</Link>
+					</div>
+
+					<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
+						<h2 className="text-sm font-medium text-slate-200">
 							Subscriptions
 						</h2>
 						<p className="mt-2 text-xs text-slate-400">
