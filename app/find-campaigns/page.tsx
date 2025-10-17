@@ -546,14 +546,30 @@ export default function FindCampaignsPage() {
 					gameSystem={mapGameToSystemKey(campaignToJoin.game)}
 				/>
 			)}
-			<div>
-				<h1 className="text-2xl font-semibold text-slate-100">
-					Find Campaigns
-				</h1>
-				<p className="mt-2 text-sm text-slate-400">
-					Search for available campaigns by game, date, time, or any
-					combination.
-				</p>
+			<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
+				<div>
+					<h1 className="text-2xl font-semibold text-slate-100">
+						Find Campaigns
+					</h1>
+					<p className="mt-2 text-sm text-slate-400">
+						Search for available campaigns by game, date, time, or any
+						combination.
+					</p>
+				</div>
+				<div className="flex gap-2 flex-shrink-0">
+					<Link
+						href="/my-campaigns"
+						className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+					>
+						My Campaigns
+					</Link>
+					<Link
+						href="/post-campaign"
+						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+					>
+						Post Campaign
+					</Link>
+				</div>
 			</div>
 
 			<Advertisement />
