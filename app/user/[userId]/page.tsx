@@ -4,6 +4,7 @@ import { readProfile } from "@/lib/profile-db";
 import { getDisplayedUserBadges } from "@/lib/badges/db";
 import Badge from "@/components/Badge";
 import HostRatingDisplay from "@/components/HostRatingDisplay";
+import PlayerRatingDisplay from "@/components/PlayerRatingDisplay";
 
 export default async function UserProfilePage({
   params,
@@ -57,8 +58,15 @@ export default async function UserProfilePage({
             {profile.location && (
               <p className="mt-1 text-sm text-slate-400">{profile.location}</p>
             )}
-            <div className="mt-2">
-              <HostRatingDisplay hostId={userId} showDetails={true} />
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <span>Host Rating:</span>
+                <HostRatingDisplay hostId={userId} showDetails={true} />
+              </div>
+              <div className="flex items-center gap-1 text-xs text-slate-500">
+                <span>Player Rating:</span>
+                <PlayerRatingDisplay playerId={userId} showDetails={true} />
+              </div>
             </div>
           </div>
         </div>

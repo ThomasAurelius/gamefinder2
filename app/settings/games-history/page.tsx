@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import HostFeedbackDialog from "@/components/HostFeedbackDialog";
-import HostFeedbackSection from "@/components/HostFeedbackSection";
-import PlayerFeedbackSection from "@/components/PlayerFeedbackSection";
+import PlayerFeedbackDialog from "@/components/PlayerFeedbackDialog";
 
 type GameSession = {
   id: string;
@@ -34,6 +33,12 @@ type GameSession = {
   isCampaign?: boolean;
 };
 
+type PlayerInfo = {
+  id: string;
+  name: string;
+  commonName?: string;
+};
+
 function GameSessionCard({
   session,
   userTimezone,
@@ -49,8 +54,12 @@ function GameSessionCard({
   const isPlayer = currentUserId && session.signedUpPlayers.includes(currentUserId);
   const isWaitlisted = currentUserId && session.waitlist.includes(currentUserId);
   const isCampaign = session.isCampaign || false;
-  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false);
-  const [hasRated, setHasRated] = useState(false);
+  const [showHostFeedbackDialog, setShowHostFeedbackDialog] = useState(false);
+  const [showPlayerFeedbackDialog, setShowPlayerFeedbackDialog] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerInfo | null>(null);
+  const [playersList, setPlayersList] = useState<PlayerInfo[]>([]);
+  const [loadingPlayers, setLoadingPlayers] = useState(false);
+  const [hasRatedHost, setHasRatedHost] = useState(false);
 
   // Check if session is in the past
   const sessionDate = new Date(session.date);
@@ -67,23 +76,41 @@ function GameSessionCard({
 
   const detailsLink = isCampaign ? `/campaigns/${session.id}` : `/games/${session.id}`;
 
-  // Check if user has already rated the host
-  useEffect(() => {
-    if (isPast && isPlayer && currentUserId && session.userId) {
-      const checkIfRated = async () => {
+  // Load players info when needed for rating
+  const loadPlayersInfo = async () => {
+    if (loadingPlayers || playersList.length > 0) return;
+
+    setLoadingPlayers(true);
+    try {
+      const players: PlayerInfo[] = [];
+      for (const playerId of session.signedUpPlayers) {
+        if (playerId === currentUserId) continue; // Skip self
         try {
-          const response = await fetch(`/api/host-feedback/stats/${session.userId}`);
+          const response = await fetch(`/api/public/users/${playerId}`);
           if (response.ok) {
-            // For now, we don't have an API to check if specific player rated
-            // This would need to be enhanced if we want to prevent duplicate ratings
+            const userData = await response.json();
+            players.push({
+              id: playerId,
+              name: userData.name || "Unknown",
+              commonName: userData.commonName,
+            });
           }
         } catch (error) {
-          console.error("Failed to check rating status", error);
+          console.error("Failed to fetch player info:", error);
         }
-      };
-      checkIfRated();
+      }
+      setPlayersList(players);
+    } catch (error) {
+      console.error("Failed to load players:", error);
+    } finally {
+      setLoadingPlayers(false);
     }
-  }, [isPast, isPlayer, currentUserId, session.userId]);
+  };
+
+  const handleRatePlayer = (player: PlayerInfo) => {
+    setSelectedPlayer(player);
+    setShowPlayerFeedbackDialog(true);
+  };
 
   return (
     <>
@@ -201,43 +228,92 @@ function GameSessionCard({
             </Link>
             {isPast && isPlayer && !isHost && (
               <button
-                onClick={() => setShowFeedbackDialog(true)}
+                onClick={() => setShowHostFeedbackDialog(true)}
                 className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
               >
-                {hasRated ? "Update Rating" : "Rate Host"}
+                {hasRatedHost ? "Update Host Rating" : "Rate Host"}
+              </button>
+            )}
+            {isPast && isHost && session.signedUpPlayers.length > 0 && (
+              <button
+                onClick={loadPlayersInfo}
+                className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-700"
+              >
+                {loadingPlayers ? "Loading..." : "Rate Players"}
               </button>
             )}
           </div>
+
+          {/* Show players list for rating when expanded */}
+          {isPast && isHost && playersList.length > 0 && (
+            <div className="mt-3 rounded-lg border border-slate-700 bg-slate-800/30 p-3">
+              <p className="text-sm font-medium text-slate-300 mb-2">Rate Players:</p>
+              <div className="space-y-2">
+                {playersList.map((player) => (
+                  <div key={player.id} className="flex items-center justify-between">
+                    <Link
+                      href={`/user/${player.id}`}
+                      className="text-sm text-slate-300 hover:text-sky-300 transition-colors"
+                    >
+                      {player.commonName || player.name}
+                    </Link>
+                    <button
+                      onClick={() => handleRatePlayer(player)}
+                      className="rounded bg-sky-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-sky-700"
+                    >
+                      Rate
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-    {showFeedbackDialog && session.hostName && (
-      <HostFeedbackDialog
-        hostId={session.userId}
-        hostName={session.hostName}
-        sessionId={session.id}
-        sessionType={isCampaign ? "campaign" : "game"}
-        isOpen={showFeedbackDialog}
-        onClose={() => setShowFeedbackDialog(false)}
-        onSubmit={() => {
-          setHasRated(true);
-          setShowFeedbackDialog(false);
-        }}
-      />
-    )}
+      {showHostFeedbackDialog && session.hostName && (
+        <HostFeedbackDialog
+          hostId={session.userId}
+          hostName={session.hostName}
+          sessionId={session.id}
+          sessionType={isCampaign ? "campaign" : "game"}
+          isOpen={showHostFeedbackDialog}
+          onClose={() => setShowHostFeedbackDialog(false)}
+          onSubmit={() => {
+            setHasRatedHost(true);
+            setShowHostFeedbackDialog(false);
+          }}
+        />
+      )}
+
+      {showPlayerFeedbackDialog && selectedPlayer && (
+        <PlayerFeedbackDialog
+          playerId={selectedPlayer.id}
+          playerName={selectedPlayer.commonName || selectedPlayer.name}
+          sessionId={session.id}
+          sessionType={isCampaign ? "campaign" : "game"}
+          isOpen={showPlayerFeedbackDialog}
+          onClose={() => {
+            setShowPlayerFeedbackDialog(false);
+            setSelectedPlayer(null);
+          }}
+          onSubmit={() => {
+            setShowPlayerFeedbackDialog(false);
+            setSelectedPlayer(null);
+          }}
+        />
+      )}
     </>
   );
 }
 
-export default function DashboardPage() {
+export default function GamesHistoryPage() {
   const [gameSessions, setGameSessions] = useState<GameSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  const [showPastSessions, setShowPastSessions] = useState(false);
 
   const today = new Date();
-  const upcomingSessions = gameSessions.filter(session => new Date(session.date) >= today);
   const pastSessions = gameSessions.filter(session => new Date(session.date) < today);
 
   useEffect(() => {
@@ -262,7 +338,6 @@ export default function DashboardPage() {
         let gameSessions: GameSession[] = [];
         if (gamesResponse.ok) {
           gameSessions = await gamesResponse.json();
-          // Mark these as one-time games (not campaigns)
           gameSessions = gameSessions.map(session => ({ ...session, isCampaign: false }));
         }
 
@@ -271,19 +346,18 @@ export default function DashboardPage() {
         let campaignSessions: GameSession[] = [];
         if (campaignsResponse.ok) {
           campaignSessions = await campaignsResponse.json();
-          // Mark these as campaigns
           campaignSessions = campaignSessions.map(session => ({ ...session, isCampaign: true }));
         }
 
         // Combine both game sessions and campaign sessions
         const allSessions = [...gameSessions, ...campaignSessions];
         
-        // Sort by date (earliest first)
-        allSessions.sort((a, b) => a.date.localeCompare(b.date));
+        // Sort by date (most recent first)
+        allSessions.sort((a, b) => b.date.localeCompare(a.date));
         
         setGameSessions(allSessions);
       } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
+        console.error("Failed to fetch games history data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -295,53 +369,23 @@ export default function DashboardPage() {
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-100">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-slate-100">Games History</h1>
         <p className="mt-2 text-sm text-slate-400">
-          View your upcoming sessions - one-time games and campaigns you&apos;re hosting, playing, or waitlisted for.
+          View your past game sessions and campaigns. Rate hosts and players to help build the community.
         </p>
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href="/post"
-          className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-sky-600 hover:bg-slate-800 hover:text-sky-300"
-        >
-          Post Game
-        </Link>
-        <Link
-          href="/post-campaign"
-          className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-sky-600 hover:bg-slate-800 hover:text-sky-300"
-        >
-          Post Campaign
-        </Link>
-        <Link
-          href="/tall-tales"
-          className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/40 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:border-sky-600 hover:bg-slate-800 hover:text-sky-300"
-        >
-          Post Tall Tale
-        </Link>
-      </div>
-
-      {/* My Ratings */}
-      {currentUserId && (
-        <div className="grid gap-6 md:grid-cols-2">
-          <HostFeedbackSection hostId={currentUserId} />
-          <PlayerFeedbackSection playerId={currentUserId} />
-        </div>
-      )}
-
       <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-        <h2 className="text-lg font-semibold text-slate-100">My Upcoming Sessions</h2>
+        <h2 className="text-lg font-semibold text-slate-100">Past Sessions</h2>
         <p className="mt-2 text-sm text-slate-400">
-          Your one-time games and multi-session campaigns
+          Sessions you&apos;ve hosted or played in that have already occurred
         </p>
 
         {isLoading ? (
-          <p className="mt-4 text-sm text-slate-500">Loading your sessions...</p>
-        ) : upcomingSessions.length > 0 ? (
+          <p className="mt-4 text-sm text-slate-500">Loading your history...</p>
+        ) : pastSessions.length > 0 ? (
           <div className="mt-4 space-y-3 max-w-3xl">
-            {upcomingSessions.map((session) => (
+            {pastSessions.map((session) => (
               <GameSessionCard
                 key={session.id}
                 session={session}
@@ -353,7 +397,7 @@ export default function DashboardPage() {
         ) : (
           <div className="mt-4 space-y-3">
             <p className="text-sm text-slate-500">
-              You don&apos;t have any upcoming sessions yet.
+              You don&apos;t have any past sessions yet.
             </p>
             <Link
               href="/find"
@@ -364,38 +408,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-
-      {!isLoading && pastSessions.length > 0 && (
-        <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-100">Past Sessions</h2>
-              <p className="mt-2 text-sm text-slate-400">
-                Rate your hosts and review past games
-              </p>
-            </div>
-            <button
-              onClick={() => setShowPastSessions(!showPastSessions)}
-              className="text-sm text-sky-400 hover:text-sky-300 transition-colors"
-            >
-              {showPastSessions ? "Hide" : "Show"} ({pastSessions.length})
-            </button>
-          </div>
-
-          {showPastSessions && (
-            <div className="mt-4 space-y-3 max-w-3xl">
-              {pastSessions.map((session) => (
-                <GameSessionCard
-                  key={session.id}
-                  session={session}
-                  userTimezone={userTimezone}
-                  currentUserId={currentUserId}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
     </section>
   );
 }
