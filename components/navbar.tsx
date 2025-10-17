@@ -26,7 +26,7 @@ const primaryLinks: NavItem[] = [
 	{ href: "/library", label: "Library" },
 	{ href: "/players", label: "Players" },
 	{ href: "/marketplace", label: "Marketplace" },
-	{ href: "/find", label: "Find Games" },
+	{ href: "/find", label: "Games" },
 	{ href: "/find-campaigns", label: "Campaigns" },
 ];
 
@@ -58,7 +58,7 @@ function NotificationBadge({ count }: { count?: number }) {
  * This delay ensures that Next.js Link component has time to initiate navigation before
  * the menu DOM element is removed. Without this delay, navigation can fail, especially
  * after the app has been running for an extended period.
- * 
+ *
  * @constant {number}
  */
 const NAVIGATION_DELAY_MS = 100;
@@ -390,7 +390,10 @@ export function Navbar() {
 												href={link.href}
 												onClick={() => {
 													// Delay closing menu to ensure navigation completes
-													setTimeout(closeMenu, NAVIGATION_DELAY_MS);
+													setTimeout(
+														closeMenu,
+														NAVIGATION_DELAY_MS
+													);
 												}}
 												className={`flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 													isActive(pathname, link.href)
