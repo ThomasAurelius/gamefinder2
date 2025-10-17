@@ -408,6 +408,12 @@ export default function CharactersPage() {
       role: record.role,
       gold: record.gold,
       experience: record.experience,
+      age: record.age,
+      height: record.height,
+      weight: record.weight,
+      eyes: record.eyes,
+      skin: record.skin,
+      hair: record.hair,
       items: record.items ? [...record.items] : [],
       stats: cloneFieldArray(record.stats),
       skills: cloneFieldArray(record.skills),
@@ -508,6 +514,12 @@ export default function CharactersPage() {
           role: savedCharacter.role,
           gold: savedCharacter.gold,
           experience: savedCharacter.experience,
+          age: savedCharacter.age,
+          height: savedCharacter.height,
+          weight: savedCharacter.weight,
+          eyes: savedCharacter.eyes,
+          skin: savedCharacter.skin,
+          hair: savedCharacter.hair,
           items: savedCharacter.items ? [...savedCharacter.items] : [],
           stats: cloneFieldArray(savedCharacter.stats),
           skills: cloneFieldArray(savedCharacter.skills),
@@ -672,6 +684,76 @@ export default function CharactersPage() {
                       Last updated: {new Date(item.updatedAt).toLocaleString()}
                     </span>
                   </div>
+
+                  {(item.age || item.height || item.weight || item.eyes || item.skin || item.hair) && (
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Physical Appearance
+                      </h3>
+                      <div className="grid gap-2 sm:grid-cols-3">
+                        {item.age && (
+                          <div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Age
+                            </div>
+                            <div className="text-sm text-slate-100">
+                              {item.age}
+                            </div>
+                          </div>
+                        )}
+                        {item.height && (
+                          <div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Height
+                            </div>
+                            <div className="text-sm text-slate-100">
+                              {item.height}
+                            </div>
+                          </div>
+                        )}
+                        {item.weight && (
+                          <div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Weight
+                            </div>
+                            <div className="text-sm text-slate-100">
+                              {item.weight}
+                            </div>
+                          </div>
+                        )}
+                        {item.eyes && (
+                          <div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Eyes
+                            </div>
+                            <div className="text-sm text-slate-100">
+                              {item.eyes}
+                            </div>
+                          </div>
+                        )}
+                        {item.skin && (
+                          <div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Skin
+                            </div>
+                            <div className="text-sm text-slate-100">
+                              {item.skin}
+                            </div>
+                          </div>
+                        )}
+                        {item.hair && (
+                          <div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Hair
+                            </div>
+                            <div className="text-sm text-slate-100">
+                              {item.hair}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-2">
@@ -947,6 +1029,116 @@ export default function CharactersPage() {
                     className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
                   />
                 </label>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-100">
+                  Physical Appearance
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <label className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-200">
+                      Age
+                    </span>
+                    <input
+                      type="text"
+                      value={character.age || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          age: event.target.value,
+                        }))
+                      }
+                      placeholder="25"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-200">
+                      Height
+                    </span>
+                    <input
+                      type="text"
+                      value={character.height || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          height: event.target.value,
+                        }))
+                      }
+                      placeholder="5'10&quot;"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-200">
+                      Weight
+                    </span>
+                    <input
+                      type="text"
+                      value={character.weight || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          weight: event.target.value,
+                        }))
+                      }
+                      placeholder="180 lbs"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-200">
+                      Eyes
+                    </span>
+                    <input
+                      type="text"
+                      value={character.eyes || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          eyes: event.target.value,
+                        }))
+                      }
+                      placeholder="Blue"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-200">
+                      Skin
+                    </span>
+                    <input
+                      type="text"
+                      value={character.skin || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          skin: event.target.value,
+                        }))
+                      }
+                      placeholder="Fair"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  </label>
+                  <label className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-slate-200">
+                      Hair
+                    </span>
+                    <input
+                      type="text"
+                      value={character.hair || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          hair: event.target.value,
+                        }))
+                      }
+                      placeholder="Black"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  </label>
+                </div>
               </div>
 
               <label className="flex flex-col gap-2">
