@@ -55,7 +55,7 @@ export async function GET(
         id: user._id.toString(),
         name: user.name || "Unknown",
         commonName: user.profile?.commonName || user.name || "Unknown",
-        avatarUrl: user.profile?.avatarUrl || undefined,
+        avatarUrl: user.profile?.avatarUrl,
       },
       { status: 200 }
     );
