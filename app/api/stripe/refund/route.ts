@@ -244,23 +244,19 @@ export async function POST(request: Request) {
 		// Refund all successful payments for this campaign
 		const refunds = [];
 		for (const payment of campaignPayments) {
-			// Cast to access charges property that exists but isn't in types
-			const paymentWithCharges = payment as Stripe.PaymentIntent & {
-				charges?: {
-					data?: Array<{ id: string }>;
-				};
-			};
+			// Get the charge ID from latest_charge field
+			const latestChargeId = typeof payment.latest_charge === "string" 
+				? payment.latest_charge 
+				: payment.latest_charge?.id;
 			
-			if (paymentWithCharges.charges?.data?.[0]?.id) {
+			if (latestChargeId) {
 				try {
-					const chargeId = paymentWithCharges.charges.data[0].id;
-					
 					// Retrieve the charge to check if it used Stripe Connect
-					const charge = await stripe.charges.retrieve(chargeId);
+					const charge = await stripe.charges.retrieve(latestChargeId);
 					
 					// Build refund options
 					const refundOptions: Stripe.RefundCreateParams = {
-						charge: chargeId,
+						charge: latestChargeId,
 						reason: "requested_by_customer",
 						metadata: {
 							campaignId,
