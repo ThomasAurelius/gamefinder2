@@ -37,7 +37,6 @@ export async function GET(
         projection: { 
           _id: 1, 
           name: 1, 
-          email: 1, 
           "profile.avatarUrl": 1,
           "profile.commonName": 1
         } 
@@ -54,8 +53,8 @@ export async function GET(
     return NextResponse.json(
       {
         id: user._id.toString(),
-        name: user.name || user.email?.split("@")[0] || "Unknown",
-        commonName: user.profile?.commonName || user.name || user.email?.split("@")[0] || "Unknown",
+        name: user.name || "Unknown",
+        commonName: user.profile?.commonName || user.name || "Unknown",
         avatarUrl: user.profile?.avatarUrl || undefined,
       },
       { status: 200 }
