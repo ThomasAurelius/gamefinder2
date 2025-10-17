@@ -136,17 +136,31 @@ function GameSessionCard({
               }),
             ]);
 
-            const playerInfo: PlayerInfo | null = userResponse.ok
-              ? await userResponse.json().then(userData => ({
+            // Parse player info
+            let playerInfo: PlayerInfo | null = null;
+            if (userResponse.ok) {
+              try {
+                const userData = await userResponse.json();
+                playerInfo = {
                   id: playerId,
                   name: userData.name || "Unknown",
                   commonName: userData.commonName,
-                }))
-              : null;
+                };
+              } catch (error) {
+                console.error(`Failed to parse user data for player ${playerId}:`, error);
+              }
+            }
 
-            const hasRated = ratingCheckResponse.ok
-              ? await ratingCheckResponse.json().then(data => data.hasRated)
-              : false;
+            // Parse rating status
+            let hasRated = false;
+            if (ratingCheckResponse.ok) {
+              try {
+                const ratingData = await ratingCheckResponse.json();
+                hasRated = ratingData.hasRated;
+              } catch (error) {
+                console.error(`Failed to parse rating data for player ${playerId}:`, error);
+              }
+            }
 
             return { playerInfo, hasRated, playerId };
           } catch (error) {
@@ -155,14 +169,14 @@ function GameSessionCard({
           }
         });
 
-      const results = await Promise.all(playerPromises);
+      const results = await Promise.allSettled(playerPromises);
       
       // Process results
       results.forEach(result => {
-        if (result?.playerInfo) {
-          players.push(result.playerInfo);
-          if (result.hasRated) {
-            rated.add(result.playerId);
+        if (result.status === 'fulfilled' && result.value?.playerInfo) {
+          players.push(result.value.playerInfo);
+          if (result.value.hasRated) {
+            rated.add(result.value.playerId);
           }
         }
       });
