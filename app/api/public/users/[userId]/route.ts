@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getUserBasicInfo } from "@/lib/users";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
@@ -14,25 +15,28 @@ export async function GET(
   }
 
   try {
-    const db = await getDb();
-    const usersCollection = db.collection("users");
-    
-    const user = await usersCollection.findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { _id: 1, name: 1, email: 1, "profile.commonName": 1, "profile.avatarUrl": 1 } }
-    );
+    // Get basic user info using the existing utility function
+    const userInfo = await getUserBasicInfo(userId);
 
-    if (!user) {
+    if (!userInfo) {
       return new NextResponse("User not found", { status: 404 });
     }
 
+    // Fetch commonName from profile since it's not in the basic info
+    const db = await getDb();
+    const usersCollection = db.collection("users");
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { "profile.commonName": 1 } }
+    );
+
     // Return user info with commonName from profile
     return NextResponse.json({
-      id: user._id?.toString() || userId,
-      name: user.name || user.email?.split("@")[0] || "Unknown User",
-      commonName: user.profile?.commonName || "",
-      email: user.email || "",
-      avatarUrl: user.profile?.avatarUrl || "",
+      id: userInfo.id,
+      name: userInfo.name,
+      commonName: user?.profile?.commonName || "",
+      email: userInfo.email,
+      avatarUrl: userInfo.avatarUrl,
     });
   } catch (error) {
     console.error("Failed to fetch user info:", error);
