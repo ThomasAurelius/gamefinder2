@@ -88,7 +88,7 @@ function GameSessionCard({
           setHasRatedHost(data.hasRated);
         }
       } catch (error) {
-        console.error("Failed to check host rating status:", error);
+        console.error(`Failed to check host rating status for session ${session.id}:`, error);
       } finally {
         setCheckingRatings(false);
       }
@@ -117,40 +117,56 @@ function GameSessionCard({
       const players: PlayerInfo[] = [];
       const rated = new Set<string>();
       
-      for (const playerId of session.signedUpPlayers) {
-        if (playerId === currentUserId) continue; // Skip self
-        try {
-          const response = await fetch(`/api/public/users/${playerId}`);
-          if (response.ok) {
-            const userData = await response.json();
-            players.push({
-              id: playerId,
-              name: userData.name || "Unknown",
-              commonName: userData.commonName,
-            });
-          }
+      // Fetch all player info and rating status concurrently
+      const playerPromises = session.signedUpPlayers
+        .filter(playerId => playerId !== currentUserId)
+        .map(async (playerId) => {
+          try {
+            // Fetch player info and rating status in parallel
+            const [userResponse, ratingCheckResponse] = await Promise.all([
+              fetch(`/api/public/users/${playerId}`),
+              fetch("/api/player-feedback/check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  playerId,
+                  sessionId: session.id,
+                  sessionType: isCampaign ? "campaign" : "game",
+                }),
+              }),
+            ]);
 
-          // Check if this player has been rated
-          const ratingCheckResponse = await fetch("/api/player-feedback/check", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              playerId,
-              sessionId: session.id,
-              sessionType: isCampaign ? "campaign" : "game",
-            }),
-          });
+            const playerInfo: PlayerInfo | null = userResponse.ok
+              ? await userResponse.json().then(userData => ({
+                  id: playerId,
+                  name: userData.name || "Unknown",
+                  commonName: userData.commonName,
+                }))
+              : null;
 
-          if (ratingCheckResponse.ok) {
-            const ratingData = await ratingCheckResponse.json();
-            if (ratingData.hasRated) {
-              rated.add(playerId);
-            }
+            const hasRated = ratingCheckResponse.ok
+              ? await ratingCheckResponse.json().then(data => data.hasRated)
+              : false;
+
+            return { playerInfo, hasRated, playerId };
+          } catch (error) {
+            console.error(`Failed to fetch info for player ${playerId}:`, error);
+            return null;
           }
-        } catch (error) {
-          console.error("Failed to fetch player info:", error);
+        });
+
+      const results = await Promise.all(playerPromises);
+      
+      // Process results
+      results.forEach(result => {
+        if (result?.playerInfo) {
+          players.push(result.playerInfo);
+          if (result.hasRated) {
+            rated.add(result.playerId);
+          }
         }
-      }
+      });
+
       setPlayersList(players);
       setRatedPlayers(rated);
     } catch (error) {
