@@ -60,10 +60,42 @@ function GameSessionCard({
   const [playersList, setPlayersList] = useState<PlayerInfo[]>([]);
   const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [hasRatedHost, setHasRatedHost] = useState(false);
+  const [ratedPlayers, setRatedPlayers] = useState<Set<string>>(new Set());
+  const [checkingRatings, setCheckingRatings] = useState(false);
 
   // Check if session is in the past
   const sessionDate = new Date(session.date);
   const isPast = sessionDate < new Date();
+
+  // Check if player has rated the host for this session
+  useEffect(() => {
+    const checkHostRating = async () => {
+      if (!isPast || !isPlayer || isHost) return;
+      
+      setCheckingRatings(true);
+      try {
+        const response = await fetch("/api/host-feedback/check", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId: session.id,
+            sessionType: isCampaign ? "campaign" : "game",
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setHasRatedHost(data.hasRated);
+        }
+      } catch (error) {
+        console.error(`Failed to check host rating status for session ${session.id}:`, error);
+      } finally {
+        setCheckingRatings(false);
+      }
+    };
+
+    checkHostRating();
+  }, [session.id, isPast, isPlayer, isHost, isCampaign]);
 
   let userRole = "";
   if (isHost) {
@@ -83,23 +115,74 @@ function GameSessionCard({
     setLoadingPlayers(true);
     try {
       const players: PlayerInfo[] = [];
-      for (const playerId of session.signedUpPlayers) {
-        if (playerId === currentUserId) continue; // Skip self
-        try {
-          const response = await fetch(`/api/public/users/${playerId}`);
-          if (response.ok) {
-            const userData = await response.json();
-            players.push({
-              id: playerId,
-              name: userData.name || "Unknown",
-              commonName: userData.commonName,
-            });
+      const rated = new Set<string>();
+      
+      // Fetch all player info and rating status concurrently
+      const playerPromises = session.signedUpPlayers
+        .filter(playerId => playerId !== currentUserId)
+        .map(async (playerId) => {
+          try {
+            // Fetch player info and rating status in parallel
+            const [userResponse, ratingCheckResponse] = await Promise.all([
+              fetch(`/api/public/users/${playerId}`),
+              fetch("/api/player-feedback/check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  playerId,
+                  sessionId: session.id,
+                  sessionType: isCampaign ? "campaign" : "game",
+                }),
+              }),
+            ]);
+
+            // Parse player info
+            let playerInfo: PlayerInfo | null = null;
+            if (userResponse.ok) {
+              try {
+                const userData = await userResponse.json();
+                playerInfo = {
+                  id: playerId,
+                  name: userData.name || "Unknown",
+                  commonName: userData.commonName,
+                };
+              } catch (error) {
+                console.error(`Failed to parse user data for player ${playerId}:`, error);
+              }
+            }
+
+            // Parse rating status
+            let hasRated = false;
+            if (ratingCheckResponse.ok) {
+              try {
+                const ratingData = await ratingCheckResponse.json();
+                hasRated = ratingData.hasRated;
+              } catch (error) {
+                console.error(`Failed to parse rating data for player ${playerId}:`, error);
+              }
+            }
+
+            return { playerInfo, hasRated, playerId };
+          } catch (error) {
+            console.error(`Failed to fetch info for player ${playerId}:`, error);
+            return null;
           }
-        } catch (error) {
-          console.error("Failed to fetch player info:", error);
+        });
+
+      const results = await Promise.allSettled(playerPromises);
+      
+      // Process results
+      results.forEach(result => {
+        if (result.status === 'fulfilled' && result.value?.playerInfo) {
+          players.push(result.value.playerInfo);
+          if (result.value.hasRated) {
+            rated.add(result.value.playerId);
+          }
         }
-      }
+      });
+
       setPlayersList(players);
+      setRatedPlayers(rated);
     } catch (error) {
       console.error("Failed to load players:", error);
     } finally {
@@ -110,6 +193,14 @@ function GameSessionCard({
   const handleRatePlayer = (player: PlayerInfo) => {
     setSelectedPlayer(player);
     setShowPlayerFeedbackDialog(true);
+  };
+
+  const handlePlayerRatingSubmit = () => {
+    if (selectedPlayer) {
+      setRatedPlayers(prev => new Set(prev).add(selectedPlayer.id));
+    }
+    setShowPlayerFeedbackDialog(false);
+    setSelectedPlayer(null);
   };
 
   return (
@@ -229,9 +320,14 @@ function GameSessionCard({
             {isPast && isPlayer && !isHost && (
               <button
                 onClick={() => setShowHostFeedbackDialog(true)}
-                className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
+                disabled={hasRatedHost || checkingRatings}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium text-white transition ${
+                  hasRatedHost 
+                    ? "bg-slate-600 cursor-not-allowed opacity-50" 
+                    : "bg-sky-600 hover:bg-sky-700"
+                }`}
               >
-                {hasRatedHost ? "Update Host Rating" : "Rate Host"}
+                {checkingRatings ? "Checking..." : hasRatedHost ? "Host Rated ✓" : "Rate Host"}
               </button>
             )}
             {isPast && isHost && session.signedUpPlayers.length > 0 && (
@@ -249,22 +345,30 @@ function GameSessionCard({
             <div className="mt-3 rounded-lg border border-slate-700 bg-slate-800/30 p-3">
               <p className="text-sm font-medium text-slate-300 mb-2">Rate Players:</p>
               <div className="space-y-2">
-                {playersList.map((player) => (
-                  <div key={player.id} className="flex items-center justify-between">
-                    <Link
-                      href={`/user/${player.id}`}
-                      className="text-sm text-slate-300 hover:text-sky-300 transition-colors"
-                    >
-                      {player.commonName || player.name}
-                    </Link>
-                    <button
-                      onClick={() => handleRatePlayer(player)}
-                      className="rounded bg-sky-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-sky-700"
-                    >
-                      Rate
-                    </button>
-                  </div>
-                ))}
+                {playersList.map((player) => {
+                  const isRated = ratedPlayers.has(player.id);
+                  return (
+                    <div key={player.id} className="flex items-center justify-between">
+                      <Link
+                        href={`/user/${player.id}`}
+                        className="text-sm text-slate-300 hover:text-sky-300 transition-colors"
+                      >
+                        {player.commonName || player.name}
+                      </Link>
+                      <button
+                        onClick={() => handleRatePlayer(player)}
+                        disabled={isRated}
+                        className={`rounded px-3 py-1 text-xs font-medium text-white transition ${
+                          isRated
+                            ? "bg-slate-600 cursor-not-allowed opacity-50"
+                            : "bg-sky-600 hover:bg-sky-700"
+                        }`}
+                      >
+                        {isRated ? "Rated ✓" : "Rate"}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -297,10 +401,7 @@ function GameSessionCard({
             setShowPlayerFeedbackDialog(false);
             setSelectedPlayer(null);
           }}
-          onSubmit={() => {
-            setShowPlayerFeedbackDialog(false);
-            setSelectedPlayer(null);
-          }}
+          onSubmit={handlePlayerRatingSubmit}
         />
       )}
     </>
