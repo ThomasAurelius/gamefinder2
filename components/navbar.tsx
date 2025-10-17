@@ -26,13 +26,7 @@ const primaryLinks: NavItem[] = [
 	{ href: "/library", label: "Library" },
 	{ href: "/players", label: "Players" },
 	{ href: "/marketplace", label: "Marketplace" },
-	{
-		label: "Games",
-		submenu: [
-			{ href: "/find", label: "Find Games" },
-			{ href: "/post", label: "Post Game" },
-		],
-	},
+	{ href: "/find", label: "Find Games" },
 	{ href: "/find-campaigns", label: "Campaigns" },
 ];
 
@@ -73,7 +67,6 @@ export function Navbar() {
 	const pathname = usePathname();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
-	const [gamesOpen, setGamesOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [authLoading, setAuthLoading] = useState(true);
 	const [hasIncompleteSettings, setHasIncompleteSettings] = useState(false);
@@ -138,7 +131,6 @@ export function Navbar() {
 	const toggleMenu = () => setMenuOpen((open) => !open);
 	const closeMenu = () => setMenuOpen(false);
 	const toggleAccount = () => setAccountOpen((open) => !open);
-	const toggleGames = () => setGamesOpen((open) => !open);
 
 	return (
 		<header className="relative z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
@@ -213,9 +205,9 @@ export function Navbar() {
 							const isAnySubmenuActive = item.submenu.some((link) =>
 								isActive(pathname, link.href)
 							);
-							const isGamesMenu = item.label === "Games";
-							const isOpen = isGamesMenu ? gamesOpen : false;
-							const toggleOpen = isGamesMenu ? toggleGames : () => {};
+							// This code block is kept for future submenu support but is not currently used
+							const isOpen = false;
+							const toggleOpen = () => {};
 
 							return (
 								<div key={item.label} className="relative">
@@ -251,7 +243,6 @@ export function Navbar() {
 													onClick={() => {
 														// Delay closing dropdown to ensure navigation completes
 														setTimeout(() => {
-															if (isGamesMenu) setGamesOpen(false);
 															closeMenu();
 														}, NAVIGATION_DELAY_MS);
 													}}
@@ -279,13 +270,16 @@ export function Navbar() {
 								<Link
 									key={item.href}
 									href={item.href}
-									className={`rounded-md px-2 py-2 transition hover:bg-white/10 ${
+									className={`flex items-center rounded-md px-2 py-2 transition hover:bg-white/10 ${
 										isActive(pathname, item.href)
 											? "bg-white/10 text-white"
 											: "text-slate-200"
 									}`}
 								>
 									{item.label}
+									{item.href === "/find" && newPostsCount > 0 && (
+										<NotificationBadge count={newPostsCount} />
+									)}
 								</Link>
 							);
 						}
@@ -424,13 +418,16 @@ export function Navbar() {
 											// Delay closing menu to ensure navigation completes
 											setTimeout(closeMenu, NAVIGATION_DELAY_MS);
 										}}
-										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
+										className={`flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, item.href)
 												? "bg-white/10 text-white"
 												: "text-slate-200"
 										}`}
 									>
-										{item.label}
+										<span>{item.label}</span>
+										{item.href === "/find" && newPostsCount > 0 && (
+											<NotificationBadge count={newPostsCount} />
+										)}
 									</Link>
 								);
 							}
