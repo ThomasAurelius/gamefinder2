@@ -33,14 +33,7 @@ const primaryLinks: NavItem[] = [
 			{ href: "/post", label: "Post Game" },
 		],
 	},
-	{
-		label: "Campaigns",
-		submenu: [
-			{ href: "/find-campaigns", label: "Find Campaigns" },
-			{ href: "/my-campaigns", label: "My Campaigns" },
-			{ href: "/post-campaign", label: "Post Campaign" },
-		],
-	},
+	{ href: "/find-campaigns", label: "Campaigns" },
 ];
 
 const accountLinks: NavLink[] = [
@@ -81,7 +74,6 @@ export function Navbar() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [gamesOpen, setGamesOpen] = useState(false);
-	const [campaignsOpen, setCampaignsOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [authLoading, setAuthLoading] = useState(true);
 	const [hasIncompleteSettings, setHasIncompleteSettings] = useState(false);
@@ -147,7 +139,6 @@ export function Navbar() {
 	const closeMenu = () => setMenuOpen(false);
 	const toggleAccount = () => setAccountOpen((open) => !open);
 	const toggleGames = () => setGamesOpen((open) => !open);
-	const toggleCampaigns = () => setCampaignsOpen((open) => !open);
 
 	return (
 		<header className="relative z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
@@ -223,17 +214,8 @@ export function Navbar() {
 								isActive(pathname, link.href)
 							);
 							const isGamesMenu = item.label === "Games";
-							const isCampaignsMenu = item.label === "Campaigns";
-							const isOpen = isGamesMenu
-								? gamesOpen
-								: isCampaignsMenu
-									? campaignsOpen
-									: false;
-							const toggleOpen = isGamesMenu
-								? toggleGames
-								: isCampaignsMenu
-									? toggleCampaigns
-									: () => {};
+							const isOpen = isGamesMenu ? gamesOpen : false;
+							const toggleOpen = isGamesMenu ? toggleGames : () => {};
 
 							return (
 								<div key={item.label} className="relative">
@@ -270,8 +252,6 @@ export function Navbar() {
 														// Delay closing dropdown to ensure navigation completes
 														setTimeout(() => {
 															if (isGamesMenu) setGamesOpen(false);
-															if (isCampaignsMenu)
-																setCampaignsOpen(false);
 															closeMenu();
 														}, NAVIGATION_DELAY_MS);
 													}}
