@@ -546,7 +546,7 @@ export default function FindCampaignsPage() {
 					gameSystem={mapGameToSystemKey(campaignToJoin.game)}
 				/>
 			)}
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+			<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<div>
 					<h1 className="text-2xl font-semibold text-slate-100">
 						Find Campaigns
