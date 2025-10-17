@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// Whitelist of allowed D&D 5e API endpoints
+const ALLOWED_ENDPOINTS = [
+	"races",
+	"classes",
+	"equipment",
+	"spells",
+	"monsters",
+	"magic-items",
+	"conditions",
+	"backgrounds",
+];
+
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
 	const endpoint = searchParams.get("endpoint");
@@ -11,9 +23,20 @@ export async function GET(request: NextRequest) {
 		);
 	}
 
+	// Validate endpoint against whitelist
+	if (!ALLOWED_ENDPOINTS.includes(endpoint)) {
+		return NextResponse.json(
+			{ error: "Invalid endpoint" },
+			{ status: 400 }
+		);
+	}
+
 	try {
 		const response = await fetch(
-			`https://www.dnd5eapi.co/api/${endpoint}`
+			`https://www.dnd5eapi.co/api/${endpoint}`,
+			{
+				next: { revalidate: 3600 }, // Cache for 1 hour
+			}
 		);
 
 		if (!response.ok) {

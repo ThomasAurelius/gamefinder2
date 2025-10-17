@@ -153,7 +153,6 @@ export default function DndCharacterBuilder() {
 
 	const [itemSearch, setItemSearch] = useState("");
 	const [searchResults, setSearchResults] = useState<APIReference[]>([]);
-	const [isSearching, setIsSearching] = useState(false);
 
 	// Common D&D equipment from SRD
 	const [equipment] = useState<APIReference[]>([
@@ -218,12 +217,10 @@ export default function DndCharacterBuilder() {
 			return;
 		}
 
-		setIsSearching(true);
 		const filtered = equipment.filter((item: APIReference) =>
 			item.name.toLowerCase().includes(itemSearch.toLowerCase())
 		);
 		setSearchResults(filtered);
-		setIsSearching(false);
 	};
 
 	const calculateModifier = (score: number): number => {
@@ -285,14 +282,17 @@ export default function DndCharacterBuilder() {
 
 	const exportCharacter = () => {
 		const dataStr = JSON.stringify(character, null, 2);
-		const dataUri =
-			"data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+		const blob = new Blob([dataStr], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
 		const exportFileDefaultName = `${character.name || "character"}.json`;
 
 		const linkElement = document.createElement("a");
-		linkElement.setAttribute("href", dataUri);
-		linkElement.setAttribute("download", exportFileDefaultName);
+		linkElement.href = url;
+		linkElement.download = exportFileDefaultName;
 		linkElement.click();
+		
+		// Clean up the URL object
+		setTimeout(() => URL.revokeObjectURL(url), 100);
 	};
 
 	return (
@@ -596,7 +596,7 @@ export default function DndCharacterBuilder() {
 					{skills.map((skill) => (
 						<label
 							key={skill}
-							className="flex cursor-pointer items-center gap-2 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm transition hover:bg-slate-750"
+							className="flex cursor-pointer items-center gap-2 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm transition hover:bg-slate-700"
 						>
 							<input
 								type="checkbox"
@@ -630,10 +630,9 @@ export default function DndCharacterBuilder() {
 						/>
 						<button
 							onClick={searchItems}
-							disabled={isSearching}
-							className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+							className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
 						>
-							{isSearching ? "Searching..." : "Search"}
+							Search
 						</button>
 					</div>
 
