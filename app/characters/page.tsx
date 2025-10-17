@@ -400,6 +400,9 @@ export default function CharactersPage() {
     setCharacter({
       name: record.name,
       campaign: record.campaign,
+      alignment: record.alignment,
+      race: record.race,
+      background: record.background,
       level: record.level,
       class: record.class,
       role: record.role,
@@ -497,6 +500,9 @@ export default function CharactersPage() {
         setCharacter({
           name: savedCharacter.name,
           campaign: savedCharacter.campaign,
+          alignment: savedCharacter.alignment,
+          race: savedCharacter.race,
+          background: savedCharacter.background,
           level: savedCharacter.level,
           class: savedCharacter.class,
           role: savedCharacter.role,
@@ -604,6 +610,31 @@ export default function CharactersPage() {
                         Level: {item.level}
                       </span>
                     )}
+                    {item.class && (
+                      <span className="text-sm text-slate-300">
+                        Class: {item.class}
+                      </span>
+                    )}
+                    {item.race && (
+                      <span className="text-sm text-slate-300">
+                        Race: {item.race}
+                      </span>
+                    )}
+                    {item.alignment && (
+                      <span className="text-sm text-slate-300">
+                        Alignment: {item.alignment}
+                      </span>
+                    )}
+                    {item.background && (
+                      <span className="text-sm text-slate-300">
+                        Background: {item.background}
+                      </span>
+                    )}
+                    {item.role && (
+                      <span className="text-sm text-slate-300">
+                        Role: {item.role}
+                      </span>
+                    )}
                     {item.gold && (
                       <span className="text-sm text-slate-300">
                         Gold: {item.gold}
@@ -612,16 +643,6 @@ export default function CharactersPage() {
                     {item.experience && (
                       <span className="text-sm text-slate-300">
                         XP: {item.experience}
-                      </span>
-                    )}
-                    {item.class && (
-                      <span className="text-sm text-slate-300">
-                        Class: {item.class}
-                      </span>
-                    )}
-                    {item.role && (
-                      <span className="text-sm text-slate-300">
-                        Role: {item.role}
                       </span>
                     )}
                     <span className="text-sm text-slate-300">
@@ -869,6 +890,60 @@ export default function CharactersPage() {
                       }))
                     }
                     placeholder="Shadows of Neverwinter"
+                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-medium text-slate-200">
+                    Alignment
+                  </span>
+                  <input
+                    type="text"
+                    value={character.alignment || ""}
+                    onChange={(event) =>
+                      setCharacter((prev) => ({
+                        ...prev,
+                        alignment: event.target.value,
+                      }))
+                    }
+                    placeholder="Chaotic Good"
+                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-medium text-slate-200">
+                    Race
+                  </span>
+                  <input
+                    type="text"
+                    value={character.race || ""}
+                    onChange={(event) =>
+                      setCharacter((prev) => ({
+                        ...prev,
+                        race: event.target.value,
+                      }))
+                    }
+                    placeholder="High Elf"
+                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                </label>
+                <label className="flex flex-col gap-2">
+                  <span className="text-sm font-medium text-slate-200">
+                    Background
+                  </span>
+                  <input
+                    type="text"
+                    value={character.background || ""}
+                    onChange={(event) =>
+                      setCharacter((prev) => ({
+                        ...prev,
+                        background: event.target.value,
+                      }))
+                    }
+                    placeholder="Sage"
                     className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
                   />
                 </label>
