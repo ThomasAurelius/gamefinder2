@@ -52,36 +52,36 @@ function PlayerCard({ player }: { player: Player }) {
 			className="group block rounded-xl border border-slate-800 bg-slate-900/60 p-6 transition hover:border-sky-500/60 hover:bg-slate-900"
 		>
 			<div className="flex items-start gap-4">
-				{player.avatarUrl ? (
-					<img
-						src={player.avatarUrl}
-						alt={displayName}
-						className="h-16 w-16 rounded-full border border-slate-700 object-cover"
-					/>
-				) : (
-					<div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-xl font-semibold text-slate-400">
-						{displayName.charAt(0).toUpperCase()}
-					</div>
-				)}
+				<div className="flex flex-col items-center gap-2">
+					{player.avatarUrl ? (
+						<img
+							src={player.avatarUrl}
+							alt={displayName}
+							className="h-16 w-16 rounded-full border border-slate-700 object-cover"
+						/>
+					) : (
+						<div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-xl font-semibold text-slate-400">
+							{displayName.charAt(0).toUpperCase()}
+						</div>
+					)}
+					{player.badges && player.badges.length > 0 && (
+						<div className="flex flex-wrap justify-center gap-1">
+							{player.badges.map((badge) => (
+								<Badge
+									key={`${player.id}-${badge.name}-${badge.imageUrl}`}
+									name={badge.name}
+									imageUrl={badge.imageUrl}
+									size="sm"
+									showTooltip={true}
+								/>
+							))}
+						</div>
+					)}
+				</div>
 				<div className="flex-1">
-					<div className="flex items-center gap-2">
-						<h3 className="text-xl font-semibold text-slate-100 group-hover:text-sky-100">
-							{displayName}
-						</h3>
-						{player.badges && player.badges.length > 0 && (
-							<div className="flex gap-1">
-								{player.badges.map((badge) => (
-									<Badge
-										key={`${player.id}-${badge.name}-${badge.imageUrl}`}
-										name={badge.name}
-										imageUrl={badge.imageUrl}
-										size="sm"
-										showTooltip={true}
-									/>
-								))}
-							</div>
-						)}
-					</div>
+					<h3 className="text-xl font-semibold text-slate-100 group-hover:text-sky-100">
+						{displayName}
+					</h3>
 					{player.location && (
 						<p className="mt-1 text-sm text-slate-400">
 							{player.location}
