@@ -1358,10 +1358,7 @@ export default function CharactersPage() {
 													</li>
 												</ol>
 												<p className="mt-2 text-purple-300">
-													{selectedSystem === "dnd" 
-														? "Example: https://app.demiplane.com/nexus/dnd5e/character/abc123"
-														: "Example: https://app.demiplane.com/nexus/starfinder2e/character/abc123"
-													}
+													Example: https://app.demiplane.com/nexus/{selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/abc123
 												</p>
 											</div>
 
@@ -1378,10 +1375,7 @@ export default function CharactersPage() {
 															demiplaneUrl: event.target.value.trim() || undefined,
 														}))
 													}
-													placeholder={selectedSystem === "dnd" 
-														? "https://app.demiplane.com/nexus/dnd5e/character/..."
-														: "https://app.demiplane.com/nexus/starfinder2e/character/..."
-													}
+													placeholder={`https://app.demiplane.com/nexus/${selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/...`}
 													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
 												/>
 											</label>
