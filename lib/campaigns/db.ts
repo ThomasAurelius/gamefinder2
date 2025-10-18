@@ -802,3 +802,124 @@ export async function denyPlayer(
     daysOfWeek: result.daysOfWeek,
   };
 }
+
+export async function removePlayer(
+  campaignId: string,
+  hostId: string,
+  playerId: string
+): Promise<StoredCampaign | null> {
+  const db = await getDb();
+  const campaignsCollection = db.collection<CampaignDocument>("campaigns");
+  
+  // Try to parse as ObjectId first (new format)
+  let campaign;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(campaignId) && campaignId.length === 24) {
+      campaign = await campaignsCollection.findOne({ _id: new ObjectId(campaignId), userId: hostId });
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to find by old 'id' field (UUID format) for backward compatibility
+  if (!campaign) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    campaign = await legacyCollection.findOne({ id: campaignId, userId: hostId });
+  }
+  
+  if (!campaign) {
+    return null;
+  }
+  
+  // Check if player is in any of the lists (signedUpPlayers, waitlist, or pendingPlayers)
+  const isInSignedUp = campaign.signedUpPlayers?.includes(playerId);
+  const isInWaitlist = campaign.waitlist?.includes(playerId);
+  const isInPending = campaign.pendingPlayers?.includes(playerId);
+  
+  if (!isInSignedUp && !isInWaitlist && !isInPending) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Remove player from all lists
+  let result;
+  try {
+    const { ObjectId } = await import("mongodb");
+    if (ObjectId.isValid(campaignId) && campaignId.length === 24) {
+      result = await campaignsCollection.findOneAndUpdate(
+        { _id: new ObjectId(campaignId), userId: hostId },
+        {
+          $pull: { 
+            signedUpPlayers: playerId,
+            signedUpPlayersWithCharacters: { userId: playerId },
+            waitlist: playerId,
+            waitlistWithCharacters: { userId: playerId },
+            pendingPlayers: playerId,
+            pendingPlayersWithCharacters: { userId: playerId }
+          },
+          $set: { updatedAt: timestamp },
+        },
+        { returnDocument: "after" }
+      );
+    }
+  } catch (error) {
+    console.error("Invalid ObjectId:", error);
+  }
+
+  // Fallback: try to update by old 'id' field (UUID format) for backward compatibility
+  if (!result) {
+    const legacyCollection = db.collection<LegacyCampaignDocument>("campaigns");
+    result = await legacyCollection.findOneAndUpdate(
+      { id: campaignId, userId: hostId },
+      {
+        $pull: { 
+          signedUpPlayers: playerId,
+          signedUpPlayersWithCharacters: { userId: playerId },
+          waitlist: playerId,
+          waitlistWithCharacters: { userId: playerId },
+          pendingPlayers: playerId,
+          pendingPlayersWithCharacters: { userId: playerId }
+        },
+        $set: { updatedAt: timestamp },
+      },
+      { returnDocument: "after" }
+    );
+  }
+  
+  if (!result) {
+    return null;
+  }
+  
+  // Handle both new and legacy formats
+  const campaignId_final = '_id' in result && result._id ? result._id.toString() : ('id' in result ? result.id as string : campaignId);
+  
+  return {
+    id: campaignId_final,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    sessionsLeft: result.sessionsLeft,
+    classesNeeded: result.classesNeeded,
+    costPerSession: result.costPerSession,
+    meetingFrequency: result.meetingFrequency,
+    daysOfWeek: result.daysOfWeek,
+  };
+}
