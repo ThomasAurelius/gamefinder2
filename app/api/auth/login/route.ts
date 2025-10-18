@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { verifyPassword } from "@/lib/password";
+import type { UserDocument } from "@/lib/user-types";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = email.trim().toLowerCase();
     const db = await getDb();
-    const usersCollection = db.collection<{ _id: ObjectId; passwordHash: string; name?: string }>(
+    const usersCollection = db.collection<UserDocument>(
       "users",
     );
     const user = await usersCollection.findOne(
@@ -46,10 +46,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update lastLoginAt timestamp
+    // Check if ambassador status has expired and turn off if necessary
+    const now = new Date();
+    const updateFields: Partial<UserDocument> = { lastLoginAt: now };
+    
+    if (user.isAmbassador && user.ambassadorUntil && user.ambassadorUntil <= now) {
+      // Ambassador status has expired, turn it off
+      updateFields.isAmbassador = false;
+      updateFields.updatedAt = now;
+    }
+
+    // Update user with login timestamp and potentially expired ambassador status
     await usersCollection.updateOne(
       { _id: user._id },
-      { $set: { lastLoginAt: new Date() } }
+      { $set: updateFields }
     );
 
     const response = NextResponse.json({
