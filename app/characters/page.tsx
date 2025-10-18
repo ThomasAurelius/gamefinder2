@@ -202,6 +202,7 @@ function createInitialCharacter(system: GameSystemKey): CharacterDetails {
 		notes: "",
 		items: [],
 		isPublic: false,
+		demiplaneUrl: undefined,
 	};
 }
 
@@ -1367,11 +1368,11 @@ export default function CharactersPage() {
 												</span>
 												<input
 													type="url"
-													value={character.demiplaneUrl || ""}
+													value={character.demiplaneUrl ?? ""}
 													onChange={(event) =>
 														setCharacter((prev) => ({
 															...prev,
-															demiplaneUrl: event.target.value,
+															demiplaneUrl: event.target.value.trim() || undefined,
 														}))
 													}
 													placeholder="https://app.demiplane.com/nexus/starfinder2e/character/..."
