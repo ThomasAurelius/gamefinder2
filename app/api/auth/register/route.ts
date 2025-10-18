@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const now = new Date();
 
     // Set ambassador status and expiration if isAmbassador is true
-    const userDocument: Partial<UserDocument> = {
+    const userDocument: Omit<UserDocument, '_id'> = {
       email: normalizedEmail,
       passwordHash,
       name: displayName,
