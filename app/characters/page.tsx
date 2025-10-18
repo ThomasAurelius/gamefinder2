@@ -20,6 +20,7 @@ import { SKILL_ATTRIBUTES, getSkillDisplayName } from "@/lib/characters/skill-at
 import { categorizeStats } from "@/lib/characters/stat-display-utils";
 import { getGameSystemOptions } from "@/lib/characters/game-system-options";
 import AvatarCropper from "@/components/AvatarCropper";
+import { parsePathbuilder2eJson } from "@/lib/characters/pathbuilder-import";
 
 const ROLE_OPTIONS = [
   "Healer",
@@ -234,6 +235,9 @@ export default function CharactersPage() {
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [jsonImportText, setJsonImportText] = useState<string>("");
+  const [jsonImportError, setJsonImportError] = useState<string | null>(null);
+  const [showJsonImport, setShowJsonImport] = useState(false);
   const [isAbilitiesOpen, setIsAbilitiesOpen] = useState(false);
   const [isSkillsOpen, setIsSkillsOpen] = useState(false);
 
@@ -377,6 +381,36 @@ export default function CharactersPage() {
 
   const handleCropCancel = () => {
     setImageToCrop(null);
+  };
+
+  const handleImportJson = () => {
+    setJsonImportError(null);
+
+    if (!jsonImportText.trim()) {
+      setJsonImportError("Please paste JSON data to import");
+      return;
+    }
+
+    const parsedCharacter = parsePathbuilder2eJson(jsonImportText);
+
+    if (!parsedCharacter) {
+      setJsonImportError(
+        "Failed to parse JSON. Please make sure you've copied the full JSON export from Pathbuilder2e."
+      );
+      return;
+    }
+
+    // Update character state with parsed data, preserving avatar if already set
+    setCharacter((prev) => ({
+      ...parsedCharacter,
+      avatarUrl: prev.avatarUrl, // Keep existing avatar
+      campaign: prev.campaign || parsedCharacter.campaign, // Keep campaign if already set
+    }));
+
+    setJsonImportText("");
+    setShowJsonImport(false);
+    setFeedbackMessage("Character data imported successfully from Pathbuilder2e!");
+    setActionError(null);
   };
 
   const resetForm = useCallback(() => {
@@ -946,6 +980,93 @@ export default function CharactersPage() {
                   {systemConfig.description}
                 </span>
               </label>
+
+              {/* JSON Import Section - Only show for Pathfinder */}
+              {selectedSystem === "pathfinder" && (
+                <div className="md:col-span-2">
+                  <div className="rounded-lg border border-indigo-500/30 bg-indigo-950/20 p-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowJsonImport(!showJsonImport)}
+                      className="flex w-full items-center justify-between text-left"
+                    >
+                      <div>
+                        <h3 className="text-sm font-semibold text-indigo-200">
+                          Import from Pathbuilder2e
+                        </h3>
+                        <p className="text-xs text-indigo-300/80">
+                          Import character data from Pathbuilder2e JSON export
+                        </p>
+                      </div>
+                      <span className="text-xs uppercase tracking-wide text-indigo-300">
+                        {showJsonImport ? "Hide" : "Show"}
+                      </span>
+                    </button>
+
+                    {showJsonImport && (
+                      <div className="mt-4 space-y-3">
+                        <div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
+                          <p className="font-semibold text-slate-200 mb-2">
+                            How to export from Pathbuilder2e:
+                          </p>
+                          <ol className="list-decimal list-inside space-y-1">
+                            <li>Open your character in Pathbuilder2e</li>
+                            <li>
+                              Tap the menu (three dots) and select &quot;Export
+                              to JSON&quot;
+                            </li>
+                            <li>Copy the entire JSON text</li>
+                            <li>Paste it in the box below and click Import</li>
+                          </ol>
+                          <p className="mt-2 text-indigo-300">
+                            Note: Avatar must be uploaded separately after import.
+                          </p>
+                        </div>
+
+                        <label className="flex flex-col gap-2">
+                          <span className="text-sm font-medium text-slate-200">
+                            Paste Pathbuilder2e JSON
+                          </span>
+                          <textarea
+                            value={jsonImportText}
+                            onChange={(e) => setJsonImportText(e.target.value)}
+                            placeholder='{"success":true,"build":{...}}'
+                            rows={6}
+                            className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs font-mono text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                          />
+                        </label>
+
+                        {jsonImportError && (
+                          <div className="rounded-md border border-rose-700 bg-rose-900/40 px-3 py-2 text-xs text-rose-100">
+                            {jsonImportError}
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleImportJson}
+                            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
+                          >
+                            Import Character Data
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setJsonImportText("");
+                              setJsonImportError(null);
+                              setShowJsonImport(false);
+                            }}
+                            className="rounded-md border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-800/60"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-2">
