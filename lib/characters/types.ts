@@ -33,6 +33,7 @@ export type CharacterDetails = {
   notes: string;
   avatarUrl?: string;
   isPublic?: boolean;
+  pdfUrls?: string[];
 };
 
 export type CharacterPayload = CharacterDetails & {
