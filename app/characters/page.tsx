@@ -435,10 +435,15 @@ export default function CharactersPage() {
 
 		// Validate file types
 		const invalidFiles = fileArray.filter(
-			(file) => file.type !== "application/pdf"
+			(file) => 
+				file.type !== "application/pdf" &&
+				file.type !== "image/jpeg" &&
+				file.type !== "image/png" &&
+				file.type !== "image/webp" &&
+				file.type !== "image/gif"
 		);
 		if (invalidFiles.length > 0) {
-			setPdfUploadError("Only PDF files are allowed");
+			setPdfUploadError("Only PDF and image files (JPEG, PNG, WebP, GIF) are allowed");
 			event.target.value = "";
 			return;
 		}
@@ -935,45 +940,42 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{item.system === "dnd" &&
-				item.pdfUrls &&
-				item.pdfUrls.length > 0 && (
-					<div className="space-y-2">
-						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-							Character Sheets
-						</h3>
-						<div className="flex flex-wrap gap-2">
-							{item.pdfUrls.map((url, index) => (
-								<a
-									key={index}
-									href={url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-								>
-									📄 Character Sheet {index + 1}
-								</a>
-							))}
-						</div>
+			{item.pdfUrls && item.pdfUrls.length > 0 && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Character Sheets
+					</h3>
+					<div className="flex flex-wrap gap-2">
+						{item.pdfUrls.map((url, index) => (
+							<a
+								key={index}
+								href={url}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+							>
+								📋 Character Sheet {index + 1}
+							</a>
+						))}
 					</div>
-				)}
+				</div>
+			)}
 
-			{item.system === "starfinder" &&
-				item.demiplaneUrl && (
-					<div className="space-y-2">
-						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-							Demiplane Character
-						</h3>
-						<a
-							href={item.demiplaneUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-						>
-							🔗 View on Demiplane
-						</a>
-					</div>
-				)}
+			{item.demiplaneUrl && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Demiplane Character
+					</h3>
+					<a
+						href={item.demiplaneUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+					>
+						🔗 View on Demiplane
+					</a>
+				</div>
+			)}
 		</div>
 	);
 
@@ -1329,9 +1331,7 @@ export default function CharactersPage() {
 										</div>
 									)}
 
-									{(item.system === "dnd" ||
-										item.system === "starfinder") &&
-										item.pdfUrls &&
+									{item.pdfUrls &&
 										item.pdfUrls.length > 0 && (
 											<div className="space-y-2">
 												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -1346,30 +1346,28 @@ export default function CharactersPage() {
 															rel="noopener noreferrer"
 															className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
 														>
-															📄 Character Sheet {index + 1}
+															📋 Character Sheet {index + 1}
 														</a>
 													))}
 												</div>
 											</div>
 										)}
 
-									{(item.system === "dnd" ||
-										item.system === "starfinder") &&
-										item.demiplaneUrl && (
-											<div className="space-y-2">
-												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-													Demiplane Character
-												</h3>
-												<a
-													href={item.demiplaneUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-												>
-													🔗 View on Demiplane
-												</a>
-											</div>
-										)}
+									{item.demiplaneUrl && (
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Demiplane Character
+											</h3>
+											<a
+												href={item.demiplaneUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+											>
+												🔗 View on Demiplane
+											</a>
+										</div>
+									)}
 								</div>
 							</details>
 						))}
@@ -1422,67 +1420,44 @@ export default function CharactersPage() {
 								</span>
 							</label>
 
-							{/* PDF Upload Section - Show for D&D and Starfinder */}
-							{(selectedSystem === "dnd" ||
+							{/* PDF/Image Upload Section - Show for Pathfinder, Shadowdark, Other, D&D and Starfinder */}
+							{(selectedSystem === "pathfinder" ||
+								selectedSystem === "shadowdark" ||
+								selectedSystem === "other" ||
+								selectedSystem === "dnd" ||
 								selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4">
 										<div>
 											<h3 className="text-sm font-semibold text-sky-200">
-												Upload{" "}
-												{selectedSystem === "dnd"
-													? "D&D Beyond"
-													: "Starfinder"}{" "}
-												Character Sheets
+												Upload Character Sheets
 											</h3>
 											<p className="text-xs text-sky-300/80">
-												Upload your character sheets{" "}
-												{selectedSystem === "dnd"
-													? "from D&D Beyond"
-													: "for Starfinder"}{" "}
-												(up to 3 PDF files)
+												Upload your character sheets as PDF or image files (up to 3 files)
 											</p>
 										</div>
 
 										<div className="mt-4 space-y-3">
 											<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
 												<p className="font-semibold text-slate-200 mb-2">
-													{selectedSystem === "dnd"
-														? "How to export from D&D Beyond:"
-														: "How to upload Starfinder character sheets:"}
+													How to upload character sheets:
 												</p>
-												{selectedSystem === "dnd" ? (
-													<ol className="list-decimal list-inside space-y-1">
-														<li>
-															Open your character in D&D Beyond
-														</li>
-														<li>
-															Click the &quot;Export&quot; or
-															&quot;View PDF&quot; button
-														</li>
-														<li>Download the PDF file(s)</li>
-														<li>
-															Upload the files below (max 3 files)
-														</li>
-													</ol>
-												) : (
-													<ol className="list-decimal list-inside space-y-1">
-														<li>
-															Export your Starfinder character
-															sheet as PDF
-														</li>
-														<li>
-															Upload the PDF file(s) below (max 3
-															files)
-														</li>
-														<li>
-															Note: PDFs may contain multiple
-															pages/sheets
-														</li>
-													</ol>
-												)}
+												<ol className="list-decimal list-inside space-y-1">
+													<li>
+														Export or screenshot your character sheet
+													</li>
+													<li>
+														Save as PDF or image file (JPEG, PNG, WebP, or GIF)
+													</li>
+													<li>
+														Upload the file(s) below (max 3 files)
+													</li>
+													<li>
+														Each file can contain multiple pages if using PDF
+													</li>
+												</ol>
 												<p className="mt-2 text-sky-300">
-													Note: Once PDFs are uploaded, only Name,
+													Note: Once files are uploaded, only Name,
 													Campaign, and Avatar fields will be
 													editable.
 												</p>
@@ -1495,19 +1470,19 @@ export default function CharactersPage() {
 												>
 													{isUploadingPdfs
 														? "Uploading..."
-														: "Upload Character Sheets (PDF)"}
+														: "Upload Character Sheets"}
 												</label>
 												<input
 													id="pdf-upload"
 													type="file"
-													accept="application/pdf"
+													accept="application/pdf,image/jpeg,image/png,image/webp,image/gif"
 													multiple
 													onChange={handlePdfUpload}
 													disabled={isUploadingPdfs}
 													className="hidden"
 												/>
 												<p className="text-xs text-slate-400">
-													PDF files only. Max 10MB per file, up to
+													PDF or image files (JPEG, PNG, WebP, GIF). Max 10MB per file, up to
 													3 files.
 												</p>
 											</div>
@@ -1661,69 +1636,58 @@ export default function CharactersPage() {
 								</div>
 							)}
 
-							{/* Demiplane URL Section - Show for D&D and Starfinder */}
-							{(selectedSystem === "dnd" ||
-								selectedSystem === "starfinder") && (
-								<div className="md:col-span-2">
-									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
-										<div>
-											<h3 className="text-sm font-semibold text-purple-200">
-												Demiplane Character Link
-											</h3>
-											<p className="text-xs text-purple-300/80">
-												Link your Demiplane{" "}
-												{selectedSystem === "dnd"
-													? "D&D"
-													: "Starfinder"}{" "}
-												character
+							{/* Demiplane URL Section - Show for all systems */}
+							<div className="md:col-span-2">
+								<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
+									<div>
+										<h3 className="text-sm font-semibold text-purple-200">
+											Demiplane Character Link
+										</h3>
+										<p className="text-xs text-purple-300/80">
+											Link your Demiplane character
+										</p>
+									</div>
+
+									<div className="mt-4 space-y-3">
+										<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
+											<p className="font-semibold text-slate-200 mb-2">
+												How to get your Demiplane character URL:
+											</p>
+											<ol className="list-decimal list-inside space-y-1">
+												<li>Open your character on Demiplane</li>
+												<li>
+													Copy the URL from your browser&apos;s
+													address bar
+												</li>
+												<li>Paste it in the field below</li>
+											</ol>
+											<p className="mt-2 text-purple-300">
+												Example: https://app.demiplane.com/nexus/[game]/character/abc123
 											</p>
 										</div>
 
-										<div className="mt-4 space-y-3">
-											<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
-												<p className="font-semibold text-slate-200 mb-2">
-													How to get your Demiplane character URL:
-												</p>
-												<ol className="list-decimal list-inside space-y-1">
-													<li>Open your character on Demiplane</li>
-													<li>
-														Copy the URL from your browser&apos;s
-														address bar
-													</li>
-													<li>Paste it in the field below</li>
-												</ol>
-												<p className="mt-2 text-purple-300">
-													Example: https://app.demiplane.com/nexus/
-													{selectedSystem === "dnd"
-														? "dnd5e"
-														: "starfinder2e"}
-													/character/abc123
-												</p>
-											</div>
-
-											<label className="flex flex-col gap-2">
-												<span className="text-sm font-medium text-slate-200">
-													Demiplane Character URL
-												</span>
-												<input
-													type="url"
-													value={character.demiplaneUrl ?? ""}
-													onChange={(event) =>
-														setCharacter((prev) => ({
-															...prev,
-															demiplaneUrl:
-																event.target.value.trim() ||
-																undefined,
-														}))
-													}
-													placeholder={`https://app.demiplane.com/nexus/${selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/...`}
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
-												/>
-											</label>
-										</div>
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Demiplane Character URL
+											</span>
+											<input
+												type="url"
+												value={character.demiplaneUrl ?? ""}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														demiplaneUrl:
+															event.target.value.trim() ||
+															undefined,
+													}))
+												}
+												placeholder="https://app.demiplane.com/nexus/dnd5e/character/abc123"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
+											/>
+										</label>
 									</div>
 								</div>
-							)}
+							</div>
 
 							{/* Name, Campaign, Avatar Section - Always visible when PDFs are uploaded */}
 							{character.pdfUrls && character.pdfUrls.length > 0 && (
