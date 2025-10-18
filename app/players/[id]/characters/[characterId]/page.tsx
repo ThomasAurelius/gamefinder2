@@ -218,6 +218,89 @@ export default async function CharacterDetailPage({
           </section>
         ) : null}
 
+        {/* Basic Character Details */}
+        {(character.race || character.background || character.alignment || 
+          character.age || character.height || character.weight || 
+          character.eyes || character.skin || character.hair) ? (
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold text-slate-100">Basic Details</h2>
+            <div className="grid gap-2 md:grid-cols-2">
+              {character.race ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Race
+                  </span>
+                  <span className="text-base font-medium">{character.race}</span>
+                </div>
+              ) : null}
+              {character.background ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Background
+                  </span>
+                  <span className="text-base font-medium">{character.background}</span>
+                </div>
+              ) : null}
+              {character.alignment ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Alignment
+                  </span>
+                  <span className="text-base font-medium">{character.alignment}</span>
+                </div>
+              ) : null}
+              {character.age ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Age
+                  </span>
+                  <span className="text-base font-medium">{character.age}</span>
+                </div>
+              ) : null}
+              {character.height ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Height
+                  </span>
+                  <span className="text-base font-medium">{character.height}</span>
+                </div>
+              ) : null}
+              {character.weight ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Weight
+                  </span>
+                  <span className="text-base font-medium">{character.weight}</span>
+                </div>
+              ) : null}
+              {character.eyes ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Eyes
+                  </span>
+                  <span className="text-base font-medium">{character.eyes}</span>
+                </div>
+              ) : null}
+              {character.skin ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Skin
+                  </span>
+                  <span className="text-base font-medium">{character.skin}</span>
+                </div>
+              ) : null}
+              {character.hair ? (
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-sm text-slate-100">
+                  <span className="block text-xs uppercase tracking-wide text-slate-400">
+                    Hair
+                  </span>
+                  <span className="text-base font-medium">{character.hair}</span>
+                </div>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
         {character.items && character.items.length > 0 ? (
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-slate-100">Items</h2>
