@@ -279,6 +279,8 @@ export default function CharactersPage() {
 		const system = event.target.value as GameSystemKey;
 		setSelectedSystem(system);
 		setCharacter(createInitialCharacter(system));
+		// Auto-expand JSON import section when Pathfinder is selected
+		setShowJsonImport(system === "pathfinder");
 	};
 
 	const updateStat = (
@@ -417,6 +419,7 @@ export default function CharactersPage() {
 		setEditingCharacterId(null);
 		setIsFormOpen(false);
 		setSubmitError(null);
+		setShowJsonImport(false);
 	}, []);
 
 	const handleToggleForm = () => {
@@ -430,6 +433,7 @@ export default function CharactersPage() {
 		setCharacter(createInitialCharacter("dnd"));
 		setSubmitError(null);
 		setFeedbackMessage(null);
+		setShowJsonImport(false);
 		setIsFormOpen(true);
 	};
 
@@ -462,6 +466,7 @@ export default function CharactersPage() {
 		});
 		setSubmitError(null);
 		setFeedbackMessage(null);
+		setShowJsonImport(record.system === "pathfinder");
 		setIsFormOpen(true);
 	};
 
