@@ -71,6 +71,7 @@ export default function RootLayout({
 				</main>
 				<footer className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 text-center text-sm text-slate-500">
 					<div>
+						<Link href="/mission">Mission</Link> -{" "}
 						<Link href="/privacy">Privacy Policy</Link> -{" "}
 						<Link href="/terms">Terms of Service</Link> -{" "}
 						<Link href="/sms-consent">SMS Consent</Link>
