@@ -42,6 +42,8 @@ export async function listCharacters(userId: string): Promise<StoredCharacter[]>
     skills: char.skills.map((skill) => ({ ...skill })),
     avatarUrl: char.avatarUrl,
     isPublic: char.isPublic ?? false,
+    pdfUrls: char.pdfUrls,
+    demiplaneUrl: char.demiplaneUrl,
     createdAt: char.createdAt,
     updatedAt: char.updatedAt,
   }));
@@ -81,9 +83,12 @@ export async function listPublicCharacters(userId: string): Promise<StoredCharac
     skills: char.skills.map((skill) => ({ ...skill })),
     avatarUrl: char.avatarUrl,
     isPublic: char.isPublic ?? false,
+    pdfUrls: char.pdfUrls,
+    demiplaneUrl: char.demiplaneUrl,
     createdAt: char.createdAt,
     updatedAt: char.updatedAt,
   }));
+}
 }
 
 export async function getCharacter(
@@ -124,6 +129,8 @@ export async function getCharacter(
     skills: character.skills.map((skill) => ({ ...skill })),
     avatarUrl: character.avatarUrl,
     isPublic: character.isPublic ?? false,
+    pdfUrls: character.pdfUrls,
+    demiplaneUrl: character.demiplaneUrl,
     createdAt: character.createdAt,
     updatedAt: character.updatedAt,
   };
@@ -175,6 +182,8 @@ export async function createCharacter(
     skills: newCharacter.skills,
     avatarUrl: newCharacter.avatarUrl,
     isPublic: newCharacter.isPublic ?? false,
+    pdfUrls: newCharacter.pdfUrls,
+    demiplaneUrl: newCharacter.demiplaneUrl,
     createdAt: newCharacter.createdAt,
     updatedAt: newCharacter.updatedAt,
   };
@@ -232,6 +241,8 @@ export async function updateCharacter(
     skills: result.skills,
     avatarUrl: result.avatarUrl,
     isPublic: result.isPublic ?? false,
+    pdfUrls: result.pdfUrls,
+    demiplaneUrl: result.demiplaneUrl,
     createdAt: result.createdAt,
     updatedAt: result.updatedAt,
   };

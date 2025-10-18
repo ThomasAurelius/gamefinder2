@@ -654,6 +654,8 @@ export default function CharactersPage() {
 					notes: savedCharacter.notes,
 					avatarUrl: savedCharacter.avatarUrl,
 					isPublic: savedCharacter.isPublic ?? false,
+					pdfUrls: savedCharacter.pdfUrls ? [...savedCharacter.pdfUrls] : undefined,
+					demiplaneUrl: savedCharacter.demiplaneUrl,
 				});
 			} else {
 				resetForm();
@@ -1049,7 +1051,8 @@ export default function CharactersPage() {
 										</div>
 									)}
 
-									{item.system === "dnd" &&
+									{(item.system === "dnd" ||
+										item.system === "starfinder") &&
 										item.pdfUrls &&
 										item.pdfUrls.length > 0 && (
 											<div className="space-y-2">
@@ -1072,7 +1075,8 @@ export default function CharactersPage() {
 											</div>
 										)}
 
-									{item.system === "starfinder" &&
+									{(item.system === "dnd" ||
+										item.system === "starfinder") &&
 										item.demiplaneUrl && (
 											<div className="space-y-2">
 												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -1140,16 +1144,24 @@ export default function CharactersPage() {
 								</span>
 							</label>
 
-							{/* PDF Upload Section - Only show for D&D */}
-							{selectedSystem === "dnd" && (
+							{/* PDF Upload Section - Show for D&D and Starfinder */}
+							{(selectedSystem === "dnd" ||
+								selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4">
 										<div>
 											<h3 className="text-sm font-semibold text-sky-200">
-												Upload D&D Beyond Character Sheets
+												Upload{" "}
+												{selectedSystem === "dnd"
+													? "D&D Beyond"
+													: "Starfinder"}{" "}
+												Character Sheets
 											</h3>
 											<p className="text-xs text-sky-300/80">
-												Upload your character sheets from D&D Beyond
+												Upload your character sheets{" "}
+												{selectedSystem === "dnd"
+													? "from D&D Beyond"
+													: "for Starfinder"}{" "}
 												(up to 3 PDF files)
 											</p>
 										</div>
@@ -1157,21 +1169,40 @@ export default function CharactersPage() {
 										<div className="mt-4 space-y-3">
 											<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
 												<p className="font-semibold text-slate-200 mb-2">
-													How to export from D&D Beyond:
+													{selectedSystem === "dnd"
+														? "How to export from D&D Beyond:"
+														: "How to upload Starfinder character sheets:"}
 												</p>
-												<ol className="list-decimal list-inside space-y-1">
-													<li>
-														Open your character in D&D Beyond
-													</li>
-													<li>
-														Click the &quot;Export&quot; or
-														&quot;View PDF&quot; button
-													</li>
-													<li>Download the PDF file(s)</li>
-													<li>
-														Upload the files below (max 3 files)
-													</li>
-												</ol>
+												{selectedSystem === "dnd" ? (
+													<ol className="list-decimal list-inside space-y-1">
+														<li>
+															Open your character in D&D Beyond
+														</li>
+														<li>
+															Click the &quot;Export&quot; or
+															&quot;View PDF&quot; button
+														</li>
+														<li>Download the PDF file(s)</li>
+														<li>
+															Upload the files below (max 3 files)
+														</li>
+													</ol>
+												) : (
+													<ol className="list-decimal list-inside space-y-1">
+														<li>
+															Export your Starfinder character
+															sheet as PDF
+														</li>
+														<li>
+															Upload the PDF file(s) below (max 3
+															files)
+														</li>
+														<li>
+															Note: PDFs may contain multiple
+															pages/sheets
+														</li>
+													</ol>
+												)}
 												<p className="mt-2 text-sky-300">
 													Note: Once PDFs are uploaded, only Name,
 													Campaign, and Avatar fields will be
