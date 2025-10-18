@@ -1015,8 +1015,8 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{/* Show editing character in collapsible "Current Values" section when editing */}
-			{editingCharacterId && isFormOpen && (
+			{/* Show editing character in collapsible "Current Values" section when editing - HIDDEN per issue requirements */}
+			{false && editingCharacterId && isFormOpen && (
 				<div className="space-y-3">
 					{characters
 						.filter((item) => item.id === editingCharacterId)
