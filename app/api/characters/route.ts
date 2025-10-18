@@ -69,6 +69,7 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
     skills: normalizeFields<SkillField>(payload.skills),
     avatarUrl: typeof payload.avatarUrl === "string" ? payload.avatarUrl : undefined,
     isPublic: typeof payload.isPublic === "boolean" ? payload.isPublic : false,
+    pdfUrls: Array.isArray(payload.pdfUrls) && payload.pdfUrls.every((url): url is string => typeof url === "string") ? payload.pdfUrls : undefined,
   };
 }
 

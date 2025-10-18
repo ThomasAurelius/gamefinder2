@@ -236,6 +236,9 @@ export default function CharactersPage() {
 	const [showJsonImport, setShowJsonImport] = useState(false);
 	const [isAbilitiesOpen, setIsAbilitiesOpen] = useState(false);
 	const [isSkillsOpen, setIsSkillsOpen] = useState(false);
+	const [isUploadingPdfs, setIsUploadingPdfs] = useState(false);
+	const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
+	const [isBasicFieldsOpen, setIsBasicFieldsOpen] = useState(true);
 
 	const systemConfig = useMemo(
 		() => GAME_SYSTEMS[selectedSystem],
@@ -413,6 +416,76 @@ export default function CharactersPage() {
 		setActionError(null);
 	};
 
+	const handlePdfUpload = async (
+		event: React.ChangeEvent<HTMLInputElement>
+	) => {
+		const files = event.target.files;
+		if (!files || files.length === 0) return;
+
+		const fileArray = Array.from(files);
+		
+		// Validate file count
+		if (fileArray.length > 3) {
+			setPdfUploadError("Maximum 3 files allowed");
+			event.target.value = "";
+			return;
+		}
+
+		// Validate file types
+		const invalidFiles = fileArray.filter(file => file.type !== "application/pdf");
+		if (invalidFiles.length > 0) {
+			setPdfUploadError("Only PDF files are allowed");
+			event.target.value = "";
+			return;
+		}
+
+		setPdfUploadError(null);
+
+		// Upload PDFs immediately
+		setIsUploadingPdfs(true);
+		try {
+			const formData = new FormData();
+			fileArray.forEach(file => {
+				formData.append("files", file);
+			});
+
+			const response = await fetch("/api/upload-pdf", {
+				method: "POST",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to upload PDFs");
+			}
+
+			const { urls } = await response.json();
+
+			// Update the character state with the PDF URLs
+			setCharacter((prev) => ({
+				...prev,
+				pdfUrls: urls,
+			}));
+			setFeedbackMessage("Character sheets uploaded successfully.");
+			setActionError(null);
+		} catch (error) {
+			setPdfUploadError(
+				error instanceof Error ? error.message : "Failed to upload PDFs"
+			);
+			setFeedbackMessage(null);
+		} finally {
+			setIsUploadingPdfs(false);
+			event.target.value = "";
+		}
+	};
+
+	const handleRemovePdf = (index: number) => {
+		setCharacter((prev) => ({
+			...prev,
+			pdfUrls: prev.pdfUrls?.filter((_, i) => i !== index),
+		}));
+	};
+
 	const resetForm = useCallback(() => {
 		setSelectedSystem("dnd");
 		setCharacter(createInitialCharacter("dnd"));
@@ -420,6 +493,8 @@ export default function CharactersPage() {
 		setIsFormOpen(false);
 		setSubmitError(null);
 		setShowJsonImport(false);
+		setPdfUploadError(null);
+		setIsBasicFieldsOpen(true);
 	}, []);
 
 	const handleToggleForm = () => {
@@ -434,6 +509,8 @@ export default function CharactersPage() {
 		setSubmitError(null);
 		setFeedbackMessage(null);
 		setShowJsonImport(false);
+		setPdfUploadError(null);
+		setIsBasicFieldsOpen(true);
 		setIsFormOpen(true);
 	};
 
@@ -463,10 +540,13 @@ export default function CharactersPage() {
 			notes: record.notes,
 			avatarUrl: record.avatarUrl,
 			isPublic: record.isPublic ?? false,
+			pdfUrls: record.pdfUrls ? [...record.pdfUrls] : undefined,
 		});
 		setSubmitError(null);
 		setFeedbackMessage(null);
 		setShowJsonImport(record.system === "pathfinder");
+		setPdfUploadError(null);
+		setIsBasicFieldsOpen(true);
 		setIsFormOpen(true);
 	};
 
@@ -964,6 +1044,27 @@ export default function CharactersPage() {
 											</div>
 										</div>
 									)}
+
+									{item.pdfUrls && item.pdfUrls.length > 0 && (
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Character Sheets
+											</h3>
+											<div className="flex flex-wrap gap-2">
+												{item.pdfUrls.map((url, index) => (
+													<a
+														key={index}
+														href={url}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+													>
+														📄 Character Sheet {index + 1}
+													</a>
+												))}
+											</div>
+										</div>
+									)}
 								</div>
 							</details>
 						))}
@@ -1015,6 +1116,100 @@ export default function CharactersPage() {
 									{systemConfig.description}
 								</span>
 							</label>
+
+							{/* PDF Upload Section - Only show for D&D */}
+							{selectedSystem === "dnd" && (
+								<div className="md:col-span-2">
+									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4">
+										<div>
+											<h3 className="text-sm font-semibold text-sky-200">
+												Upload D&D Beyond Character Sheets
+											</h3>
+											<p className="text-xs text-sky-300/80">
+												Upload your character sheets from D&D Beyond (up to 3 PDF files)
+											</p>
+										</div>
+
+										<div className="mt-4 space-y-3">
+											<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
+												<p className="font-semibold text-slate-200 mb-2">
+													How to export from D&D Beyond:
+												</p>
+												<ol className="list-decimal list-inside space-y-1">
+													<li>Open your character in D&D Beyond</li>
+													<li>Click the &quot;Export&quot; or &quot;View PDF&quot; button</li>
+													<li>Download the PDF file(s)</li>
+													<li>Upload the files below (max 3 files)</li>
+												</ol>
+												<p className="mt-2 text-sky-300">
+													Note: Once PDFs are uploaded, only Name, Campaign, and Avatar fields will be editable.
+												</p>
+											</div>
+
+											<div className="space-y-2">
+												<label
+													htmlFor="pdf-upload"
+													className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+												>
+													{isUploadingPdfs
+														? "Uploading..."
+														: "Upload Character Sheets (PDF)"}
+												</label>
+												<input
+													id="pdf-upload"
+													type="file"
+													accept="application/pdf"
+													multiple
+													onChange={handlePdfUpload}
+													disabled={isUploadingPdfs}
+													className="hidden"
+												/>
+												<p className="text-xs text-slate-400">
+													PDF files only. Max 10MB per file, up to 3 files.
+												</p>
+											</div>
+
+											{pdfUploadError && (
+												<div className="rounded-md border border-rose-700 bg-rose-900/40 px-3 py-2 text-xs text-rose-100">
+													{pdfUploadError}
+												</div>
+											)}
+
+											{character.pdfUrls && character.pdfUrls.length > 0 && (
+												<div className="space-y-2">
+													<p className="text-sm font-medium text-slate-200">
+														Uploaded Files:
+													</p>
+													<div className="space-y-2">
+														{character.pdfUrls.map((url, index) => (
+															<div
+																key={index}
+																className="flex items-center justify-between rounded-md border border-slate-700 bg-slate-900/50 px-3 py-2"
+															>
+																<a
+																	href={url}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	className="text-sm text-sky-300 hover:text-sky-200 underline"
+																>
+																	Character Sheet {index + 1}
+																</a>
+																<button
+																	type="button"
+																	onClick={() => handleRemovePdf(index)}
+																	className="text-slate-400 hover:text-slate-200"
+																>
+																	×
+																</button>
+															</div>
+														))}
+													</div>
+												</div>
+											)}
+										</div>
+									</div>
+								</div>
+							)}
 
 							{/* JSON Import Section - Only show for Pathfinder */}
 							{selectedSystem === "pathfinder" && (
@@ -1115,89 +1310,197 @@ export default function CharactersPage() {
 								</div>
 							)}
 
-							{/* Avatar Upload Section */}
-							<div className="space-y-4">
-								<h2 className="text-lg font-semibold text-slate-100">
-									Character Avatar
-								</h2>
-								<div className="flex items-center gap-6">
-									<div className="flex-shrink-0">
-										{character.avatarUrl ? (
-											<img
-												src={character.avatarUrl}
-												alt="Character Avatar"
-												className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
-											/>
-										) : (
-											<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
-												{character.name
-													? character.name.charAt(0).toUpperCase()
-													: "?"}
+							{/* Basic Fields Section - Collapsible when PDFs are uploaded */}
+							{character.pdfUrls && character.pdfUrls.length > 0 ? (
+								<div className="md:col-span-2 space-y-4">
+									<button
+										type="button"
+										onClick={() => setIsBasicFieldsOpen(!isBasicFieldsOpen)}
+										className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+									>
+										<h2 className="text-lg font-semibold text-slate-100">
+											Basic Information
+										</h2>
+										<span className="text-xs uppercase tracking-wide text-slate-400">
+											{isBasicFieldsOpen ? "Collapse" : "Expand"}
+										</span>
+									</button>
+									{isBasicFieldsOpen && (
+										<div className="space-y-4 border border-slate-800 rounded-md p-4 bg-slate-950/40">
+											{/* Avatar Upload Section */}
+											<div className="space-y-4">
+												<h3 className="text-base font-semibold text-slate-100">
+													Character Avatar
+												</h3>
+												<div className="flex items-center gap-6">
+													<div className="flex-shrink-0">
+														{character.avatarUrl ? (
+															<img
+																src={character.avatarUrl}
+																alt="Character Avatar"
+																className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
+															/>
+														) : (
+															<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
+																{character.name
+																	? character.name.charAt(0).toUpperCase()
+																	: "?"}
+															</div>
+														)}
+													</div>
+													<div className="flex-1 space-y-2">
+														<label
+															htmlFor="character-avatar-upload"
+															className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+														>
+															{isUploadingAvatar
+																? "Uploading..."
+																: "Upload Avatar"}
+														</label>
+														<input
+															id="character-avatar-upload"
+															type="file"
+															accept="image/jpeg,image/png,image/webp,image/gif"
+															onChange={handleAvatarUpload}
+															disabled={isUploadingAvatar}
+															className="hidden"
+														/>
+														<p className="text-xs text-slate-400">
+															JPG, PNG, WebP or GIF. Max 5MB.
+														</p>
+													</div>
+												</div>
 											</div>
-										)}
-									</div>
-									<div className="flex-1 space-y-2">
-										<label
-											htmlFor="character-avatar-upload"
-											className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
-										>
-											{isUploadingAvatar
-												? "Uploading..."
-												: "Upload Avatar"}
-										</label>
-										<input
-											id="character-avatar-upload"
-											type="file"
-											accept="image/jpeg,image/png,image/webp,image/gif"
-											onChange={handleAvatarUpload}
-											disabled={isUploadingAvatar}
-											className="hidden"
-										/>
-										<p className="text-xs text-slate-400">
-											JPG, PNG, WebP or GIF. Max 5MB.
-										</p>
-									</div>
+
+											<div className="grid gap-4 sm:grid-cols-2">
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Name
+													</span>
+													<input
+														type="text"
+														value={character.name}
+														onChange={(event) =>
+															setCharacter((prev) => ({
+																...prev,
+																name: event.target.value,
+															}))
+														}
+														placeholder="Eldrin the Bold"
+														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													/>
+												</label>
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Campaign
+													</span>
+													<input
+														type="text"
+														value={character.campaign}
+														onChange={(event) =>
+															setCharacter((prev) => ({
+																...prev,
+																campaign: event.target.value,
+															}))
+														}
+														placeholder="Shadows of Neverwinter"
+														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													/>
+												</label>
+											</div>
+										</div>
+									)}
 								</div>
-							</div>
+							) : (
+								<>
+									{/* Avatar Upload Section */}
+									<div className="space-y-4">
+										<h2 className="text-lg font-semibold text-slate-100">
+											Character Avatar
+										</h2>
+										<div className="flex items-center gap-6">
+											<div className="flex-shrink-0">
+												{character.avatarUrl ? (
+													<img
+														src={character.avatarUrl}
+														alt="Character Avatar"
+														className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
+													/>
+												) : (
+													<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
+														{character.name
+															? character.name.charAt(0).toUpperCase()
+															: "?"}
+													</div>
+												)}
+											</div>
+											<div className="flex-1 space-y-2">
+												<label
+													htmlFor="character-avatar-upload"
+													className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+												>
+													{isUploadingAvatar
+														? "Uploading..."
+														: "Upload Avatar"}
+												</label>
+												<input
+													id="character-avatar-upload"
+													type="file"
+													accept="image/jpeg,image/png,image/webp,image/gif"
+													onChange={handleAvatarUpload}
+													disabled={isUploadingAvatar}
+													className="hidden"
+												/>
+												<p className="text-xs text-slate-400">
+													JPG, PNG, WebP or GIF. Max 5MB.
+												</p>
+											</div>
+										</div>
+									</div>
 
-							<div className="grid gap-4 sm:grid-cols-2">
-								<label className="flex flex-col gap-2">
-									<span className="text-sm font-medium text-slate-200">
-										Name
-									</span>
-									<input
-										type="text"
-										value={character.name}
-										onChange={(event) =>
-											setCharacter((prev) => ({
-												...prev,
-												name: event.target.value,
-											}))
-										}
-										placeholder="Eldrin the Bold"
-										className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-									/>
-								</label>
-								<label className="flex flex-col gap-2">
-									<span className="text-sm font-medium text-slate-200">
-										Campaign
-									</span>
-									<input
-										type="text"
-										value={character.campaign}
-										onChange={(event) =>
-											setCharacter((prev) => ({
-												...prev,
-												campaign: event.target.value,
-											}))
-										}
-										placeholder="Shadows of Neverwinter"
-										className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-									/>
-								</label>
-							</div>
+									<div className="grid gap-4 sm:grid-cols-2">
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Name
+											</span>
+											<input
+												type="text"
+												value={character.name}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														name: event.target.value,
+													}))
+												}
+												placeholder="Eldrin the Bold"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										</label>
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Campaign
+											</span>
+											<input
+												type="text"
+												value={character.campaign}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														campaign: event.target.value,
+													}))
+												}
+												placeholder="Shadows of Neverwinter"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										</label>
+									</div>
+								</>
+							)}
 
-							<div className="grid gap-4 sm:grid-cols-3">
+							{/* Hide all other fields when PDFs are uploaded */}
+							{(!character.pdfUrls || character.pdfUrls.length === 0) && (
+								<>
+									<div className="grid gap-4 sm:grid-cols-3">
 								<label className="flex flex-col gap-2">
 									<span className="text-sm font-medium text-slate-200">
 										Alignment
@@ -1563,7 +1866,6 @@ export default function CharactersPage() {
 									</span>
 								</span>
 							</label>
-						</div>
 
 						{/* Items Section */}
 						<div className="space-y-4">
@@ -1812,6 +2114,10 @@ export default function CharactersPage() {
 								className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 							/>
 						</label>
+
+								</>
+							)}
+						</div>
 
 						{submitError && (
 							<div className="rounded-md border border-rose-700 bg-rose-900/40 px-4 py-3 text-sm text-rose-100">
