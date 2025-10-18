@@ -1275,58 +1275,6 @@ export default function CharactersPage() {
 								</div>
 							)}
 
-							{/* Demiplane URL Section - Show for all systems */}
-							<div className="md:col-span-2">
-								<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
-									<div>
-										<h3 className="text-sm font-semibold text-purple-200">
-											Demiplane Character Link
-										</h3>
-										<p className="text-xs text-purple-300/80">
-											Link your Demiplane character
-										</p>
-									</div>
-
-									<div className="mt-4 space-y-3">
-										<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
-											<p className="font-semibold text-slate-200 mb-2">
-												How to get your Demiplane character URL:
-											</p>
-											<ol className="list-decimal list-inside space-y-1">
-												<li>Open your character on Demiplane</li>
-												<li>
-													Copy the URL from your browser&apos;s
-													address bar
-												</li>
-												<li>Paste it in the field below</li>
-											</ol>
-											<p className="mt-2 text-purple-300">
-												Example: https://app.demiplane.com/nexus/[game]/character/abc123
-											</p>
-										</div>
-
-										<label className="flex flex-col gap-2">
-											<span className="text-sm font-medium text-slate-200">
-												Demiplane Character URL
-											</span>
-											<input
-												type="url"
-												value={character.demiplaneUrl ?? ""}
-												onChange={(event) =>
-													setCharacter((prev) => ({
-														...prev,
-														demiplaneUrl:
-															event.target.value.trim() ||
-															undefined,
-													}))
-												}
-												placeholder="https://app.demiplane.com/nexus/dnd5e/character/abc123"
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
-											/>
-										</label>
-									</div>
-								</div>
-							</div>
 
 							{/* Name, Campaign, Avatar Section - Always visible when PDFs are uploaded */}
 							{character.pdfUrls && character.pdfUrls.length > 0 && (
