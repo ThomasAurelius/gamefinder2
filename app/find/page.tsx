@@ -75,10 +75,10 @@ function GameSessionCard({
 	return (
 		<div
 			key={session.id}
-			className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden"
+			className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden md:flex md:flex-wrap"
 		>
 			{session.imageUrl && (
-				<Link href={`/games/${session.id}`}>
+				<Link href={`/games/${session.id}`} className="md:w-1/2">
 					<img
 						src={session.imageUrl}
 						alt={session.game}
@@ -86,7 +86,7 @@ function GameSessionCard({
 					/>
 				</Link>
 			)}
-			<div className="p-4">
+			<div className="p-4 md:w-1/2 md:flex-grow">
 				<div className="flex items-center gap-2">
 					<Link
 						href={`/games/${session.id}`}
