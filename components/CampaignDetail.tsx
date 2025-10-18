@@ -51,6 +51,7 @@ type PendingPlayer = {
   characterName?: string;
   characterId?: string;
   characterIsPublic?: boolean;
+  characterAvatarUrl?: string;
 };
 
 type PlayerWithInfo = {
@@ -60,6 +61,7 @@ type PlayerWithInfo = {
   characterName?: string;
   characterId?: string;
   characterIsPublic?: boolean;
+  characterAvatarUrl?: string;
   hasActiveSubscription?: boolean;
 };
 
@@ -767,9 +769,32 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                     )}
                   </div>
                 </div>
-                {player.hasActiveSubscription && (
-                  <span className="text-xs text-green-400">Subscriber</span>
-                )}
+                <div className="flex items-center gap-3">
+                  {player.characterName && (
+                    <div className="flex flex-col items-end">
+                      {player.characterIsPublic && player.characterId ? (
+                        <Link
+                          href={`/players/${player.userId}/characters/${player.characterId}`}
+                          className="text-sm font-medium text-slate-200 hover:text-sky-300"
+                        >
+                          {player.characterName}
+                        </Link>
+                      ) : (
+                        <span className="text-sm font-medium text-slate-200">{player.characterName}</span>
+                      )}
+                    </div>
+                  )}
+                  {player.characterAvatarUrl && (
+                    <img
+                      src={player.characterAvatarUrl}
+                      alt={player.characterName || "Character"}
+                      className="h-10 w-10 rounded-full border border-slate-700"
+                    />
+                  )}
+                  {player.hasActiveSubscription && (
+                    <span className="text-xs text-green-400">Subscriber</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -820,9 +845,32 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                     )}
                   </div>
                 </div>
-                {player.hasActiveSubscription && (
-                  <span className="text-xs text-green-400">Subscriber</span>
-                )}
+                <div className="flex items-center gap-3">
+                  {player.characterName && (
+                    <div className="flex flex-col items-end">
+                      {player.characterIsPublic && player.characterId ? (
+                        <Link
+                          href={`/players/${player.userId}/characters/${player.characterId}`}
+                          className="text-sm font-medium text-slate-200 hover:text-sky-300"
+                        >
+                          {player.characterName}
+                        </Link>
+                      ) : (
+                        <span className="text-sm font-medium text-slate-200">{player.characterName}</span>
+                      )}
+                    </div>
+                  )}
+                  {player.characterAvatarUrl && (
+                    <img
+                      src={player.characterAvatarUrl}
+                      alt={player.characterName || "Character"}
+                      className="h-10 w-10 rounded-full border border-slate-700"
+                    />
+                  )}
+                  {player.hasActiveSubscription && (
+                    <span className="text-xs text-green-400">Subscriber</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -295,3 +295,38 @@ export async function getCharactersPublicStatus(
 
 	return result;
 }
+
+export async function getCharactersAvatars(
+	characterIds: { userId: string; characterId: string }[]
+): Promise<Map<string, string>> {
+	const result = new Map<string, string>();
+
+	if (characterIds.length === 0) {
+		return result;
+	}
+
+	const db = await getDb();
+	const charactersCollection = db.collection<CharacterDocument>("characters");
+
+	// Build query to find all requested characters
+	const orConditions = characterIds.map(({ userId, characterId }) => ({
+		userId,
+		id: characterId,
+	}));
+
+	const characters = await charactersCollection
+		.find(
+			{ $or: orConditions },
+			{ projection: { id: 1, userId: 1, avatarUrl: 1 } }
+		)
+		.toArray();
+
+	for (const char of characters) {
+		// Use characterId as the key for easy lookup
+		if (char.avatarUrl) {
+			result.set(char.id, char.avatarUrl);
+		}
+	}
+
+	return result;
+}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCampaign } from "@/lib/campaigns/db";
 import { getUsersBasicInfo } from "@/lib/users";
-import { getCharactersPublicStatus } from "@/lib/characters/db";
+import { getCharactersPublicStatus, getCharactersAvatars } from "@/lib/characters/db";
 
 type PendingPlayer = {
   id: string;
@@ -10,6 +10,7 @@ type PendingPlayer = {
   characterName?: string;
   characterId?: string;
   characterIsPublic?: boolean;
+  characterAvatarUrl?: string;
 };
 
 type PlayerWithInfo = {
@@ -19,6 +20,7 @@ type PlayerWithInfo = {
   characterName?: string;
   characterId?: string;
   characterIsPublic?: boolean;
+  characterAvatarUrl?: string;
   hasActiveSubscription?: boolean;
 };
 
@@ -74,6 +76,7 @@ export async function GET(
     });
     
     const charactersPublicStatusMap = await getCharactersPublicStatus(allCharacterRefs);
+    const charactersAvatarsMap = await getCharactersAvatars(allCharacterRefs);
 
     // Build enriched pending players list
     const pendingPlayers: PendingPlayer[] = [];
@@ -90,6 +93,7 @@ export async function GET(
             characterName: player.characterName,
             characterId: player.characterId,
             characterIsPublic: player.characterId ? charactersPublicStatusMap.get(player.characterId) ?? false : false,
+            characterAvatarUrl: player.characterId ? charactersAvatarsMap.get(player.characterId) : undefined,
           });
         }
       }
@@ -121,6 +125,7 @@ export async function GET(
             characterName: player.characterName,
             characterId: player.characterId,
             characterIsPublic: player.characterId ? charactersPublicStatusMap.get(player.characterId) ?? false : false,
+            characterAvatarUrl: player.characterId ? charactersAvatarsMap.get(player.characterId) : undefined,
             // TODO: Add subscription status check if needed
             hasActiveSubscription: false,
           });
@@ -155,6 +160,7 @@ export async function GET(
             characterName: player.characterName,
             characterId: player.characterId,
             characterIsPublic: player.characterId ? charactersPublicStatusMap.get(player.characterId) ?? false : false,
+            characterAvatarUrl: player.characterId ? charactersAvatarsMap.get(player.characterId) : undefined,
             hasActiveSubscription: false,
           });
         }
