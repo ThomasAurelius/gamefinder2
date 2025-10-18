@@ -504,10 +504,12 @@ export default function MyCampaignsPage() {
 				)
 			);
 
-			// Update the session in the all events list
+			// Update the session in the all events list, preserving the distance property
 			setAllEvents((prevEvents) =>
 				prevEvents.map((event) =>
-					event.id === campaignToJoin.id ? updatedSession : event
+					event.id === campaignToJoin.id 
+						? { ...updatedSession, distance: event.distance }
+						: event
 				)
 			);
 		} catch (error) {
