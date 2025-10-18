@@ -98,6 +98,7 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
   const [messageSuccess, setMessageSuccess] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -363,6 +364,7 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     }
 
     setIsDeleting(true);
+    setDeleteError(null);
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}`, {
@@ -374,13 +376,11 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
         router.push("/find-campaigns");
       } else {
         const error = await response.json();
-        alert(error.error || "Failed to delete campaign");
-        setShowDeleteConfirm(false);
+        setDeleteError(error.error || "Failed to delete campaign");
       }
     } catch (error) {
       console.error("Error deleting campaign:", error);
-      alert("Failed to delete campaign");
-      setShowDeleteConfirm(false);
+      setDeleteError("Failed to delete campaign");
     } finally {
       setIsDeleting(false);
     }
@@ -1003,10 +1003,19 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
               </p>
             </div>
 
+            {deleteError && (
+              <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                {deleteError}
+              </div>
+            )}
+
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => setShowDeleteConfirm(false)}
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
                 disabled={isDeleting}
                 className="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
               >
