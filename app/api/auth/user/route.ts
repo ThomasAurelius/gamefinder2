@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { readProfile } from "@/lib/profile-db";
+import { DEFAULT_TIMEZONE } from "@/lib/timezone";
 
 /**
  * GET /api/auth/user - Get current user's ID and timezone
@@ -22,7 +23,7 @@ export async function GET() {
 
     return NextResponse.json({ 
       userId, 
-      timezone: profile.timezone 
+      timezone: profile.timezone || DEFAULT_TIMEZONE 
     });
   } catch (error) {
     console.error("Failed to get user info", error);
