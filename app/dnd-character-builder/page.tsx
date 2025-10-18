@@ -605,7 +605,10 @@ export default function DndCharacterBuilder() {
 									type="number"
 									value={skillValue}
 									onChange={(e) =>
-										updateSkillValue(skill.name, parseInt(e.target.value) || 0)
+										updateSkillValue(
+											skill.name,
+											e.target.value === '' ? 0 : parseInt(e.target.value, 10) || 0
+										)
 									}
 									className="w-20 rounded border border-slate-600 bg-slate-700 px-2 py-1 text-center font-mono text-sm font-medium text-sky-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 								/>
