@@ -240,6 +240,7 @@ export default function CharactersPage() {
 	const [isUploadingPdfs, setIsUploadingPdfs] = useState(false);
 	const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
 	const [isBasicFieldsOpen, setIsBasicFieldsOpen] = useState(true);
+	const [isCurrentValuesOpen, setIsCurrentValuesOpen] = useState(false);
 
 	const systemConfig = useMemo(
 		() => GAME_SYSTEMS[selectedSystem],
@@ -498,6 +499,7 @@ export default function CharactersPage() {
 		setShowJsonImport(false);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
+		setIsCurrentValuesOpen(false);
 	}, []);
 
 	const handleToggleForm = () => {
@@ -514,6 +516,7 @@ export default function CharactersPage() {
 		setShowJsonImport(false);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
+		setIsCurrentValuesOpen(false);
 		setIsFormOpen(true);
 	};
 
@@ -551,6 +554,7 @@ export default function CharactersPage() {
 		setShowJsonImport(record.system === "pathfinder");
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
+		setIsCurrentValuesOpen(false);
 		setIsFormOpen(true);
 	};
 
@@ -670,6 +674,307 @@ export default function CharactersPage() {
 		resetForm();
 	};
 
+	// Helper function to render character details
+	const renderCharacterDetails = (item: StoredCharacter) => (
+		<div className="space-y-4 border-t border-slate-800 bg-slate-950/40 px-4 py-4 text-sm text-slate-200">
+			<div className="flex flex-wrap justify-between gap-2">
+				<div className="flex flex-wrap gap-2">
+					<button
+						type="button"
+						onClick={() => handleEditCharacter(item)}
+						className="rounded-md border border-indigo-500/70 px-3 py-1 text-xs font-medium text-indigo-200 transition hover:bg-indigo-500/10"
+					>
+						Edit
+					</button>
+					<button
+						type="button"
+						onClick={() =>
+							handleDeleteCharacter(item.id)
+						}
+						className="rounded-md border border-rose-600/70 px-3 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-600/10"
+					>
+						Delete
+					</button>
+				</div>
+				<span className="text-xs text-slate-400">
+					Last updated:{" "}
+					{new Date(item.updatedAt).toLocaleString()}
+				</span>
+			</div>
+
+			{(item.age ||
+				item.height ||
+				item.weight ||
+				item.eyes ||
+				item.skin ||
+				item.hair) && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Physical Appearance
+					</h3>
+					<div className="grid gap-2 sm:grid-cols-3">
+						{item.age && (
+							<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									Age
+								</div>
+								<div className="text-sm text-slate-100">
+									{item.age}
+								</div>
+							</div>
+						)}
+						{item.height && (
+							<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									Height
+								</div>
+								<div className="text-sm text-slate-100">
+									{item.height}
+								</div>
+							</div>
+						)}
+						{item.weight && (
+							<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									Weight
+								</div>
+								<div className="text-sm text-slate-100">
+									{item.weight}
+								</div>
+							</div>
+						)}
+						{item.eyes && (
+							<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									Eyes
+								</div>
+								<div className="text-sm text-slate-100">
+									{item.eyes}
+								</div>
+							</div>
+						)}
+						{item.skin && (
+							<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									Skin
+								</div>
+								<div className="text-sm text-slate-100">
+									{item.skin}
+								</div>
+							</div>
+						)}
+						{item.hair && (
+							<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									Hair
+								</div>
+								<div className="text-sm text-slate-100">
+									{item.hair}
+								</div>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
+
+			<div className="grid gap-3 md:grid-cols-2">
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Ability Scores
+					</h3>
+					{(() => {
+						const {
+							physical: physicalStats,
+							mental: mentalStats,
+							other: otherStats,
+							hasStandardStats,
+						} = categorizeStats(item.stats);
+
+						if (hasStandardStats) {
+							return (
+								<>
+									<div className="grid gap-2 grid-cols-2">
+										<div className="space-y-2">
+											{physicalStats.map(
+												(stat, index) => (
+													<div
+														key={`${stat.name}-${index}`}
+														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+													>
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															{stat.name ||
+																"Stat"}
+														</div>
+														<div className="text-lg font-semibold text-slate-100">
+															{stat.value ||
+																"-"}
+														</div>
+													</div>
+												)
+											)}
+										</div>
+										<div className="space-y-2">
+											{mentalStats.map(
+												(stat, index) => (
+													<div
+														key={`${stat.name}-${index}`}
+														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+													>
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															{stat.name ||
+																"Stat"}
+														</div>
+														<div className="text-lg font-semibold text-slate-100">
+															{stat.value ||
+																"-"}
+														</div>
+													</div>
+												)
+											)}
+										</div>
+									</div>
+									{otherStats.length > 0 && (
+										<div className="grid gap-2 sm:grid-cols-2 mt-2">
+											{otherStats.map(
+												(stat, index) => (
+													<div
+														key={`${stat.name}-${index}`}
+														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+													>
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															{stat.name ||
+																"Stat"}
+														</div>
+														<div className="text-lg font-semibold text-slate-100">
+															{stat.value ||
+																"-"}
+														</div>
+													</div>
+												)
+											)}
+										</div>
+									)}
+								</>
+							);
+						} else {
+							// For completely custom systems with no standard stats
+							return (
+								<div className="grid gap-2 sm:grid-cols-2">
+									{item.stats.map((stat, index) => (
+										<div
+											key={`${stat.name}-${index}`}
+											className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+										>
+											<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												{stat.name || "Stat"}
+											</div>
+											<div className="text-lg font-semibold text-slate-100">
+												{stat.value || "-"}
+											</div>
+										</div>
+									))}
+								</div>
+							);
+						}
+					})()}
+				</div>
+
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Skills
+					</h3>
+					<div className="grid gap-2 sm:grid-cols-2">
+						{item.skills.map((skill, index) => (
+							<div
+								key={`${skill.name}-${index}`}
+								className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+							>
+								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+									{getSkillDisplayName(
+										skill.name,
+										item.system
+									) || "Skill"}
+								</div>
+								<div className="text-lg font-semibold text-slate-100">
+									{skill.value || "-"}
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+
+			{item.notes && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Notes
+					</h3>
+					<p className="whitespace-pre-wrap rounded-md border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
+						{item.notes}
+					</p>
+				</div>
+			)}
+
+			{item.items && item.items.length > 0 && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Items
+					</h3>
+					<div className="flex flex-wrap gap-2">
+						{item.items.map((itemName, index) => (
+							<span
+								key={index}
+								className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+							>
+								{itemName}
+							</span>
+						))}
+					</div>
+				</div>
+			)}
+
+			{item.system === "dnd" &&
+				item.pdfUrls &&
+				item.pdfUrls.length > 0 && (
+					<div className="space-y-2">
+						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+							Character Sheets
+						</h3>
+						<div className="flex flex-wrap gap-2">
+							{item.pdfUrls.map((url, index) => (
+								<a
+									key={index}
+									href={url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+								>
+									📄 Character Sheet {index + 1}
+								</a>
+							))}
+						</div>
+					</div>
+				)}
+
+			{item.system === "starfinder" &&
+				item.demiplaneUrl && (
+					<div className="space-y-2">
+						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+							Demiplane Character
+						</h3>
+						<a
+							href={item.demiplaneUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+						>
+							🔗 View on Demiplane
+						</a>
+					</div>
+				)}
+		</div>
+	);
+
 	return (
 		<section className="space-y-6">
 			{imageToCrop && (
@@ -706,27 +1011,22 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			<div className="space-y-3">
-				<h2 className="text-xl font-semibold text-slate-100">
-					Saved Characters
-				</h2>
-				{isLoading ? (
-					<div className="rounded-md border border-slate-800 bg-slate-950/40 px-4 py-6 text-sm text-slate-300">
-						Loading characters...
-					</div>
-				) : characters.length === 0 ? (
-					<div className="rounded-md border border-slate-800 bg-slate-950/40 px-4 py-6 text-sm text-slate-300">
-						You haven&apos;t saved any characters yet. Use the button
-						below to add your first adventurer.
-					</div>
-				) : (
-					<div className="space-y-3">
-						{characters.map((item) => (
+			{/* Show editing character in collapsible "Current Values" section when editing */}
+			{editingCharacterId && isFormOpen && (
+				<div className="space-y-3">
+					{characters
+						.filter((item) => item.id === editingCharacterId)
+						.map((item) => (
 							<details
 								key={item.id}
+								open={isCurrentValuesOpen}
+								onToggle={(e) => setIsCurrentValuesOpen((e.target as HTMLDetailsElement).open)}
 								className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
 							>
 								<summary className="flex cursor-pointer items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
+									<span className="text-base font-semibold text-emerald-300">
+										Current Values
+									</span>
 									{item.avatarUrl ? (
 										<img
 											src={item.avatarUrl}
@@ -762,339 +1062,20 @@ export default function CharactersPage() {
 												Race: {item.race}
 											</span>
 										)}
-										{item.alignment && (
+										{item.campaign && (
 											<span className="text-sm text-slate-300">
-												Alignment: {item.alignment}
+												Campaign: {item.campaign}
 											</span>
 										)}
-										{item.background && (
-											<span className="text-sm text-slate-300">
-												Background: {item.background}
-											</span>
-										)}
-										{item.role && (
-											<span className="text-sm text-slate-300">
-												Role: {item.role}
-											</span>
-										)}
-										{item.gold && (
-											<span className="text-sm text-slate-300">
-												Gold: {item.gold}
-											</span>
-										)}
-										{item.experience && (
-											<span className="text-sm text-slate-300">
-												XP: {item.experience}
-											</span>
-										)}
-										<span className="text-sm text-slate-300">
-											Campaign: {item.campaign || "Unassigned"}
-										</span>
 									</div>
 								</summary>
-								<div className="space-y-4 border-t border-slate-800 bg-slate-950/40 px-4 py-4 text-sm text-slate-200">
-									<div className="flex flex-wrap justify-between gap-2">
-										<div className="flex flex-wrap gap-2">
-											<button
-												type="button"
-												onClick={() => handleEditCharacter(item)}
-												className="rounded-md border border-indigo-500/70 px-3 py-1 text-xs font-medium text-indigo-200 transition hover:bg-indigo-500/10"
-											>
-												Edit
-											</button>
-											<button
-												type="button"
-												onClick={() =>
-													handleDeleteCharacter(item.id)
-												}
-												className="rounded-md border border-rose-600/70 px-3 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-600/10"
-											>
-												Delete
-											</button>
-										</div>
-										<span className="text-xs text-slate-400">
-											Last updated:{" "}
-											{new Date(item.updatedAt).toLocaleString()}
-										</span>
-									</div>
-
-									{(item.age ||
-										item.height ||
-										item.weight ||
-										item.eyes ||
-										item.skin ||
-										item.hair) && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Physical Appearance
-											</h3>
-											<div className="grid gap-2 sm:grid-cols-3">
-												{item.age && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Age
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.age}
-														</div>
-													</div>
-												)}
-												{item.height && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Height
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.height}
-														</div>
-													</div>
-												)}
-												{item.weight && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Weight
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.weight}
-														</div>
-													</div>
-												)}
-												{item.eyes && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Eyes
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.eyes}
-														</div>
-													</div>
-												)}
-												{item.skin && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Skin
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.skin}
-														</div>
-													</div>
-												)}
-												{item.hair && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Hair
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.hair}
-														</div>
-													</div>
-												)}
-											</div>
-										</div>
-									)}
-
-									<div className="grid gap-3 md:grid-cols-2">
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Ability Scores
-											</h3>
-											{(() => {
-												const {
-													physical: physicalStats,
-													mental: mentalStats,
-													other: otherStats,
-													hasStandardStats,
-												} = categorizeStats(item.stats);
-
-												if (hasStandardStats) {
-													return (
-														<>
-															<div className="grid gap-2 grid-cols-2">
-																<div className="space-y-2">
-																	{physicalStats.map(
-																		(stat, index) => (
-																			<div
-																				key={`${stat.name}-${index}`}
-																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																			>
-																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																					{stat.name ||
-																						"Stat"}
-																				</div>
-																				<div className="text-lg font-semibold text-slate-100">
-																					{stat.value ||
-																						"-"}
-																				</div>
-																			</div>
-																		)
-																	)}
-																</div>
-																<div className="space-y-2">
-																	{mentalStats.map(
-																		(stat, index) => (
-																			<div
-																				key={`${stat.name}-${index}`}
-																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																			>
-																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																					{stat.name ||
-																						"Stat"}
-																				</div>
-																				<div className="text-lg font-semibold text-slate-100">
-																					{stat.value ||
-																						"-"}
-																				</div>
-																			</div>
-																		)
-																	)}
-																</div>
-															</div>
-															{otherStats.length > 0 && (
-																<div className="grid gap-2 sm:grid-cols-2 mt-2">
-																	{otherStats.map(
-																		(stat, index) => (
-																			<div
-																				key={`${stat.name}-${index}`}
-																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																			>
-																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																					{stat.name ||
-																						"Stat"}
-																				</div>
-																				<div className="text-lg font-semibold text-slate-100">
-																					{stat.value ||
-																						"-"}
-																				</div>
-																			</div>
-																		)
-																	)}
-																</div>
-															)}
-														</>
-													);
-												} else {
-													// For completely custom systems with no standard stats
-													return (
-														<div className="grid gap-2 sm:grid-cols-2">
-															{item.stats.map((stat, index) => (
-																<div
-																	key={`${stat.name}-${index}`}
-																	className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																>
-																	<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																		{stat.name || "Stat"}
-																	</div>
-																	<div className="text-lg font-semibold text-slate-100">
-																		{stat.value || "-"}
-																	</div>
-																</div>
-															))}
-														</div>
-													);
-												}
-											})()}
-										</div>
-
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Skills
-											</h3>
-											<div className="grid gap-2 sm:grid-cols-2">
-												{item.skills.map((skill, index) => (
-													<div
-														key={`${skill.name}-${index}`}
-														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-													>
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															{getSkillDisplayName(
-																skill.name,
-																item.system
-															) || "Skill"}
-														</div>
-														<div className="text-lg font-semibold text-slate-100">
-															{skill.value || "-"}
-														</div>
-													</div>
-												))}
-											</div>
-										</div>
-									</div>
-
-									{item.notes && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Notes
-											</h3>
-											<p className="whitespace-pre-wrap rounded-md border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
-												{item.notes}
-											</p>
-										</div>
-									)}
-
-									{item.items && item.items.length > 0 && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Items
-											</h3>
-											<div className="flex flex-wrap gap-2">
-												{item.items.map((itemName, index) => (
-													<span
-														key={index}
-														className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
-													>
-														{itemName}
-													</span>
-												))}
-											</div>
-										</div>
-									)}
-
-									{item.system === "dnd" &&
-										item.pdfUrls &&
-										item.pdfUrls.length > 0 && (
-											<div className="space-y-2">
-												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-													Character Sheets
-												</h3>
-												<div className="flex flex-wrap gap-2">
-													{item.pdfUrls.map((url, index) => (
-														<a
-															key={index}
-															href={url}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-														>
-															📄 Character Sheet {index + 1}
-														</a>
-													))}
-												</div>
-											</div>
-										)}
-
-									{item.system === "starfinder" &&
-										item.demiplaneUrl && (
-											<div className="space-y-2">
-												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-													Demiplane Character
-												</h3>
-												<a
-													href={item.demiplaneUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-												>
-													🔗 View on Demiplane
-												</a>
-											</div>
-										)}
-								</div>
+								{renderCharacterDetails(item)}
 							</details>
 						))}
-					</div>
-				)}
-			</div>
+				</div>
+			)}
 
+			{/* Form Section */}
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
 				<button
 					type="button"
@@ -2284,6 +2265,102 @@ export default function CharactersPage() {
 							</button>
 						</div>
 					</form>
+				)}
+			</div>
+
+			{/* Other Characters Section */}
+			<div className="space-y-3">
+				<h2 className="text-xl font-semibold text-slate-100">
+					{editingCharacterId && isFormOpen ? "Other Characters" : "Saved Characters"}
+				</h2>
+				{isLoading ? (
+					<div className="rounded-md border border-slate-800 bg-slate-950/40 px-4 py-6 text-sm text-slate-300">
+						Loading characters...
+					</div>
+				) : characters.length === 0 ? (
+					<div className="rounded-md border border-slate-800 bg-slate-950/40 px-4 py-6 text-sm text-slate-300">
+						You haven&apos;t saved any characters yet. Use the button
+						above to add your first adventurer.
+					</div>
+				) : (
+					<div className="space-y-3">
+						{characters
+							.filter((item) => !editingCharacterId || !isFormOpen || item.id !== editingCharacterId)
+							.map((item) => (
+								<details
+									key={item.id}
+									className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
+								>
+									<summary className="flex cursor-pointer items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
+										{item.avatarUrl ? (
+											<img
+												src={item.avatarUrl}
+												alt={item.name}
+												className="h-12 w-12 rounded-full border-2 border-slate-700 object-cover flex-shrink-0"
+											/>
+										) : (
+											<div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-lg font-semibold text-slate-400 flex-shrink-0">
+												{item.name
+													? item.name.charAt(0).toUpperCase()
+													: "?"}
+											</div>
+										)}
+										<div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
+											<span className="text-base font-semibold text-slate-100">
+												{item.name || "Untitled Character"}
+											</span>
+											<span className="rounded-full border border-indigo-500/60 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-200">
+												{getSystemLabel(item.system)}
+											</span>
+											{item.level && (
+												<span className="text-sm text-slate-300">
+													Level: {item.level}
+												</span>
+											)}
+											{item.class && (
+												<span className="text-sm text-slate-300">
+													Class: {item.class}
+												</span>
+											)}
+											{item.race && (
+												<span className="text-sm text-slate-300">
+													Race: {item.race}
+												</span>
+											)}
+											{item.alignment && (
+												<span className="text-sm text-slate-300">
+													Alignment: {item.alignment}
+												</span>
+											)}
+											{item.background && (
+												<span className="text-sm text-slate-300">
+													Background: {item.background}
+												</span>
+											)}
+											{item.role && (
+												<span className="text-sm text-slate-300">
+													Role: {item.role}
+												</span>
+											)}
+											{item.gold && (
+												<span className="text-sm text-slate-300">
+													Gold: {item.gold}
+												</span>
+											)}
+											{item.experience && (
+												<span className="text-sm text-slate-300">
+													XP: {item.experience}
+												</span>
+											)}
+											<span className="text-sm text-slate-300">
+												Campaign: {item.campaign || "Unassigned"}
+											</span>
+										</div>
+									</summary>
+									{renderCharacterDetails(item)}
+								</details>
+							))}
+					</div>
 				)}
 			</div>
 		</section>
