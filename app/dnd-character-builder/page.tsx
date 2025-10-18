@@ -35,7 +35,7 @@ interface Character {
 	// Proficiencies and traits
 	proficiencyBonus: number;
 	savingThrows: string[];
-	skills: string[];
+	skills: { [skillName: string]: number };
 	traits: string[];
 	features: string[];
 	// Equipment
@@ -72,7 +72,7 @@ export default function DndCharacterBuilder() {
 		hitDice: "1d8",
 		proficiencyBonus: 2,
 		savingThrows: [],
-		skills: [],
+		skills: {},
 		traits: [],
 		features: [],
 		items: [],
@@ -228,18 +228,6 @@ export default function DndCharacterBuilder() {
 		return Math.floor((score - 10) / 2);
 	};
 
-	const calculateSkillModifier = (skillAbility: string, isProficient: boolean): number => {
-		// Type-safe ability score lookup
-		const validAbilities = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
-		if (!validAbilities.includes(skillAbility)) {
-			return 0;
-		}
-		const abilityScore = character[skillAbility as keyof Character] as number;
-		const abilityModifier = calculateModifier(abilityScore);
-		const profBonus = isProficient ? character.proficiencyBonus : 0;
-		return abilityModifier + profBonus;
-	};
-
 	const addItem = (itemName: string) => {
 		const existingItem = character.items.find((i) => i.name === itemName);
 		if (existingItem) {
@@ -279,18 +267,14 @@ export default function DndCharacterBuilder() {
 		setCharacter({ ...character, [ability]: value });
 	};
 
-	const toggleSkill = (skill: string) => {
-		if (character.skills.includes(skill)) {
-			setCharacter({
-				...character,
-				skills: character.skills.filter((s) => s !== skill),
-			});
-		} else {
-			setCharacter({
-				...character,
-				skills: [...character.skills, skill],
-			});
-		}
+	const updateSkillValue = (skillName: string, value: number) => {
+		setCharacter({
+			...character,
+			skills: {
+				...character.skills,
+				[skillName]: value,
+			},
+		});
 	};
 
 	const exportCharacter = () => {
@@ -607,27 +591,28 @@ export default function DndCharacterBuilder() {
 				<h2 className="mb-3 text-lg font-semibold">Skills</h2>
 				<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
 					{skillsData.map((skill) => {
-						const isProficient = character.skills.includes(skill.name);
-						const modifier = calculateSkillModifier(skill.ability, isProficient);
+						const skillValue = character.skills[skill.name] || 0;
 						return (
-							<label
+							<div
 								key={skill.name}
-								className="flex cursor-pointer items-center justify-between gap-2 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm transition hover:bg-slate-700"
+								className="flex items-center justify-between gap-2 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm"
 							>
-								<div className="flex items-center gap-2">
-									<input
-										type="checkbox"
-										checked={isProficient}
-										onChange={() => toggleSkill(skill.name)}
-										className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-sky-600 focus:ring-sky-500"
-									/>
-									<span className="text-slate-200">{skill.name}</span>
-								</div>
-								<span className="font-mono text-sm font-medium text-sky-400">
-									{modifier >= 0 ? "+" : ""}
-									{modifier}
-								</span>
-							</label>
+								<label htmlFor={`skill-${skill.name}`} className="text-slate-200">
+									{skill.name}
+								</label>
+								<input
+									id={`skill-${skill.name}`}
+									type="number"
+									value={skillValue}
+									onChange={(e) =>
+										updateSkillValue(
+											skill.name,
+											e.target.value === '' ? 0 : parseInt(e.target.value, 10) || 0
+										)
+									}
+									className="w-20 rounded border border-slate-600 bg-slate-700 px-2 py-1 text-center font-mono text-sm font-medium text-sky-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+								/>
+							</div>
 						);
 					})}
 				</div>
