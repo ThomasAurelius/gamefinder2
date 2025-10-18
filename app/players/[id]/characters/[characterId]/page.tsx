@@ -253,7 +253,7 @@ export default async function CharacterDetailPage({
           </section>
         ) : null}
 
-        {character.demiplaneUrl ? (
+        {character.system === "starfinder" && character.demiplaneUrl ? (
           <section className="space-y-2">
             <h2 className="text-lg font-semibold text-slate-100">Demiplane Character</h2>
             <a
