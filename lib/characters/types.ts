@@ -34,6 +34,7 @@ export type CharacterDetails = {
   avatarUrl?: string;
   isPublic?: boolean;
   pdfUrls?: string[];
+  demiplaneUrl?: string;
 };
 
 export type CharacterPayload = CharacterDetails & {
