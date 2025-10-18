@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Types for D&D 5e API data
 interface APIReference {
 	index: string;
 	name: string;
 	url: string;
+}
+
+interface APIListResponse {
+	count: number;
+	results: APIReference[];
 }
 
 interface Character {
@@ -78,7 +83,8 @@ export default function DndCharacterBuilder() {
 		items: [],
 	});
 
-	const [races] = useState<APIReference[]>([
+	// Fallback data from D&D 5e SRD
+	const fallbackRaces: APIReference[] = [
 		{ index: "dragonborn", name: "Dragonborn", url: "/api/races/dragonborn" },
 		{ index: "dwarf", name: "Dwarf", url: "/api/races/dwarf" },
 		{ index: "elf", name: "Elf", url: "/api/races/elf" },
@@ -88,8 +94,9 @@ export default function DndCharacterBuilder() {
 		{ index: "halfling", name: "Halfling", url: "/api/races/halfling" },
 		{ index: "human", name: "Human", url: "/api/races/human" },
 		{ index: "tiefling", name: "Tiefling", url: "/api/races/tiefling" },
-	]);
-	const [classes] = useState<APIReference[]>([
+	];
+	
+	const fallbackClasses: APIReference[] = [
 		{ index: "barbarian", name: "Barbarian", url: "/api/classes/barbarian" },
 		{ index: "bard", name: "Bard", url: "/api/classes/bard" },
 		{ index: "cleric", name: "Cleric", url: "/api/classes/cleric" },
@@ -102,61 +109,9 @@ export default function DndCharacterBuilder() {
 		{ index: "sorcerer", name: "Sorcerer", url: "/api/classes/sorcerer" },
 		{ index: "warlock", name: "Warlock", url: "/api/classes/warlock" },
 		{ index: "wizard", name: "Wizard", url: "/api/classes/wizard" },
-	]);
-	const [alignments] = useState<string[]>([
-		"Lawful Good",
-		"Neutral Good",
-		"Chaotic Good",
-		"Lawful Neutral",
-		"True Neutral",
-		"Chaotic Neutral",
-		"Lawful Evil",
-		"Neutral Evil",
-		"Chaotic Evil",
-	]);
-	const [backgrounds] = useState<string[]>([
-		"Acolyte",
-		"Charlatan",
-		"Criminal",
-		"Entertainer",
-		"Folk Hero",
-		"Guild Artisan",
-		"Hermit",
-		"Noble",
-		"Outlander",
-		"Sage",
-		"Sailor",
-		"Soldier",
-		"Urchin",
-	]);
-
-	// D&D 5e skills mapped to their ability scores
-	const skillsData = [
-		{ name: "Acrobatics", ability: "dexterity" },
-		{ name: "Animal Handling", ability: "wisdom" },
-		{ name: "Arcana", ability: "intelligence" },
-		{ name: "Athletics", ability: "strength" },
-		{ name: "Deception", ability: "charisma" },
-		{ name: "History", ability: "intelligence" },
-		{ name: "Insight", ability: "wisdom" },
-		{ name: "Intimidation", ability: "charisma" },
-		{ name: "Investigation", ability: "intelligence" },
-		{ name: "Medicine", ability: "wisdom" },
-		{ name: "Nature", ability: "intelligence" },
-		{ name: "Perception", ability: "wisdom" },
-		{ name: "Performance", ability: "charisma" },
-		{ name: "Persuasion", ability: "charisma" },
-		{ name: "Religion", ability: "intelligence" },
-		{ name: "Sleight of Hand", ability: "dexterity" },
-		{ name: "Stealth", ability: "dexterity" },
-		{ name: "Survival", ability: "wisdom" },
 	];
-
-	const [itemSearch, setItemSearch] = useState("");
-	const [searchResults, setSearchResults] = useState<APIReference[]>([]);
-
-	// Common D&D equipment from SRD
-	const [equipment] = useState<APIReference[]>([
+	
+	const fallbackEquipment: APIReference[] = [
 		{ index: "longsword", name: "Longsword", url: "/api/equipment/longsword" },
 		{ index: "shortsword", name: "Shortsword", url: "/api/equipment/shortsword" },
 		{ index: "greatsword", name: "Greatsword", url: "/api/equipment/greatsword" },
@@ -210,7 +165,133 @@ export default function DndCharacterBuilder() {
 		{ index: "component-pouch", name: "Component Pouch", url: "/api/equipment/component-pouch" },
 		{ index: "arcane-focus", name: "Arcane Focus", url: "/api/equipment/arcane-focus" },
 		{ index: "druidic-focus", name: "Druidic Focus", url: "/api/equipment/druidic-focus" },
+	];
+
+	const [races, setRaces] = useState<APIReference[]>(fallbackRaces);
+	const [classes, setClasses] = useState<APIReference[]>(fallbackClasses);
+	const [alignments] = useState<string[]>([
+		"Lawful Good",
+		"Neutral Good",
+		"Chaotic Good",
+		"Lawful Neutral",
+		"True Neutral",
+		"Chaotic Neutral",
+		"Lawful Evil",
+		"Neutral Evil",
+		"Chaotic Evil",
 	]);
+	const [backgrounds] = useState<string[]>([
+		"Acolyte",
+		"Charlatan",
+		"Criminal",
+		"Entertainer",
+		"Folk Hero",
+		"Guild Artisan",
+		"Hermit",
+		"Noble",
+		"Outlander",
+		"Sage",
+		"Sailor",
+		"Soldier",
+		"Urchin",
+	]);
+	const [equipment, setEquipment] = useState<APIReference[]>(fallbackEquipment);
+	const [loading, setLoading] = useState<{
+		races: boolean;
+		classes: boolean;
+		equipment: boolean;
+	}>({
+		races: false,
+		classes: false,
+		equipment: false,
+	});
+	const [usingFallback, setUsingFallback] = useState(false);
+
+	// Load data from D&D 5e API on component mount, with fallback to local data
+	useEffect(() => {
+		const loadRaces = async () => {
+			setLoading((prev) => ({ ...prev, races: true }));
+			try {
+				const response = await fetch("/api/dnd?endpoint=races");
+				if (!response.ok) throw new Error("Failed to load races");
+				const data: APIListResponse = await response.json();
+				if (data.results && data.results.length > 0) {
+					setRaces(data.results);
+				}
+			} catch (err) {
+				console.warn("Using fallback data for races:", err);
+				setUsingFallback(true);
+				// Already initialized with fallback data
+			} finally {
+				setLoading((prev) => ({ ...prev, races: false }));
+			}
+		};
+
+		const loadClasses = async () => {
+			setLoading((prev) => ({ ...prev, classes: true }));
+			try {
+				const response = await fetch("/api/dnd?endpoint=classes");
+				if (!response.ok) throw new Error("Failed to load classes");
+				const data: APIListResponse = await response.json();
+				if (data.results && data.results.length > 0) {
+					setClasses(data.results);
+				}
+			} catch (err) {
+				console.warn("Using fallback data for classes:", err);
+				setUsingFallback(true);
+				// Already initialized with fallback data
+			} finally {
+				setLoading((prev) => ({ ...prev, classes: false }));
+			}
+		};
+
+		const loadEquipment = async () => {
+			setLoading((prev) => ({ ...prev, equipment: true }));
+			try {
+				const response = await fetch("/api/dnd?endpoint=equipment");
+				if (!response.ok) throw new Error("Failed to load equipment");
+				const data: APIListResponse = await response.json();
+				if (data.results && data.results.length > 0) {
+					setEquipment(data.results);
+				}
+			} catch (err) {
+				console.warn("Using fallback data for equipment:", err);
+				setUsingFallback(true);
+				// Already initialized with fallback data
+			} finally {
+				setLoading((prev) => ({ ...prev, equipment: false }));
+			}
+		};
+
+		loadRaces();
+		loadClasses();
+		loadEquipment();
+	}, []);
+
+	// D&D 5e skills mapped to their ability scores
+	const skillsData = [
+		{ name: "Acrobatics", ability: "dexterity" },
+		{ name: "Animal Handling", ability: "wisdom" },
+		{ name: "Arcana", ability: "intelligence" },
+		{ name: "Athletics", ability: "strength" },
+		{ name: "Deception", ability: "charisma" },
+		{ name: "History", ability: "intelligence" },
+		{ name: "Insight", ability: "wisdom" },
+		{ name: "Intimidation", ability: "charisma" },
+		{ name: "Investigation", ability: "intelligence" },
+		{ name: "Medicine", ability: "wisdom" },
+		{ name: "Nature", ability: "intelligence" },
+		{ name: "Perception", ability: "wisdom" },
+		{ name: "Performance", ability: "charisma" },
+		{ name: "Persuasion", ability: "charisma" },
+		{ name: "Religion", ability: "intelligence" },
+		{ name: "Sleight of Hand", ability: "dexterity" },
+		{ name: "Stealth", ability: "dexterity" },
+		{ name: "Survival", ability: "wisdom" },
+	];
+
+	const [itemSearch, setItemSearch] = useState("");
+	const [searchResults, setSearchResults] = useState<APIReference[]>([]);
 
 	const searchItems = () => {
 		if (!itemSearch.trim()) {
@@ -299,6 +380,11 @@ export default function DndCharacterBuilder() {
 				<p className="text-sm text-slate-300">
 					Create and manage your D&D 5e character using data from the D&D 5e API
 				</p>
+				{usingFallback && (
+					<div className="mt-2 rounded border border-yellow-500 bg-yellow-900/20 px-3 py-2 text-sm text-yellow-300">
+						Using local D&D 5e SRD data (API unavailable)
+					</div>
+				)}
 			</div>
 
 			{/* Basic Information */}
@@ -326,9 +412,12 @@ export default function DndCharacterBuilder() {
 							onChange={(e) =>
 								setCharacter({ ...character, race: e.target.value })
 							}
-							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
+							disabled={loading.races}
+							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100 disabled:opacity-50"
 						>
-							<option value="">Select Race</option>
+							<option value="">
+								{loading.races ? "Loading races..." : "Select Race"}
+							</option>
 							{races.map((race) => (
 								<option key={race.index} value={race.name}>
 									{race.name}
@@ -343,9 +432,12 @@ export default function DndCharacterBuilder() {
 							onChange={(e) =>
 								setCharacter({ ...character, class: e.target.value })
 							}
-							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
+							disabled={loading.classes}
+							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100 disabled:opacity-50"
 						>
-							<option value="">Select Class</option>
+							<option value="">
+								{loading.classes ? "Loading classes..." : "Select Class"}
+							</option>
 							{classes.map((cls) => (
 								<option key={cls.index} value={cls.name}>
 									{cls.name}
@@ -634,13 +726,15 @@ export default function DndCharacterBuilder() {
 							onChange={(e) => setItemSearch(e.target.value)}
 							onKeyDown={(e) => e.key === "Enter" && searchItems()}
 							placeholder="Search for equipment..."
-							className="flex-1 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100"
+							disabled={loading.equipment}
+							className="flex-1 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 disabled:opacity-50"
 						/>
 						<button
 							onClick={searchItems}
-							className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+							disabled={loading.equipment}
+							className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"
 						>
-							Search
+							{loading.equipment ? "Loading..." : "Search"}
 						</button>
 					</div>
 
