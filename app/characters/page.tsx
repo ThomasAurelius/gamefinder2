@@ -18,6 +18,7 @@ import {
 } from "@/lib/characters/types";
 import { SKILL_ATTRIBUTES, getSkillDisplayName } from "@/lib/characters/skill-attributes";
 import { categorizeStats } from "@/lib/characters/stat-display-utils";
+import { getGameSystemOptions } from "@/lib/characters/game-system-options";
 import AvatarCropper from "@/components/AvatarCropper";
 import { parsePathbuilder2eJson } from "@/lib/characters/pathbuilder-import";
 
@@ -237,12 +238,18 @@ export default function CharactersPage() {
   const [jsonImportText, setJsonImportText] = useState<string>("");
   const [jsonImportError, setJsonImportError] = useState<string | null>(null);
   const [showJsonImport, setShowJsonImport] = useState(false);
+  const [isAbilitiesOpen, setIsAbilitiesOpen] = useState(false);
+  const [isSkillsOpen, setIsSkillsOpen] = useState(false);
 
   const systemConfig = useMemo(
     () => GAME_SYSTEMS[selectedSystem],
     [selectedSystem]
   );
   const isCustomSystem = selectedSystem === "other";
+  const systemOptions = useMemo(
+    () => getGameSystemOptions(selectedSystem),
+    [selectedSystem]
+  );
 
   const fetchCharacters = useCallback(async () => {
     setLoadingError(null);
@@ -1103,52 +1110,112 @@ export default function CharactersPage() {
                   <span className="text-sm font-medium text-slate-200">
                     Alignment
                   </span>
-                  <input
-                    type="text"
-                    value={character.alignment || ""}
-                    onChange={(event) =>
-                      setCharacter((prev) => ({
-                        ...prev,
-                        alignment: event.target.value,
-                      }))
-                    }
-                    placeholder="Chaotic Good"
-                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-                  />
+                  {systemOptions?.alignments ? (
+                    <select
+                      value={character.alignment || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          alignment: event.target.value,
+                        }))
+                      }
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    >
+                      <option value="">Select alignment</option>
+                      {systemOptions.alignments.map((alignment) => (
+                        <option key={alignment} value={alignment}>
+                          {alignment}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={character.alignment || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          alignment: event.target.value,
+                        }))
+                      }
+                      placeholder="Chaotic Good"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  )}
                 </label>
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-slate-200">
                     Race
                   </span>
-                  <input
-                    type="text"
-                    value={character.race || ""}
-                    onChange={(event) =>
-                      setCharacter((prev) => ({
-                        ...prev,
-                        race: event.target.value,
-                      }))
-                    }
-                    placeholder="High Elf"
-                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-                  />
+                  {systemOptions?.races ? (
+                    <select
+                      value={character.race || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          race: event.target.value,
+                        }))
+                      }
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    >
+                      <option value="">Select race</option>
+                      {systemOptions.races.map((race) => (
+                        <option key={race} value={race}>
+                          {race}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={character.race || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          race: event.target.value,
+                        }))
+                      }
+                      placeholder="High Elf"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  )}
                 </label>
                 <label className="flex flex-col gap-2">
                   <span className="text-sm font-medium text-slate-200">
                     Background
                   </span>
-                  <input
-                    type="text"
-                    value={character.background || ""}
-                    onChange={(event) =>
-                      setCharacter((prev) => ({
-                        ...prev,
-                        background: event.target.value,
-                      }))
-                    }
-                    placeholder="Sage"
-                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-                  />
+                  {systemOptions?.backgrounds ? (
+                    <select
+                      value={character.background || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          background: event.target.value,
+                        }))
+                      }
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    >
+                      <option value="">Select background</option>
+                      {systemOptions.backgrounds.map((background) => (
+                        <option key={background} value={background}>
+                          {background}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={character.background || ""}
+                      onChange={(event) =>
+                        setCharacter((prev) => ({
+                          ...prev,
+                          background: event.target.value,
+                        }))
+                      }
+                      placeholder="Sage"
+                      className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                    />
+                  )}
                 </label>
               </div>
 
@@ -1320,18 +1387,38 @@ export default function CharactersPage() {
                 <span className="text-sm font-medium text-slate-200">
                   Class
                 </span>
-                <input
-                  type="text"
-                  value={character.class || ""}
-                  onChange={(event) =>
-                    setCharacter((prev) => ({
-                      ...prev,
-                      class: event.target.value,
-                    }))
-                  }
-                  placeholder="Wizard"
-                  className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-                />
+                {systemOptions?.classes ? (
+                  <select
+                    value={character.class || ""}
+                    onChange={(event) =>
+                      setCharacter((prev) => ({
+                        ...prev,
+                        class: event.target.value,
+                      }))
+                    }
+                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  >
+                    <option value="">Select class</option>
+                    {systemOptions.classes.map((className) => (
+                      <option key={className} value={className}>
+                        {className}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={character.class || ""}
+                    onChange={(event) =>
+                      setCharacter((prev) => ({
+                        ...prev,
+                        class: event.target.value,
+                      }))
+                    }
+                    placeholder="Wizard"
+                    className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                  />
+                )}
               </label>
 
               <label className="flex flex-col gap-2">
@@ -1492,108 +1579,136 @@ export default function CharactersPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-100">
-                  Ability Scores
-                </h2>
-                {isCustomSystem && (
-                  <button
-                    type="button"
-                    onClick={addCustomStat}
-                    className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
-                  >
-                    Add Stat
-                  </button>
-                )}
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {character.stats.map((stat, index) => (
-                  <div
-                    key={`${stat.name}-${index}`}
-                    className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
-                  >
-                    <label className="flex flex-col gap-2">
-                      <span className="text-xs uppercase tracking-wide text-slate-400">
-                        {isCustomSystem ? (
-                          <input
-                            type="text"
-                            value={stat.name}
-                            onChange={(event) =>
-                              updateStat(index, "name", event.target.value)
-                            }
-                            placeholder="Stat Name"
-                            className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
-                          />
-                        ) : (
-                          stat.name
-                        )}
-                      </span>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        value={stat.value}
-                        onChange={(event) =>
-                          updateStat(index, "value", event.target.value)
-                        }
-                        placeholder="0"
-                        className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-                      />
-                    </label>
-                  </div>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsAbilitiesOpen(!isAbilitiesOpen)}
+                className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+              >
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-slate-100">
+                    Ability Scores
+                  </h2>
+                  {isCustomSystem && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addCustomStat();
+                      }}
+                      className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+                    >
+                      Add Stat
+                    </button>
+                  )}
+                </div>
+                <span className="text-xs uppercase tracking-wide text-slate-400">
+                  {isAbilitiesOpen ? "Collapse" : "Expand"}
+                </span>
+              </button>
+              {isAbilitiesOpen && (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {character.stats.map((stat, index) => (
+                    <div
+                      key={`${stat.name}-${index}`}
+                      className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+                    >
+                      <label className="flex flex-col gap-2">
+                        <span className="text-xs uppercase tracking-wide text-slate-400">
+                          {isCustomSystem ? (
+                            <input
+                              type="text"
+                              value={stat.name}
+                              onChange={(event) =>
+                                updateStat(index, "name", event.target.value)
+                              }
+                              placeholder="Stat Name"
+                              className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+                            />
+                          ) : (
+                            stat.name
+                          )}
+                        </span>
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={stat.value}
+                          onChange={(event) =>
+                            updateStat(index, "value", event.target.value)
+                          }
+                          placeholder="0"
+                          className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-100">
-                  Skills
-                </h2>
-                {isCustomSystem && (
-                  <button
-                    type="button"
-                    onClick={addCustomSkill}
-                    className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
-                  >
-                    Add Skill
-                  </button>
-                )}
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {character.skills.map((skill, index) => (
-                  <div
-                    key={`${skill.name}-${index}`}
-                    className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
-                  >
-                    <label className="flex flex-col gap-2">
-                      <span className="text-xs uppercase tracking-wide text-slate-400">
-                        {isCustomSystem ? (
-                          <input
-                            type="text"
-                            value={skill.name}
-                            onChange={(event) =>
-                              updateSkill(index, "name", event.target.value)
-                            }
-                            placeholder="Skill Name"
-                            className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
-                          />
-                        ) : (
-                          getSkillDisplayName(skill.name, selectedSystem)
-                        )}
-                      </span>
-                      <input
-                        type="text"
-                        value={skill.value}
-                        onChange={(event) =>
-                          updateSkill(index, "value", event.target.value)
-                        }
-                        placeholder={isCustomSystem ? "Rank / Modifier" : "+0"}
-                        className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-                      />
-                    </label>
-                  </div>
-                ))}
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsSkillsOpen(!isSkillsOpen)}
+                className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+              >
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-slate-100">
+                    Skills
+                  </h2>
+                  {isCustomSystem && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addCustomSkill();
+                      }}
+                      className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+                    >
+                      Add Skill
+                    </button>
+                  )}
+                </div>
+                <span className="text-xs uppercase tracking-wide text-slate-400">
+                  {isSkillsOpen ? "Collapse" : "Expand"}
+                </span>
+              </button>
+              {isSkillsOpen && (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {character.skills.map((skill, index) => (
+                    <div
+                      key={`${skill.name}-${index}`}
+                      className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+                    >
+                      <label className="flex flex-col gap-2">
+                        <span className="text-xs uppercase tracking-wide text-slate-400">
+                          {isCustomSystem ? (
+                            <input
+                              type="text"
+                              value={skill.name}
+                              onChange={(event) =>
+                                updateSkill(index, "name", event.target.value)
+                              }
+                              placeholder="Skill Name"
+                              className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+                            />
+                          ) : (
+                            getSkillDisplayName(skill.name, selectedSystem)
+                          )}
+                        </span>
+                        <input
+                          type="text"
+                          value={skill.value}
+                          onChange={(event) =>
+                            updateSkill(index, "value", event.target.value)
+                          }
+                          placeholder={isCustomSystem ? "Rank / Modifier" : "+0"}
+                          className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <label className="flex flex-col gap-2">

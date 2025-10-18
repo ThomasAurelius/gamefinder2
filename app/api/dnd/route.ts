@@ -10,11 +10,14 @@ const ALLOWED_ENDPOINTS = [
 	"magic-items",
 	"conditions",
 	"backgrounds",
+	"alignments",
+	"equipment-categories",
 ];
 
 export async function GET(request: NextRequest) {
 	const searchParams = request.nextUrl.searchParams;
 	const endpoint = searchParams.get("endpoint");
+	const id = searchParams.get("id");
 
 	if (!endpoint) {
 		return NextResponse.json(
@@ -32,12 +35,14 @@ export async function GET(request: NextRequest) {
 	}
 
 	try {
-		const response = await fetch(
-			`https://www.dnd5eapi.co/api/${endpoint}`,
-			{
-				next: { revalidate: 3600 }, // Cache for 1 hour
-			}
-		);
+		// Build the URL - if id is provided, fetch specific item
+		const url = id 
+			? `https://www.dnd5eapi.co/api/${endpoint}/${id}`
+			: `https://www.dnd5eapi.co/api/${endpoint}`;
+
+		const response = await fetch(url, {
+			next: { revalidate: 3600 }, // Cache for 1 hour
+		});
 
 		if (!response.ok) {
 			return NextResponse.json(
