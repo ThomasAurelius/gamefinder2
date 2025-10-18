@@ -1507,7 +1507,7 @@ export default function CharactersPage() {
 							{/* Hide all other fields when PDFs are uploaded */}
 							{(!character.pdfUrls || character.pdfUrls.length === 0) && (
 								<>
-							<div className="grid gap-4 sm:grid-cols-3">
+									<div className="grid gap-4 sm:grid-cols-3">
 								<label className="flex flex-col gap-2">
 									<span className="text-sm font-medium text-slate-200">
 										Alignment
@@ -1873,7 +1873,6 @@ export default function CharactersPage() {
 									</span>
 								</span>
 							</label>
-						</div>
 
 						{/* Items Section */}
 						<div className="space-y-4">
@@ -2125,6 +2124,7 @@ export default function CharactersPage() {
 
 								</>
 							)}
+						</div>
 
 						{submitError && (
 							<div className="rounded-md border border-rose-700 bg-rose-900/40 px-4 py-3 text-sm text-rose-100">
