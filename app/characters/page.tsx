@@ -658,7 +658,9 @@ export default function CharactersPage() {
 					notes: savedCharacter.notes,
 					avatarUrl: savedCharacter.avatarUrl,
 					isPublic: savedCharacter.isPublic ?? false,
-					pdfUrls: savedCharacter.pdfUrls ? [...savedCharacter.pdfUrls] : undefined,
+					pdfUrls: savedCharacter.pdfUrls
+						? [...savedCharacter.pdfUrls]
+						: undefined,
 					demiplaneUrl: savedCharacter.demiplaneUrl,
 				});
 			} else {
@@ -690,17 +692,14 @@ export default function CharactersPage() {
 					</button>
 					<button
 						type="button"
-						onClick={() =>
-							handleDeleteCharacter(item.id)
-						}
+						onClick={() => handleDeleteCharacter(item.id)}
 						className="rounded-md border border-rose-600/70 px-3 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-600/10"
 					>
 						Delete
 					</button>
 				</div>
 				<span className="text-xs text-slate-400">
-					Last updated:{" "}
-					{new Date(item.updatedAt).toLocaleString()}
+					Last updated: {new Date(item.updatedAt).toLocaleString()}
 				</span>
 			</div>
 
@@ -720,9 +719,7 @@ export default function CharactersPage() {
 								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
 									Age
 								</div>
-								<div className="text-sm text-slate-100">
-									{item.age}
-								</div>
+								<div className="text-sm text-slate-100">{item.age}</div>
 							</div>
 						)}
 						{item.height && (
@@ -797,63 +794,51 @@ export default function CharactersPage() {
 								<>
 									<div className="grid gap-2 grid-cols-2">
 										<div className="space-y-2">
-											{physicalStats.map(
-												(stat, index) => (
-													<div
-														key={`${stat.name}-${index}`}
-														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-													>
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															{stat.name ||
-																"Stat"}
-														</div>
-														<div className="text-lg font-semibold text-slate-100">
-															{stat.value ||
-																"-"}
-														</div>
+											{physicalStats.map((stat, index) => (
+												<div
+													key={`${stat.name}-${index}`}
+													className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+												>
+													<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+														{stat.name || "Stat"}
 													</div>
-												)
-											)}
+													<div className="text-lg font-semibold text-slate-100">
+														{stat.value || "-"}
+													</div>
+												</div>
+											))}
 										</div>
 										<div className="space-y-2">
-											{mentalStats.map(
-												(stat, index) => (
-													<div
-														key={`${stat.name}-${index}`}
-														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-													>
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															{stat.name ||
-																"Stat"}
-														</div>
-														<div className="text-lg font-semibold text-slate-100">
-															{stat.value ||
-																"-"}
-														</div>
+											{mentalStats.map((stat, index) => (
+												<div
+													key={`${stat.name}-${index}`}
+													className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+												>
+													<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+														{stat.name || "Stat"}
 													</div>
-												)
-											)}
+													<div className="text-lg font-semibold text-slate-100">
+														{stat.value || "-"}
+													</div>
+												</div>
+											))}
 										</div>
 									</div>
 									{otherStats.length > 0 && (
 										<div className="grid gap-2 sm:grid-cols-2 mt-2">
-											{otherStats.map(
-												(stat, index) => (
-													<div
-														key={`${stat.name}-${index}`}
-														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-													>
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															{stat.name ||
-																"Stat"}
-														</div>
-														<div className="text-lg font-semibold text-slate-100">
-															{stat.value ||
-																"-"}
-														</div>
+											{otherStats.map((stat, index) => (
+												<div
+													key={`${stat.name}-${index}`}
+													className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+												>
+													<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+														{stat.name || "Stat"}
 													</div>
-												)
-											)}
+													<div className="text-lg font-semibold text-slate-100">
+														{stat.value || "-"}
+													</div>
+												</div>
+											))}
 										</div>
 									)}
 								</>
@@ -892,10 +877,8 @@ export default function CharactersPage() {
 								className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
 							>
 								<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-									{getSkillDisplayName(
-										skill.name,
-										item.system
-									) || "Skill"}
+									{getSkillDisplayName(skill.name, item.system) ||
+										"Skill"}
 								</div>
 								<div className="text-lg font-semibold text-slate-100">
 									{skill.value || "-"}
@@ -935,45 +918,42 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{item.system === "dnd" &&
-				item.pdfUrls &&
-				item.pdfUrls.length > 0 && (
-					<div className="space-y-2">
-						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-							Character Sheets
-						</h3>
-						<div className="flex flex-wrap gap-2">
-							{item.pdfUrls.map((url, index) => (
-								<a
-									key={index}
-									href={url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-								>
-									📄 Character Sheet {index + 1}
-								</a>
-							))}
-						</div>
+			{item.system === "dnd" && item.pdfUrls && item.pdfUrls.length > 0 && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Character Sheets
+					</h3>
+					<div className="flex flex-wrap gap-2">
+						{item.pdfUrls.map((url, index) => (
+							<a
+								key={index}
+								href={url}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+							>
+								📄 Character Sheet {index + 1}
+							</a>
+						))}
 					</div>
-				)}
+				</div>
+			)}
 
-			{item.system === "starfinder" &&
-				item.demiplaneUrl && (
-					<div className="space-y-2">
-						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-							Demiplane Character
-						</h3>
-						<a
-							href={item.demiplaneUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-						>
-							🔗 View on Demiplane
-						</a>
-					</div>
-				)}
+			{item.system === "starfinder" && item.demiplaneUrl && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Demiplane Character
+					</h3>
+					<a
+						href={item.demiplaneUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+					>
+						🔗 View on Demiplane
+					</a>
+				</div>
+			)}
 		</div>
 	);
 
@@ -1022,7 +1002,11 @@ export default function CharactersPage() {
 							<details
 								key={item.id}
 								open={isCurrentValuesOpen}
-								onToggle={(e) => setIsCurrentValuesOpen((e.target as HTMLDetailsElement).open)}
+								onToggle={(e) =>
+									setIsCurrentValuesOpen(
+										(e.target as HTMLDetailsElement).open
+									)
+								}
 								className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
 							>
 								<summary className="flex cursor-pointer items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
@@ -1353,8 +1337,7 @@ export default function CharactersPage() {
 											</div>
 										)}
 
-									{(item.system === "dnd" ||
-										item.system === "starfinder") &&
+									{item.system === "starfinder" &&
 										item.demiplaneUrl && (
 											<div className="space-y-2">
 												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -1462,7 +1445,8 @@ export default function CharactersPage() {
 														</li>
 														<li>Download the PDF file(s)</li>
 														<li>
-															Upload the files below (max 3 files)
+															Upload the files below (max 3
+															files)
 														</li>
 													</ol>
 												) : (
@@ -1662,8 +1646,7 @@ export default function CharactersPage() {
 							)}
 
 							{/* Demiplane URL Section - Show for D&D and Starfinder */}
-							{(selectedSystem === "dnd" ||
-								selectedSystem === "starfinder") && (
+							{selectedSystem === "starfinder" && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
 										<div>
@@ -1671,11 +1654,7 @@ export default function CharactersPage() {
 												Demiplane Character Link
 											</h3>
 											<p className="text-xs text-purple-300/80">
-												Link your Demiplane{" "}
-												{selectedSystem === "dnd"
-													? "D&D"
-													: "Starfinder"}{" "}
-												character
+												Link your Demiplane Starfinder character
 											</p>
 										</div>
 
@@ -1693,11 +1672,8 @@ export default function CharactersPage() {
 													<li>Paste it in the field below</li>
 												</ol>
 												<p className="mt-2 text-purple-300">
-													Example: https://app.demiplane.com/nexus/
-													{selectedSystem === "dnd"
-														? "dnd5e"
-														: "starfinder2e"}
-													/character/abc123
+													Example:
+													https://app.demiplane.com/nexus/starfinder2e/character/abc123
 												</p>
 											</div>
 
@@ -1716,7 +1692,7 @@ export default function CharactersPage() {
 																undefined,
 														}))
 													}
-													placeholder={`https://app.demiplane.com/nexus/${selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/...`}
+													placeholder={`https://app.demiplane.com/nexus/starfinder2e/character/...`}
 													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
 												/>
 											</label>
@@ -2599,7 +2575,9 @@ export default function CharactersPage() {
 			{/* Other Characters Section */}
 			<div className="space-y-3">
 				<h2 className="text-xl font-semibold text-slate-100">
-					{editingCharacterId && isFormOpen ? "Other Characters" : "Saved Characters"}
+					{editingCharacterId && isFormOpen
+						? "Other Characters"
+						: "Saved Characters"}
 				</h2>
 				{isLoading ? (
 					<div className="rounded-md border border-slate-800 bg-slate-950/40 px-4 py-6 text-sm text-slate-300">
@@ -2613,7 +2591,12 @@ export default function CharactersPage() {
 				) : (
 					<div className="space-y-3">
 						{characters
-							.filter((item) => !editingCharacterId || !isFormOpen || item.id !== editingCharacterId)
+							.filter(
+								(item) =>
+									!editingCharacterId ||
+									!isFormOpen ||
+									item.id !== editingCharacterId
+							)
 							.map((item) => (
 								<details
 									key={item.id}
