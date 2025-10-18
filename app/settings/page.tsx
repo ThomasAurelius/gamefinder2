@@ -79,6 +79,20 @@ export default function SettingsPage() {
 	const [awardingBadge, setAwardingBadge] = useState(false);
 	const [assigningSelfBadge, setAssigningSelfBadge] = useState(false);
 
+	// Ambassador management state
+	const [ambassadorSearchUsername, setAmbassadorSearchUsername] = useState("");
+	const [ambassadorSearchedUser, setAmbassadorSearchedUser] = useState<{
+		userId: string;
+		name: string;
+		commonName: string;
+		isAmbassador?: boolean;
+		ambassadorUntil?: string;
+	} | null>(null);
+	const [searchingAmbassadorUser, setSearchingAmbassadorUser] = useState(false);
+	const [savingAmbassador, setSavingAmbassador] = useState(false);
+	const [ambassadorMessage, setAmbassadorMessage] = useState("");
+	const [ambassadorUntilDate, setAmbassadorUntilDate] = useState("");
+
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
 			try {
@@ -538,6 +552,80 @@ export default function SettingsPage() {
 		} catch (error) {
 			console.error("Failed to remove badge:", error);
 			setBadgeMessage("Failed to remove badge. Please try again.");
+		}
+	};
+
+	const handleSearchAmbassadorUser = async () => {
+		if (!ambassadorSearchUsername.trim()) {
+			setAmbassadorMessage("Please enter a username");
+			return;
+		}
+
+		setSearchingAmbassadorUser(true);
+		setAmbassadorMessage("");
+
+		try {
+			const response = await fetch(`/api/public/users/search?username=${encodeURIComponent(ambassadorSearchUsername)}`);
+			if (!response.ok) {
+				throw new Error("User not found");
+			}
+
+			const userData = await response.json();
+			
+			// Check current ambassador status
+			const statusResponse = await fetch(`/api/admin/ambassador?userId=${userData.userId}`);
+			if (statusResponse.ok) {
+				const statusData = await statusResponse.json();
+				userData.isAmbassador = statusData.isAmbassador;
+				userData.ambassadorUntil = statusData.ambassadorUntil;
+				setAmbassadorUntilDate(statusData.ambassadorUntil ? new Date(statusData.ambassadorUntil).toISOString().split('T')[0] : "");
+			}
+			
+			setAmbassadorSearchedUser(userData);
+		} catch (error) {
+			console.error("Failed to search user:", error);
+			setAmbassadorMessage("User not found. Please check the username.");
+			setAmbassadorSearchedUser(null);
+		} finally {
+			setSearchingAmbassadorUser(false);
+		}
+	};
+
+	const handleSetAmbassadorStatus = async (isAmbassador: boolean) => {
+		if (!ambassadorSearchedUser) return;
+
+		setSavingAmbassador(true);
+		setAmbassadorMessage("");
+
+		try {
+			const response = await fetch("/api/admin/ambassador", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ 
+					userId: ambassadorSearchedUser.userId, 
+					isAmbassador,
+					ambassadorUntil: isAmbassador && ambassadorUntilDate ? ambassadorUntilDate : undefined,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to update ambassador status");
+			}
+
+			setAmbassadorMessage(`Ambassador status ${isAmbassador ? "granted" : "removed"} successfully!`);
+			setTimeout(() => setAmbassadorMessage(""), 3000);
+			
+			// Update local state
+			setAmbassadorSearchedUser({
+				...ambassadorSearchedUser,
+				isAmbassador,
+				ambassadorUntil: isAmbassador && ambassadorUntilDate ? ambassadorUntilDate : undefined,
+			});
+		} catch (error) {
+			console.error("Failed to update ambassador status:", error);
+			setAmbassadorMessage("Failed to update ambassador status. Please try again.");
+		} finally {
+			setSavingAmbassador(false);
 		}
 	};
 
@@ -1117,6 +1205,115 @@ export default function SettingsPage() {
 										{badgeMessage}
 									</p>
 								)}
+							</div>
+						</div>
+					)}
+
+					{isAdmin && (
+						<div className="rounded-lg border border-amber-700/50 bg-amber-900/20 p-4">
+							<h2 className="text-sm font-medium text-amber-200">
+								Admin: Ambassador Management
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								Grant or revoke ambassador status for DMs. Ambassadors pay only Stripe transaction fees (no platform fee).
+							</p>
+
+							<div className="mt-4 space-y-4">
+								<div className="rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
+									<h3 className="text-sm font-medium text-slate-200">Search User</h3>
+									
+									<div className="flex gap-2">
+										<input
+											type="text"
+											value={ambassadorSearchUsername}
+											onChange={(e) => setAmbassadorSearchUsername(e.target.value)}
+											placeholder="Enter username"
+											className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													handleSearchAmbassadorUser();
+												}
+											}}
+										/>
+										<button
+											onClick={handleSearchAmbassadorUser}
+											disabled={searchingAmbassadorUser}
+											className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											{searchingAmbassadorUser ? "Searching..." : "Search"}
+										</button>
+									</div>
+
+									{ambassadorSearchedUser && (
+										<div className="space-y-3 pt-3 border-t border-slate-700">
+											<div>
+												<p className="text-sm text-slate-300">
+													User: <span className="font-medium text-slate-100">{ambassadorSearchedUser.commonName || ambassadorSearchedUser.name}</span>
+												</p>
+												<p className="text-xs text-slate-400 mt-1">
+													Current Status: {ambassadorSearchedUser.isAmbassador ? (
+														<span className="text-emerald-400">
+															Ambassador {ambassadorSearchedUser.ambassadorUntil ? `until ${new Date(ambassadorSearchedUser.ambassadorUntil).toLocaleDateString()}` : "(permanent)"}
+														</span>
+													) : (
+														<span className="text-slate-400">Regular User (15% platform fee)</span>
+													)}
+												</p>
+											</div>
+
+											<div className="space-y-2">
+												<label className="block text-sm font-medium text-slate-200">
+													Ambassador Until (optional)
+												</label>
+												<input
+													type="date"
+													value={ambassadorUntilDate}
+													onChange={(e) => setAmbassadorUntilDate(e.target.value)}
+													className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+												/>
+												<p className="text-xs text-slate-500">
+													Leave blank for permanent ambassador status
+												</p>
+											</div>
+
+											<div className="flex gap-2">
+												{!ambassadorSearchedUser.isAmbassador ? (
+													<button
+														onClick={() => handleSetAmbassadorStatus(true)}
+														disabled={savingAmbassador}
+														className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+													>
+														{savingAmbassador ? "Saving..." : "Grant Ambassador Status"}
+													</button>
+												) : (
+													<button
+														onClick={() => handleSetAmbassadorStatus(false)}
+														disabled={savingAmbassador}
+														className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+													>
+														{savingAmbassador ? "Saving..." : "Revoke Ambassador Status"}
+													</button>
+												)}
+											</div>
+										</div>
+									)}
+								</div>
+
+								{ambassadorMessage && (
+									<p
+										className={`text-sm ${ambassadorMessage.includes("success") ? "text-emerald-400" : "text-rose-400"}`}
+									>
+										{ambassadorMessage}
+									</p>
+								)}
+
+								<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-3">
+									<h3 className="text-xs font-medium text-slate-300 mb-2">Fee Structure</h3>
+									<ul className="text-xs text-slate-400 space-y-1">
+										<li>• <span className="text-emerald-400">Ambassadors:</span> 0% platform fee + Stripe transaction fees (~2.9% + 30¢)</li>
+										<li>• <span className="text-slate-300">Regular DMs:</span> 15% platform fee + Stripe transaction fees</li>
+									</ul>
+								</div>
 							</div>
 						</div>
 					)}
