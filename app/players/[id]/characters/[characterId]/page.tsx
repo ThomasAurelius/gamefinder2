@@ -234,6 +234,39 @@ export default async function CharacterDetailPage({
           </section>
         ) : null}
 
+        {character.pdfUrls && character.pdfUrls.length > 0 ? (
+          <section className="space-y-2">
+            <h2 className="text-lg font-semibold text-slate-100">Character Sheets</h2>
+            <div className="flex flex-wrap gap-2">
+              {character.pdfUrls.map((url, index) => (
+                <a
+                  key={index}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+                >
+                  📄 Character Sheet {index + 1}
+                </a>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {character.demiplaneUrl ? (
+          <section className="space-y-2">
+            <h2 className="text-lg font-semibold text-slate-100">Demiplane Character</h2>
+            <a
+              href={character.demiplaneUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+            >
+              🔗 View on Demiplane
+            </a>
+          </section>
+        ) : null}
+
         <FieldList title="Stats" items={character.stats} />
         <FieldList title="Skills" items={character.skills} system={character.system} />
       </div>
