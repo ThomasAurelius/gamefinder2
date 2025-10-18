@@ -954,7 +954,7 @@ export default function CharactersPage() {
 								rel="noopener noreferrer"
 								className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
 							>
-								📄 Character Sheet {index + 1}
+								📋 Character Sheet {index + 1}
 							</a>
 						))}
 					</div>
@@ -1346,7 +1346,7 @@ export default function CharactersPage() {
 															rel="noopener noreferrer"
 															className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
 														>
-															📄 Character Sheet {index + 1}
+															📋 Character Sheet {index + 1}
 														</a>
 													))}
 												</div>
@@ -1681,7 +1681,7 @@ export default function CharactersPage() {
 															undefined,
 													}))
 												}
-												placeholder="https://app.demiplane.com/nexus/..."
+												placeholder="https://app.demiplane.com/nexus/dnd5e/character/abc123"
 												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
 											/>
 										</label>

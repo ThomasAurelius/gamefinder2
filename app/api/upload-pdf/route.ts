@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { uploadImageToFirebase } from "@/lib/firebase-storage";
 import { randomUUID } from "crypto";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for PDFs and images
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for character sheet files (PDFs and images)
 const ALLOWED_TYPES = [
   "application/pdf",
   "image/jpeg",
