@@ -1445,9 +1445,11 @@ export default function CharactersPage() {
 									</div>
 								</div>
 							)}
+						</div>
+					) : null}
 
-							{/* Show normal Name/Campaign/Avatar when no PDFs */}
-							{(!character.pdfUrls || character.pdfUrls.length === 0) && (
+					{/* Show normal Name/Campaign/Avatar when no PDFs */}
+					{(!character.pdfUrls || character.pdfUrls.length === 0) && (
 								<>
 									{/* Avatar Upload Section */}
 									<div className="space-y-4">
