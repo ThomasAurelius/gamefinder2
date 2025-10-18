@@ -199,7 +199,7 @@ export function parsePathbuilder2eJson(jsonString: string): CharacterDetails | n
       skills,
       notes: "", // Can be filled in manually
       items: [], // Equipment can be added separately
-      isPublic: false,
+      isPublic: true,
     };
 
     return character;

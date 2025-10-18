@@ -66,7 +66,7 @@ function parseCharacterPayload(data: unknown): CharacterPayload | null {
     stats: normalizeFields<StatField>(payload.stats),
     skills: normalizeFields<SkillField>(payload.skills),
     avatarUrl: typeof payload.avatarUrl === "string" ? payload.avatarUrl : undefined,
-    isPublic: typeof payload.isPublic === "boolean" ? payload.isPublic : false,
+    isPublic: typeof payload.isPublic === "boolean" ? payload.isPublic : true,
     pdfUrls: Array.isArray(payload.pdfUrls) && payload.pdfUrls.every((url): url is string => typeof url === "string") ? payload.pdfUrls : undefined,
     demiplaneUrl: typeof payload.demiplaneUrl === "string" ? payload.demiplaneUrl : undefined,
   };

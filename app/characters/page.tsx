@@ -201,7 +201,7 @@ function createInitialCharacter(system: GameSystemKey): CharacterDetails {
 		skills,
 		notes: "",
 		items: [],
-		isPublic: false,
+		isPublic: true,
 		demiplaneUrl: undefined,
 	};
 }
