@@ -892,8 +892,11 @@ export async function removePlayer(
     return null;
   }
   
+  // Handle both new and legacy formats
+  const campaignId_final = '_id' in result && result._id ? result._id.toString() : ('id' in result ? result.id as string : campaignId);
+  
   return {
-    id: result._id ? result._id.toString() : result.id,
+    id: campaignId_final,
     userId: result.userId,
     game: result.game,
     date: result.date,
