@@ -1725,112 +1725,97 @@ export default function CharactersPage() {
 								</div>
 							)}
 
-							{/* Basic Fields Section - Collapsible when PDFs are uploaded */}
-							{character.pdfUrls && character.pdfUrls.length > 0 ? (
-								<div className="md:col-span-2 space-y-4">
-									<button
-										type="button"
-										onClick={() =>
-											setIsBasicFieldsOpen(!isBasicFieldsOpen)
-										}
-										className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
-									>
-										<h2 className="text-lg font-semibold text-slate-100">
-											Basic Information
-										</h2>
-										<span className="text-xs uppercase tracking-wide text-slate-400">
-											{isBasicFieldsOpen ? "Collapse" : "Expand"}
-										</span>
-									</button>
-									{isBasicFieldsOpen && (
-										<div className="space-y-4 border border-slate-800 rounded-md p-4 bg-slate-950/40">
-											{/* Avatar Upload Section */}
-											<div className="space-y-4">
-												<h3 className="text-base font-semibold text-slate-100">
-													Character Avatar
-												</h3>
-												<div className="flex items-center gap-6">
-													<div className="flex-shrink-0">
-														{character.avatarUrl ? (
-															<img
-																src={character.avatarUrl}
-																alt="Character Avatar"
-																className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
-															/>
-														) : (
-															<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
-																{character.name
-																	? character.name
-																			.charAt(0)
-																			.toUpperCase()
-																	: "?"}
-															</div>
-														)}
+							{/* Name, Campaign, Avatar Section - Always visible when PDFs are uploaded */}
+							{character.pdfUrls && character.pdfUrls.length > 0 && (
+								<div className="md:col-span-2 space-y-4 border border-slate-800 rounded-md p-4 bg-slate-950/40">
+									{/* Avatar Upload Section */}
+									<div className="space-y-4">
+										<h3 className="text-base font-semibold text-slate-100">
+											Character Avatar
+										</h3>
+										<div className="flex items-center gap-6">
+											<div className="flex-shrink-0">
+												{character.avatarUrl ? (
+													<img
+														src={character.avatarUrl}
+														alt="Character Avatar"
+														className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
+													/>
+												) : (
+													<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
+														{character.name
+															? character.name
+																	.charAt(0)
+																	.toUpperCase()
+															: "?"}
 													</div>
-													<div className="flex-1 space-y-2">
-														<label
-															htmlFor="character-avatar-upload"
-															className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
-														>
-															{isUploadingAvatar
-																? "Uploading..."
-																: "Upload Avatar"}
-														</label>
-														<input
-															id="character-avatar-upload"
-															type="file"
-															accept="image/jpeg,image/png,image/webp,image/gif"
-															onChange={handleAvatarUpload}
-															disabled={isUploadingAvatar}
-															className="hidden"
-														/>
-														<p className="text-xs text-slate-400">
-															JPG, PNG, WebP or GIF. Max 5MB.
-														</p>
-													</div>
-												</div>
+												)}
 											</div>
-
-											<div className="grid gap-4 sm:grid-cols-2">
-												<label className="flex flex-col gap-2">
-													<span className="text-sm font-medium text-slate-200">
-														Name
-													</span>
-													<input
-														type="text"
-														value={character.name}
-														onChange={(event) =>
-															setCharacter((prev) => ({
-																...prev,
-																name: event.target.value,
-															}))
-														}
-														placeholder="Eldrin the Bold"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-													/>
+											<div className="flex-1 space-y-2">
+												<label
+													htmlFor="character-avatar-upload"
+													className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+												>
+													{isUploadingAvatar
+														? "Uploading..."
+														: "Upload Avatar"}
 												</label>
-												<label className="flex flex-col gap-2">
-													<span className="text-sm font-medium text-slate-200">
-														Campaign
-													</span>
-													<input
-														type="text"
-														value={character.campaign}
-														onChange={(event) =>
-															setCharacter((prev) => ({
-																...prev,
-																campaign: event.target.value,
-															}))
-														}
-														placeholder="Shadows of Neverwinter"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-													/>
-												</label>
+												<input
+													id="character-avatar-upload"
+													type="file"
+													accept="image/jpeg,image/png,image/webp,image/gif"
+													onChange={handleAvatarUpload}
+													disabled={isUploadingAvatar}
+													className="hidden"
+												/>
+												<p className="text-xs text-slate-400">
+													JPG, PNG, WebP or GIF. Max 5MB.
+												</p>
 											</div>
 										</div>
-									)}
+									</div>
+
+									<div className="grid gap-4 sm:grid-cols-2">
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Name
+											</span>
+											<input
+												type="text"
+												value={character.name}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														name: event.target.value,
+													}))
+												}
+												placeholder="Eldrin the Bold"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										</label>
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Campaign
+											</span>
+											<input
+												type="text"
+												value={character.campaign}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														campaign: event.target.value,
+													}))
+												}
+												placeholder="Shadows of Neverwinter"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										</label>
+									</div>
 								</div>
-							) : (
+							)}
+
+							{/* Show normal Name/Campaign/Avatar when no PDFs */}
+							{(!character.pdfUrls || character.pdfUrls.length === 0) && (
 								<>
 									{/* Avatar Upload Section */}
 									<div className="space-y-4">
