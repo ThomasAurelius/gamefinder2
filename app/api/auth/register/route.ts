@@ -5,7 +5,7 @@ import { UserDocument } from "@/lib/user-types";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    const { email, password, name, isAmbassador } = await request.json();
 
     if (!email || typeof email !== "string") {
       return NextResponse.json(
@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(password);
     const now = new Date();
 
-    const insertResult = await usersCollection.insertOne({
+    // Set ambassador status and expiration if isAmbassador is true
+    const userDocument: Partial<UserDocument> = {
       email: normalizedEmail,
       passwordHash,
       name: displayName,
@@ -66,7 +67,15 @@ export async function POST(request: NextRequest) {
         avatarUrl: "",
         canPostPaidGames: false,
       },
-    });
+    };
+
+    if (isAmbassador === true) {
+      userDocument.isAmbassador = true;
+      // Set ambassador expiration to June 30, 2026
+      userDocument.ambassadorUntil = new Date('2026-06-30T23:59:59Z');
+    }
+
+    const insertResult = await usersCollection.insertOne(userDocument);
 
     return NextResponse.json({
       message: "Account created",
