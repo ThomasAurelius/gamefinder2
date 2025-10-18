@@ -21,6 +21,12 @@ export type CharacterDetails = {
   role?: string;
   gold?: string;
   experience?: string;
+  age?: string;
+  height?: string;
+  weight?: string;
+  eyes?: string;
+  skin?: string;
+  hair?: string;
   items?: string[];
   stats: StatField[];
   skills: SkillField[];
