@@ -1047,7 +1047,7 @@ export default function CharactersPage() {
 										</div>
 									)}
 
-									{item.pdfUrls && item.pdfUrls.length > 0 && (
+									{item.system === "dnd" && item.pdfUrls && item.pdfUrls.length > 0 && (
 										<div className="space-y-2">
 											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
 												Character Sheets
@@ -1068,7 +1068,7 @@ export default function CharactersPage() {
 										</div>
 									)}
 
-									{item.demiplaneUrl && (
+									{(item.system === "dnd" || item.system === "starfinder") && item.demiplaneUrl && (
 										<div className="space-y-2">
 											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
 												Demiplane Character
