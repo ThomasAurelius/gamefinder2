@@ -7,6 +7,7 @@ import {
 	setStripeCustomerId,
 	getUserEmail,
 	getStripeConnectAccountId,
+	isActiveAmbassador,
 } from "@/lib/users";
 import { getCampaign } from "@/lib/campaigns/db";
 
@@ -135,6 +136,7 @@ export async function POST(request: Request) {
 
 			// Get campaign to retrieve host information
 			let hostConnectAccountId: string | null = null;
+			let hostIsAmbassador = false;
 			if (campaignId) {
 				try {
 					const campaign = await getCampaign(campaignId);
@@ -142,6 +144,10 @@ export async function POST(request: Request) {
 						// Get the host's Connect account ID
 						hostConnectAccountId = await getStripeConnectAccountId(campaign.userId);
 						console.log("Host Connect account ID:", hostConnectAccountId || "Not set");
+						
+						// Check if host is an active ambassador
+						hostIsAmbassador = await isActiveAmbassador(campaign.userId);
+						console.log("Host ambassador status:", hostIsAmbassador);
 					} else {
 						console.warn("Campaign not found:", campaignId);
 					}
@@ -262,10 +268,10 @@ export async function POST(request: Request) {
 				);
 			}
 
-			// Calculate application fee (15% of the amount)
-			const applicationFeeAmount = hostConnectAccountId 
-				? Math.round(amount * 100 * 0.15) // 15% platform fee
-				: undefined;
+			// Calculate application fee based on ambassador status
+			// Ambassadors get 100% of payment (minus Stripe transaction fees)
+			// Regular hosts get 85% (15% platform fee)
+			const applicationFeePercent = hostIsAmbassador ? 0 : 15;
 
 			// Build subscription creation options
 			const subscriptionOptions: Stripe.SubscriptionCreateParams = {
@@ -276,6 +282,7 @@ export async function POST(request: Request) {
 					campaignName: campaignName || "",
 					userId,
 					hostConnectAccountId: hostConnectAccountId || "",
+					hostIsAmbassador: String(hostIsAmbassador),
 				},
 				payment_behavior: "default_incomplete",
 				collection_method: "charge_automatically",
@@ -290,14 +297,17 @@ export async function POST(request: Request) {
 			};
 
 			// Add Connect account and application fee if host has completed onboarding
-			if (hostConnectAccountId && applicationFeeAmount) {
-				subscriptionOptions.application_fee_percent = 15; // Platform takes 15%
+			if (hostConnectAccountId) {
+				if (applicationFeePercent > 0) {
+					subscriptionOptions.application_fee_percent = applicationFeePercent;
+				}
 				subscriptionOptions.transfer_data = {
 					destination: hostConnectAccountId,
 				};
 				console.log("Subscription will use Stripe Connect:", {
 					hostAccount: hostConnectAccountId,
-					applicationFeePercent: 15,
+					applicationFeePercent,
+					isAmbassador: hostIsAmbassador,
 				});
 			} else {
 				console.log("Subscription will use standard payment (no Connect account)");

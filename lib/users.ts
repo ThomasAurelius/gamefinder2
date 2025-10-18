@@ -319,3 +319,115 @@ export async function searchUsersByName(searchTerm: string): Promise<UserBasicIn
   }
 }
 
+/**
+ * Check if a user is an active ambassador
+ */
+export async function isActiveAmbassador(userId: string): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return false;
+    }
+    
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { isAmbassador: 1, ambassadorUntil: 1 } }
+    );
+    
+    if (!user || !user.isAmbassador) {
+      return false;
+    }
+    
+    // Check if ambassador status has expired
+    if (user.ambassadorUntil) {
+      const now = new Date();
+      return user.ambassadorUntil > now;
+    }
+    
+    // If no expiration date is set, ambassador status is permanent
+    return true;
+  } catch (error) {
+    console.error("Failed to check ambassador status:", error);
+    return false;
+  }
+}
+
+/**
+ * Get ambassador status details for a user
+ */
+export async function getAmbassadorStatus(userId: string): Promise<{
+  isAmbassador: boolean;
+  ambassadorUntil?: Date;
+} | null> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return null;
+    }
+    
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(userId) },
+      { projection: { isAmbassador: 1, ambassadorUntil: 1 } }
+    );
+    
+    if (!user) {
+      return null;
+    }
+    
+    return {
+      isAmbassador: user.isAmbassador || false,
+      ambassadorUntil: user.ambassadorUntil,
+    };
+  } catch (error) {
+    console.error("Failed to get ambassador status:", error);
+    return null;
+  }
+}
+
+/**
+ * Set ambassador status for a user (admin only)
+ */
+export async function setAmbassadorStatus(
+  userId: string,
+  isAmbassador: boolean,
+  ambassadorUntil?: Date
+): Promise<boolean> {
+  try {
+    const db = await getDb();
+    const usersCollection = db.collection<UserDocument>("users");
+    
+    if (!ObjectId.isValid(userId)) {
+      return false;
+    }
+    
+    const updateData: Partial<UserDocument> = {
+      isAmbassador,
+      updatedAt: new Date(),
+    };
+    
+    if (ambassadorUntil) {
+      updateData.ambassadorUntil = ambassadorUntil;
+    } else if (!isAmbassador) {
+      // If removing ambassador status, also remove expiration date
+      updateData.ambassadorUntil = undefined;
+    }
+    
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(userId) },
+      { 
+        $set: updateData,
+        ...(updateData.ambassadorUntil === undefined && { $unset: { ambassadorUntil: "" } })
+      }
+    );
+    
+    return result.modifiedCount > 0;
+  } catch (error) {
+    console.error("Failed to set ambassador status:", error);
+    return false;
+  }
+}
+
