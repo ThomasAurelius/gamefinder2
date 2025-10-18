@@ -49,6 +49,8 @@ type PendingPlayer = {
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  characterId?: string;
+  characterIsPublic?: boolean;
 };
 
 type PlayerWithInfo = {
@@ -56,6 +58,8 @@ type PlayerWithInfo = {
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  characterId?: string;
+  characterIsPublic?: boolean;
   hasActiveSubscription?: boolean;
 };
 
@@ -747,7 +751,19 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                       {player.name}
                     </Link>
                     {player.characterName && (
-                      <p className="text-xs text-slate-400">Playing: {player.characterName}</p>
+                      <p className="text-xs text-slate-400">
+                        Playing:{" "}
+                        {player.characterIsPublic && player.characterId ? (
+                          <Link
+                            href={`/players/${player.userId}/characters/${player.characterId}`}
+                            className="hover:text-sky-300 transition-colors"
+                          >
+                            {player.characterName}
+                          </Link>
+                        ) : (
+                          player.characterName
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -788,7 +804,19 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                       {player.name}
                     </Link>
                     {player.characterName && (
-                      <p className="text-xs text-slate-400">Playing: {player.characterName}</p>
+                      <p className="text-xs text-slate-400">
+                        Playing:{" "}
+                        {player.characterIsPublic && player.characterId ? (
+                          <Link
+                            href={`/players/${player.userId}/characters/${player.characterId}`}
+                            className="hover:text-sky-300 transition-colors"
+                          >
+                            {player.characterName}
+                          </Link>
+                        ) : (
+                          player.characterName
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>

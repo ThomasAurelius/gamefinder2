@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type PendingPlayer = {
   id: string;
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  characterId?: string;
+  characterIsPublic?: boolean;
 };
 
 type PendingCampaignPlayersManagerProps = {
@@ -152,7 +155,17 @@ export default function PendingCampaignPlayersManager({
                   <span className="text-base text-slate-100">{player.name}</span>
                   {player.characterName && (
                     <span className="text-sm text-slate-400">
-                      Playing as: {player.characterName}
+                      Playing as:{" "}
+                      {player.characterIsPublic && player.characterId ? (
+                        <Link
+                          href={`/players/${player.id}/characters/${player.characterId}`}
+                          className="hover:text-sky-300 transition-colors"
+                        >
+                          {player.characterName}
+                        </Link>
+                      ) : (
+                        player.characterName
+                      )}
                     </span>
                   )}
                 </div>
