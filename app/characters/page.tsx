@@ -236,7 +236,6 @@ export default function CharactersPage() {
 	const [showJsonImport, setShowJsonImport] = useState(false);
 	const [isAbilitiesOpen, setIsAbilitiesOpen] = useState(false);
 	const [isSkillsOpen, setIsSkillsOpen] = useState(false);
-	const [pdfFiles, setPdfFiles] = useState<File[]>([]);
 	const [isUploadingPdfs, setIsUploadingPdfs] = useState(false);
 	const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
 	const [isBasicFieldsOpen, setIsBasicFieldsOpen] = useState(true);
@@ -440,7 +439,6 @@ export default function CharactersPage() {
 			return;
 		}
 
-		setPdfFiles(fileArray);
 		setPdfUploadError(null);
 
 		// Upload PDFs immediately
@@ -475,7 +473,6 @@ export default function CharactersPage() {
 				error instanceof Error ? error.message : "Failed to upload PDFs"
 			);
 			setFeedbackMessage(null);
-			setPdfFiles([]);
 		} finally {
 			setIsUploadingPdfs(false);
 			event.target.value = "";
@@ -487,7 +484,6 @@ export default function CharactersPage() {
 			...prev,
 			pdfUrls: prev.pdfUrls?.filter((_, i) => i !== index),
 		}));
-		setPdfFiles((prev) => prev.filter((_, i) => i !== index));
 	};
 
 	const resetForm = useCallback(() => {
@@ -497,7 +493,6 @@ export default function CharactersPage() {
 		setIsFormOpen(false);
 		setSubmitError(null);
 		setShowJsonImport(false);
-		setPdfFiles([]);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
 	}, []);
@@ -514,7 +509,6 @@ export default function CharactersPage() {
 		setSubmitError(null);
 		setFeedbackMessage(null);
 		setShowJsonImport(false);
-		setPdfFiles([]);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
 		setIsFormOpen(true);
@@ -551,7 +545,6 @@ export default function CharactersPage() {
 		setSubmitError(null);
 		setFeedbackMessage(null);
 		setShowJsonImport(record.system === "pathfinder");
-		setPdfFiles([]);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
 		setIsFormOpen(true);
