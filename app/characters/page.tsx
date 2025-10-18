@@ -658,6 +658,8 @@ export default function CharactersPage() {
 					notes: savedCharacter.notes,
 					avatarUrl: savedCharacter.avatarUrl,
 					isPublic: savedCharacter.isPublic ?? false,
+					pdfUrls: savedCharacter.pdfUrls ? [...savedCharacter.pdfUrls] : undefined,
+					demiplaneUrl: savedCharacter.demiplaneUrl,
 				});
 			} else {
 				resetForm();
@@ -1070,6 +1072,305 @@ export default function CharactersPage() {
 									</div>
 								</summary>
 								{renderCharacterDetails(item)}
+								<div className="space-y-4 border-t border-slate-800 bg-slate-950/40 px-4 py-4 text-sm text-slate-200">
+									<div className="flex flex-wrap justify-between gap-2">
+										<div className="flex flex-wrap gap-2">
+											<button
+												type="button"
+												onClick={() => handleEditCharacter(item)}
+												className="rounded-md border border-indigo-500/70 px-3 py-1 text-xs font-medium text-indigo-200 transition hover:bg-indigo-500/10"
+											>
+												Edit
+											</button>
+											<button
+												type="button"
+												onClick={() =>
+													handleDeleteCharacter(item.id)
+												}
+												className="rounded-md border border-rose-600/70 px-3 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-600/10"
+											>
+												Delete
+											</button>
+										</div>
+										<span className="text-xs text-slate-400">
+											Last updated:{" "}
+											{new Date(item.updatedAt).toLocaleString()}
+										</span>
+									</div>
+
+									{(item.age ||
+										item.height ||
+										item.weight ||
+										item.eyes ||
+										item.skin ||
+										item.hair) && (
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Physical Appearance
+											</h3>
+											<div className="grid gap-2 sm:grid-cols-3">
+												{item.age && (
+													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															Age
+														</div>
+														<div className="text-sm text-slate-100">
+															{item.age}
+														</div>
+													</div>
+												)}
+												{item.height && (
+													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															Height
+														</div>
+														<div className="text-sm text-slate-100">
+															{item.height}
+														</div>
+													</div>
+												)}
+												{item.weight && (
+													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															Weight
+														</div>
+														<div className="text-sm text-slate-100">
+															{item.weight}
+														</div>
+													</div>
+												)}
+												{item.eyes && (
+													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															Eyes
+														</div>
+														<div className="text-sm text-slate-100">
+															{item.eyes}
+														</div>
+													</div>
+												)}
+												{item.skin && (
+													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															Skin
+														</div>
+														<div className="text-sm text-slate-100">
+															{item.skin}
+														</div>
+													</div>
+												)}
+												{item.hair && (
+													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															Hair
+														</div>
+														<div className="text-sm text-slate-100">
+															{item.hair}
+														</div>
+													</div>
+												)}
+											</div>
+										</div>
+									)}
+
+									<div className="grid gap-3 md:grid-cols-2">
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Ability Scores
+											</h3>
+											{(() => {
+												const {
+													physical: physicalStats,
+													mental: mentalStats,
+													other: otherStats,
+													hasStandardStats,
+												} = categorizeStats(item.stats);
+
+												if (hasStandardStats) {
+													return (
+														<>
+															<div className="grid gap-2 grid-cols-2">
+																<div className="space-y-2">
+																	{physicalStats.map(
+																		(stat, index) => (
+																			<div
+																				key={`${stat.name}-${index}`}
+																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+																			>
+																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+																					{stat.name ||
+																						"Stat"}
+																				</div>
+																				<div className="text-lg font-semibold text-slate-100">
+																					{stat.value ||
+																						"-"}
+																				</div>
+																			</div>
+																		)
+																	)}
+																</div>
+																<div className="space-y-2">
+																	{mentalStats.map(
+																		(stat, index) => (
+																			<div
+																				key={`${stat.name}-${index}`}
+																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+																			>
+																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+																					{stat.name ||
+																						"Stat"}
+																				</div>
+																				<div className="text-lg font-semibold text-slate-100">
+																					{stat.value ||
+																						"-"}
+																				</div>
+																			</div>
+																		)
+																	)}
+																</div>
+															</div>
+															{otherStats.length > 0 && (
+																<div className="grid gap-2 sm:grid-cols-2 mt-2">
+																	{otherStats.map(
+																		(stat, index) => (
+																			<div
+																				key={`${stat.name}-${index}`}
+																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+																			>
+																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+																					{stat.name ||
+																						"Stat"}
+																				</div>
+																				<div className="text-lg font-semibold text-slate-100">
+																					{stat.value ||
+																						"-"}
+																				</div>
+																			</div>
+																		)
+																	)}
+																</div>
+															)}
+														</>
+													);
+												} else {
+													// For completely custom systems with no standard stats
+													return (
+														<div className="grid gap-2 sm:grid-cols-2">
+															{item.stats.map((stat, index) => (
+																<div
+																	key={`${stat.name}-${index}`}
+																	className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+																>
+																	<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+																		{stat.name || "Stat"}
+																	</div>
+																	<div className="text-lg font-semibold text-slate-100">
+																		{stat.value || "-"}
+																	</div>
+																</div>
+															))}
+														</div>
+													);
+												}
+											})()}
+										</div>
+
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Skills
+											</h3>
+											<div className="grid gap-2 sm:grid-cols-2">
+												{item.skills.map((skill, index) => (
+													<div
+														key={`${skill.name}-${index}`}
+														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
+													>
+														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+															{getSkillDisplayName(
+																skill.name,
+																item.system
+															) || "Skill"}
+														</div>
+														<div className="text-lg font-semibold text-slate-100">
+															{skill.value || "-"}
+														</div>
+													</div>
+												))}
+											</div>
+										</div>
+									</div>
+
+									{item.notes && (
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Notes
+											</h3>
+											<p className="whitespace-pre-wrap rounded-md border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
+												{item.notes}
+											</p>
+										</div>
+									)}
+
+									{item.items && item.items.length > 0 && (
+										<div className="space-y-2">
+											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+												Items
+											</h3>
+											<div className="flex flex-wrap gap-2">
+												{item.items.map((itemName, index) => (
+													<span
+														key={index}
+														className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+													>
+														{itemName}
+													</span>
+												))}
+											</div>
+										</div>
+									)}
+
+									{(item.system === "dnd" ||
+										item.system === "starfinder") &&
+										item.pdfUrls &&
+										item.pdfUrls.length > 0 && (
+											<div className="space-y-2">
+												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+													Character Sheets
+												</h3>
+												<div className="flex flex-wrap gap-2">
+													{item.pdfUrls.map((url, index) => (
+														<a
+															key={index}
+															href={url}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+														>
+															📄 Character Sheet {index + 1}
+														</a>
+													))}
+												</div>
+											</div>
+										)}
+
+									{(item.system === "dnd" ||
+										item.system === "starfinder") &&
+										item.demiplaneUrl && (
+											<div className="space-y-2">
+												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+													Demiplane Character
+												</h3>
+												<a
+													href={item.demiplaneUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+												>
+													🔗 View on Demiplane
+												</a>
+											</div>
+										)}
+								</div>
 							</details>
 						))}
 				</div>
@@ -1121,16 +1422,24 @@ export default function CharactersPage() {
 								</span>
 							</label>
 
-							{/* PDF Upload Section - Only show for D&D */}
-							{selectedSystem === "dnd" && (
+							{/* PDF Upload Section - Show for D&D and Starfinder */}
+							{(selectedSystem === "dnd" ||
+								selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4">
 										<div>
 											<h3 className="text-sm font-semibold text-sky-200">
-												Upload D&D Beyond Character Sheets
+												Upload{" "}
+												{selectedSystem === "dnd"
+													? "D&D Beyond"
+													: "Starfinder"}{" "}
+												Character Sheets
 											</h3>
 											<p className="text-xs text-sky-300/80">
-												Upload your character sheets from D&D Beyond
+												Upload your character sheets{" "}
+												{selectedSystem === "dnd"
+													? "from D&D Beyond"
+													: "for Starfinder"}{" "}
 												(up to 3 PDF files)
 											</p>
 										</div>
@@ -1138,21 +1447,40 @@ export default function CharactersPage() {
 										<div className="mt-4 space-y-3">
 											<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
 												<p className="font-semibold text-slate-200 mb-2">
-													How to export from D&D Beyond:
+													{selectedSystem === "dnd"
+														? "How to export from D&D Beyond:"
+														: "How to upload Starfinder character sheets:"}
 												</p>
-												<ol className="list-decimal list-inside space-y-1">
-													<li>
-														Open your character in D&D Beyond
-													</li>
-													<li>
-														Click the &quot;Export&quot; or
-														&quot;View PDF&quot; button
-													</li>
-													<li>Download the PDF file(s)</li>
-													<li>
-														Upload the files below (max 3 files)
-													</li>
-												</ol>
+												{selectedSystem === "dnd" ? (
+													<ol className="list-decimal list-inside space-y-1">
+														<li>
+															Open your character in D&D Beyond
+														</li>
+														<li>
+															Click the &quot;Export&quot; or
+															&quot;View PDF&quot; button
+														</li>
+														<li>Download the PDF file(s)</li>
+														<li>
+															Upload the files below (max 3 files)
+														</li>
+													</ol>
+												) : (
+													<ol className="list-decimal list-inside space-y-1">
+														<li>
+															Export your Starfinder character
+															sheet as PDF
+														</li>
+														<li>
+															Upload the PDF file(s) below (max 3
+															files)
+														</li>
+														<li>
+															Note: PDFs may contain multiple
+															pages/sheets
+														</li>
+													</ol>
+												)}
 												<p className="mt-2 text-sky-300">
 													Note: Once PDFs are uploaded, only Name,
 													Campaign, and Avatar fields will be
