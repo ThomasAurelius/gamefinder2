@@ -1011,7 +1011,7 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{/* "Current Values" section removed - when editing, users can see all fields in the form below */}
+			{/* Current Values section removed - all fields available in edit form */}
 
 			{/* Form Section */}
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
