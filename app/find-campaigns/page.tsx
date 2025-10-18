@@ -80,10 +80,10 @@ function CampaignCard({
 	return (
 		<div
 			key={campaign.id}
-			className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden"
+			className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden md:flex md:flex-wrap"
 		>
 			{campaign.imageUrl && (
-				<Link href={`/campaigns/${campaign.id}`}>
+				<Link href={`/campaigns/${campaign.id}`} className="md:w-1/2">
 					<img
 						src={campaign.imageUrl}
 						alt={campaign.game}
@@ -91,7 +91,7 @@ function CampaignCard({
 					/>
 				</Link>
 			)}
-			<div className="p-4">
+			<div className="p-4 md:w-1/2 md:flex-grow">
 				<div className="flex items-center gap-2">
 					<Link
 						href={`/campaigns/${campaign.id}`}
