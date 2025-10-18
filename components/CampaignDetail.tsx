@@ -96,6 +96,8 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
   const [messageSuccess, setMessageSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -355,6 +357,35 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     }
   };
 
+  const handleDeleteCampaign = async () => {
+    if (!currentUserId) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Redirect to campaigns list after successful deletion
+        router.push("/find-campaigns");
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to delete campaign");
+        setShowDeleteConfirm(false);
+      }
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      alert("Failed to delete campaign");
+      setShowDeleteConfirm(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -397,12 +428,20 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
           <div>
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
-              <Link
-                href={`/campaigns/${campaignId}/edit`}
-                className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
-              >
-                Edit Campaign
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={`/campaigns/${campaignId}/edit`}
+                  className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+                >
+                  Edit Campaign
+                </Link>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+                >
+                  Delete Campaign
+                </button>
+              </div>
             </div>
             
             {/* Share buttons */}
@@ -947,6 +986,41 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-slate-100">
+                Delete Campaign
+              </h2>
+              <p className="mt-2 text-sm text-slate-400">
+                Are you sure you want to delete this campaign? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCampaign}
+                disabled={isDeleting}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}
