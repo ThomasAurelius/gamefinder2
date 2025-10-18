@@ -49,6 +49,9 @@ type PendingPlayer = {
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  characterId?: string;
+  characterIsPublic?: boolean;
+  characterAvatarUrl?: string;
 };
 
 type PlayerWithInfo = {
@@ -56,6 +59,9 @@ type PlayerWithInfo = {
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  characterId?: string;
+  characterIsPublic?: boolean;
+  characterAvatarUrl?: string;
   hasActiveSubscription?: boolean;
 };
 
@@ -96,6 +102,14 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
   const [messageSuccess, setMessageSuccess] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<PlayerWithInfo | null>(null);
+  const [removeReason, setRemoveReason] = useState("");
+  const [removeError, setRemoveError] = useState<string | null>(null);
+  const [isRemovingPlayer, setIsRemovingPlayer] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -355,6 +369,101 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     }
   };
 
+  const handleDeleteCampaign = async () => {
+    if (!currentUserId) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Redirect to campaigns list after successful deletion
+        router.push("/find-campaigns");
+      } else {
+        const error = await response.json();
+        setDeleteError(error.error || "Failed to delete campaign");
+      }
+    } catch (error) {
+      console.error("Error deleting campaign:", error);
+      setDeleteError("Failed to delete campaign");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleRemovePlayerClick = (player: PlayerWithInfo) => {
+    setSelectedPlayer(player);
+    setRemoveReason("");
+    setRemoveError(null);
+    setShowRemoveModal(true);
+  };
+
+  const handleRemovePlayerConfirm = async () => {
+    if (!selectedPlayer || !removeReason.trim()) {
+      setRemoveError("Please provide a reason for removing this player");
+      return;
+    }
+
+    setIsRemovingPlayer(true);
+    setRemoveError(null);
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/remove-player`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          playerId: selectedPlayer.userId,
+          reason: removeReason.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to remove player");
+      }
+
+      // Close modal and refresh data
+      setShowRemoveModal(false);
+      setSelectedPlayer(null);
+      setRemoveReason("");
+
+      // Refresh campaign data
+      const campaignResponse = await fetch(`/api/campaigns/${campaignId}`);
+      if (campaignResponse.ok) {
+        const campaignData = await campaignResponse.json();
+        setCampaign(campaignData);
+      }
+
+      // Refresh enriched data
+      const enrichedResponse = await fetch(`/api/campaigns/${campaignId}/enriched`);
+      if (enrichedResponse.ok) {
+        const enrichedData = await enrichedResponse.json();
+        setSignedUpPlayersList(enrichedData.signedUpPlayers || []);
+        setWaitlistPlayersList(enrichedData.waitlistPlayers || []);
+        setPendingPlayersList(enrichedData.pendingPlayers || []);
+      }
+    } catch (err) {
+      setRemoveError(err instanceof Error ? err.message : "Failed to remove player");
+    } finally {
+      setIsRemovingPlayer(false);
+    }
+  };
+
+  const handleCancelRemovePlayer = () => {
+    setShowRemoveModal(false);
+    setSelectedPlayer(null);
+    setRemoveReason("");
+    setRemoveError(null);
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -397,12 +506,20 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
           <div>
             <div className="flex items-start justify-between gap-4">
               <h1 className="text-2xl font-bold text-slate-100">{campaign.game}</h1>
-              <Link
-                href={`/campaigns/${campaignId}/edit`}
-                className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
-              >
-                Edit Campaign
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={`/campaigns/${campaignId}/edit`}
+                  className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+                >
+                  Edit Campaign
+                </Link>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+                >
+                  Delete Campaign
+                </button>
+              </div>
             </div>
             
             {/* Share buttons */}
@@ -708,13 +825,56 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                       {player.name}
                     </Link>
                     {player.characterName && (
-                      <p className="text-xs text-slate-400">Playing: {player.characterName}</p>
+                      <p className="text-xs text-slate-400">
+                        Playing:{" "}
+                        {player.characterIsPublic && player.characterId ? (
+                          <Link
+                            href={`/players/${player.userId}/characters/${player.characterId}`}
+                            className="hover:text-sky-300 transition-colors"
+                          >
+                            {player.characterName}
+                          </Link>
+                        ) : (
+                          player.characterName
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>
-                {player.hasActiveSubscription && (
-                  <span className="text-xs text-green-400">Subscriber</span>
-                )}
+                <div className="flex items-center gap-3">
+                  {player.characterName && (
+                    <div className="flex flex-col items-end">
+                      {player.characterIsPublic && player.characterId ? (
+                        <Link
+                          href={`/players/${player.userId}/characters/${player.characterId}`}
+                          className="text-sm font-medium text-slate-200 hover:text-sky-300"
+                        >
+                          {player.characterName}
+                        </Link>
+                      ) : (
+                        <span className="text-sm font-medium text-slate-200">{player.characterName}</span>
+                      )}
+                    </div>
+                  )}
+                  {player.characterAvatarUrl && (
+                    <img
+                      src={player.characterAvatarUrl}
+                      alt={player.characterName || "Character"}
+                      className="h-10 w-10 rounded-full border border-slate-700"
+                    />
+                  )}
+                  {player.hasActiveSubscription && (
+                    <span className="text-xs text-green-400">Subscriber</span>
+                  )}
+                  {isCreator && (
+                    <button
+                      onClick={() => handleRemovePlayerClick(player)}
+                      className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -749,13 +909,56 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                       {player.name}
                     </Link>
                     {player.characterName && (
-                      <p className="text-xs text-slate-400">Playing: {player.characterName}</p>
+                      <p className="text-xs text-slate-400">
+                        Playing:{" "}
+                        {player.characterIsPublic && player.characterId ? (
+                          <Link
+                            href={`/players/${player.userId}/characters/${player.characterId}`}
+                            className="hover:text-sky-300 transition-colors"
+                          >
+                            {player.characterName}
+                          </Link>
+                        ) : (
+                          player.characterName
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>
-                {player.hasActiveSubscription && (
-                  <span className="text-xs text-green-400">Subscriber</span>
-                )}
+                <div className="flex items-center gap-3">
+                  {player.characterName && (
+                    <div className="flex flex-col items-end">
+                      {player.characterIsPublic && player.characterId ? (
+                        <Link
+                          href={`/players/${player.userId}/characters/${player.characterId}`}
+                          className="text-sm font-medium text-slate-200 hover:text-sky-300"
+                        >
+                          {player.characterName}
+                        </Link>
+                      ) : (
+                        <span className="text-sm font-medium text-slate-200">{player.characterName}</span>
+                      )}
+                    </div>
+                  )}
+                  {player.characterAvatarUrl && (
+                    <img
+                      src={player.characterAvatarUrl}
+                      alt={player.characterName || "Character"}
+                      className="h-10 w-10 rounded-full border border-slate-700"
+                    />
+                  )}
+                  {player.hasActiveSubscription && (
+                    <span className="text-xs text-green-400">Subscriber</span>
+                  )}
+                  {isCreator && (
+                    <button
+                      onClick={() => handleRemovePlayerClick(player)}
+                      className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -947,6 +1150,103 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-900 p-6">
+            <div className="mb-4">
+              <h2 className="text-xl font-bold text-slate-100">
+                Delete Campaign
+              </h2>
+              <p className="mt-2 text-sm text-slate-400">
+                Are you sure you want to delete this campaign? This action cannot be undone.
+              </p>
+            </div>
+
+            {deleteError && (
+              <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
+                disabled={isDeleting}
+                className="flex-1 rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCampaign}
+                disabled={isDeleting}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Player Modal */}
+      {showRemoveModal && selectedPlayer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg border border-slate-800 bg-slate-900 p-6">
+            <h3 className="text-xl font-semibold text-slate-100 mb-4">
+              Remove Player
+            </h3>
+            <p className="text-slate-300 mb-4">
+              You are about to remove <strong>{selectedPlayer.name}</strong> from this campaign.
+              Please provide a reason that will be sent to the player.
+            </p>
+
+            {removeError && (
+              <div className="mb-4 rounded-lg border border-red-800 bg-red-900/20 px-4 py-3 text-sm text-red-400">
+                {removeError}
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label htmlFor="removeReason" className="block text-sm font-medium text-slate-300 mb-2">
+                Reason for removal<span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="removeReason"
+                value={removeReason}
+                onChange={(e) => setRemoveReason(e.target.value)}
+                placeholder="Please explain why you are removing this player..."
+                rows={4}
+                className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                disabled={isRemovingPlayer}
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelRemovePlayer}
+                disabled={isRemovingPlayer}
+                className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemovePlayerConfirm}
+                disabled={isRemovingPlayer || !removeReason.trim()}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRemovingPlayer ? "Removing..." : "Remove Player"}
+              </button>
+            </div>
           </div>
         </div>
       )}

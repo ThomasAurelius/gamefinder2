@@ -201,7 +201,7 @@ function createInitialCharacter(system: GameSystemKey): CharacterDetails {
 		skills,
 		notes: "",
 		items: [],
-		isPublic: false,
+		isPublic: true,
 		demiplaneUrl: undefined,
 	};
 }
@@ -240,7 +240,6 @@ export default function CharactersPage() {
 	const [isUploadingPdfs, setIsUploadingPdfs] = useState(false);
 	const [pdfUploadError, setPdfUploadError] = useState<string | null>(null);
 	const [isBasicFieldsOpen, setIsBasicFieldsOpen] = useState(true);
-	const [isCurrentValuesOpen, setIsCurrentValuesOpen] = useState(false);
 
 	const systemConfig = useMemo(
 		() => GAME_SYSTEMS[selectedSystem],
@@ -435,10 +434,15 @@ export default function CharactersPage() {
 
 		// Validate file types
 		const invalidFiles = fileArray.filter(
-			(file) => file.type !== "application/pdf"
+			(file) => 
+				file.type !== "application/pdf" &&
+				file.type !== "image/jpeg" &&
+				file.type !== "image/png" &&
+				file.type !== "image/webp" &&
+				file.type !== "image/gif"
 		);
 		if (invalidFiles.length > 0) {
-			setPdfUploadError("Only PDF files are allowed");
+			setPdfUploadError("Only PDF and image files (JPEG, PNG, WebP, GIF) are allowed");
 			event.target.value = "";
 			return;
 		}
@@ -499,7 +503,6 @@ export default function CharactersPage() {
 		setShowJsonImport(false);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
-		setIsCurrentValuesOpen(false);
 	}, []);
 
 	const handleToggleForm = () => {
@@ -516,7 +519,6 @@ export default function CharactersPage() {
 		setShowJsonImport(false);
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
-		setIsCurrentValuesOpen(false);
 		setIsFormOpen(true);
 	};
 
@@ -554,7 +556,6 @@ export default function CharactersPage() {
 		setShowJsonImport(record.system === "pathfinder");
 		setPdfUploadError(null);
 		setIsBasicFieldsOpen(true);
-		setIsCurrentValuesOpen(false);
 		setIsFormOpen(true);
 	};
 
@@ -918,42 +919,45 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{item.system === "dnd" && item.pdfUrls && item.pdfUrls.length > 0 && (
-				<div className="space-y-2">
-					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-						Character Sheets
-					</h3>
-					<div className="flex flex-wrap gap-2">
-						{item.pdfUrls.map((url, index) => (
-							<a
-								key={index}
-								href={url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-							>
-								📄 Character Sheet {index + 1}
-							</a>
-						))}
+			{item.system === "dnd" &&
+				item.pdfUrls &&
+				item.pdfUrls.length > 0 && (
+					<div className="space-y-2">
+						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+							Character Sheets
+						</h3>
+						<div className="flex flex-wrap gap-2">
+							{item.pdfUrls.map((url, index) => (
+								<a
+									key={index}
+									href={url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+								>
+									📄 Character Sheet {index + 1}
+								</a>
+							))}
+						</div>
 					</div>
-				</div>
-			)}
+				)}
 
-			{item.system === "starfinder" && item.demiplaneUrl && (
-				<div className="space-y-2">
-					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-						Demiplane Character
-					</h3>
-					<a
-						href={item.demiplaneUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-					>
-						🔗 View on Demiplane
-					</a>
-				</div>
-			)}
+			{item.system === "starfinder" &&
+				item.demiplaneUrl && (
+					<div className="space-y-2">
+						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+							Demiplane Character
+						</h3>
+						<a
+							href={item.demiplaneUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+						>
+							🔗 View on Demiplane
+						</a>
+					</div>
+				)}
 		</div>
 	);
 
@@ -993,371 +997,7 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{/* Show editing character in collapsible "Current Values" section when editing */}
-			{editingCharacterId && isFormOpen && (
-				<div className="space-y-3">
-					{characters
-						.filter((item) => item.id === editingCharacterId)
-						.map((item) => (
-							<details
-								key={item.id}
-								open={isCurrentValuesOpen}
-								onToggle={(e) =>
-									setIsCurrentValuesOpen(
-										(e.target as HTMLDetailsElement).open
-									)
-								}
-								className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
-							>
-								<summary className="flex cursor-pointer items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
-									<span className="text-base font-semibold text-emerald-300">
-										Current Values
-									</span>
-									{item.avatarUrl ? (
-										<img
-											src={item.avatarUrl}
-											alt={item.name}
-											className="h-12 w-12 rounded-full border-2 border-slate-700 object-cover flex-shrink-0"
-										/>
-									) : (
-										<div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-lg font-semibold text-slate-400 flex-shrink-0">
-											{item.name
-												? item.name.charAt(0).toUpperCase()
-												: "?"}
-										</div>
-									)}
-									<div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
-										<span className="text-base font-semibold text-slate-100">
-											{item.name || "Untitled Character"}
-										</span>
-										<span className="rounded-full border border-indigo-500/60 bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-200">
-											{getSystemLabel(item.system)}
-										</span>
-										{item.level && (
-											<span className="text-sm text-slate-300">
-												Level: {item.level}
-											</span>
-										)}
-										{item.class && (
-											<span className="text-sm text-slate-300">
-												Class: {item.class}
-											</span>
-										)}
-										{item.race && (
-											<span className="text-sm text-slate-300">
-												Race: {item.race}
-											</span>
-										)}
-										{item.campaign && (
-											<span className="text-sm text-slate-300">
-												Campaign: {item.campaign}
-											</span>
-										)}
-									</div>
-								</summary>
-								{renderCharacterDetails(item)}
-								<div className="space-y-4 border-t border-slate-800 bg-slate-950/40 px-4 py-4 text-sm text-slate-200">
-									<div className="flex flex-wrap justify-between gap-2">
-										<div className="flex flex-wrap gap-2">
-											<button
-												type="button"
-												onClick={() => handleEditCharacter(item)}
-												className="rounded-md border border-indigo-500/70 px-3 py-1 text-xs font-medium text-indigo-200 transition hover:bg-indigo-500/10"
-											>
-												Edit
-											</button>
-											<button
-												type="button"
-												onClick={() =>
-													handleDeleteCharacter(item.id)
-												}
-												className="rounded-md border border-rose-600/70 px-3 py-1 text-xs font-medium text-rose-200 transition hover:bg-rose-600/10"
-											>
-												Delete
-											</button>
-										</div>
-										<span className="text-xs text-slate-400">
-											Last updated:{" "}
-											{new Date(item.updatedAt).toLocaleString()}
-										</span>
-									</div>
-
-									{(item.age ||
-										item.height ||
-										item.weight ||
-										item.eyes ||
-										item.skin ||
-										item.hair) && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Physical Appearance
-											</h3>
-											<div className="grid gap-2 sm:grid-cols-3">
-												{item.age && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Age
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.age}
-														</div>
-													</div>
-												)}
-												{item.height && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Height
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.height}
-														</div>
-													</div>
-												)}
-												{item.weight && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Weight
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.weight}
-														</div>
-													</div>
-												)}
-												{item.eyes && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Eyes
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.eyes}
-														</div>
-													</div>
-												)}
-												{item.skin && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Skin
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.skin}
-														</div>
-													</div>
-												)}
-												{item.hair && (
-													<div className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2">
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															Hair
-														</div>
-														<div className="text-sm text-slate-100">
-															{item.hair}
-														</div>
-													</div>
-												)}
-											</div>
-										</div>
-									)}
-
-									<div className="grid gap-3 md:grid-cols-2">
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Ability Scores
-											</h3>
-											{(() => {
-												const {
-													physical: physicalStats,
-													mental: mentalStats,
-													other: otherStats,
-													hasStandardStats,
-												} = categorizeStats(item.stats);
-
-												if (hasStandardStats) {
-													return (
-														<>
-															<div className="grid gap-2 grid-cols-2">
-																<div className="space-y-2">
-																	{physicalStats.map(
-																		(stat, index) => (
-																			<div
-																				key={`${stat.name}-${index}`}
-																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																			>
-																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																					{stat.name ||
-																						"Stat"}
-																				</div>
-																				<div className="text-lg font-semibold text-slate-100">
-																					{stat.value ||
-																						"-"}
-																				</div>
-																			</div>
-																		)
-																	)}
-																</div>
-																<div className="space-y-2">
-																	{mentalStats.map(
-																		(stat, index) => (
-																			<div
-																				key={`${stat.name}-${index}`}
-																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																			>
-																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																					{stat.name ||
-																						"Stat"}
-																				</div>
-																				<div className="text-lg font-semibold text-slate-100">
-																					{stat.value ||
-																						"-"}
-																				</div>
-																			</div>
-																		)
-																	)}
-																</div>
-															</div>
-															{otherStats.length > 0 && (
-																<div className="grid gap-2 sm:grid-cols-2 mt-2">
-																	{otherStats.map(
-																		(stat, index) => (
-																			<div
-																				key={`${stat.name}-${index}`}
-																				className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																			>
-																				<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																					{stat.name ||
-																						"Stat"}
-																				</div>
-																				<div className="text-lg font-semibold text-slate-100">
-																					{stat.value ||
-																						"-"}
-																				</div>
-																			</div>
-																		)
-																	)}
-																</div>
-															)}
-														</>
-													);
-												} else {
-													// For completely custom systems with no standard stats
-													return (
-														<div className="grid gap-2 sm:grid-cols-2">
-															{item.stats.map((stat, index) => (
-																<div
-																	key={`${stat.name}-${index}`}
-																	className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-																>
-																	<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-																		{stat.name || "Stat"}
-																	</div>
-																	<div className="text-lg font-semibold text-slate-100">
-																		{stat.value || "-"}
-																	</div>
-																</div>
-															))}
-														</div>
-													);
-												}
-											})()}
-										</div>
-
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Skills
-											</h3>
-											<div className="grid gap-2 sm:grid-cols-2">
-												{item.skills.map((skill, index) => (
-													<div
-														key={`${skill.name}-${index}`}
-														className="rounded-md border border-slate-800 bg-slate-950/50 px-3 py-2"
-													>
-														<div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-															{getSkillDisplayName(
-																skill.name,
-																item.system
-															) || "Skill"}
-														</div>
-														<div className="text-lg font-semibold text-slate-100">
-															{skill.value || "-"}
-														</div>
-													</div>
-												))}
-											</div>
-										</div>
-									</div>
-
-									{item.notes && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Notes
-											</h3>
-											<p className="whitespace-pre-wrap rounded-md border border-slate-800 bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
-												{item.notes}
-											</p>
-										</div>
-									)}
-
-									{item.items && item.items.length > 0 && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Items
-											</h3>
-											<div className="flex flex-wrap gap-2">
-												{item.items.map((itemName, index) => (
-													<span
-														key={index}
-														className="inline-flex items-center rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
-													>
-														{itemName}
-													</span>
-												))}
-											</div>
-										</div>
-									)}
-
-									{(item.system === "dnd" ||
-										item.system === "starfinder") &&
-										item.pdfUrls &&
-										item.pdfUrls.length > 0 && (
-											<div className="space-y-2">
-												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-													Character Sheets
-												</h3>
-												<div className="flex flex-wrap gap-2">
-													{item.pdfUrls.map((url, index) => (
-														<a
-															key={index}
-															href={url}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-														>
-															📄 Character Sheet {index + 1}
-														</a>
-													))}
-												</div>
-											</div>
-										)}
-
-									{item.system === "starfinder" &&
-										item.demiplaneUrl && (
-											<div className="space-y-2">
-												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-													Demiplane Character
-												</h3>
-												<a
-													href={item.demiplaneUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-												>
-													🔗 View on Demiplane
-												</a>
-											</div>
-										)}
-								</div>
-							</details>
-						))}
-				</div>
-			)}
+			{/* Current Values section removed - all fields available in edit form */}
 
 			{/* Form Section */}
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
@@ -1405,34 +1045,27 @@ export default function CharactersPage() {
 								</span>
 							</label>
 
-							{/* PDF Upload Section - Show for D&D and Starfinder */}
-							{(selectedSystem === "dnd" ||
+							{/* PDF/Image Upload Section - Show for Pathfinder, Shadowdark, Other, D&D and Starfinder */}
+							{(selectedSystem === "pathfinder" ||
+								selectedSystem === "shadowdark" ||
+								selectedSystem === "other" ||
+								selectedSystem === "dnd" ||
 								selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4">
 										<div>
 											<h3 className="text-sm font-semibold text-sky-200">
-												Upload{" "}
-												{selectedSystem === "dnd"
-													? "D&D Beyond"
-													: "Starfinder"}{" "}
-												Character Sheets
+												Upload Character Sheets
 											</h3>
 											<p className="text-xs text-sky-300/80">
-												Upload your character sheets{" "}
-												{selectedSystem === "dnd"
-													? "from D&D Beyond"
-													: "for Starfinder"}{" "}
-												(up to 3 PDF files)
+												Upload your character sheets as PDF or image files (up to 3 files)
 											</p>
 										</div>
 
 										<div className="mt-4 space-y-3">
 											<div className="rounded-md bg-slate-900/50 p-3 text-xs text-slate-300">
 												<p className="font-semibold text-slate-200 mb-2">
-													{selectedSystem === "dnd"
-														? "How to export from D&D Beyond:"
-														: "How to upload Starfinder character sheets:"}
+													How to upload character sheets:
 												</p>
 												{selectedSystem === "dnd" ? (
 													<ol className="list-decimal list-inside space-y-1">
@@ -1445,8 +1078,7 @@ export default function CharactersPage() {
 														</li>
 														<li>Download the PDF file(s)</li>
 														<li>
-															Upload the files below (max 3
-															files)
+															Upload the files below (max 3 files)
 														</li>
 													</ol>
 												) : (
@@ -1466,7 +1098,7 @@ export default function CharactersPage() {
 													</ol>
 												)}
 												<p className="mt-2 text-sky-300">
-													Note: Once PDFs are uploaded, only Name,
+													Note: Once files are uploaded, only Name,
 													Campaign, and Avatar fields will be
 													editable.
 												</p>
@@ -1479,19 +1111,19 @@ export default function CharactersPage() {
 												>
 													{isUploadingPdfs
 														? "Uploading..."
-														: "Upload Character Sheets (PDF)"}
+														: "Upload Character Sheets"}
 												</label>
 												<input
 													id="pdf-upload"
 													type="file"
-													accept="application/pdf"
+													accept="application/pdf,image/jpeg,image/png,image/webp,image/gif"
 													multiple
 													onChange={handlePdfUpload}
 													disabled={isUploadingPdfs}
 													className="hidden"
 												/>
 												<p className="text-xs text-slate-400">
-													PDF files only. Max 10MB per file, up to
+													PDF or image files (JPEG, PNG, WebP, GIF). Max 10MB per file, up to
 													3 files.
 												</p>
 											</div>
@@ -1646,7 +1278,8 @@ export default function CharactersPage() {
 							)}
 
 							{/* Demiplane URL Section - Show for D&D and Starfinder */}
-							{selectedSystem === "starfinder" && (
+							{(selectedSystem === "dnd" ||
+								selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
 										<div>
@@ -1654,7 +1287,11 @@ export default function CharactersPage() {
 												Demiplane Character Link
 											</h3>
 											<p className="text-xs text-purple-300/80">
-												Link your Demiplane Starfinder character
+												Link your Demiplane{" "}
+												{selectedSystem === "dnd"
+													? "D&D"
+													: "Starfinder"}{" "}
+												character
 											</p>
 										</div>
 
@@ -1672,8 +1309,11 @@ export default function CharactersPage() {
 													<li>Paste it in the field below</li>
 												</ol>
 												<p className="mt-2 text-purple-300">
-													Example:
-													https://app.demiplane.com/nexus/starfinder2e/character/abc123
+													Example: https://app.demiplane.com/nexus/
+													{selectedSystem === "dnd"
+														? "dnd5e"
+														: "starfinder2e"}
+													/character/abc123
 												</p>
 											</div>
 
@@ -1692,7 +1332,7 @@ export default function CharactersPage() {
 																undefined,
 														}))
 													}
-													placeholder={`https://app.demiplane.com/nexus/starfinder2e/character/...`}
+													placeholder={`https://app.demiplane.com/nexus/${selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/...`}
 													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
 												/>
 											</label>
@@ -1767,46 +1407,47 @@ export default function CharactersPage() {
 												</div>
 											</div>
 
-											<div className="grid gap-4 sm:grid-cols-2">
-												<label className="flex flex-col gap-2">
-													<span className="text-sm font-medium text-slate-200">
-														Name
-													</span>
-													<input
-														type="text"
-														value={character.name}
-														onChange={(event) =>
-															setCharacter((prev) => ({
-																...prev,
-																name: event.target.value,
-															}))
-														}
-														placeholder="Eldrin the Bold"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-													/>
-												</label>
-												<label className="flex flex-col gap-2">
-													<span className="text-sm font-medium text-slate-200">
-														Campaign
-													</span>
-													<input
-														type="text"
-														value={character.campaign}
-														onChange={(event) =>
-															setCharacter((prev) => ({
-																...prev,
-																campaign: event.target.value,
-															}))
-														}
-														placeholder="Shadows of Neverwinter"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-													/>
-												</label>
-											</div>
-										</div>
-									)}
+									<div className="grid gap-4 sm:grid-cols-2">
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Name
+											</span>
+											<input
+												type="text"
+												value={character.name}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														name: event.target.value,
+													}))
+												}
+												placeholder="Eldrin the Bold"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										</label>
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Campaign
+											</span>
+											<input
+												type="text"
+												value={character.campaign}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														campaign: event.target.value,
+													}))
+												}
+												placeholder="Shadows of Neverwinter"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										</label>
+									</div>
 								</div>
-							) : (
+							)}
+
+							{/* Show normal Name/Campaign/Avatar when no PDFs */}
+							{(!character.pdfUrls || character.pdfUrls.length === 0) && (
 								<>
 									{/* Avatar Upload Section */}
 									<div className="space-y-4">
@@ -1894,9 +1535,669 @@ export default function CharactersPage() {
 								</>
 							)}
 
-							{/* Hide all other fields when PDFs are uploaded */}
-							{(!character.pdfUrls ||
-								character.pdfUrls.length === 0) && (
+							{/* Character Details Section - Collapsible when PDFs are uploaded */}
+							{character.pdfUrls && character.pdfUrls.length > 0 ? (
+								<div className="md:col-span-2 space-y-4">
+									<button
+										type="button"
+										onClick={() =>
+											setIsBasicFieldsOpen(!isBasicFieldsOpen)
+										}
+										className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+									>
+										<h2 className="text-lg font-semibold text-slate-100">
+											Character Details (Race, Background, etc.)
+										</h2>
+										<span className="text-xs uppercase tracking-wide text-slate-400">
+											{isBasicFieldsOpen ? "Collapse" : "Expand"}
+										</span>
+									</button>
+									{isBasicFieldsOpen && (
+										<div className="space-y-4 border border-slate-800 rounded-md p-4 bg-slate-950/40">
+											<div className="grid gap-4 sm:grid-cols-3">
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Alignment
+													</span>
+													{systemOptions?.alignments ? (
+														<select
+															value={character.alignment || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	alignment: event.target.value,
+																}))
+															}
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														>
+															<option value="">
+																Select alignment
+															</option>
+															{systemOptions.alignments.map(
+																(alignment) => (
+																	<option
+																		key={alignment}
+																		value={alignment}
+																	>
+																		{alignment}
+																	</option>
+																)
+															)}
+														</select>
+													) : (
+														<input
+															type="text"
+															value={character.alignment || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	alignment: event.target.value,
+																}))
+															}
+															placeholder="Chaotic Good"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													)}
+												</label>
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Race
+													</span>
+													{systemOptions?.races ? (
+														<select
+															value={character.race || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	race: event.target.value,
+																}))
+															}
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														>
+															<option value="">Select race</option>
+															{systemOptions.races.map((race) => (
+																<option key={race} value={race}>
+																	{race}
+																</option>
+															))}
+														</select>
+													) : (
+														<input
+															type="text"
+															value={character.race || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	race: event.target.value,
+																}))
+															}
+															placeholder="High Elf"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													)}
+												</label>
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Background
+													</span>
+													{systemOptions?.backgrounds ? (
+														<select
+															value={character.background || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	background: event.target.value,
+																}))
+															}
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														>
+															<option value="">
+																Select background
+															</option>
+															{systemOptions.backgrounds.map(
+																(background) => (
+																	<option
+																		key={background}
+																		value={background}
+																	>
+																		{background}
+																	</option>
+																)
+															)}
+														</select>
+													) : (
+														<input
+															type="text"
+															value={character.background || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	background: event.target.value,
+																}))
+															}
+															placeholder="Sage"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													)}
+												</label>
+											</div>
+
+											<div className="space-y-2">
+												<h3 className="text-base font-semibold text-slate-100">
+													Physical Appearance
+												</h3>
+												<div className="grid gap-4 sm:grid-cols-3">
+													<label className="flex flex-col gap-2">
+														<span className="text-sm font-medium text-slate-200">
+															Age
+														</span>
+														<input
+															type="text"
+															value={character.age || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	age: event.target.value,
+																}))
+															}
+															placeholder="25"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													</label>
+													<label className="flex flex-col gap-2">
+														<span className="text-sm font-medium text-slate-200">
+															Height
+														</span>
+														<input
+															type="text"
+															value={character.height || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	height: event.target.value,
+																}))
+															}
+															placeholder="6 ft"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													</label>
+													<label className="flex flex-col gap-2">
+														<span className="text-sm font-medium text-slate-200">
+															Weight
+														</span>
+														<input
+															type="text"
+															value={character.weight || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	weight: event.target.value,
+																}))
+															}
+															placeholder="180 lbs"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													</label>
+													<label className="flex flex-col gap-2">
+														<span className="text-sm font-medium text-slate-200">
+															Eyes
+														</span>
+														<input
+															type="text"
+															value={character.eyes || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	eyes: event.target.value,
+																}))
+															}
+															placeholder="Blue"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													</label>
+													<label className="flex flex-col gap-2">
+														<span className="text-sm font-medium text-slate-200">
+															Skin
+														</span>
+														<input
+															type="text"
+															value={character.skin || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	skin: event.target.value,
+																}))
+															}
+															placeholder="Fair"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													</label>
+													<label className="flex flex-col gap-2">
+														<span className="text-sm font-medium text-slate-200">
+															Hair
+														</span>
+														<input
+															type="text"
+															value={character.hair || ""}
+															onChange={(event) =>
+																setCharacter((prev) => ({
+																	...prev,
+																	hair: event.target.value,
+																}))
+															}
+															placeholder="Black"
+															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+													</label>
+												</div>
+											</div>
+
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Level
+												</span>
+												<input
+													type="text"
+													value={character.level || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															level: event.target.value,
+														}))
+													}
+													placeholder="5"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Gold
+												</span>
+												<input
+													type="text"
+													value={character.gold || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															gold: event.target.value,
+														}))
+													}
+													placeholder="100"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Experience
+												</span>
+												<input
+													type="text"
+													value={character.experience || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															experience: event.target.value,
+														}))
+													}
+													placeholder="2500"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Class
+												</span>
+												{systemOptions?.classes ? (
+													<select
+														value={character.class || ""}
+														onChange={(event) =>
+															setCharacter((prev) => ({
+																...prev,
+																class: event.target.value,
+															}))
+														}
+														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													>
+														<option value="">Select class</option>
+														{systemOptions.classes.map((className) => (
+															<option
+																key={className}
+																value={className}
+															>
+																{className}
+															</option>
+														))}
+													</select>
+												) : (
+													<input
+														type="text"
+														value={character.class || ""}
+														onChange={(event) =>
+															setCharacter((prev) => ({
+																...prev,
+																class: event.target.value,
+															}))
+														}
+														placeholder="Wizard"
+														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													/>
+												)}
+											</label>
+
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Role
+												</span>
+												<select
+													value={character.role || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															role: event.target.value,
+														}))
+													}
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												>
+													<option value="">Select a role</option>
+													{ROLE_OPTIONS.map((role) => (
+														<option key={role} value={role}>
+															{role}
+														</option>
+													))}
+												</select>
+											</label>
+
+											<label className="flex items-center gap-3">
+												<input
+													type="checkbox"
+													checked={character.isPublic ?? false}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															isPublic: event.target.checked,
+														}))
+													}
+													className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-indigo-500 outline-none transition focus:ring-2 focus:ring-indigo-500/40"
+												/>
+												<span className="text-sm text-slate-200">
+													<span className="font-medium">
+														Make this character public
+													</span>
+													<span className="block text-xs text-slate-400">
+														Public characters will be visible on your
+														player profile page
+													</span>
+												</span>
+											</label>
+
+											{/* Items Section */}
+											<div className="space-y-4">
+												<h2 className="text-lg font-semibold text-slate-100">
+													Items
+												</h2>
+												<div className="space-y-3">
+													<div className="flex gap-2">
+														<input
+															type="text"
+															placeholder="Add an item (e.g., Sword of Fire)"
+															onKeyDown={(event) => {
+																if (event.key === "Enter") {
+																	event.preventDefault();
+																	const value =
+																		event.currentTarget.value.trim();
+																	if (value) {
+																		setCharacter((prev) => ({
+																			...prev,
+																			items: [
+																				...(prev.items || []),
+																				value,
+																			],
+																		}));
+																		event.currentTarget.value = "";
+																	}
+																}
+															}}
+															className="flex-1 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														/>
+														<button
+															type="button"
+															onClick={(event) => {
+																const input = event.currentTarget
+																	.previousElementSibling as HTMLInputElement;
+																const value = input?.value.trim();
+																if (value) {
+																	setCharacter((prev) => ({
+																		...prev,
+																		items: [
+																			...(prev.items || []),
+																			value,
+																		],
+																	}));
+																	input.value = "";
+																}
+															}}
+															className="rounded-md border border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+														>
+															Add
+														</button>
+													</div>
+													{character.items &&
+														character.items.length > 0 && (
+															<div className="flex flex-wrap gap-2">
+																{character.items.map(
+																	(item, index) => (
+																		<span
+																			key={index}
+																			className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+																		>
+																			{item}
+																			<button
+																				type="button"
+																				onClick={() => {
+																					setCharacter(
+																						(prev) => ({
+																							...prev,
+																							items: prev.items?.filter(
+																								(_, i) =>
+																									i !== index
+																							),
+																						})
+																					);
+																				}}
+																				className="text-slate-400 hover:text-slate-200"
+																			>
+																				×
+																			</button>
+																		</span>
+																	)
+																)}
+															</div>
+														)}
+												</div>
+											</div>
+
+											<div className="space-y-4">
+												<button
+													type="button"
+													onClick={() =>
+														setIsAbilitiesOpen(!isAbilitiesOpen)
+													}
+													className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+												>
+													<div className="flex items-center gap-2">
+														<h2 className="text-lg font-semibold text-slate-100">
+															Ability Scores
+														</h2>
+														{isCustomSystem && (
+															<button
+																type="button"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	addCustomStat();
+																}}
+																className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+															>
+																Add Stat
+															</button>
+														)}
+													</div>
+													<span className="text-xs uppercase tracking-wide text-slate-400">
+														{isAbilitiesOpen ? "Collapse" : "Expand"}
+													</span>
+												</button>
+												{isAbilitiesOpen && (
+													<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+														{character.stats.map((stat, index) => (
+															<div
+																key={`${stat.name}-${index}`}
+																className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+															>
+																<label className="flex flex-col gap-2">
+																	<span className="text-xs uppercase tracking-wide text-slate-400">
+																		{isCustomSystem ? (
+																			<input
+																				type="text"
+																				value={stat.name}
+																				onChange={(event) =>
+																					updateStat(
+																						index,
+																						"name",
+																						event.target.value
+																					)
+																				}
+																				placeholder="Stat Name"
+																				className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+																			/>
+																		) : (
+																			stat.name
+																		)}
+																	</span>
+																	<input
+																		type="number"
+																		inputMode="numeric"
+																		value={stat.value}
+																		onChange={(event) =>
+																			updateStat(
+																				index,
+																				"value",
+																				event.target.value
+																			)
+																		}
+																		placeholder="0"
+																		className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																	/>
+																</label>
+															</div>
+														))}
+													</div>
+												)}
+											</div>
+
+											<div className="space-y-4">
+												<button
+													type="button"
+													onClick={() => setIsSkillsOpen(!isSkillsOpen)}
+													className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+												>
+													<div className="flex items-center gap-2">
+														<h2 className="text-lg font-semibold text-slate-100">
+															Skills
+														</h2>
+														{isCustomSystem && (
+															<button
+																type="button"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	addCustomSkill();
+																}}
+																className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+															>
+																Add Skill
+															</button>
+														)}
+													</div>
+													<span className="text-xs uppercase tracking-wide text-slate-400">
+														{isSkillsOpen ? "Collapse" : "Expand"}
+													</span>
+												</button>
+												{isSkillsOpen && (
+													<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+														{character.skills.map((skill, index) => (
+															<div
+																key={`${skill.name}-${index}`}
+																className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+															>
+																<label className="flex flex-col gap-2">
+																	<span className="text-xs uppercase tracking-wide text-slate-400">
+																		{isCustomSystem ? (
+																			<input
+																				type="text"
+																				value={skill.name}
+																				onChange={(event) =>
+																					updateSkill(
+																						index,
+																						"name",
+																						event.target.value
+																					)
+																				}
+																				placeholder="Skill Name"
+																				className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+																			/>
+																		) : (
+																			getSkillDisplayName(
+																				skill.name,
+																				selectedSystem
+																			)
+																		)}
+																	</span>
+																	<input
+																		type="text"
+																		value={skill.value}
+																		onChange={(event) =>
+																			updateSkill(
+																				index,
+																				"value",
+																				event.target.value
+																			)
+																		}
+																		placeholder={
+																			isCustomSystem
+																				? "Rank / Modifier"
+																				: "+0"
+																		}
+																		className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																	/>
+																</label>
+															</div>
+														))}
+													</div>
+												)}
+											</div>
+
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Notes
+												</span>
+												<textarea
+													value={character.notes}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															notes: event.target.value,
+														}))
+													}
+													placeholder="Personality traits, ideals, bonds, flaws, and other custom details."
+													rows={4}
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+										</div>
+									)}
+								</div>
+							) : (
 								<>
 									<div className="grid gap-4 sm:grid-cols-3">
 										<label className="flex flex-col gap-2">

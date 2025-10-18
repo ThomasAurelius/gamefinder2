@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getCampaign, updateCampaign } from "@/lib/campaigns/db";
+import { getCampaign, updateCampaign, deleteCampaign } from "@/lib/campaigns/db";
 import { CampaignPayload } from "@/lib/campaigns/types";
 
 export async function GET(
@@ -91,6 +91,41 @@ export async function PUT(
     console.error("Failed to update campaign", error);
     return NextResponse.json(
       { error: "Failed to update campaign" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const success = await deleteCampaign(userId, id);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: "Campaign not found or you do not have permission to delete it" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error) {
+    console.error("Failed to delete campaign", error);
+    return NextResponse.json(
+      { error: "Failed to delete campaign" },
       { status: 500 }
     );
   }

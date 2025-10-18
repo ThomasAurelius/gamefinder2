@@ -591,3 +591,75 @@ export async function countNewGamesSinceDate(sinceDate: Date): Promise<number> {
 
   return count;
 }
+
+export async function removePlayer(
+  sessionId: string,
+  hostId: string,
+  playerId: string
+): Promise<StoredGameSession | null> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+  
+  const session = await gamesCollection.findOne({ id: sessionId, userId: hostId });
+  
+  if (!session) {
+    return null;
+  }
+  
+  // Check if player is in any of the lists (signedUpPlayers, waitlist, or pendingPlayers)
+  const isInSignedUp = session.signedUpPlayers?.includes(playerId);
+  const isInWaitlist = session.waitlist?.includes(playerId);
+  const isInPending = session.pendingPlayers?.includes(playerId);
+  
+  if (!isInSignedUp && !isInWaitlist && !isInPending) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  
+  // Remove player from all lists
+  const result = await gamesCollection.findOneAndUpdate(
+    { id: sessionId, userId: hostId },
+    {
+      $pull: { 
+        signedUpPlayers: playerId,
+        signedUpPlayersWithCharacters: { userId: playerId },
+        waitlist: playerId,
+        waitlistWithCharacters: { userId: playerId },
+        pendingPlayers: playerId,
+        pendingPlayersWithCharacters: { userId: playerId }
+      },
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
+  };
+}
