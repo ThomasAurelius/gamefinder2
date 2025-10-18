@@ -1328,8 +1328,8 @@ export default function CharactersPage() {
 								</div>
 							)}
 
-							{/* Demiplane URL Section - Only show for Starfinder */}
-							{selectedSystem === "starfinder" && (
+							{/* Demiplane URL Section - Show for D&D and Starfinder */}
+							{(selectedSystem === "dnd" || selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
 										<div>
@@ -1337,7 +1337,7 @@ export default function CharactersPage() {
 												Demiplane Character Link
 											</h3>
 											<p className="text-xs text-purple-300/80">
-												Link your Demiplane Starfinder character
+												Link your Demiplane {selectedSystem === "dnd" ? "D&D" : "Starfinder"} character
 											</p>
 										</div>
 
@@ -1358,7 +1358,7 @@ export default function CharactersPage() {
 													</li>
 												</ol>
 												<p className="mt-2 text-purple-300">
-													Example: https://app.demiplane.com/nexus/starfinder2e/character/abc123
+													Example: https://app.demiplane.com/nexus/{selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/abc123
 												</p>
 											</div>
 
@@ -1375,7 +1375,7 @@ export default function CharactersPage() {
 															demiplaneUrl: event.target.value.trim() || undefined,
 														}))
 													}
-													placeholder="https://app.demiplane.com/nexus/starfinder2e/character/..."
+													placeholder={`https://app.demiplane.com/nexus/${selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/...`}
 													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
 												/>
 											</label>
