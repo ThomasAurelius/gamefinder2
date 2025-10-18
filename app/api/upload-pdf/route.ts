@@ -3,8 +3,14 @@ import { cookies } from "next/headers";
 import { uploadImageToFirebase } from "@/lib/firebase-storage";
 import { randomUUID } from "crypto";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for PDFs
-const ALLOWED_TYPES = ["application/pdf"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for PDFs and images
+const ALLOWED_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif"
+];
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +46,7 @@ export async function POST(request: NextRequest) {
     for (const file of files) {
       if (!ALLOWED_TYPES.includes(file.type)) {
         return NextResponse.json(
-          { error: "Invalid file type. Only PDF files are allowed." },
+          { error: "Invalid file type. Only PDF and image files (JPEG, PNG, WebP, GIF) are allowed." },
           { status: 400 }
         );
       }
