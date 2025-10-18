@@ -424,7 +424,7 @@ export default function CharactersPage() {
 		if (!files || files.length === 0) return;
 
 		const fileArray = Array.from(files);
-		
+
 		// Validate file count
 		if (fileArray.length > 3) {
 			setPdfUploadError("Maximum 3 files allowed");
@@ -433,7 +433,9 @@ export default function CharactersPage() {
 		}
 
 		// Validate file types
-		const invalidFiles = fileArray.filter(file => file.type !== "application/pdf");
+		const invalidFiles = fileArray.filter(
+			(file) => file.type !== "application/pdf"
+		);
 		if (invalidFiles.length > 0) {
 			setPdfUploadError("Only PDF files are allowed");
 			event.target.value = "";
@@ -446,7 +448,7 @@ export default function CharactersPage() {
 		setIsUploadingPdfs(true);
 		try {
 			const formData = new FormData();
-			fileArray.forEach(file => {
+			fileArray.forEach((file) => {
 				formData.append("files", file);
 			});
 
@@ -1047,42 +1049,45 @@ export default function CharactersPage() {
 										</div>
 									)}
 
-									{item.system === "dnd" && item.pdfUrls && item.pdfUrls.length > 0 && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Character Sheets
-											</h3>
-											<div className="flex flex-wrap gap-2">
-												{item.pdfUrls.map((url, index) => (
-													<a
-														key={index}
-														href={url}
-														target="_blank"
-														rel="noopener noreferrer"
-														className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-													>
-														📄 Character Sheet {index + 1}
-													</a>
-												))}
+									{item.system === "dnd" &&
+										item.pdfUrls &&
+										item.pdfUrls.length > 0 && (
+											<div className="space-y-2">
+												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+													Character Sheets
+												</h3>
+												<div className="flex flex-wrap gap-2">
+													{item.pdfUrls.map((url, index) => (
+														<a
+															key={index}
+															href={url}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+														>
+															📄 Character Sheet {index + 1}
+														</a>
+													))}
+												</div>
 											</div>
-										</div>
-									)}
+										)}
 
-									{(item.system === "dnd" || item.system === "starfinder") && item.demiplaneUrl && (
-										<div className="space-y-2">
-											<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-												Demiplane Character
-											</h3>
-											<a
-												href={item.demiplaneUrl}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-											>
-												🔗 View on Demiplane
-											</a>
-										</div>
-									)}
+									{item.system === "starfinder" &&
+										item.demiplaneUrl && (
+											<div className="space-y-2">
+												<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+													Demiplane Character
+												</h3>
+												<a
+													href={item.demiplaneUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+												>
+													🔗 View on Demiplane
+												</a>
+											</div>
+										)}
 								</div>
 							</details>
 						))}
@@ -1144,7 +1149,8 @@ export default function CharactersPage() {
 												Upload D&D Beyond Character Sheets
 											</h3>
 											<p className="text-xs text-sky-300/80">
-												Upload your character sheets from D&D Beyond (up to 3 PDF files)
+												Upload your character sheets from D&D Beyond
+												(up to 3 PDF files)
 											</p>
 										</div>
 
@@ -1154,13 +1160,22 @@ export default function CharactersPage() {
 													How to export from D&D Beyond:
 												</p>
 												<ol className="list-decimal list-inside space-y-1">
-													<li>Open your character in D&D Beyond</li>
-													<li>Click the &quot;Export&quot; or &quot;View PDF&quot; button</li>
+													<li>
+														Open your character in D&D Beyond
+													</li>
+													<li>
+														Click the &quot;Export&quot; or
+														&quot;View PDF&quot; button
+													</li>
 													<li>Download the PDF file(s)</li>
-													<li>Upload the files below (max 3 files)</li>
+													<li>
+														Upload the files below (max 3 files)
+													</li>
 												</ol>
 												<p className="mt-2 text-sky-300">
-													Note: Once PDFs are uploaded, only Name, Campaign, and Avatar fields will be editable.
+													Note: Once PDFs are uploaded, only Name,
+													Campaign, and Avatar fields will be
+													editable.
 												</p>
 											</div>
 
@@ -1183,7 +1198,8 @@ export default function CharactersPage() {
 													className="hidden"
 												/>
 												<p className="text-xs text-slate-400">
-													PDF files only. Max 10MB per file, up to 3 files.
+													PDF files only. Max 10MB per file, up to
+													3 files.
 												</p>
 											</div>
 
@@ -1193,37 +1209,45 @@ export default function CharactersPage() {
 												</div>
 											)}
 
-											{character.pdfUrls && character.pdfUrls.length > 0 && (
-												<div className="space-y-2">
-													<p className="text-sm font-medium text-slate-200">
-														Uploaded Files:
-													</p>
+											{character.pdfUrls &&
+												character.pdfUrls.length > 0 && (
 													<div className="space-y-2">
-														{character.pdfUrls.map((url, index) => (
-															<div
-																key={index}
-																className="flex items-center justify-between rounded-md border border-slate-700 bg-slate-900/50 px-3 py-2"
-															>
-																<a
-																	href={url}
-																	target="_blank"
-																	rel="noopener noreferrer"
-																	className="text-sm text-sky-300 hover:text-sky-200 underline"
-																>
-																	Character Sheet {index + 1}
-																</a>
-																<button
-																	type="button"
-																	onClick={() => handleRemovePdf(index)}
-																	className="text-slate-400 hover:text-slate-200"
-																>
-																	×
-																</button>
-															</div>
-														))}
+														<p className="text-sm font-medium text-slate-200">
+															Uploaded Files:
+														</p>
+														<div className="space-y-2">
+															{character.pdfUrls.map(
+																(url, index) => (
+																	<div
+																		key={index}
+																		className="flex items-center justify-between rounded-md border border-slate-700 bg-slate-900/50 px-3 py-2"
+																	>
+																		<a
+																			href={url}
+																			target="_blank"
+																			rel="noopener noreferrer"
+																			className="text-sm text-sky-300 hover:text-sky-200 underline"
+																		>
+																			Character Sheet{" "}
+																			{index + 1}
+																		</a>
+																		<button
+																			type="button"
+																			onClick={() =>
+																				handleRemovePdf(
+																					index
+																				)
+																			}
+																			className="text-slate-400 hover:text-slate-200"
+																		>
+																			×
+																		</button>
+																	</div>
+																)
+															)}
+														</div>
 													</div>
-												</div>
-											)}
+												)}
 										</div>
 									</div>
 								</div>
@@ -1329,7 +1353,8 @@ export default function CharactersPage() {
 							)}
 
 							{/* Demiplane URL Section - Show for D&D and Starfinder */}
-							{(selectedSystem === "dnd" || selectedSystem === "starfinder") && (
+							{(selectedSystem === "dnd" ||
+								selectedSystem === "starfinder") && (
 								<div className="md:col-span-2">
 									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
 										<div>
@@ -1337,7 +1362,11 @@ export default function CharactersPage() {
 												Demiplane Character Link
 											</h3>
 											<p className="text-xs text-purple-300/80">
-												Link your Demiplane {selectedSystem === "dnd" ? "D&D" : "Starfinder"} character
+												Link your Demiplane{" "}
+												{selectedSystem === "dnd"
+													? "D&D"
+													: "Starfinder"}{" "}
+												character
 											</p>
 										</div>
 
@@ -1347,18 +1376,19 @@ export default function CharactersPage() {
 													How to get your Demiplane character URL:
 												</p>
 												<ol className="list-decimal list-inside space-y-1">
+													<li>Open your character on Demiplane</li>
 													<li>
-														Open your character on Demiplane
+														Copy the URL from your browser&apos;s
+														address bar
 													</li>
-													<li>
-														Copy the URL from your browser&apos;s address bar
-													</li>
-													<li>
-														Paste it in the field below
-													</li>
+													<li>Paste it in the field below</li>
 												</ol>
 												<p className="mt-2 text-purple-300">
-													Example: https://app.demiplane.com/nexus/{selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/abc123
+													Example: https://app.demiplane.com/nexus/
+													{selectedSystem === "dnd"
+														? "dnd5e"
+														: "starfinder2e"}
+													/character/abc123
 												</p>
 											</div>
 
@@ -1372,7 +1402,9 @@ export default function CharactersPage() {
 													onChange={(event) =>
 														setCharacter((prev) => ({
 															...prev,
-															demiplaneUrl: event.target.value.trim() || undefined,
+															demiplaneUrl:
+																event.target.value.trim() ||
+																undefined,
 														}))
 													}
 													placeholder={`https://app.demiplane.com/nexus/${selectedSystem === "dnd" ? "dnd5e" : "starfinder2e"}/character/...`}
@@ -1389,7 +1421,9 @@ export default function CharactersPage() {
 								<div className="md:col-span-2 space-y-4">
 									<button
 										type="button"
-										onClick={() => setIsBasicFieldsOpen(!isBasicFieldsOpen)}
+										onClick={() =>
+											setIsBasicFieldsOpen(!isBasicFieldsOpen)
+										}
 										className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
 									>
 										<h2 className="text-lg font-semibold text-slate-100">
@@ -1417,7 +1451,9 @@ export default function CharactersPage() {
 														) : (
 															<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
 																{character.name
-																	? character.name.charAt(0).toUpperCase()
+																	? character.name
+																			.charAt(0)
+																			.toUpperCase()
 																	: "?"}
 															</div>
 														)}
@@ -1503,7 +1539,9 @@ export default function CharactersPage() {
 												) : (
 													<div className="flex h-24 w-24 items-center justify-center rounded-full border-2 border-slate-700 bg-slate-800 text-2xl font-semibold text-slate-400">
 														{character.name
-															? character.name.charAt(0).toUpperCase()
+															? character.name
+																	.charAt(0)
+																	.toUpperCase()
 															: "?"}
 													</div>
 												)}
@@ -1572,623 +1610,649 @@ export default function CharactersPage() {
 							)}
 
 							{/* Hide all other fields when PDFs are uploaded */}
-							{(!character.pdfUrls || character.pdfUrls.length === 0) && (
+							{(!character.pdfUrls ||
+								character.pdfUrls.length === 0) && (
 								<>
 									<div className="grid gap-4 sm:grid-cols-3">
-								<label className="flex flex-col gap-2">
-									<span className="text-sm font-medium text-slate-200">
-										Alignment
-									</span>
-									{systemOptions?.alignments ? (
-										<select
-											value={character.alignment || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													alignment: event.target.value,
-												}))
-											}
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										>
-											<option value="">Select alignment</option>
-											{systemOptions.alignments.map((alignment) => (
-												<option key={alignment} value={alignment}>
-													{alignment}
-												</option>
-											))}
-										</select>
-									) : (
-										<input
-											type="text"
-											value={character.alignment || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													alignment: event.target.value,
-												}))
-											}
-											placeholder="Chaotic Good"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									)}
-								</label>
-								<label className="flex flex-col gap-2">
-									<span className="text-sm font-medium text-slate-200">
-										Race
-									</span>
-									{systemOptions?.races ? (
-										<select
-											value={character.race || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													race: event.target.value,
-												}))
-											}
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										>
-											<option value="">Select race</option>
-											{systemOptions.races.map((race) => (
-												<option key={race} value={race}>
-													{race}
-												</option>
-											))}
-										</select>
-									) : (
-										<input
-											type="text"
-											value={character.race || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													race: event.target.value,
-												}))
-											}
-											placeholder="High Elf"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									)}
-								</label>
-								<label className="flex flex-col gap-2">
-									<span className="text-sm font-medium text-slate-200">
-										Background
-									</span>
-									{systemOptions?.backgrounds ? (
-										<select
-											value={character.background || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													background: event.target.value,
-												}))
-											}
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										>
-											<option value="">Select background</option>
-											{systemOptions.backgrounds.map(
-												(background) => (
-													<option
-														key={background}
-														value={background}
-													>
-														{background}
-													</option>
-												)
-											)}
-										</select>
-									) : (
-										<input
-											type="text"
-											value={character.background || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													background: event.target.value,
-												}))
-											}
-											placeholder="Sage"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									)}
-								</label>
-							</div>
-
-							<div className="space-y-2">
-								<h3 className="text-base font-semibold text-slate-100">
-									Physical Appearance
-								</h3>
-								<div className="grid gap-4 sm:grid-cols-3">
-									<label className="flex flex-col gap-2">
-										<span className="text-sm font-medium text-slate-200">
-											Age
-										</span>
-										<input
-											type="text"
-											value={character.age || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													age: event.target.value,
-												}))
-											}
-											placeholder="25"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									</label>
-									<label className="flex flex-col gap-2">
-										<span className="text-sm font-medium text-slate-200">
-											Height
-										</span>
-										<input
-											type="text"
-											value={character.height || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													height: event.target.value,
-												}))
-											}
-											placeholder="6 ft"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									</label>
-									<label className="flex flex-col gap-2">
-										<span className="text-sm font-medium text-slate-200">
-											Weight
-										</span>
-										<input
-											type="text"
-											value={character.weight || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													weight: event.target.value,
-												}))
-											}
-											placeholder="180 lbs"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									</label>
-									<label className="flex flex-col gap-2">
-										<span className="text-sm font-medium text-slate-200">
-											Eyes
-										</span>
-										<input
-											type="text"
-											value={character.eyes || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													eyes: event.target.value,
-												}))
-											}
-											placeholder="Blue"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									</label>
-									<label className="flex flex-col gap-2">
-										<span className="text-sm font-medium text-slate-200">
-											Skin
-										</span>
-										<input
-											type="text"
-											value={character.skin || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													skin: event.target.value,
-												}))
-											}
-											placeholder="Fair"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									</label>
-									<label className="flex flex-col gap-2">
-										<span className="text-sm font-medium text-slate-200">
-											Hair
-										</span>
-										<input
-											type="text"
-											value={character.hair || ""}
-											onChange={(event) =>
-												setCharacter((prev) => ({
-													...prev,
-													hair: event.target.value,
-												}))
-											}
-											placeholder="Black"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-										/>
-									</label>
-								</div>
-							</div>
-
-							<label className="flex flex-col gap-2">
-								<span className="text-sm font-medium text-slate-200">
-									Level
-								</span>
-								<input
-									type="text"
-									value={character.level || ""}
-									onChange={(event) =>
-										setCharacter((prev) => ({
-											...prev,
-											level: event.target.value,
-										}))
-									}
-									placeholder="5"
-									className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-								/>
-							</label>
-
-							<label className="flex flex-col gap-2">
-								<span className="text-sm font-medium text-slate-200">
-									Gold
-								</span>
-								<input
-									type="text"
-									value={character.gold || ""}
-									onChange={(event) =>
-										setCharacter((prev) => ({
-											...prev,
-											gold: event.target.value,
-										}))
-									}
-									placeholder="100"
-									className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-								/>
-							</label>
-
-							<label className="flex flex-col gap-2">
-								<span className="text-sm font-medium text-slate-200">
-									Experience
-								</span>
-								<input
-									type="text"
-									value={character.experience || ""}
-									onChange={(event) =>
-										setCharacter((prev) => ({
-											...prev,
-											experience: event.target.value,
-										}))
-									}
-									placeholder="2500"
-									className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-								/>
-							</label>
-
-							<label className="flex flex-col gap-2">
-								<span className="text-sm font-medium text-slate-200">
-									Class
-								</span>
-								{systemOptions?.classes ? (
-									<select
-										value={character.class || ""}
-										onChange={(event) =>
-											setCharacter((prev) => ({
-												...prev,
-												class: event.target.value,
-											}))
-										}
-										className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-									>
-										<option value="">Select class</option>
-										{systemOptions.classes.map((className) => (
-											<option key={className} value={className}>
-												{className}
-											</option>
-										))}
-									</select>
-								) : (
-									<input
-										type="text"
-										value={character.class || ""}
-										onChange={(event) =>
-											setCharacter((prev) => ({
-												...prev,
-												class: event.target.value,
-											}))
-										}
-										placeholder="Wizard"
-										className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-									/>
-								)}
-							</label>
-
-							<label className="flex flex-col gap-2">
-								<span className="text-sm font-medium text-slate-200">
-									Role
-								</span>
-								<select
-									value={character.role || ""}
-									onChange={(event) =>
-										setCharacter((prev) => ({
-											...prev,
-											role: event.target.value,
-										}))
-									}
-									className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-								>
-									<option value="">Select a role</option>
-									{ROLE_OPTIONS.map((role) => (
-										<option key={role} value={role}>
-											{role}
-										</option>
-									))}
-								</select>
-							</label>
-
-							<label className="flex items-center gap-3">
-								<input
-									type="checkbox"
-									checked={character.isPublic ?? false}
-									onChange={(event) =>
-										setCharacter((prev) => ({
-											...prev,
-											isPublic: event.target.checked,
-										}))
-									}
-									className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-indigo-500 outline-none transition focus:ring-2 focus:ring-indigo-500/40"
-								/>
-								<span className="text-sm text-slate-200">
-									<span className="font-medium">
-										Make this character public
-									</span>
-									<span className="block text-xs text-slate-400">
-										Public characters will be visible on your player
-										profile page
-									</span>
-								</span>
-							</label>
-
-						{/* Items Section */}
-						<div className="space-y-4">
-							<h2 className="text-lg font-semibold text-slate-100">
-								Items
-							</h2>
-							<div className="space-y-3">
-								<div className="flex gap-2">
-									<input
-										type="text"
-										placeholder="Add an item (e.g., Sword of Fire)"
-										onKeyDown={(event) => {
-											if (event.key === "Enter") {
-												event.preventDefault();
-												const value =
-													event.currentTarget.value.trim();
-												if (value) {
-													setCharacter((prev) => ({
-														...prev,
-														items: [...(prev.items || []), value],
-													}));
-													event.currentTarget.value = "";
-												}
-											}
-										}}
-										className="flex-1 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-									/>
-									<button
-										type="button"
-										onClick={(event) => {
-											const input = event.currentTarget
-												.previousElementSibling as HTMLInputElement;
-											const value = input?.value.trim();
-											if (value) {
-												setCharacter((prev) => ({
-													...prev,
-													items: [...(prev.items || []), value],
-												}));
-												input.value = "";
-											}
-										}}
-										className="rounded-md border border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-300 transition hover:bg-indigo-600/10"
-									>
-										Add
-									</button>
-								</div>
-								{character.items && character.items.length > 0 && (
-									<div className="flex flex-wrap gap-2">
-										{character.items.map((item, index) => (
-											<span
-												key={index}
-												className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
-											>
-												{item}
-												<button
-													type="button"
-													onClick={() => {
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Alignment
+											</span>
+											{systemOptions?.alignments ? (
+												<select
+													value={character.alignment || ""}
+													onChange={(event) =>
 														setCharacter((prev) => ({
 															...prev,
-															items: prev.items?.filter(
-																(_, i) => i !== index
-															),
-														}));
-													}}
-													className="text-slate-400 hover:text-slate-200"
-												>
-													×
-												</button>
-											</span>
-										))}
-									</div>
-								)}
-							</div>
-						</div>
-
-						<div className="space-y-4">
-							<button
-								type="button"
-								onClick={() => setIsAbilitiesOpen(!isAbilitiesOpen)}
-								className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
-							>
-								<div className="flex items-center gap-2">
-									<h2 className="text-lg font-semibold text-slate-100">
-										Ability Scores
-									</h2>
-									{isCustomSystem && (
-										<button
-											type="button"
-											onClick={(e) => {
-												e.stopPropagation();
-												addCustomStat();
-											}}
-											className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
-										>
-											Add Stat
-										</button>
-									)}
-								</div>
-								<span className="text-xs uppercase tracking-wide text-slate-400">
-									{isAbilitiesOpen ? "Collapse" : "Expand"}
-								</span>
-							</button>
-							{isAbilitiesOpen && (
-								<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-									{character.stats.map((stat, index) => (
-										<div
-											key={`${stat.name}-${index}`}
-											className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
-										>
-											<label className="flex flex-col gap-2">
-												<span className="text-xs uppercase tracking-wide text-slate-400">
-													{isCustomSystem ? (
-														<input
-															type="text"
-															value={stat.name}
-															onChange={(event) =>
-																updateStat(
-																	index,
-																	"name",
-																	event.target.value
-																)
-															}
-															placeholder="Stat Name"
-															className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
-														/>
-													) : (
-														stat.name
-													)}
-												</span>
-												<input
-													type="number"
-													inputMode="numeric"
-													value={stat.value}
-													onChange={(event) =>
-														updateStat(
-															index,
-															"value",
-															event.target.value
-														)
+															alignment: event.target.value,
+														}))
 													}
-													placeholder="0"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												>
+													<option value="">
+														Select alignment
+													</option>
+													{systemOptions.alignments.map(
+														(alignment) => (
+															<option
+																key={alignment}
+																value={alignment}
+															>
+																{alignment}
+															</option>
+														)
+													)}
+												</select>
+											) : (
+												<input
+													type="text"
+													value={character.alignment || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															alignment: event.target.value,
+														}))
+													}
+													placeholder="Chaotic Good"
 													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
-											</label>
-										</div>
-									))}
-								</div>
-							)}
-						</div>
-
-						<div className="space-y-4">
-							<button
-								type="button"
-								onClick={() => setIsSkillsOpen(!isSkillsOpen)}
-								className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
-							>
-								<div className="flex items-center gap-2">
-									<h2 className="text-lg font-semibold text-slate-100">
-										Skills
-									</h2>
-									{isCustomSystem && (
-										<button
-											type="button"
-											onClick={(e) => {
-												e.stopPropagation();
-												addCustomSkill();
-											}}
-											className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
-										>
-											Add Skill
-										</button>
-									)}
-								</div>
-								<span className="text-xs uppercase tracking-wide text-slate-400">
-									{isSkillsOpen ? "Collapse" : "Expand"}
-								</span>
-							</button>
-							{isSkillsOpen && (
-								<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-									{character.skills.map((skill, index) => (
-										<div
-											key={`${skill.name}-${index}`}
-											className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
-										>
-											<label className="flex flex-col gap-2">
-												<span className="text-xs uppercase tracking-wide text-slate-400">
-													{isCustomSystem ? (
-														<input
-															type="text"
-															value={skill.name}
-															onChange={(event) =>
-																updateSkill(
-																	index,
-																	"name",
-																	event.target.value
-																)
-															}
-															placeholder="Skill Name"
-															className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
-														/>
-													) : (
-														getSkillDisplayName(
-															skill.name,
-															selectedSystem
+											)}
+										</label>
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Race
+											</span>
+											{systemOptions?.races ? (
+												<select
+													value={character.race || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															race: event.target.value,
+														}))
+													}
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												>
+													<option value="">Select race</option>
+													{systemOptions.races.map((race) => (
+														<option key={race} value={race}>
+															{race}
+														</option>
+													))}
+												</select>
+											) : (
+												<input
+													type="text"
+													value={character.race || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															race: event.target.value,
+														}))
+													}
+													placeholder="High Elf"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											)}
+										</label>
+										<label className="flex flex-col gap-2">
+											<span className="text-sm font-medium text-slate-200">
+												Background
+											</span>
+											{systemOptions?.backgrounds ? (
+												<select
+													value={character.background || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															background: event.target.value,
+														}))
+													}
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												>
+													<option value="">
+														Select background
+													</option>
+													{systemOptions.backgrounds.map(
+														(background) => (
+															<option
+																key={background}
+																value={background}
+															>
+																{background}
+															</option>
 														)
 													)}
+												</select>
+											) : (
+												<input
+													type="text"
+													value={character.background || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															background: event.target.value,
+														}))
+													}
+													placeholder="Sage"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											)}
+										</label>
+									</div>
+
+									<div className="space-y-2">
+										<h3 className="text-base font-semibold text-slate-100">
+											Physical Appearance
+										</h3>
+										<div className="grid gap-4 sm:grid-cols-3">
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Age
 												</span>
 												<input
 													type="text"
-													value={skill.value}
+													value={character.age || ""}
 													onChange={(event) =>
-														updateSkill(
-															index,
-															"value",
-															event.target.value
-														)
+														setCharacter((prev) => ({
+															...prev,
+															age: event.target.value,
+														}))
 													}
-													placeholder={
-														isCustomSystem
-															? "Rank / Modifier"
-															: "+0"
+													placeholder="25"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Height
+												</span>
+												<input
+													type="text"
+													value={character.height || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															height: event.target.value,
+														}))
 													}
+													placeholder="6 ft"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Weight
+												</span>
+												<input
+													type="text"
+													value={character.weight || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															weight: event.target.value,
+														}))
+													}
+													placeholder="180 lbs"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Eyes
+												</span>
+												<input
+													type="text"
+													value={character.eyes || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															eyes: event.target.value,
+														}))
+													}
+													placeholder="Blue"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Skin
+												</span>
+												<input
+													type="text"
+													value={character.skin || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															skin: event.target.value,
+														}))
+													}
+													placeholder="Fair"
+													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+											</label>
+											<label className="flex flex-col gap-2">
+												<span className="text-sm font-medium text-slate-200">
+													Hair
+												</span>
+												<input
+													type="text"
+													value={character.hair || ""}
+													onChange={(event) =>
+														setCharacter((prev) => ({
+															...prev,
+															hair: event.target.value,
+														}))
+													}
+													placeholder="Black"
 													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 										</div>
-									))}
-								</div>
-							)}
-						</div>
+									</div>
 
-						<label className="flex flex-col gap-2">
-							<span className="text-sm font-medium text-slate-200">
-								Notes
-							</span>
-							<textarea
-								value={character.notes}
-								onChange={(event) =>
-									setCharacter((prev) => ({
-										...prev,
-										notes: event.target.value,
-									}))
-								}
-								placeholder="Personality traits, ideals, bonds, flaws, and other custom details."
-								rows={4}
-								className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-							/>
-						</label>
+									<label className="flex flex-col gap-2">
+										<span className="text-sm font-medium text-slate-200">
+											Level
+										</span>
+										<input
+											type="text"
+											value={character.level || ""}
+											onChange={(event) =>
+												setCharacter((prev) => ({
+													...prev,
+													level: event.target.value,
+												}))
+											}
+											placeholder="5"
+											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+										/>
+									</label>
 
+									<label className="flex flex-col gap-2">
+										<span className="text-sm font-medium text-slate-200">
+											Gold
+										</span>
+										<input
+											type="text"
+											value={character.gold || ""}
+											onChange={(event) =>
+												setCharacter((prev) => ({
+													...prev,
+													gold: event.target.value,
+												}))
+											}
+											placeholder="100"
+											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+										/>
+									</label>
+
+									<label className="flex flex-col gap-2">
+										<span className="text-sm font-medium text-slate-200">
+											Experience
+										</span>
+										<input
+											type="text"
+											value={character.experience || ""}
+											onChange={(event) =>
+												setCharacter((prev) => ({
+													...prev,
+													experience: event.target.value,
+												}))
+											}
+											placeholder="2500"
+											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+										/>
+									</label>
+
+									<label className="flex flex-col gap-2">
+										<span className="text-sm font-medium text-slate-200">
+											Class
+										</span>
+										{systemOptions?.classes ? (
+											<select
+												value={character.class || ""}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														class: event.target.value,
+													}))
+												}
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											>
+												<option value="">Select class</option>
+												{systemOptions.classes.map((className) => (
+													<option
+														key={className}
+														value={className}
+													>
+														{className}
+													</option>
+												))}
+											</select>
+										) : (
+											<input
+												type="text"
+												value={character.class || ""}
+												onChange={(event) =>
+													setCharacter((prev) => ({
+														...prev,
+														class: event.target.value,
+													}))
+												}
+												placeholder="Wizard"
+												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											/>
+										)}
+									</label>
+
+									<label className="flex flex-col gap-2">
+										<span className="text-sm font-medium text-slate-200">
+											Role
+										</span>
+										<select
+											value={character.role || ""}
+											onChange={(event) =>
+												setCharacter((prev) => ({
+													...prev,
+													role: event.target.value,
+												}))
+											}
+											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+										>
+											<option value="">Select a role</option>
+											{ROLE_OPTIONS.map((role) => (
+												<option key={role} value={role}>
+													{role}
+												</option>
+											))}
+										</select>
+									</label>
+
+									<label className="flex items-center gap-3">
+										<input
+											type="checkbox"
+											checked={character.isPublic ?? false}
+											onChange={(event) =>
+												setCharacter((prev) => ({
+													...prev,
+													isPublic: event.target.checked,
+												}))
+											}
+											className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-indigo-500 outline-none transition focus:ring-2 focus:ring-indigo-500/40"
+										/>
+										<span className="text-sm text-slate-200">
+											<span className="font-medium">
+												Make this character public
+											</span>
+											<span className="block text-xs text-slate-400">
+												Public characters will be visible on your
+												player profile page
+											</span>
+										</span>
+									</label>
+
+									{/* Items Section */}
+									<div className="space-y-4">
+										<h2 className="text-lg font-semibold text-slate-100">
+											Items
+										</h2>
+										<div className="space-y-3">
+											<div className="flex gap-2">
+												<input
+													type="text"
+													placeholder="Add an item (e.g., Sword of Fire)"
+													onKeyDown={(event) => {
+														if (event.key === "Enter") {
+															event.preventDefault();
+															const value =
+																event.currentTarget.value.trim();
+															if (value) {
+																setCharacter((prev) => ({
+																	...prev,
+																	items: [
+																		...(prev.items || []),
+																		value,
+																	],
+																}));
+																event.currentTarget.value = "";
+															}
+														}
+													}}
+													className="flex-1 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												/>
+												<button
+													type="button"
+													onClick={(event) => {
+														const input = event.currentTarget
+															.previousElementSibling as HTMLInputElement;
+														const value = input?.value.trim();
+														if (value) {
+															setCharacter((prev) => ({
+																...prev,
+																items: [
+																	...(prev.items || []),
+																	value,
+																],
+															}));
+															input.value = "";
+														}
+													}}
+													className="rounded-md border border-indigo-600 px-4 py-2 text-sm font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+												>
+													Add
+												</button>
+											</div>
+											{character.items &&
+												character.items.length > 0 && (
+													<div className="flex flex-wrap gap-2">
+														{character.items.map(
+															(item, index) => (
+																<span
+																	key={index}
+																	className="inline-flex items-center gap-2 rounded-full border border-slate-700 bg-slate-800/50 px-3 py-1 text-sm text-slate-200"
+																>
+																	{item}
+																	<button
+																		type="button"
+																		onClick={() => {
+																			setCharacter(
+																				(prev) => ({
+																					...prev,
+																					items: prev.items?.filter(
+																						(_, i) =>
+																							i !== index
+																					),
+																				})
+																			);
+																		}}
+																		className="text-slate-400 hover:text-slate-200"
+																	>
+																		×
+																	</button>
+																</span>
+															)
+														)}
+													</div>
+												)}
+										</div>
+									</div>
+
+									<div className="space-y-4">
+										<button
+											type="button"
+											onClick={() =>
+												setIsAbilitiesOpen(!isAbilitiesOpen)
+											}
+											className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+										>
+											<div className="flex items-center gap-2">
+												<h2 className="text-lg font-semibold text-slate-100">
+													Ability Scores
+												</h2>
+												{isCustomSystem && (
+													<button
+														type="button"
+														onClick={(e) => {
+															e.stopPropagation();
+															addCustomStat();
+														}}
+														className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+													>
+														Add Stat
+													</button>
+												)}
+											</div>
+											<span className="text-xs uppercase tracking-wide text-slate-400">
+												{isAbilitiesOpen ? "Collapse" : "Expand"}
+											</span>
+										</button>
+										{isAbilitiesOpen && (
+											<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+												{character.stats.map((stat, index) => (
+													<div
+														key={`${stat.name}-${index}`}
+														className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+													>
+														<label className="flex flex-col gap-2">
+															<span className="text-xs uppercase tracking-wide text-slate-400">
+																{isCustomSystem ? (
+																	<input
+																		type="text"
+																		value={stat.name}
+																		onChange={(event) =>
+																			updateStat(
+																				index,
+																				"name",
+																				event.target.value
+																			)
+																		}
+																		placeholder="Stat Name"
+																		className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+																	/>
+																) : (
+																	stat.name
+																)}
+															</span>
+															<input
+																type="number"
+																inputMode="numeric"
+																value={stat.value}
+																onChange={(event) =>
+																	updateStat(
+																		index,
+																		"value",
+																		event.target.value
+																	)
+																}
+																placeholder="0"
+																className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															/>
+														</label>
+													</div>
+												))}
+											</div>
+										)}
+									</div>
+
+									<div className="space-y-4">
+										<button
+											type="button"
+											onClick={() => setIsSkillsOpen(!isSkillsOpen)}
+											className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
+										>
+											<div className="flex items-center gap-2">
+												<h2 className="text-lg font-semibold text-slate-100">
+													Skills
+												</h2>
+												{isCustomSystem && (
+													<button
+														type="button"
+														onClick={(e) => {
+															e.stopPropagation();
+															addCustomSkill();
+														}}
+														className="rounded-md border border-indigo-600 px-3 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-600/10"
+													>
+														Add Skill
+													</button>
+												)}
+											</div>
+											<span className="text-xs uppercase tracking-wide text-slate-400">
+												{isSkillsOpen ? "Collapse" : "Expand"}
+											</span>
+										</button>
+										{isSkillsOpen && (
+											<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+												{character.skills.map((skill, index) => (
+													<div
+														key={`${skill.name}-${index}`}
+														className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+													>
+														<label className="flex flex-col gap-2">
+															<span className="text-xs uppercase tracking-wide text-slate-400">
+																{isCustomSystem ? (
+																	<input
+																		type="text"
+																		value={skill.name}
+																		onChange={(event) =>
+																			updateSkill(
+																				index,
+																				"name",
+																				event.target.value
+																			)
+																		}
+																		placeholder="Skill Name"
+																		className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+																	/>
+																) : (
+																	getSkillDisplayName(
+																		skill.name,
+																		selectedSystem
+																	)
+																)}
+															</span>
+															<input
+																type="text"
+																value={skill.value}
+																onChange={(event) =>
+																	updateSkill(
+																		index,
+																		"value",
+																		event.target.value
+																	)
+																}
+																placeholder={
+																	isCustomSystem
+																		? "Rank / Modifier"
+																		: "+0"
+																}
+																className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															/>
+														</label>
+													</div>
+												))}
+											</div>
+										)}
+									</div>
+
+									<label className="flex flex-col gap-2">
+										<span className="text-sm font-medium text-slate-200">
+											Notes
+										</span>
+										<textarea
+											value={character.notes}
+											onChange={(event) =>
+												setCharacter((prev) => ({
+													...prev,
+													notes: event.target.value,
+												}))
+											}
+											placeholder="Personality traits, ideals, bonds, flaws, and other custom details."
+											rows={4}
+											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+										/>
+									</label>
 								</>
 							)}
 						</div>
