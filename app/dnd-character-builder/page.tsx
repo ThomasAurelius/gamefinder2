@@ -229,6 +229,11 @@ export default function DndCharacterBuilder() {
 	};
 
 	const calculateSkillModifier = (skillAbility: string, isProficient: boolean): number => {
+		// Type-safe ability score lookup
+		const validAbilities = ['strength', 'dexterity', 'constitution', 'intelligence', 'wisdom', 'charisma'];
+		if (!validAbilities.includes(skillAbility)) {
+			return 0;
+		}
 		const abilityScore = character[skillAbility as keyof Character] as number;
 		const abilityModifier = calculateModifier(abilityScore);
 		const profBonus = isProficient ? character.proficiencyBonus : 0;
