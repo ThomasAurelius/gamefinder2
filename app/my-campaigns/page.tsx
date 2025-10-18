@@ -72,6 +72,7 @@ function CampaignCard({
 	campaign,
 	userTimezone,
 	joiningCampaignId,
+	withdrawingCampaignId,
 	onJoin,
 	onWithdraw,
 	currentUserId,
@@ -79,6 +80,7 @@ function CampaignCard({
 	campaign: Campaign;
 	userTimezone: string;
 	joiningCampaignId: string | null;
+	withdrawingCampaignId: string | null;
 	onJoin: (campaignId: string) => void;
 	onWithdraw: (campaignId: string) => void;
 	currentUserId: string | null;
@@ -260,10 +262,13 @@ function CampaignCard({
 					) : (
 						<button
 							onClick={() => onWithdraw(campaign.id)}
-							className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 bg-red-600 hover:bg-red-700 focus:ring-red-500"
+							disabled={withdrawingCampaignId === campaign.id}
+							className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 bg-red-600 hover:bg-red-700 focus:ring-red-500"
 							title="Withdraw from campaign"
 						>
-							Withdraw
+							{withdrawingCampaignId === campaign.id
+								? "Withdrawing..."
+								: "Withdraw"}
 						</button>
 					)}
 					<Link
@@ -292,6 +297,9 @@ export default function MyCampaignsPage() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [hasSearched, setHasSearched] = useState(false);
 	const [joiningCampaignId, setJoiningCampaignId] = useState<string | null>(
+		null
+	);
+	const [withdrawingCampaignId, setWithdrawingCampaignId] = useState<string | null>(
 		null
 	);
 	const [joinError, setJoinError] = useState<string | null>(null);
@@ -532,10 +540,11 @@ export default function MyCampaignsPage() {
 	};
 
 	const handleWithdrawClick = async (campaignId: string) => {
-		if (!currentUserId) {
+		if (!currentUserId || withdrawingCampaignId) {
 			return;
 		}
 
+		setWithdrawingCampaignId(campaignId);
 		setWithdrawError(null);
 
 		try {
@@ -562,10 +571,12 @@ export default function MyCampaignsPage() {
 				)
 			);
 
-			// Update the campaign in the all events list
+			// Update the campaign in the all events list, preserving the distance property
 			setAllEvents((prevEvents) =>
 				prevEvents.map((event) =>
-					event.id === campaignId ? updatedCampaign : event
+					event.id === campaignId 
+						? { ...updatedCampaign, distance: event.distance }
+						: event
 				)
 			);
 		} catch (error) {
@@ -574,6 +585,8 @@ export default function MyCampaignsPage() {
 					? error.message
 					: "Failed to withdraw from campaign"
 			);
+		} finally {
+			setWithdrawingCampaignId(null);
 		}
 	};
 
@@ -862,6 +875,7 @@ export default function MyCampaignsPage() {
 									campaign={event}
 									userTimezone={userTimezone}
 									joiningCampaignId={joiningCampaignId}
+									withdrawingCampaignId={withdrawingCampaignId}
 									onJoin={handleJoinClick}
 									onWithdraw={handleWithdrawClick}
 									currentUserId={currentUserId}
@@ -896,6 +910,7 @@ export default function MyCampaignsPage() {
 									campaign={event}
 									userTimezone={userTimezone}
 									joiningCampaignId={joiningCampaignId}
+									withdrawingCampaignId={withdrawingCampaignId}
 									onJoin={handleJoinClick}
 									onWithdraw={handleWithdrawClick}
 									currentUserId={currentUserId}
