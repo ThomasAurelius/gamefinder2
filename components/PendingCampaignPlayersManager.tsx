@@ -135,44 +135,42 @@ export default function PendingCampaignPlayersManager({
             key={player.id}
             className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {player.avatarUrl ? (
-                  <img
-                    src={player.avatarUrl}
-                    alt={player.name}
-                    className="h-8 w-8 rounded-full border-2 border-yellow-700 object-cover"
-                  />
-                ) : (
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
-                    {player.name.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-3">
+              {player.avatarUrl ? (
+                <img
+                  src={player.avatarUrl}
+                  alt={player.name}
+                  className="h-8 w-8 rounded-full border-2 border-yellow-700 object-cover"
+                />
+              ) : (
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-600 text-sm font-medium">
+                  {player.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+              <div className="flex flex-col">
+                <span className="text-base text-slate-100">{player.name}</span>
+                {player.characterName && (
+                  <span className="text-sm text-slate-400">
+                    Playing as: {player.characterName}
                   </span>
                 )}
-                <div className="flex flex-col">
-                  <span className="text-base text-slate-100">{player.name}</span>
-                  {player.characterName && (
-                    <span className="text-sm text-slate-400">
-                      Playing as: {player.characterName}
-                    </span>
-                  )}
-                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleApprove(player.id)}
-                  disabled={processingPlayerId === player.id}
-                  className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {processingPlayerId === player.id ? "..." : "Approve"}
-                </button>
-                <button
-                  onClick={() => handleDeny(player.id)}
-                  disabled={processingPlayerId === player.id}
-                  className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {processingPlayerId === player.id ? "..." : "Deny"}
-                </button>
-              </div>
+            </div>
+            <div className="mt-3 flex gap-2">
+              <button
+                onClick={() => handleApprove(player.id)}
+                disabled={processingPlayerId === player.id}
+                className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processingPlayerId === player.id ? "..." : "Approve"}
+              </button>
+              <button
+                onClick={() => handleDeny(player.id)}
+                disabled={processingPlayerId === player.id}
+                className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processingPlayerId === player.id ? "..." : "Deny"}
+              </button>
             </div>
           </div>
         ))}
