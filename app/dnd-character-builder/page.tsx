@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // Types for D&D 5e API data
 interface APIReference {
 	index: string;
 	name: string;
 	url: string;
+}
+
+interface APIListResponse {
+	count: number;
+	results: APIReference[];
 }
 
 interface Character {
@@ -78,31 +83,8 @@ export default function DndCharacterBuilder() {
 		items: [],
 	});
 
-	const [races] = useState<APIReference[]>([
-		{ index: "dragonborn", name: "Dragonborn", url: "/api/races/dragonborn" },
-		{ index: "dwarf", name: "Dwarf", url: "/api/races/dwarf" },
-		{ index: "elf", name: "Elf", url: "/api/races/elf" },
-		{ index: "gnome", name: "Gnome", url: "/api/races/gnome" },
-		{ index: "half-elf", name: "Half-Elf", url: "/api/races/half-elf" },
-		{ index: "half-orc", name: "Half-Orc", url: "/api/races/half-orc" },
-		{ index: "halfling", name: "Halfling", url: "/api/races/halfling" },
-		{ index: "human", name: "Human", url: "/api/races/human" },
-		{ index: "tiefling", name: "Tiefling", url: "/api/races/tiefling" },
-	]);
-	const [classes] = useState<APIReference[]>([
-		{ index: "barbarian", name: "Barbarian", url: "/api/classes/barbarian" },
-		{ index: "bard", name: "Bard", url: "/api/classes/bard" },
-		{ index: "cleric", name: "Cleric", url: "/api/classes/cleric" },
-		{ index: "druid", name: "Druid", url: "/api/classes/druid" },
-		{ index: "fighter", name: "Fighter", url: "/api/classes/fighter" },
-		{ index: "monk", name: "Monk", url: "/api/classes/monk" },
-		{ index: "paladin", name: "Paladin", url: "/api/classes/paladin" },
-		{ index: "ranger", name: "Ranger", url: "/api/classes/ranger" },
-		{ index: "rogue", name: "Rogue", url: "/api/classes/rogue" },
-		{ index: "sorcerer", name: "Sorcerer", url: "/api/classes/sorcerer" },
-		{ index: "warlock", name: "Warlock", url: "/api/classes/warlock" },
-		{ index: "wizard", name: "Wizard", url: "/api/classes/wizard" },
-	]);
+	const [races, setRaces] = useState<APIReference[]>([]);
+	const [classes, setClasses] = useState<APIReference[]>([]);
 	const [alignments] = useState<string[]>([
 		"Lawful Good",
 		"Neutral Good",
@@ -129,6 +111,69 @@ export default function DndCharacterBuilder() {
 		"Soldier",
 		"Urchin",
 	]);
+	const [equipment, setEquipment] = useState<APIReference[]>([]);
+	const [loading, setLoading] = useState<{
+		races: boolean;
+		classes: boolean;
+		equipment: boolean;
+	}>({
+		races: false,
+		classes: false,
+		equipment: false,
+	});
+	const [error, setError] = useState<string | null>(null);
+
+	// Load data from D&D 5e API on component mount
+	useEffect(() => {
+		const loadRaces = async () => {
+			setLoading((prev) => ({ ...prev, races: true }));
+			try {
+				const response = await fetch("/api/dnd?endpoint=races");
+				if (!response.ok) throw new Error("Failed to load races");
+				const data: APIListResponse = await response.json();
+				setRaces(data.results);
+			} catch (err) {
+				console.error("Error loading races:", err);
+				setError("Failed to load races from API");
+			} finally {
+				setLoading((prev) => ({ ...prev, races: false }));
+			}
+		};
+
+		const loadClasses = async () => {
+			setLoading((prev) => ({ ...prev, classes: true }));
+			try {
+				const response = await fetch("/api/dnd?endpoint=classes");
+				if (!response.ok) throw new Error("Failed to load classes");
+				const data: APIListResponse = await response.json();
+				setClasses(data.results);
+			} catch (err) {
+				console.error("Error loading classes:", err);
+				setError("Failed to load classes from API");
+			} finally {
+				setLoading((prev) => ({ ...prev, classes: false }));
+			}
+		};
+
+		const loadEquipment = async () => {
+			setLoading((prev) => ({ ...prev, equipment: true }));
+			try {
+				const response = await fetch("/api/dnd?endpoint=equipment");
+				if (!response.ok) throw new Error("Failed to load equipment");
+				const data: APIListResponse = await response.json();
+				setEquipment(data.results);
+			} catch (err) {
+				console.error("Error loading equipment:", err);
+				setError("Failed to load equipment from API");
+			} finally {
+				setLoading((prev) => ({ ...prev, equipment: false }));
+			}
+		};
+
+		loadRaces();
+		loadClasses();
+		loadEquipment();
+	}, []);
 
 	// D&D 5e skills mapped to their ability scores
 	const skillsData = [
@@ -154,63 +199,6 @@ export default function DndCharacterBuilder() {
 
 	const [itemSearch, setItemSearch] = useState("");
 	const [searchResults, setSearchResults] = useState<APIReference[]>([]);
-
-	// Common D&D equipment from SRD
-	const [equipment] = useState<APIReference[]>([
-		{ index: "longsword", name: "Longsword", url: "/api/equipment/longsword" },
-		{ index: "shortsword", name: "Shortsword", url: "/api/equipment/shortsword" },
-		{ index: "greatsword", name: "Greatsword", url: "/api/equipment/greatsword" },
-		{ index: "dagger", name: "Dagger", url: "/api/equipment/dagger" },
-		{ index: "handaxe", name: "Handaxe", url: "/api/equipment/handaxe" },
-		{ index: "battleaxe", name: "Battleaxe", url: "/api/equipment/battleaxe" },
-		{ index: "greataxe", name: "Greataxe", url: "/api/equipment/greataxe" },
-		{ index: "mace", name: "Mace", url: "/api/equipment/mace" },
-		{ index: "warhammer", name: "Warhammer", url: "/api/equipment/warhammer" },
-		{ index: "spear", name: "Spear", url: "/api/equipment/spear" },
-		{ index: "longbow", name: "Longbow", url: "/api/equipment/longbow" },
-		{ index: "shortbow", name: "Shortbow", url: "/api/equipment/shortbow" },
-		{ index: "crossbow-light", name: "Crossbow, light", url: "/api/equipment/crossbow-light" },
-		{ index: "crossbow-heavy", name: "Crossbow, heavy", url: "/api/equipment/crossbow-heavy" },
-		{ index: "padded-armor", name: "Padded Armor", url: "/api/equipment/padded-armor" },
-		{ index: "leather-armor", name: "Leather Armor", url: "/api/equipment/leather-armor" },
-		{ index: "studded-leather-armor", name: "Studded Leather", url: "/api/equipment/studded-leather-armor" },
-		{ index: "hide-armor", name: "Hide Armor", url: "/api/equipment/hide-armor" },
-		{ index: "chain-shirt", name: "Chain Shirt", url: "/api/equipment/chain-shirt" },
-		{ index: "scale-mail", name: "Scale Mail", url: "/api/equipment/scale-mail" },
-		{ index: "breastplate", name: "Breastplate", url: "/api/equipment/breastplate" },
-		{ index: "half-plate", name: "Half Plate", url: "/api/equipment/half-plate" },
-		{ index: "ring-mail", name: "Ring Mail", url: "/api/equipment/ring-mail" },
-		{ index: "chain-mail", name: "Chain Mail", url: "/api/equipment/chain-mail" },
-		{ index: "splint", name: "Splint", url: "/api/equipment/splint" },
-		{ index: "plate", name: "Plate", url: "/api/equipment/plate" },
-		{ index: "shield", name: "Shield", url: "/api/equipment/shield" },
-		{ index: "backpack", name: "Backpack", url: "/api/equipment/backpack" },
-		{ index: "bedroll", name: "Bedroll", url: "/api/equipment/bedroll" },
-		{ index: "rope-hempen-50-feet", name: "Rope, hempen (50 feet)", url: "/api/equipment/rope-hempen-50-feet" },
-		{ index: "torch", name: "Torch", url: "/api/equipment/torch" },
-		{ index: "tinderbox", name: "Tinderbox", url: "/api/equipment/tinderbox" },
-		{ index: "rations-1-day", name: "Rations (1 day)", url: "/api/equipment/rations-1-day" },
-		{ index: "waterskin", name: "Waterskin", url: "/api/equipment/waterskin" },
-		{ index: "potion-of-healing", name: "Potion of Healing", url: "/api/equipment/potion-of-healing" },
-		{ index: "burglar-pack", name: "Burglar's Pack", url: "/api/equipment/burglar-pack" },
-		{ index: "diplomat-pack", name: "Diplomat's Pack", url: "/api/equipment/diplomat-pack" },
-		{ index: "dungeoneer-pack", name: "Dungeoneer's Pack", url: "/api/equipment/dungeoneer-pack" },
-		{ index: "entertainer-pack", name: "Entertainer's Pack", url: "/api/equipment/entertainer-pack" },
-		{ index: "explorer-pack", name: "Explorer's Pack", url: "/api/equipment/explorer-pack" },
-		{ index: "priest-pack", name: "Priest's Pack", url: "/api/equipment/priest-pack" },
-		{ index: "scholar-pack", name: "Scholar's Pack", url: "/api/equipment/scholar-pack" },
-		{ index: "cloak", name: "Cloak", url: "/api/equipment/cloak" },
-		{ index: "common-clothes", name: "Common Clothes", url: "/api/equipment/common-clothes" },
-		{ index: "costume", name: "Costume", url: "/api/equipment/costume" },
-		{ index: "fine-clothes", name: "Fine Clothes", url: "/api/equipment/fine-clothes" },
-		{ index: "robes", name: "Robes", url: "/api/equipment/robes" },
-		{ index: "travelers-clothes", name: "Traveler's Clothes", url: "/api/equipment/travelers-clothes" },
-		{ index: "holy-symbol", name: "Holy Symbol", url: "/api/equipment/holy-symbol" },
-		{ index: "spellbook", name: "Spellbook", url: "/api/equipment/spellbook" },
-		{ index: "component-pouch", name: "Component Pouch", url: "/api/equipment/component-pouch" },
-		{ index: "arcane-focus", name: "Arcane Focus", url: "/api/equipment/arcane-focus" },
-		{ index: "druidic-focus", name: "Druidic Focus", url: "/api/equipment/druidic-focus" },
-	]);
 
 	const searchItems = () => {
 		if (!itemSearch.trim()) {
@@ -299,6 +287,11 @@ export default function DndCharacterBuilder() {
 				<p className="text-sm text-slate-300">
 					Create and manage your D&D 5e character using data from the D&D 5e API
 				</p>
+				{error && (
+					<div className="mt-2 rounded border border-red-500 bg-red-900/20 px-3 py-2 text-sm text-red-300">
+						{error}
+					</div>
+				)}
 			</div>
 
 			{/* Basic Information */}
@@ -326,9 +319,12 @@ export default function DndCharacterBuilder() {
 							onChange={(e) =>
 								setCharacter({ ...character, race: e.target.value })
 							}
-							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
+							disabled={loading.races}
+							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100 disabled:opacity-50"
 						>
-							<option value="">Select Race</option>
+							<option value="">
+								{loading.races ? "Loading races..." : "Select Race"}
+							</option>
 							{races.map((race) => (
 								<option key={race.index} value={race.name}>
 									{race.name}
@@ -343,9 +339,12 @@ export default function DndCharacterBuilder() {
 							onChange={(e) =>
 								setCharacter({ ...character, class: e.target.value })
 							}
-							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100"
+							disabled={loading.classes}
+							className="w-full rounded border border-slate-700 bg-slate-800 px-2 py-1 text-sm text-slate-100 disabled:opacity-50"
 						>
-							<option value="">Select Class</option>
+							<option value="">
+								{loading.classes ? "Loading classes..." : "Select Class"}
+							</option>
 							{classes.map((cls) => (
 								<option key={cls.index} value={cls.name}>
 									{cls.name}
@@ -634,13 +633,15 @@ export default function DndCharacterBuilder() {
 							onChange={(e) => setItemSearch(e.target.value)}
 							onKeyDown={(e) => e.key === "Enter" && searchItems()}
 							placeholder="Search for equipment..."
-							className="flex-1 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100"
+							disabled={loading.equipment}
+							className="flex-1 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 disabled:opacity-50"
 						/>
 						<button
 							onClick={searchItems}
-							className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700"
+							disabled={loading.equipment}
+							className="rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-50"
 						>
-							Search
+							{loading.equipment ? "Loading..." : "Search"}
 						</button>
 					</div>
 
