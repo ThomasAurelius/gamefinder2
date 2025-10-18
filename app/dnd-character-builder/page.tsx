@@ -130,26 +130,27 @@ export default function DndCharacterBuilder() {
 		"Urchin",
 	]);
 
-	const [skills] = useState<string[]>([
-		"Acrobatics",
-		"Animal Handling",
-		"Arcana",
-		"Athletics",
-		"Deception",
-		"History",
-		"Insight",
-		"Intimidation",
-		"Investigation",
-		"Medicine",
-		"Nature",
-		"Perception",
-		"Performance",
-		"Persuasion",
-		"Religion",
-		"Sleight of Hand",
-		"Stealth",
-		"Survival",
-	]);
+	// D&D 5e skills mapped to their ability scores
+	const skillsData = [
+		{ name: "Acrobatics", ability: "dexterity" },
+		{ name: "Animal Handling", ability: "wisdom" },
+		{ name: "Arcana", ability: "intelligence" },
+		{ name: "Athletics", ability: "strength" },
+		{ name: "Deception", ability: "charisma" },
+		{ name: "History", ability: "intelligence" },
+		{ name: "Insight", ability: "wisdom" },
+		{ name: "Intimidation", ability: "charisma" },
+		{ name: "Investigation", ability: "intelligence" },
+		{ name: "Medicine", ability: "wisdom" },
+		{ name: "Nature", ability: "intelligence" },
+		{ name: "Perception", ability: "wisdom" },
+		{ name: "Performance", ability: "charisma" },
+		{ name: "Persuasion", ability: "charisma" },
+		{ name: "Religion", ability: "intelligence" },
+		{ name: "Sleight of Hand", ability: "dexterity" },
+		{ name: "Stealth", ability: "dexterity" },
+		{ name: "Survival", ability: "wisdom" },
+	];
 
 	const [itemSearch, setItemSearch] = useState("");
 	const [searchResults, setSearchResults] = useState<APIReference[]>([]);
@@ -225,6 +226,13 @@ export default function DndCharacterBuilder() {
 
 	const calculateModifier = (score: number): number => {
 		return Math.floor((score - 10) / 2);
+	};
+
+	const calculateSkillModifier = (skillAbility: string, isProficient: boolean): number => {
+		const abilityScore = character[skillAbility as keyof Character] as number;
+		const abilityModifier = calculateModifier(abilityScore);
+		const profBonus = isProficient ? character.proficiencyBonus : 0;
+		return abilityModifier + profBonus;
 	};
 
 	const addItem = (itemName: string) => {
@@ -593,20 +601,30 @@ export default function DndCharacterBuilder() {
 			<div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
 				<h2 className="mb-3 text-lg font-semibold">Skills</h2>
 				<div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-					{skills.map((skill) => (
-						<label
-							key={skill}
-							className="flex cursor-pointer items-center gap-2 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm transition hover:bg-slate-700"
-						>
-							<input
-								type="checkbox"
-								checked={character.skills.includes(skill)}
-								onChange={() => toggleSkill(skill)}
-								className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-sky-600 focus:ring-sky-500"
-							/>
-							<span className="text-slate-200">{skill}</span>
-						</label>
-					))}
+					{skillsData.map((skill) => {
+						const isProficient = character.skills.includes(skill.name);
+						const modifier = calculateSkillModifier(skill.ability, isProficient);
+						return (
+							<label
+								key={skill.name}
+								className="flex cursor-pointer items-center justify-between gap-2 rounded border border-slate-700 bg-slate-800 px-3 py-2 text-sm transition hover:bg-slate-700"
+							>
+								<div className="flex items-center gap-2">
+									<input
+										type="checkbox"
+										checked={isProficient}
+										onChange={() => toggleSkill(skill.name)}
+										className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-sky-600 focus:ring-sky-500"
+									/>
+									<span className="text-slate-200">{skill.name}</span>
+								</div>
+								<span className="font-mono text-sm font-medium text-sky-400">
+									{modifier >= 0 ? "+" : ""}
+									{modifier}
+								</span>
+							</label>
+						);
+					})}
 				</div>
 			</div>
 
