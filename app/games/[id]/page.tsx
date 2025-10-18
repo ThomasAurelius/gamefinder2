@@ -339,6 +339,8 @@ export default async function GameDetailPage({
 						name: p.name,
 						avatarUrl: p.avatarUrl,
 						characterName: p.characterName,
+						characterId: p.characterId,
+						characterIsPublic: p.characterIsPublic,
 					}))}
 				/>
 			)}

@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type PendingPlayer = {
   id: string;
   name: string;
   avatarUrl?: string;
   characterName?: string;
+  characterId?: string;
+  characterIsPublic?: boolean;
 };
 
 type PendingCampaignPlayersManagerProps = {
@@ -154,6 +157,40 @@ export default function PendingCampaignPlayersManager({
                     Playing as: {player.characterName}
                   </span>
                 )}
+                <div className="flex flex-col">
+                  <span className="text-base text-slate-100">{player.name}</span>
+                  {player.characterName && (
+                    <span className="text-sm text-slate-400">
+                      Playing as:{" "}
+                      {player.characterIsPublic && player.characterId ? (
+                        <Link
+                          href={`/players/${player.id}/characters/${player.characterId}`}
+                          className="hover:text-sky-300 transition-colors"
+                        >
+                          {player.characterName}
+                        </Link>
+                      ) : (
+                        player.characterName
+                      )}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleApprove(player.id)}
+                  disabled={processingPlayerId === player.id}
+                  className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {processingPlayerId === player.id ? "..." : "Approve"}
+                </button>
+                <button
+                  onClick={() => handleDeny(player.id)}
+                  disabled={processingPlayerId === player.id}
+                  className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {processingPlayerId === player.id ? "..." : "Deny"}
+                </button>
               </div>
             </div>
             <div className="mt-3 flex gap-2">
