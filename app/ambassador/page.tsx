@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { AMBASSADOR_EXPIRATION_DISPLAY } from "@/lib/ambassador-config";
 
 type FormData = {
   name: string;
@@ -166,7 +167,7 @@ export default function AmbassadorSignupPage() {
           </p>
           <div className="inline-block rounded-full bg-amber-500/20 border border-amber-500/50 px-6 py-2">
             <p className="text-amber-300 font-semibold">
-              🎉 Program Active Until June 30th, 2026
+              🎉 Program Active Until {AMBASSADOR_EXPIRATION_DISPLAY}
             </p>
           </div>
         </div>
@@ -248,7 +249,7 @@ export default function AmbassadorSignupPage() {
               <div className="flex-1">
                 <p className="text-slate-100 font-semibold">Enjoy Your Benefits</p>
                 <p className="text-sm text-slate-300">
-                  Host paid campaigns with zero platform fees and maximize your earnings until June 30th, 2026.
+                  Host paid campaigns with zero platform fees and maximize your earnings until {AMBASSADOR_EXPIRATION_DISPLAY}.
                 </p>
               </div>
             </li>

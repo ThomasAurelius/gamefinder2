@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { hashPassword } from "@/lib/password";
 import { UserDocument } from "@/lib/user-types";
+import { AMBASSADOR_EXPIRATION_DATE } from "@/lib/ambassador-config";
 
 export async function POST(request: NextRequest) {
   try {
@@ -71,8 +72,8 @@ export async function POST(request: NextRequest) {
 
     if (isAmbassador === true) {
       userDocument.isAmbassador = true;
-      // Set ambassador expiration to June 30, 2026
-      userDocument.ambassadorUntil = new Date('2026-06-30T23:59:59Z');
+      // Set ambassador expiration to the configured date
+      userDocument.ambassadorUntil = AMBASSADOR_EXPIRATION_DATE;
     }
 
     const insertResult = await usersCollection.insertOne(userDocument);
