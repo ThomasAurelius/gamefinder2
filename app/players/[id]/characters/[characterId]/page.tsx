@@ -222,7 +222,7 @@ export default async function CharacterDetailPage({
         {(character.race || character.background || character.alignment || 
           character.age || character.height || character.weight || 
           character.eyes || character.skin || character.hair) ? (
-          <section className="space-y-3">
+          <section className="space-y-2">
             <h2 className="text-lg font-semibold text-slate-100">Basic Details</h2>
             <div className="grid gap-2 md:grid-cols-2">
               {character.race ? (
