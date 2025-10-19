@@ -672,3 +672,93 @@ export async function removePlayer(
     stripeConnectAccountId: result.stripeConnectAccountId,
   };
 }
+
+export async function updatePlayerCharacter(
+  gameId: string,
+  userId: string,
+  characterId?: string,
+  characterName?: string
+): Promise<StoredGameSession | null> {
+  const db = await getDb();
+  const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
+  
+  const game = await gamesCollection.findOne({ id: gameId });
+  
+  if (!game) {
+    return null;
+  }
+  
+  // Check if user is in any of the player lists
+  const isInSignedUp = game.signedUpPlayers?.includes(userId);
+  const isInWaitlist = game.waitlist?.includes(userId);
+  const isInPending = game.pendingPlayers?.includes(userId);
+  
+  if (!isInSignedUp && !isInWaitlist && !isInPending) {
+    return null;
+  }
+  
+  const timestamp = new Date().toISOString();
+  const playerSignup = { userId, characterId, characterName };
+  
+  // First, remove the old character entry
+  await gamesCollection.updateOne(
+    { id: gameId },
+    {
+      $pull: {
+        signedUpPlayersWithCharacters: { userId: userId },
+        waitlistWithCharacters: { userId: userId },
+        pendingPlayersWithCharacters: { userId: userId }
+      }
+    }
+  );
+  
+  // Then, add the new character entry in the appropriate list(s)
+  const pushUpdate: Record<string, unknown> = {};
+  if (isInSignedUp) {
+    pushUpdate.signedUpPlayersWithCharacters = playerSignup;
+  }
+  if (isInWaitlist) {
+    pushUpdate.waitlistWithCharacters = playerSignup;
+  }
+  if (isInPending) {
+    pushUpdate.pendingPlayersWithCharacters = playerSignup;
+  }
+  
+  const result = await gamesCollection.findOneAndUpdate(
+    { id: gameId },
+    {
+      $push: pushUpdate,
+      $set: { updatedAt: timestamp },
+    },
+    { returnDocument: "after" }
+  );
+  
+  if (!result) {
+    return null;
+  }
+  
+  return {
+    id: result.id,
+    userId: result.userId,
+    game: result.game,
+    date: result.date,
+    times: [...result.times],
+    description: result.description,
+    maxPlayers: result.maxPlayers || 4,
+    signedUpPlayers: result.signedUpPlayers || [],
+    signedUpPlayersWithCharacters: result.signedUpPlayersWithCharacters || [],
+    waitlist: result.waitlist || [],
+    waitlistWithCharacters: result.waitlistWithCharacters || [],
+    pendingPlayers: result.pendingPlayers || [],
+    pendingPlayersWithCharacters: result.pendingPlayersWithCharacters || [],
+    createdAt: result.createdAt,
+    updatedAt: result.updatedAt,
+    imageUrl: result.imageUrl,
+    location: result.location,
+    zipCode: result.zipCode,
+    latitude: result.latitude,
+    longitude: result.longitude,
+    costPerSession: result.costPerSession,
+    stripeConnectAccountId: result.stripeConnectAccountId,
+  };
+}

@@ -7,6 +7,7 @@ import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
 import { isPaidCampaign } from "@/lib/campaign-utils";
 import ShareButtons from "@/components/ShareButtons";
+import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 
 type PlayerSignup = {
   userId: string;
@@ -110,6 +111,10 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
   const [removeReason, setRemoveReason] = useState("");
   const [removeError, setRemoveError] = useState<string | null>(null);
   const [isRemovingPlayer, setIsRemovingPlayer] = useState(false);
+  const [showCharacterDialog, setShowCharacterDialog] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
+  const [showCharacterSwitchDialog, setShowCharacterSwitchDialog] = useState(false);
+  const [isUpdatingCharacter, setIsUpdatingCharacter] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -190,11 +195,22 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     );
   };
 
-  const handleJoinCampaign = async () => {
+  const handleJoinCampaign = () => {
     if (!currentUserId) {
       router.push("/login");
       return;
     }
+
+    // Show character selection dialog
+    setShowCharacterDialog(true);
+  };
+
+  const handleCharacterSelect = async (
+    characterId?: string,
+    characterName?: string
+  ) => {
+    setShowCharacterDialog(false);
+    setIsJoining(true);
 
     try {
       const response = await fetch(`/api/campaigns/${campaignId}/join`, {
@@ -202,6 +218,7 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ characterId, characterName }),
       });
 
       if (response.ok) {
@@ -227,7 +244,65 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
     } catch (error) {
       console.error("Error joining campaign:", error);
       alert("Failed to join campaign");
+    } finally {
+      setIsJoining(false);
     }
+  };
+
+  const handleCharacterCancel = () => {
+    setShowCharacterDialog(false);
+  };
+
+  const handleSwitchCharacter = () => {
+    setShowCharacterSwitchDialog(true);
+  };
+
+  const handleCharacterSwitch = async (
+    characterId?: string,
+    characterName?: string
+  ) => {
+    setShowCharacterSwitchDialog(false);
+    setIsUpdatingCharacter(true);
+
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/update-character`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ characterId, characterName }),
+      });
+
+      if (response.ok) {
+        // Refresh campaign data
+        const campaignResponse = await fetch(`/api/campaigns/${campaignId}`);
+        if (campaignResponse.ok) {
+          const campaignData = await campaignResponse.json();
+          setCampaign(campaignData);
+        }
+
+        // Refresh enriched data
+        const enrichedResponse = await fetch(`/api/campaigns/${campaignId}/enriched`);
+        if (enrichedResponse.ok) {
+          const enrichedData = await enrichedResponse.json();
+          setPendingPlayersList(enrichedData.pendingPlayers || []);
+          setSignedUpPlayersList(enrichedData.signedUpPlayers || []);
+          setWaitlistPlayersList(enrichedData.waitlistPlayers || []);
+        }
+      } else {
+        const error = await response.json();
+        alert(error.error || "Failed to update character");
+      }
+    } catch (error) {
+      console.error("Error updating character:", error);
+      alert("Failed to update character");
+    } finally {
+      setIsUpdatingCharacter(false);
+    }
+  };
+
+  const handleCharacterSwitchCancel = () => {
+    setShowCharacterSwitchDialog(false);
   };
 
   const handleWithdraw = async () => {
@@ -742,19 +817,29 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
             {!isParticipant && (
               <button
                 onClick={handleJoinCampaign}
-                className="w-full rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+                disabled={isJoining}
+                className="w-full rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:opacity-50"
               >
-                Request to Join Campaign
+                {isJoining ? "Joining..." : "Request to Join Campaign"}
               </button>
             )}
             {isParticipant && (
-              <button
-                onClick={handleWithdraw}
-                disabled={isWithdrawing}
-                className="w-full rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
-              >
-                {isWithdrawing ? "Withdrawing..." : "Withdraw from Campaign"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSwitchCharacter}
+                  disabled={isUpdatingCharacter}
+                  className="flex-1 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:opacity-50"
+                >
+                  {isUpdatingCharacter ? "Updating..." : "Switch Character"}
+                </button>
+                <button
+                  onClick={handleWithdraw}
+                  disabled={isWithdrawing}
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+                >
+                  {isWithdrawing ? "Withdrawing..." : "Withdraw from Campaign"}
+                </button>
+              </div>
             )}
             {withdrawError && (
               <p className="mt-2 text-sm text-red-400">{withdrawError}</p>
@@ -1249,6 +1334,26 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
             </div>
           </div>
         </div>
+      )}
+
+      {/* Character Selection Dialog for Joining */}
+      {showCharacterDialog && (
+        <CharacterSelectionDialog
+          onSelect={handleCharacterSelect}
+          onCancel={handleCharacterCancel}
+          isLoading={isJoining}
+          gameSystem={campaign?.game}
+        />
+      )}
+
+      {/* Character Selection Dialog for Switching */}
+      {showCharacterSwitchDialog && (
+        <CharacterSelectionDialog
+          onSelect={handleCharacterSwitch}
+          onCancel={handleCharacterSwitchCancel}
+          isLoading={isUpdatingCharacter}
+          gameSystem={campaign?.game}
+        />
       )}
     </div>
   );
