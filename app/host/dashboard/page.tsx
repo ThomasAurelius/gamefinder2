@@ -97,9 +97,12 @@ export default function HostDashboardPage() {
 		setSessionsLoading(true);
 		try {
 			// Fetch upcoming sessions
-			const upcomingResponse = await fetch("/api/host/sessions?type=upcoming");
+			const upcomingResponse = await fetch(
+				"/api/host/sessions?type=upcoming"
+			);
 			if (upcomingResponse.ok) {
-				const upcomingData: SessionsResponse = await upcomingResponse.json();
+				const upcomingData: SessionsResponse =
+					await upcomingResponse.json();
 				setUpcomingSessions(upcomingData.sessions);
 			}
 
@@ -255,7 +258,7 @@ export default function HostDashboardPage() {
 							<button
 								onClick={handleOpenDashboard}
 								disabled={isDashboardLoading}
-								className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:opacity-50"
+								className="rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 							>
 								{isDashboardLoading
 									? "Opening Dashboard..."

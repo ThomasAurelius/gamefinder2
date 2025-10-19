@@ -14,22 +14,25 @@ export default function SettingsPage() {
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
 	const [isRedirectingToPortal, setIsRedirectingToPortal] = useState(false);
 	const [checkingStripeStatus, setCheckingStripeStatus] = useState(false);
-	const [stripeOnboardingComplete, setStripeOnboardingComplete] = useState(false);
-	const [flags, setFlags] = useState<Array<{
-		id: string;
-		taleId: string;
-		flaggedBy: string;
-		flaggerName: string;
-		flagReason: string;
-		flagComment?: string;
-		flaggedAt: Date;
-		tale?: {
+	const [stripeOnboardingComplete, setStripeOnboardingComplete] =
+		useState(false);
+	const [flags, setFlags] = useState<
+		Array<{
 			id: string;
-			title: string;
-			content: string;
-			userId: string;
-		};
-	}>>([]);
+			taleId: string;
+			flaggedBy: string;
+			flaggerName: string;
+			flagReason: string;
+			flagComment?: string;
+			flaggedAt: Date;
+			tale?: {
+				id: string;
+				title: string;
+				content: string;
+				userId: string;
+			};
+		}>
+	>([]);
 	const [loadingFlags, setLoadingFlags] = useState(false);
 	const [adImageUrl, setAdImageUrl] = useState("");
 	const [adIsActive, setAdIsActive] = useState(false);
@@ -39,24 +42,28 @@ export default function SettingsPage() {
 	const [savingAd, setSavingAd] = useState(false);
 
 	// Badge management state
-	const [badges, setBadges] = useState<Array<{
-		id: string;
-		name: string;
-		description: string;
-		imageUrl: string;
-		color?: string;
-		isSelfAssignable?: boolean;
-	}>>([]);
-	const [userBadges, setUserBadges] = useState<Array<{
-		id: string;
-		badgeId: string;
-		name: string;
-		description: string;
-		imageUrl: string;
-		color?: string;
-		awardedAt: Date;
-		isDisplayed: boolean;
-	}>>([]);
+	const [badges, setBadges] = useState<
+		Array<{
+			id: string;
+			name: string;
+			description: string;
+			imageUrl: string;
+			color?: string;
+			isSelfAssignable?: boolean;
+		}>
+	>([]);
+	const [userBadges, setUserBadges] = useState<
+		Array<{
+			id: string;
+			badgeId: string;
+			name: string;
+			description: string;
+			imageUrl: string;
+			color?: string;
+			awardedAt: Date;
+			isDisplayed: boolean;
+		}>
+	>([]);
 	const [loadingBadges, setLoadingBadges] = useState(false);
 	const [editingBadge, setEditingBadge] = useState<{
 		id?: string;
@@ -88,7 +95,8 @@ export default function SettingsPage() {
 		isAmbassador?: boolean;
 		ambassadorUntil?: string;
 	} | null>(null);
-	const [searchingAmbassadorUser, setSearchingAmbassadorUser] = useState(false);
+	const [searchingAmbassadorUser, setSearchingAmbassadorUser] =
+		useState(false);
 	const [savingAmbassador, setSavingAmbassador] = useState(false);
 	const [ambassadorMessage, setAmbassadorMessage] = useState("");
 	const [ambassadorUntilDate, setAmbassadorUntilDate] = useState("");
@@ -118,7 +126,7 @@ export default function SettingsPage() {
 
 					// Load flags
 					loadFlags();
-					
+
 					// Load badges for admin
 					loadBadges();
 				}
@@ -131,15 +139,19 @@ export default function SettingsPage() {
 				if (profileRes.ok) {
 					const profileData = await profileRes.json();
 					setCanPostPaidGames(profileData.canPostPaidGames || false);
-					
+
 					// If user has paid games enabled, check Stripe onboarding status
 					if (profileData.canPostPaidGames) {
 						setCheckingStripeStatus(true);
 						try {
-							const stripeRes = await fetch("/api/stripe/connect/status");
+							const stripeRes = await fetch(
+								"/api/stripe/connect/status"
+							);
 							if (stripeRes.ok) {
 								const stripeData = await stripeRes.json();
-								setStripeOnboardingComplete(stripeData.onboardingComplete || false);
+								setStripeOnboardingComplete(
+									stripeData.onboardingComplete || false
+								);
 							}
 						} catch (err) {
 							console.error("Failed to check Stripe status:", err);
@@ -176,7 +188,7 @@ export default function SettingsPage() {
 			}
 
 			const data = await response.json();
-			
+
 			// Redirect to Stripe Customer Portal
 			window.location.href = data.url;
 		} catch (error) {
@@ -226,7 +238,11 @@ export default function SettingsPage() {
 		}
 	};
 
-	const handleFlagAction = async (flagId: string, taleId: string, action: "allow" | "delete") => {
+	const handleFlagAction = async (
+		flagId: string,
+		taleId: string,
+		action: "allow" | "delete"
+	) => {
 		setMessage("");
 
 		try {
@@ -240,9 +256,11 @@ export default function SettingsPage() {
 				throw new Error("Failed to resolve flag");
 			}
 
-			setMessage(`Flag ${action === "delete" ? "resolved and content deleted" : "resolved and content allowed"} successfully!`);
+			setMessage(
+				`Flag ${action === "delete" ? "resolved and content deleted" : "resolved and content allowed"} successfully!`
+			);
 			setTimeout(() => setMessage(""), 3000);
-			
+
 			// Reload flags
 			loadFlags();
 		} catch (error) {
@@ -251,7 +269,9 @@ export default function SettingsPage() {
 		}
 	};
 
-	const handleAdImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleAdImageUpload = async (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
@@ -278,7 +298,8 @@ export default function SettingsPage() {
 			setMessage("Image uploaded successfully!");
 			setTimeout(() => setMessage(""), 3000);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";
+			const errorMessage =
+				err instanceof Error ? err.message : "Failed to upload image";
 			setMessage(errorMessage);
 		} finally {
 			setUploadingAd(false);
@@ -293,7 +314,12 @@ export default function SettingsPage() {
 			const response = await fetch("/api/advertisements", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ imageUrl: adImageUrl, isActive: adIsActive, zipCode: adZipCode, url: adUrl }),
+				body: JSON.stringify({
+					imageUrl: adImageUrl,
+					isActive: adIsActive,
+					zipCode: adZipCode,
+					url: adUrl,
+				}),
 			});
 
 			if (!response.ok) {
@@ -337,7 +363,9 @@ export default function SettingsPage() {
 		}
 	}
 
-	const handleBadgeImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleBadgeImageUpload = async (
+		e: React.ChangeEvent<HTMLInputElement>
+	) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
@@ -366,7 +394,8 @@ export default function SettingsPage() {
 			setBadgeMessage("Image uploaded successfully!");
 			setTimeout(() => setBadgeMessage(""), 3000);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "Failed to upload image";
+			const errorMessage =
+				err instanceof Error ? err.message : "Failed to upload image";
 			setBadgeMessage(errorMessage);
 		} finally {
 			setUploadingBadgeImage(false);
@@ -381,9 +410,22 @@ export default function SettingsPage() {
 
 		try {
 			const method = editingBadge.id ? "PUT" : "POST";
-			const body = editingBadge.id 
-				? { id: editingBadge.id, name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color, isSelfAssignable: editingBadge.isSelfAssignable }
-				: { name: editingBadge.name, description: editingBadge.description, imageUrl: editingBadge.imageUrl, color: editingBadge.color, isSelfAssignable: editingBadge.isSelfAssignable };
+			const body = editingBadge.id
+				? {
+						id: editingBadge.id,
+						name: editingBadge.name,
+						description: editingBadge.description,
+						imageUrl: editingBadge.imageUrl,
+						color: editingBadge.color,
+						isSelfAssignable: editingBadge.isSelfAssignable,
+					}
+				: {
+						name: editingBadge.name,
+						description: editingBadge.description,
+						imageUrl: editingBadge.imageUrl,
+						color: editingBadge.color,
+						isSelfAssignable: editingBadge.isSelfAssignable,
+					};
 
 			const response = await fetch("/api/badges", {
 				method,
@@ -408,7 +450,11 @@ export default function SettingsPage() {
 	};
 
 	const handleDeleteBadge = async (badgeId: string) => {
-		if (!confirm("Are you sure you want to delete this badge? This will remove it from all users. This action cannot be undone.")) {
+		if (
+			!confirm(
+				"Are you sure you want to delete this badge? This will remove it from all users. This action cannot be undone."
+			)
+		) {
 			return;
 		}
 
@@ -430,7 +476,10 @@ export default function SettingsPage() {
 		}
 	};
 
-	const handleToggleBadgeDisplay = async (badgeId: string, isDisplayed: boolean) => {
+	const handleToggleBadgeDisplay = async (
+		badgeId: string,
+		isDisplayed: boolean
+	) => {
 		try {
 			const response = await fetch("/api/user-badges", {
 				method: "PUT",
@@ -443,8 +492,8 @@ export default function SettingsPage() {
 			}
 
 			// Update local state
-			setUserBadges(prevBadges => 
-				prevBadges.map(b => 
+			setUserBadges((prevBadges) =>
+				prevBadges.map((b) =>
 					b.badgeId === badgeId ? { ...b, isDisplayed } : b
 				)
 			);
@@ -463,7 +512,9 @@ export default function SettingsPage() {
 		setBadgeMessage("");
 
 		try {
-			const response = await fetch(`/api/public/users/search?username=${encodeURIComponent(searchUsername)}`);
+			const response = await fetch(
+				`/api/public/users/search?username=${encodeURIComponent(searchUsername)}`
+			);
 			if (!response.ok) {
 				throw new Error("User not found");
 			}
@@ -496,11 +547,15 @@ export default function SettingsPage() {
 				throw new Error("Failed to award badge");
 			}
 
-			setBadgeMessage(`Badge awarded to ${searchedUser.commonName || searchedUser.name} successfully!`);
+			setBadgeMessage(
+				`Badge awarded to ${searchedUser.commonName || searchedUser.name} successfully!`
+			);
 			setTimeout(() => setBadgeMessage(""), 3000);
 		} catch (error) {
 			console.error("Failed to award badge:", error);
-			setBadgeMessage("Failed to award badge. User may already have this badge.");
+			setBadgeMessage(
+				"Failed to award badge. User may already have this badge."
+			);
 		} finally {
 			setAwardingBadge(false);
 		}
@@ -527,21 +582,34 @@ export default function SettingsPage() {
 			loadUserBadges();
 		} catch (error) {
 			console.error("Failed to self-assign badge:", error);
-			setBadgeMessage("Failed to assign badge. You may already have this badge.");
+			setBadgeMessage(
+				"Failed to assign badge. You may already have this badge."
+			);
 		} finally {
 			setAssigningSelfBadge(false);
 		}
 	};
 
-	const handleRemoveBadge = async (userId: string, badgeId: string, userName: string) => {
-		if (!confirm(`Are you sure you want to remove this badge from ${userName}? This action cannot be undone.`)) {
+	const handleRemoveBadge = async (
+		userId: string,
+		badgeId: string,
+		userName: string
+	) => {
+		if (
+			!confirm(
+				`Are you sure you want to remove this badge from ${userName}? This action cannot be undone.`
+			)
+		) {
 			return;
 		}
 
 		try {
-			const response = await fetch(`/api/admin/user-badges?userId=${userId}&badgeId=${badgeId}`, {
-				method: "DELETE",
-			});
+			const response = await fetch(
+				`/api/admin/user-badges?userId=${userId}&badgeId=${badgeId}`,
+				{
+					method: "DELETE",
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error("Failed to remove badge");
@@ -565,22 +633,32 @@ export default function SettingsPage() {
 		setAmbassadorMessage("");
 
 		try {
-			const response = await fetch(`/api/public/users/search?username=${encodeURIComponent(ambassadorSearchUsername)}`);
+			const response = await fetch(
+				`/api/public/users/search?username=${encodeURIComponent(ambassadorSearchUsername)}`
+			);
 			if (!response.ok) {
 				throw new Error("User not found");
 			}
 
 			const userData = await response.json();
-			
+
 			// Check current ambassador status
-			const statusResponse = await fetch(`/api/admin/ambassador?userId=${userData.userId}`);
+			const statusResponse = await fetch(
+				`/api/admin/ambassador?userId=${userData.userId}`
+			);
 			if (statusResponse.ok) {
 				const statusData = await statusResponse.json();
 				userData.isAmbassador = statusData.isAmbassador;
 				userData.ambassadorUntil = statusData.ambassadorUntil;
-				setAmbassadorUntilDate(statusData.ambassadorUntil ? new Date(statusData.ambassadorUntil).toISOString().split('T')[0] : "");
+				setAmbassadorUntilDate(
+					statusData.ambassadorUntil
+						? new Date(statusData.ambassadorUntil)
+								.toISOString()
+								.split("T")[0]
+						: ""
+				);
 			}
-			
+
 			setAmbassadorSearchedUser(userData);
 		} catch (error) {
 			console.error("Failed to search user:", error);
@@ -601,10 +679,13 @@ export default function SettingsPage() {
 			const response = await fetch("/api/admin/ambassador", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ 
-					userId: ambassadorSearchedUser.userId, 
+				body: JSON.stringify({
+					userId: ambassadorSearchedUser.userId,
 					isAmbassador,
-					ambassadorUntil: isAmbassador && ambassadorUntilDate ? ambassadorUntilDate : undefined,
+					ambassadorUntil:
+						isAmbassador && ambassadorUntilDate
+							? ambassadorUntilDate
+							: undefined,
 				}),
 			});
 
@@ -612,18 +693,25 @@ export default function SettingsPage() {
 				throw new Error("Failed to update ambassador status");
 			}
 
-			setAmbassadorMessage(`Ambassador status ${isAmbassador ? "granted" : "removed"} successfully!`);
+			setAmbassadorMessage(
+				`Ambassador status ${isAmbassador ? "granted" : "removed"} successfully!`
+			);
 			setTimeout(() => setAmbassadorMessage(""), 3000);
-			
+
 			// Update local state
 			setAmbassadorSearchedUser({
 				...ambassadorSearchedUser,
 				isAmbassador,
-				ambassadorUntil: isAmbassador && ambassadorUntilDate ? ambassadorUntilDate : undefined,
+				ambassadorUntil:
+					isAmbassador && ambassadorUntilDate
+						? ambassadorUntilDate
+						: undefined,
 			});
 		} catch (error) {
 			console.error("Failed to update ambassador status:", error);
-			setAmbassadorMessage("Failed to update ambassador status. Please try again.");
+			setAmbassadorMessage(
+				"Failed to update ambassador status. Please try again."
+			);
 		} finally {
 			setSavingAmbassador(false);
 		}
@@ -649,7 +737,7 @@ export default function SettingsPage() {
 						</p>
 						<Link
 							href="/profile"
-							className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+							className="mt-3 inline-block rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 						>
 							Go to Profile
 						</Link>
@@ -660,11 +748,12 @@ export default function SettingsPage() {
 							Games History
 						</h2>
 						<p className="mt-2 text-xs text-slate-400">
-							View your past game sessions and campaigns. Rate hosts and players.
+							View your past game sessions and campaigns. Rate hosts and
+							players.
 						</p>
 						<Link
 							href="/settings/games-history"
-							className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+							className="mt-3 inline-block rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 						>
 							View Games History
 						</Link>
@@ -679,7 +768,7 @@ export default function SettingsPage() {
 						</p>
 						<Link
 							href="/subscriptions"
-							className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+							className="mt-3 inline-block rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 						>
 							View Subscriptions
 						</Link>
@@ -705,13 +794,15 @@ export default function SettingsPage() {
 									disabled={isRedirectingToPortal}
 									className="inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
 								>
-									{isRedirectingToPortal ? "Opening Portal..." : "Manage Billing"}
+									{isRedirectingToPortal
+										? "Opening Portal..."
+										: "Manage Billing"}
 								</button>
 							</div>
 						) : (
 							<Link
 								href="/terms-paid-games?from=settings"
-								className="mt-3 inline-block rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+								className="mt-3 inline-block rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 							>
 								Enable Paid Games
 							</Link>
@@ -790,9 +881,13 @@ export default function SettingsPage() {
 
 							<div className="mt-4 space-y-3">
 								{loadingFlags ? (
-									<p className="text-sm text-slate-400">Loading flags...</p>
+									<p className="text-sm text-slate-400">
+										Loading flags...
+									</p>
 								) : flags.length === 0 ? (
-									<p className="text-sm text-slate-400">No unresolved flags.</p>
+									<p className="text-sm text-slate-400">
+										No unresolved flags.
+									</p>
 								) : (
 									<div className="space-y-3">
 										{flags.map((flag) => (
@@ -803,10 +898,14 @@ export default function SettingsPage() {
 												<div className="flex items-start justify-between">
 													<div className="flex-1">
 														<p className="text-sm font-medium text-slate-200">
-															{flag.tale?.title || "Tale not found"}
+															{flag.tale?.title ||
+																"Tale not found"}
 														</p>
 														<p className="text-xs text-slate-400 mt-1">
-															Reason: <span className="text-amber-400 capitalize">{flag.flagReason}</span>
+															Reason:{" "}
+															<span className="text-amber-400 capitalize">
+																{flag.flagReason}
+															</span>
 														</p>
 														<p className="text-xs text-slate-400">
 															Reported by: {flag.flaggerName}
@@ -825,13 +924,25 @@ export default function SettingsPage() {
 												</div>
 												<div className="flex gap-2 pt-2">
 													<button
-														onClick={() => handleFlagAction(flag.id, flag.taleId, "allow")}
+														onClick={() =>
+															handleFlagAction(
+																flag.id,
+																flag.taleId,
+																"allow"
+															)
+														}
 														className="flex-1 rounded bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"
 													>
 														Allow
 													</button>
 													<button
-														onClick={() => handleFlagAction(flag.id, flag.taleId, "delete")}
+														onClick={() =>
+															handleFlagAction(
+																flag.id,
+																flag.taleId,
+																"delete"
+															)
+														}
 														className="flex-1 rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-700"
 													>
 														Delete
@@ -851,8 +962,9 @@ export default function SettingsPage() {
 								Admin: Advertisement
 							</h2>
 							<p className="mt-2 text-xs text-slate-400">
-								Upload and manage the site advertisement (800x800 image).
-								Add a zip code to show the ad only within 50 miles of that location.
+								Upload and manage the site advertisement (800x800
+								image). Add a zip code to show the ad only within 50
+								miles of that location.
 							</p>
 
 							<div className="mt-4 space-y-3">
@@ -884,7 +996,8 @@ export default function SettingsPage() {
 										className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 									/>
 									<p className="text-xs text-slate-500">
-										Leave blank to show to all users. If provided, ad will only show within 50 miles.
+										Leave blank to show to all users. If provided, ad
+										will only show within 50 miles.
 									</p>
 								</div>
 
@@ -904,12 +1017,16 @@ export default function SettingsPage() {
 										className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 									/>
 									<p className="text-xs text-slate-500">
-										When users click the ad, they will be taken to this URL in a new window.
+										When users click the ad, they will be taken to
+										this URL in a new window.
 									</p>
 								</div>
 
 								{adImageUrl && (
-									<div className="relative w-full max-w-md" style={{ aspectRatio: "2/1" }}>
+									<div
+										className="relative w-full max-w-md"
+										style={{ aspectRatio: "2/1" }}
+									>
 										<Image
 											src={adImageUrl}
 											alt="Advertisement preview"
@@ -924,7 +1041,9 @@ export default function SettingsPage() {
 										htmlFor="ad-upload"
 										className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
 									>
-										{uploadingAd ? "Uploading..." : "Upload Image (800x400)"}
+										{uploadingAd
+											? "Uploading..."
+											: "Upload Image (800x400)"}
 									</label>
 									<input
 										id="ad-upload"
@@ -935,7 +1054,8 @@ export default function SettingsPage() {
 										className="hidden"
 									/>
 									<p className="text-xs text-slate-500">
-										Recommended size: 800x400 pixels. Max file size: 5MB
+										Recommended size: 800x400 pixels. Max file size:
+										5MB
 									</p>
 								</div>
 
@@ -972,9 +1092,11 @@ export default function SettingsPage() {
 								{editingBadge && (
 									<div className="rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
 										<h3 className="text-sm font-medium text-slate-200">
-											{editingBadge.id ? "Edit Badge" : "Create New Badge"}
+											{editingBadge.id
+												? "Edit Badge"
+												: "Create New Badge"}
 										</h3>
-										
+
 										<div className="space-y-2">
 											<label className="block text-sm font-medium text-slate-200">
 												Name
@@ -982,7 +1104,12 @@ export default function SettingsPage() {
 											<input
 												type="text"
 												value={editingBadge.name}
-												onChange={(e) => setEditingBadge({ ...editingBadge, name: e.target.value })}
+												onChange={(e) =>
+													setEditingBadge({
+														...editingBadge,
+														name: e.target.value,
+													})
+												}
 												placeholder="Badge Name"
 												className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 											/>
@@ -994,7 +1121,12 @@ export default function SettingsPage() {
 											</label>
 											<textarea
 												value={editingBadge.description}
-												onChange={(e) => setEditingBadge({ ...editingBadge, description: e.target.value })}
+												onChange={(e) =>
+													setEditingBadge({
+														...editingBadge,
+														description: e.target.value,
+													})
+												}
 												placeholder="Badge Description"
 												rows={2}
 												className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
@@ -1008,7 +1140,12 @@ export default function SettingsPage() {
 											<input
 												type="text"
 												value={editingBadge.color}
-												onChange={(e) => setEditingBadge({ ...editingBadge, color: e.target.value })}
+												onChange={(e) =>
+													setEditingBadge({
+														...editingBadge,
+														color: e.target.value,
+													})
+												}
 												placeholder="#94a3b8"
 												className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 											/>
@@ -1019,10 +1156,18 @@ export default function SettingsPage() {
 												type="checkbox"
 												id="self-assignable"
 												checked={editingBadge.isSelfAssignable}
-												onChange={(e) => setEditingBadge({ ...editingBadge, isSelfAssignable: e.target.checked })}
+												onChange={(e) =>
+													setEditingBadge({
+														...editingBadge,
+														isSelfAssignable: e.target.checked,
+													})
+												}
 												className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-amber-500 outline-none transition focus:ring-2 focus:ring-amber-500/40"
 											/>
-											<label htmlFor="self-assignable" className="text-sm text-slate-300">
+											<label
+												htmlFor="self-assignable"
+												className="text-sm text-slate-300"
+											>
 												Allow users to self-assign this badge
 											</label>
 										</div>
@@ -1045,7 +1190,9 @@ export default function SettingsPage() {
 												htmlFor="badge-image-upload"
 												className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
 											>
-												{uploadingBadgeImage ? "Uploading..." : "Upload Badge Image"}
+												{uploadingBadgeImage
+													? "Uploading..."
+													: "Upload Badge Image"}
 											</label>
 											<input
 												id="badge-image-upload"
@@ -1056,14 +1203,20 @@ export default function SettingsPage() {
 												className="hidden"
 											/>
 											<p className="text-xs text-slate-500">
-												Recommended: square image, 64x64 to 256x256 pixels
+												Recommended: square image, 64x64 to 256x256
+												pixels
 											</p>
 										</div>
 
 										<div className="flex gap-2">
 											<button
 												onClick={handleSaveBadge}
-												disabled={savingBadge || !editingBadge.name || !editingBadge.description || !editingBadge.imageUrl}
+												disabled={
+													savingBadge ||
+													!editingBadge.name ||
+													!editingBadge.description ||
+													!editingBadge.imageUrl
+												}
 												className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
 											>
 												{savingBadge ? "Saving..." : "Save Badge"}
@@ -1080,7 +1233,15 @@ export default function SettingsPage() {
 
 								{!editingBadge && (
 									<button
-										onClick={() => setEditingBadge({ name: "", description: "", imageUrl: "", color: "", isSelfAssignable: false })}
+										onClick={() =>
+											setEditingBadge({
+												name: "",
+												description: "",
+												imageUrl: "",
+												color: "",
+												isSelfAssignable: false,
+											})
+										}
 										className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
 									>
 										Create New Badge
@@ -1089,12 +1250,18 @@ export default function SettingsPage() {
 
 								{/* Badge List */}
 								{loadingBadges ? (
-									<p className="text-sm text-slate-400">Loading badges...</p>
+									<p className="text-sm text-slate-400">
+										Loading badges...
+									</p>
 								) : badges.length === 0 ? (
-									<p className="text-sm text-slate-400">No badges created yet.</p>
+									<p className="text-sm text-slate-400">
+										No badges created yet.
+									</p>
 								) : (
 									<div className="space-y-2">
-										<h3 className="text-sm font-medium text-slate-200">Existing Badges</h3>
+										<h3 className="text-sm font-medium text-slate-200">
+											Existing Badges
+										</h3>
 										<div className="grid gap-2">
 											{badges.map((badge) => (
 												<div
@@ -1111,19 +1278,37 @@ export default function SettingsPage() {
 															/>
 														</div>
 														<div>
-															<p className="text-sm font-medium text-slate-200">{badge.name}</p>
-															<p className="text-xs text-slate-400">{badge.description}</p>
+															<p className="text-sm font-medium text-slate-200">
+																{badge.name}
+															</p>
+															<p className="text-xs text-slate-400">
+																{badge.description}
+															</p>
 														</div>
 													</div>
 													<div className="flex gap-2">
 														<button
-															onClick={() => setEditingBadge({ id: badge.id, name: badge.name, description: badge.description, imageUrl: badge.imageUrl, color: badge.color || "", isSelfAssignable: badge.isSelfAssignable || false })}
+															onClick={() =>
+																setEditingBadge({
+																	id: badge.id,
+																	name: badge.name,
+																	description:
+																		badge.description,
+																	imageUrl: badge.imageUrl,
+																	color: badge.color || "",
+																	isSelfAssignable:
+																		badge.isSelfAssignable ||
+																		false,
+																})
+															}
 															className="rounded bg-sky-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-sky-700"
 														>
 															Edit
 														</button>
 														<button
-															onClick={() => handleDeleteBadge(badge.id)}
+															onClick={() =>
+																handleDeleteBadge(badge.id)
+															}
 															className="rounded bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-red-700"
 														>
 															Delete
@@ -1137,13 +1322,17 @@ export default function SettingsPage() {
 
 								{/* Award Badge to User Section */}
 								<div className="mt-6 rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
-									<h3 className="text-sm font-medium text-slate-200">Award Badge to User</h3>
-									
+									<h3 className="text-sm font-medium text-slate-200">
+										Award Badge to User
+									</h3>
+
 									<div className="flex gap-2">
 										<input
 											type="text"
 											value={searchUsername}
-											onChange={(e) => setSearchUsername(e.target.value)}
+											onChange={(e) =>
+												setSearchUsername(e.target.value)
+											}
 											placeholder="Enter username"
 											className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 											onKeyDown={(e) => {
@@ -1164,9 +1353,13 @@ export default function SettingsPage() {
 									{searchedUser && (
 										<div className="space-y-2">
 											<p className="text-sm text-slate-300">
-												Found user: <span className="font-medium text-slate-100">{searchedUser.commonName || searchedUser.name}</span>
+												Found user:{" "}
+												<span className="font-medium text-slate-100">
+													{searchedUser.commonName ||
+														searchedUser.name}
+												</span>
 											</p>
-											
+
 											<div className="grid gap-2">
 												{badges.map((badge) => (
 													<div
@@ -1182,10 +1375,14 @@ export default function SettingsPage() {
 																	className="object-cover"
 																/>
 															</div>
-															<span className="text-sm text-slate-200">{badge.name}</span>
+															<span className="text-sm text-slate-200">
+																{badge.name}
+															</span>
 														</div>
 														<button
-															onClick={() => handleAwardBadge(badge.id)}
+															onClick={() =>
+																handleAwardBadge(badge.id)
+															}
 															disabled={awardingBadge}
 															className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 														>
@@ -1215,18 +1412,23 @@ export default function SettingsPage() {
 								Admin: Ambassador Management
 							</h2>
 							<p className="mt-2 text-xs text-slate-400">
-								Grant or revoke ambassador status for DMs. Ambassadors pay only Stripe transaction fees (no platform fee).
+								Grant or revoke ambassador status for DMs. Ambassadors
+								pay only Stripe transaction fees (no platform fee).
 							</p>
 
 							<div className="mt-4 space-y-4">
 								<div className="rounded-lg border border-slate-700 bg-slate-950/60 p-4 space-y-3">
-									<h3 className="text-sm font-medium text-slate-200">Search User</h3>
-									
+									<h3 className="text-sm font-medium text-slate-200">
+										Search User
+									</h3>
+
 									<div className="flex gap-2">
 										<input
 											type="text"
 											value={ambassadorSearchUsername}
-											onChange={(e) => setAmbassadorSearchUsername(e.target.value)}
+											onChange={(e) =>
+												setAmbassadorSearchUsername(e.target.value)
+											}
 											placeholder="Enter username"
 											className="flex-1 rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 											onKeyDown={(e) => {
@@ -1240,7 +1442,9 @@ export default function SettingsPage() {
 											disabled={searchingAmbassadorUser}
 											className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
 										>
-											{searchingAmbassadorUser ? "Searching..." : "Search"}
+											{searchingAmbassadorUser
+												? "Searching..."
+												: "Search"}
 										</button>
 									</div>
 
@@ -1248,15 +1452,25 @@ export default function SettingsPage() {
 										<div className="space-y-3 pt-3 border-t border-slate-700">
 											<div>
 												<p className="text-sm text-slate-300">
-													User: <span className="font-medium text-slate-100">{ambassadorSearchedUser.commonName || ambassadorSearchedUser.name}</span>
+													User:{" "}
+													<span className="font-medium text-slate-100">
+														{ambassadorSearchedUser.commonName ||
+															ambassadorSearchedUser.name}
+													</span>
 												</p>
 												<p className="text-xs text-slate-400 mt-1">
-													Current Status: {ambassadorSearchedUser.isAmbassador ? (
+													Current Status:{" "}
+													{ambassadorSearchedUser.isAmbassador ? (
 														<span className="text-emerald-400">
-															Ambassador {ambassadorSearchedUser.ambassadorUntil ? `until ${new Date(ambassadorSearchedUser.ambassadorUntil).toLocaleDateString()}` : "(permanent)"}
+															Ambassador{" "}
+															{ambassadorSearchedUser.ambassadorUntil
+																? `until ${new Date(ambassadorSearchedUser.ambassadorUntil).toLocaleDateString()}`
+																: "(permanent)"}
 														</span>
 													) : (
-														<span className="text-slate-400">Regular User (15% platform fee)</span>
+														<span className="text-slate-400">
+															Regular User (15% platform fee)
+														</span>
 													)}
 												</p>
 											</div>
@@ -1268,30 +1482,41 @@ export default function SettingsPage() {
 												<input
 													type="date"
 													value={ambassadorUntilDate}
-													onChange={(e) => setAmbassadorUntilDate(e.target.value)}
+													onChange={(e) =>
+														setAmbassadorUntilDate(e.target.value)
+													}
 													className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 												/>
 												<p className="text-xs text-slate-500">
-													Leave blank for permanent ambassador status
+													Leave blank for permanent ambassador
+													status
 												</p>
 											</div>
 
 											<div className="flex gap-2">
 												{!ambassadorSearchedUser.isAmbassador ? (
 													<button
-														onClick={() => handleSetAmbassadorStatus(true)}
+														onClick={() =>
+															handleSetAmbassadorStatus(true)
+														}
 														disabled={savingAmbassador}
 														className="flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 													>
-														{savingAmbassador ? "Saving..." : "Grant Ambassador Status"}
+														{savingAmbassador
+															? "Saving..."
+															: "Grant Ambassador Status"}
 													</button>
 												) : (
 													<button
-														onClick={() => handleSetAmbassadorStatus(false)}
+														onClick={() =>
+															handleSetAmbassadorStatus(false)
+														}
 														disabled={savingAmbassador}
 														className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
 													>
-														{savingAmbassador ? "Saving..." : "Revoke Ambassador Status"}
+														{savingAmbassador
+															? "Saving..."
+															: "Revoke Ambassador Status"}
 													</button>
 												)}
 											</div>
@@ -1308,10 +1533,25 @@ export default function SettingsPage() {
 								)}
 
 								<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-3">
-									<h3 className="text-xs font-medium text-slate-300 mb-2">Fee Structure</h3>
+									<h3 className="text-xs font-medium text-slate-300 mb-2">
+										Fee Structure
+									</h3>
 									<ul className="text-xs text-slate-400 space-y-1">
-										<li>• <span className="text-emerald-400">Ambassadors:</span> 0% platform fee + Stripe transaction fees (~2.9% + 30¢)</li>
-										<li>• <span className="text-slate-300">Regular DMs:</span> 15% platform fee + Stripe transaction fees</li>
+										<li>
+											•{" "}
+											<span className="text-emerald-400">
+												Ambassadors:
+											</span>{" "}
+											0% platform fee + Stripe transaction fees
+											(~2.9% + 30¢)
+										</li>
+										<li>
+											•{" "}
+											<span className="text-slate-300">
+												Regular DMs:
+											</span>{" "}
+											15% platform fee + Stripe transaction fees
+										</li>
 									</ul>
 								</div>
 							</div>
@@ -1325,7 +1565,8 @@ export default function SettingsPage() {
 								My Badges
 							</h2>
 							<p className="mt-2 text-xs text-slate-400">
-								Select which badges to display on your profile. Unchecked badges will be hidden from other users.
+								Select which badges to display on your profile.
+								Unchecked badges will be hidden from other users.
 							</p>
 
 							<div className="mt-4 space-y-2">
@@ -1344,18 +1585,29 @@ export default function SettingsPage() {
 												/>
 											</div>
 											<div>
-												<p className="text-sm font-medium text-slate-200">{badge.name}</p>
-												<p className="text-xs text-slate-400">{badge.description}</p>
+												<p className="text-sm font-medium text-slate-200">
+													{badge.name}
+												</p>
+												<p className="text-xs text-slate-400">
+													{badge.description}
+												</p>
 											</div>
 										</div>
 										<label className="flex items-center gap-2 cursor-pointer">
 											<input
 												type="checkbox"
 												checked={badge.isDisplayed}
-												onChange={(e) => handleToggleBadgeDisplay(badge.badgeId, e.target.checked)}
+												onChange={(e) =>
+													handleToggleBadgeDisplay(
+														badge.badgeId,
+														e.target.checked
+													)
+												}
 												className="h-5 w-5 rounded border-slate-700 bg-slate-950/60 text-sky-500 outline-none transition focus:ring-2 focus:ring-sky-500/40"
 											/>
-											<span className="text-sm text-slate-300">Display</span>
+											<span className="text-sm text-slate-300">
+												Display
+											</span>
 										</label>
 									</div>
 								))}
@@ -1364,18 +1616,29 @@ export default function SettingsPage() {
 					)}
 
 					{/* Self-Assignable Badges */}
-					{badges.filter(badge => badge.isSelfAssignable && !userBadges.some(ub => ub.badgeId === badge.id)).length > 0 && (
+					{badges.filter(
+						(badge) =>
+							badge.isSelfAssignable &&
+							!userBadges.some((ub) => ub.badgeId === badge.id)
+					).length > 0 && (
 						<div className="rounded-lg border border-emerald-700/50 bg-emerald-900/20 p-4">
 							<h2 className="text-sm font-medium text-emerald-200">
 								Available Badges
 							</h2>
 							<p className="mt-2 text-xs text-slate-400">
-								These badges can be assigned to yourself to indicate your role or status.
+								These badges can be assigned to yourself to indicate
+								your role or status.
 							</p>
 
 							<div className="mt-4 space-y-2">
 								{badges
-									.filter(badge => badge.isSelfAssignable && !userBadges.some(ub => ub.badgeId === badge.id))
+									.filter(
+										(badge) =>
+											badge.isSelfAssignable &&
+											!userBadges.some(
+												(ub) => ub.badgeId === badge.id
+											)
+									)
 									.map((badge) => (
 										<div
 											key={badge.id}
@@ -1391,16 +1654,24 @@ export default function SettingsPage() {
 													/>
 												</div>
 												<div>
-													<p className="text-sm font-medium text-slate-200">{badge.name}</p>
-													<p className="text-xs text-slate-400">{badge.description}</p>
+													<p className="text-sm font-medium text-slate-200">
+														{badge.name}
+													</p>
+													<p className="text-xs text-slate-400">
+														{badge.description}
+													</p>
 												</div>
 											</div>
 											<button
-												onClick={() => handleSelfAssignBadge(badge.id)}
+												onClick={() =>
+													handleSelfAssignBadge(badge.id)
+												}
 												disabled={assigningSelfBadge}
 												className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 											>
-												{assigningSelfBadge ? "Assigning..." : "Assign to Me"}
+												{assigningSelfBadge
+													? "Assigning..."
+													: "Assign to Me"}
 											</button>
 										</div>
 									))}

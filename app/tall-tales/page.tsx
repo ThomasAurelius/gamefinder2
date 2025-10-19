@@ -20,22 +20,26 @@ export default function TallTalesPage() {
 	const [isUploadingImage, setIsUploadingImage] = useState(false);
 	const [showDisclaimer, setShowDisclaimer] = useState(true);
 	const [disclaimerClosed, setDisclaimerClosed] = useState(false);
-	const [tales, setTales] = useState<Array<{
-		id: string;
-		userId: string;
-		title: string;
-		content: string;
-		imageUrls?: string[];
-		gameSystem?: string;
-		customGameSystem?: string;
-		createdAt: Date;
-		authorName: string;
-		authorAvatarUrl?: string;
-	}>>([]);
+	const [tales, setTales] = useState<
+		Array<{
+			id: string;
+			userId: string;
+			title: string;
+			content: string;
+			imageUrls?: string[];
+			gameSystem?: string;
+			customGameSystem?: string;
+			createdAt: Date;
+			authorName: string;
+			authorAvatarUrl?: string;
+		}>
+	>([]);
 	const [isLoadingTales, setIsLoadingTales] = useState(true);
 	const [flagModalOpen, setFlagModalOpen] = useState(false);
 	const [flagTaleId, setFlagTaleId] = useState("");
-	const [flagReason, setFlagReason] = useState<"offtopic" | "inappropriate" | "spam" | "other">("offtopic");
+	const [flagReason, setFlagReason] = useState<
+		"offtopic" | "inappropriate" | "spam" | "other"
+	>("offtopic");
 	const [flagComment, setFlagComment] = useState("");
 	const [flagSubmitting, setFlagSubmitting] = useState(false);
 	const [flagMessage, setFlagMessage] = useState("");
@@ -76,12 +80,12 @@ export default function TallTalesPage() {
 	// Handle Escape key to close modal
 	useEffect(() => {
 		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === 'Escape' && modalImageUrl) {
+			if (e.key === "Escape" && modalImageUrl) {
 				setModalImageUrl(null);
 			}
 		};
-		window.addEventListener('keydown', handleEscape);
-		return () => window.removeEventListener('keydown', handleEscape);
+		window.addEventListener("keydown", handleEscape);
+		return () => window.removeEventListener("keydown", handleEscape);
 	}, [modalImageUrl]);
 
 	const loadTales = async () => {
@@ -191,7 +195,10 @@ export default function TallTalesPage() {
 					content: content.trim(),
 					imageUrls: imageUrls.length > 0 ? imageUrls : undefined,
 					gameSystem: gameSystem || undefined,
-					customGameSystem: gameSystem === "Other" && customGameSystem ? customGameSystem.trim() : undefined,
+					customGameSystem:
+						gameSystem === "Other" && customGameSystem
+							? customGameSystem.trim()
+							: undefined,
 				}),
 			});
 
@@ -206,7 +213,7 @@ export default function TallTalesPage() {
 			setImageUrls([]);
 			setGameSystem("");
 			setCustomGameSystem("");
-			
+
 			// Reload tales
 			await loadTales();
 
@@ -221,12 +228,12 @@ export default function TallTalesPage() {
 
 	const formatDate = (date: Date) => {
 		const d = new Date(date);
-		return d.toLocaleDateString('en-US', { 
-			month: 'short', 
-			day: 'numeric', 
-			year: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+		return d.toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
 		});
 	};
 
@@ -257,12 +264,16 @@ export default function TallTalesPage() {
 				throw new Error(errorData.error || "Failed to flag content");
 			}
 
-			setFlagMessage("Content flagged successfully. Admins will review your report.");
+			setFlagMessage(
+				"Content flagged successfully. Admins will review your report."
+			);
 			setTimeout(() => {
 				setFlagModalOpen(false);
 			}, 2000);
 		} catch (err) {
-			setFlagMessage(err instanceof Error ? err.message : "Failed to flag content");
+			setFlagMessage(
+				err instanceof Error ? err.message : "Failed to flag content"
+			);
 		} finally {
 			setFlagSubmitting(false);
 		}
@@ -271,16 +282,19 @@ export default function TallTalesPage() {
 	return (
 		<section className="mx-auto max-w-4xl space-y-8 px-4 py-8">
 			{showDisclaimer && (
-				<TallTalesDisclaimer onClose={() => {
-					setShowDisclaimer(false);
-					setDisclaimerClosed(true);
-				}} />
+				<TallTalesDisclaimer
+					onClose={() => {
+						setShowDisclaimer(false);
+						setDisclaimerClosed(true);
+					}}
+				/>
 			)}
 
 			<div className="space-y-2">
 				<h1 className="text-3xl font-bold text-slate-100">Tall Tales</h1>
 				<p className="text-sm text-slate-400">
-					Share your campaign stories, memorable game moments, and boardgame-related content with the community.
+					Share your campaign stories, memorable game moments, and
+					boardgame-related content with the community.
 				</p>
 			</div>
 
@@ -290,9 +304,7 @@ export default function TallTalesPage() {
 					onClick={handleToggleForm}
 					className="flex w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30"
 				>
-					<span>
-						{isFormOpen ? "Hide post form" : "Share a Tale"}
-					</span>
+					<span>{isFormOpen ? "Hide post form" : "Share a Tale"}</span>
 					<span className="text-xs uppercase tracking-wide text-slate-400">
 						{isFormOpen ? "Collapse" : "Expand"}
 					</span>
@@ -300,187 +312,214 @@ export default function TallTalesPage() {
 				{isFormOpen && (
 					<form
 						onSubmit={handleSubmit}
-						className="space-y-6 border-t border-slate-800 p-6"
+						className="space-y-6 border-t  bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30 border-slate-800 p-6"
 					>
-				<div className="space-y-2">
-					<label
-						htmlFor="title"
-						className="block text-sm font-medium text-slate-200"
-					>
-						Title
-					</label>
-					<input
-						id="title"
-						type="text"
-						value={title}
-						onChange={(e) => setTitle(e.target.value)}
-						placeholder="Give your story a catchy title..."
-						maxLength={200}
-						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					/>
-				</div>
-
-				<div className="space-y-2">
-					<label
-						htmlFor="game-system"
-						className="block text-sm font-medium text-slate-200"
-					>
-						Game System (Optional)
-					</label>
-					<select
-						id="game-system"
-						value={gameSystem}
-						onChange={(e) => setGameSystem(e.target.value)}
-						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					>
-						<option value="">Choose a game system...</option>
-						{GAME_OPTIONS.map((game) => (
-							<option key={game} value={game}>
-								{game}
-							</option>
-						))}
-					</select>
-					<p className="text-xs text-slate-500">
-						Select the game system your story is about.
-					</p>
-				</div>
-
-				{gameSystem === "Other" && (
-					<div className="space-y-2">
-						<label
-							htmlFor="custom-game-system"
-							className="block text-sm font-medium text-slate-200"
-						>
-							Game System Name
-						</label>
-						<input
-							id="custom-game-system"
-							type="text"
-							value={customGameSystem}
-							onChange={(e) => setCustomGameSystem(e.target.value)}
-							placeholder="Enter the name of the game system"
-							className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-						/>
-						<p className="text-xs text-slate-500">
-							Please enter the specific name of the game system.
-						</p>
-					</div>
-				)}
-
-				<div className="space-y-2">
-					<div className="flex items-center justify-between">
-						<label
-							htmlFor="content"
-							className="block text-sm font-medium text-slate-200"
-						>
-							Your Story (Markdown supported)
-						</label>
-						<span className={`text-xs ${remainingCharacters < 0 ? 'text-red-400' : remainingCharacters < 500 ? 'text-amber-400' : 'text-slate-500'}`}>
-							{remainingCharacters} characters remaining
-						</span>
-					</div>
-					<textarea
-						id="content"
-						value={content}
-						onChange={(e) => setContent(e.target.value)}
-						rows={12}
-						placeholder="Share your epic tale here... You can use Markdown for formatting:&#10;&#10;# Heading&#10;**bold** or *italic*&#10;- List items&#10;&#10;Tell us about that critical hit, the hilarious roleplay moment, or the strategic victory!"
-						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					/>
-					<p className="text-xs text-slate-500">
-						You can use Markdown for headings (#), emphasis (**bold**, *italic*), and lists (-)
-					</p>
-				</div>
-
-				<div className="space-y-2">
-					<label className="block text-sm font-medium text-slate-200">
-						Images (Optional, up to 5)
-					</label>
-					<div className="flex flex-wrap gap-3">
-						{imageUrls.map((url, index) => (
-							<div key={index} className="relative">
-								<img
-									src={url}
-									alt={`Upload ${index + 1}`}
-									className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
-								/>
-								<button
-									type="button"
-									onClick={() => removeImage(index)}
-									className="absolute -right-2 -top-2 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
-								>
-									<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-									</svg>
-								</button>
-							</div>
-						))}
-						{imageUrls.length < 5 && (
+						<div className="space-y-2">
 							<label
-								htmlFor="image-upload"
-								className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-slate-700 bg-slate-800/50 transition hover:border-slate-600 hover:bg-slate-800"
+								htmlFor="title"
+								className="block text-sm font-medium text-slate-200"
 							>
-								{isUploadingImage ? (
-									<span className="text-xs text-slate-400">Uploading...</span>
-								) : (
-									<svg className="h-8 w-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-									</svg>
-								)}
+								Title
 							</label>
+							<input
+								id="title"
+								type="text"
+								value={title}
+								onChange={(e) => setTitle(e.target.value)}
+								placeholder="Give your story a catchy title..."
+								maxLength={200}
+								className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+							/>
+						</div>
+
+						<div className="space-y-2">
+							<label
+								htmlFor="game-system"
+								className="block text-sm font-medium text-slate-200"
+							>
+								Game System (Optional)
+							</label>
+							<select
+								id="game-system"
+								value={gameSystem}
+								onChange={(e) => setGameSystem(e.target.value)}
+								className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+							>
+								<option value="">Choose a game system...</option>
+								{GAME_OPTIONS.map((game) => (
+									<option key={game} value={game}>
+										{game}
+									</option>
+								))}
+							</select>
+							<p className="text-xs text-slate-500">
+								Select the game system your story is about.
+							</p>
+						</div>
+
+						{gameSystem === "Other" && (
+							<div className="space-y-2">
+								<label
+									htmlFor="custom-game-system"
+									className="block text-sm font-medium text-slate-200"
+								>
+									Game System Name
+								</label>
+								<input
+									id="custom-game-system"
+									type="text"
+									value={customGameSystem}
+									onChange={(e) => setCustomGameSystem(e.target.value)}
+									placeholder="Enter the name of the game system"
+									className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+								/>
+								<p className="text-xs text-slate-500">
+									Please enter the specific name of the game system.
+								</p>
+							</div>
 						)}
-					</div>
-					<input
-						id="image-upload"
-						type="file"
-						accept="image/jpeg,image/png,image/webp,image/gif"
-						onChange={handleImageUpload}
-						disabled={isUploadingImage || imageUrls.length >= 5}
-						className="hidden"
-					/>
-					<p className="text-xs text-slate-500">
-						JPG, PNG, WebP or GIF. Max 5MB per image.
-					</p>
-				</div>
 
-				{error && (
-					<div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-						{error}
-					</div>
-				)}
+						<div className="space-y-2">
+							<div className="flex items-center justify-between">
+								<label
+									htmlFor="content"
+									className="block text-sm font-medium text-slate-200"
+								>
+									Your Story (Markdown supported)
+								</label>
+								<span
+									className={`text-xs ${remainingCharacters < 0 ? "text-red-400" : remainingCharacters < 500 ? "text-amber-400" : "text-slate-500"}`}
+								>
+									{remainingCharacters} characters remaining
+								</span>
+							</div>
+							<textarea
+								id="content"
+								value={content}
+								onChange={(e) => setContent(e.target.value)}
+								rows={12}
+								placeholder="Share your epic tale here... You can use Markdown for formatting:&#10;&#10;# Heading&#10;**bold** or *italic*&#10;- List items&#10;&#10;Tell us about that critical hit, the hilarious roleplay moment, or the strategic victory!"
+								className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+							/>
+							<p className="text-xs text-slate-500">
+								You can use Markdown for headings (#), emphasis
+								(**bold**, *italic*), and lists (-)
+							</p>
+						</div>
 
-				{submitted && (
-					<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-						Your tale has been shared successfully!
-					</div>
-				)}
+						<div className="space-y-2">
+							<label className="block text-sm font-medium text-slate-200">
+								Images (Optional, up to 5)
+							</label>
+							<div className="flex flex-wrap gap-3">
+								{imageUrls.map((url, index) => (
+									<div key={index} className="relative">
+										<img
+											src={url}
+											alt={`Upload ${index + 1}`}
+											className="h-24 w-24 rounded-lg border border-slate-700 object-cover"
+										/>
+										<button
+											type="button"
+											onClick={() => removeImage(index)}
+											className="absolute -right-2 -top-2 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+										>
+											<svg
+												className="h-4 w-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M6 18L18 6M6 6l12 12"
+												/>
+											</svg>
+										</button>
+									</div>
+								))}
+								{imageUrls.length < 5 && (
+									<label
+										htmlFor="image-upload"
+										className="flex h-24 w-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-slate-700 bg-slate-800/50 transition hover:border-slate-600 hover:bg-slate-800"
+									>
+										{isUploadingImage ? (
+											<span className="text-xs text-slate-400">
+												Uploading...
+											</span>
+										) : (
+											<svg
+												className="h-8 w-8 text-slate-500"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M12 4v16m8-8H4"
+												/>
+											</svg>
+										)}
+									</label>
+								)}
+							</div>
+							<input
+								id="image-upload"
+								type="file"
+								accept="image/jpeg,image/png,image/webp,image/gif"
+								onChange={handleImageUpload}
+								disabled={isUploadingImage || imageUrls.length >= 5}
+								className="hidden"
+							/>
+							<p className="text-xs text-slate-500">
+								JPG, PNG, WebP or GIF. Max 5MB per image.
+							</p>
+						</div>
 
-				<button
-					type="submit"
-					disabled={isSubmitting || content.length > 5000}
-					className="w-full rounded-xl bg-sky-500 px-6 py-3 font-medium text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
-				>
-					{isSubmitting ? "Posting..." : "Share Your Tale"}
-				</button>
-			</form>
+						{error && (
+							<div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+								{error}
+							</div>
+						)}
+
+						{submitted && (
+							<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+								Your tale has been shared successfully!
+							</div>
+						)}
+
+						<button
+							type="submit"
+							disabled={isSubmitting || content.length > 5000}
+							className="w-full rounded-xl bg-sky-500 px-6 py-3 font-medium bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							{isSubmitting ? "Posting..." : "Share Your Tale"}
+						</button>
+					</form>
 				)}
 			</div>
 
 			{/* Tales List */}
 			<div className="space-y-6">
 				<h2 className="text-2xl font-bold text-slate-100">Recent Tales</h2>
-				
+
 				{isLoadingTales ? (
 					<div className="rounded-2xl border border-slate-800/60 bg-slate-900/40 p-8 text-center">
 						<p className="text-slate-400">Loading tales...</p>
 					</div>
 				) : tales.length === 0 ? (
 					<div className="rounded-2xl border border-slate-800/60 bg-slate-900/40 p-8 text-center">
-						<p className="text-slate-400">No tales yet. Be the first to share your story!</p>
+						<p className="text-slate-400">
+							No tales yet. Be the first to share your story!
+						</p>
 					</div>
 				) : (
 					tales.map((tale) => (
-						<article 
+						<article
 							key={tale.id}
 							className="rounded-2xl border border-slate-800/60 bg-slate-900/40 overflow-hidden shadow-lg shadow-slate-900/30"
 						>
@@ -490,10 +529,13 @@ export default function TallTalesPage() {
 									src={tale.imageUrls[0]}
 									alt={tale.title}
 									className="w-full max-h-96 object-cover cursor-pointer transition hover:opacity-90"
-									onClick={() => tale.imageUrls && setModalImageUrl(tale.imageUrls[0])}
+									onClick={() =>
+										tale.imageUrls &&
+										setModalImageUrl(tale.imageUrls[0])
+									}
 								/>
 							)}
-							
+
 							<div className="p-6 space-y-4">
 								<div className="flex items-start justify-between gap-4">
 									<div className="flex items-center gap-3">
@@ -509,11 +551,16 @@ export default function TallTalesPage() {
 											</div>
 										)}
 										<div>
-											<p className="font-medium text-slate-200">{tale.authorName}</p>
-											<p className="text-xs text-slate-500">{formatDate(tale.createdAt)}</p>
+											<p className="font-medium text-slate-200">
+												{tale.authorName}
+											</p>
+											<p className="text-xs text-slate-500">
+												{formatDate(tale.createdAt)}
+											</p>
 											{tale.gameSystem && (
 												<p className="text-xs text-slate-400 mt-1">
-													{tale.gameSystem === "Other" && tale.customGameSystem
+													{tale.gameSystem === "Other" &&
+													tale.customGameSystem
 														? tale.customGameSystem
 														: tale.gameSystem}
 												</p>
@@ -532,34 +579,48 @@ export default function TallTalesPage() {
 											className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs text-slate-300 transition hover:border-red-500/50 hover:bg-red-900/20 hover:text-red-400"
 											title="Flag content"
 										>
-											<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+											<svg
+												className="h-4 w-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"
+												/>
 											</svg>
 										</button>
 									</div>
 								</div>
-								
+
 								<div>
-									<h3 className="text-xl font-semibold text-slate-100 mb-2">{tale.title}</h3>
+									<h3 className="text-xl font-semibold text-slate-100 mb-2">
+										{tale.title}
+									</h3>
 									<div className="prose prose-invert prose-slate max-w-none prose-headings:text-slate-100 prose-p:text-slate-300 prose-strong:text-slate-100 prose-em:text-slate-300 prose-li:text-slate-300 prose-blockquote:text-slate-400">
 										<ReactMarkdown remarkPlugins={[remarkGfm]}>
 											{tale.content}
 										</ReactMarkdown>
 									</div>
 								</div>
-								
+
 								{/* Additional images after the content */}
 								{tale.imageUrls && tale.imageUrls.length > 1 && (
 									<div className="flex flex-wrap gap-3 pt-2">
-										{tale.imageUrls.slice(1).map((url: string, index: number) => (
-											<img
-												key={index}
-												src={url}
-												alt={`Tale image ${index + 2}`}
-												className="h-24 w-24 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
-												onClick={() => setModalImageUrl(url)}
-											/>
-										))}
+										{tale.imageUrls
+											.slice(1)
+											.map((url: string, index: number) => (
+												<img
+													key={index}
+													src={url}
+													alt={`Tale image ${index + 2}`}
+													className="h-24 w-24 rounded-lg border border-slate-700 object-cover cursor-pointer transition hover:opacity-80"
+													onClick={() => setModalImageUrl(url)}
+												/>
+											))}
 									</div>
 								)}
 							</div>
@@ -570,7 +631,7 @@ export default function TallTalesPage() {
 
 			{/* Image Modal */}
 			{modalImageUrl && (
-				<div 
+				<div
 					className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 px-4"
 					onClick={() => setModalImageUrl(null)}
 				>
@@ -579,8 +640,18 @@ export default function TallTalesPage() {
 						className="absolute right-4 top-4 rounded-full bg-slate-800/80 p-2 text-slate-200 transition hover:bg-slate-700"
 						aria-label="Close modal"
 					>
-						<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+						<svg
+							className="h-6 w-6"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M6 18L18 6M6 6l12 12"
+							/>
 						</svg>
 					</button>
 					<img
@@ -597,19 +668,32 @@ export default function TallTalesPage() {
 				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
 					<div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
 						<div className="mb-4 flex items-center justify-between">
-							<h3 className="text-lg font-semibold text-slate-100">Flag Content</h3>
+							<h3 className="text-lg font-semibold text-slate-100">
+								Flag Content
+							</h3>
 							<button
 								onClick={() => setFlagModalOpen(false)}
 								className="text-slate-400 hover:text-slate-200"
 							>
-								<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+								<svg
+									className="h-6 w-6"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M6 18L18 6M6 6l12 12"
+									/>
 								</svg>
 							</button>
 						</div>
 
 						<p className="mb-4 text-sm text-slate-400">
-							Help us keep the community safe by reporting inappropriate content.
+							Help us keep the community safe by reporting inappropriate
+							content.
 						</p>
 
 						<div className="space-y-4">
@@ -619,7 +703,9 @@ export default function TallTalesPage() {
 								</label>
 								<select
 									value={flagReason}
-									onChange={(e) => setFlagReason(e.target.value as typeof flagReason)}
+									onChange={(e) =>
+										setFlagReason(e.target.value as typeof flagReason)
+									}
 									className="w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 								>
 									<option value="offtopic">Off-topic</option>
@@ -643,11 +729,13 @@ export default function TallTalesPage() {
 							</div>
 
 							{flagMessage && (
-								<div className={`rounded-lg border px-3 py-2 text-sm ${
-									flagMessage.includes("successfully") 
-										? "border-green-500/20 bg-green-500/10 text-green-400" 
-										: "border-red-500/20 bg-red-500/10 text-red-400"
-								}`}>
+								<div
+									className={`rounded-lg border px-3 py-2 text-sm ${
+										flagMessage.includes("successfully")
+											? "border-green-500/20 bg-green-500/10 text-green-400"
+											: "border-red-500/20 bg-red-500/10 text-red-400"
+									}`}
+								>
 									{flagMessage}
 								</div>
 							)}

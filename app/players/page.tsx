@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, DAYS_OF_WEEK, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
+import {
+	GAME_OPTIONS,
+	DAYS_OF_WEEK,
+	TIME_SLOTS,
+	TIME_SLOT_GROUPS,
+} from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import Badge from "@/components/Badge";
 
@@ -173,7 +178,8 @@ export default function PlayersPage() {
 			const params = new URLSearchParams();
 			if (searchQuery) params.append("search", searchQuery);
 			if (selectedRole) params.append("role", selectedRole);
-			if (selectedGames.length > 0) params.append("games", selectedGames.join(","));
+			if (selectedGames.length > 0)
+				params.append("games", selectedGames.join(","));
 			if (locationSearch) {
 				params.append("location", locationSearch);
 				params.append("radius", radiusMiles);
@@ -213,8 +219,9 @@ export default function PlayersPage() {
 					Find Players
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Search for players by name, location, role, favorite games, or availability.
-					Use zip code or city to find players within a specific radius.
+					Search for players by name, location, role, favorite games, or
+					availability. Use zip code or city to find players within a
+					specific radius.
 				</p>
 			</div>
 
@@ -222,7 +229,7 @@ export default function PlayersPage() {
 				<button
 					type="button"
 					onClick={() => setIsSearchFormOpen(!isSearchFormOpen)}
-					className="flex w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30"
+					className="flex rounded-md border-amber-500/50 border-1  w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30"
 				>
 					<span>
 						{isSearchFormOpen
@@ -234,7 +241,7 @@ export default function PlayersPage() {
 					</span>
 				</button>
 				{isSearchFormOpen && (
-					<div className="space-y-4 border-t border-slate-800 p-6">
+					<div className="space-y-4 border-1 border-amber-500/50 rounded-md  bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30 p-6">
 						<p className="text-xs text-slate-400">
 							Use the filters below to find players. Leave blank to see
 							all players.
@@ -386,7 +393,8 @@ export default function PlayersPage() {
 									Preferred Time on {selectedDayOfWeek}
 								</label>
 								<p className="mb-3 text-xs text-slate-400">
-									Select a time slot to find players available at that time
+									Select a time slot to find players available at that
+									time
 								</p>
 								<div className="space-y-3">
 									{TIME_SLOT_GROUPS.map((group) => (
@@ -401,10 +409,17 @@ export default function PlayersPage() {
 														<button
 															key={slot}
 															type="button"
-															onClick={() => setSelectedTimeSlot(active ? "" : slot)}
-															className={tagButtonClasses(active, {
-																size: "sm",
-															})}
+															onClick={() =>
+																setSelectedTimeSlot(
+																	active ? "" : slot
+																)
+															}
+															className={tagButtonClasses(
+																active,
+																{
+																	size: "sm",
+																}
+															)}
 														>
 															{slot}
 														</button>
@@ -420,7 +435,7 @@ export default function PlayersPage() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+							className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-2 text-md"
 							disabled={isLoading}
 						>
 							{isLoading ? "Searching..." : "Search Players"}
@@ -440,8 +455,8 @@ export default function PlayersPage() {
 								Found{" "}
 								<span className="text-sky-400">{players.length}</span>{" "}
 								{players.length === 1 ? "player" : "players"}
-								{(searchQuery || 
-									selectedRole || 
+								{(searchQuery ||
+									selectedRole ||
 									selectedGames.length > 0 ||
 									selectedDayOfWeek ||
 									selectedTimeSlot ||

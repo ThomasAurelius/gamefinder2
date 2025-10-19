@@ -583,7 +583,7 @@ export default function FindCampaignsPage() {
 					</Link>
 					<Link
 						href="/post-campaign"
-						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+						className="rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 					>
 						Post Campaign
 					</Link>
@@ -837,7 +837,7 @@ export default function FindCampaignsPage() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+							className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 							disabled={
 								(!selectedGame &&
 									!selectedDate &&

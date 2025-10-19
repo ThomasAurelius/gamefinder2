@@ -460,7 +460,7 @@ export default function ProfilePage() {
 						<div className="flex-1 space-y-2">
 							<label
 								htmlFor="avatar-upload"
-								className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+								className="inline-block cursor-pointer rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 							>
 								{isUploadingAvatar ? "Uploading..." : "Upload Avatar"}
 							</label>
@@ -880,7 +880,7 @@ export default function ProfilePage() {
 				<div className="flex flex-col items-start gap-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<button
 						type="submit"
-						className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-60"
+						className="rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 						disabled={isSubmitDisabled}
 					>
 						{isLoading

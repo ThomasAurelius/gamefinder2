@@ -30,7 +30,7 @@ export default function SubscriptionsPage() {
 			try {
 				setIsLoading(true);
 				const response = await fetch("/api/stripe/list-subscriptions");
-				
+
 				if (!response.ok) {
 					throw new Error("Failed to fetch subscriptions");
 				}
@@ -38,7 +38,11 @@ export default function SubscriptionsPage() {
 				const data = await response.json();
 				setSubscriptions(data.subscriptions || []);
 			} catch (err) {
-				setError(err instanceof Error ? err.message : "Failed to load subscriptions");
+				setError(
+					err instanceof Error
+						? err.message
+						: "Failed to load subscriptions"
+				);
 			} finally {
 				setIsLoading(false);
 			}
@@ -66,29 +70,38 @@ export default function SubscriptionsPage() {
 			}
 
 			const data = await response.json();
-			
+
 			// Redirect to Stripe Customer Portal
 			window.location.href = data.url;
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to open billing portal");
+			setError(
+				err instanceof Error ? err.message : "Failed to open billing portal"
+			);
 			setIsRedirecting(false);
 		}
 	};
 
 	const handleDeleteSubscription = async (subscriptionId: string) => {
-		if (!confirm("Are you sure you want to delete this incomplete subscription? This action cannot be undone.")) {
+		if (
+			!confirm(
+				"Are you sure you want to delete this incomplete subscription? This action cannot be undone."
+			)
+		) {
 			return;
 		}
 
 		try {
-			setDeletingIds(prev => new Set(prev).add(subscriptionId));
+			setDeletingIds((prev) => new Set(prev).add(subscriptionId));
 			setError(null);
 
-			const response = await fetch("/api/stripe/delete-incomplete-subscription", {
-				method: "DELETE",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ subscriptionId }),
-			});
+			const response = await fetch(
+				"/api/stripe/delete-incomplete-subscription",
+				{
+					method: "DELETE",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ subscriptionId }),
+				}
+			);
 
 			if (!response.ok) {
 				const data = await response.json();
@@ -96,11 +109,15 @@ export default function SubscriptionsPage() {
 			}
 
 			// Remove the subscription from the list
-			setSubscriptions(prev => prev.filter(sub => sub.id !== subscriptionId));
+			setSubscriptions((prev) =>
+				prev.filter((sub) => sub.id !== subscriptionId)
+			);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to delete subscription");
+			setError(
+				err instanceof Error ? err.message : "Failed to delete subscription"
+			);
 		} finally {
-			setDeletingIds(prev => {
+			setDeletingIds((prev) => {
 				const next = new Set(prev);
 				next.delete(subscriptionId);
 				return next;
@@ -147,7 +164,9 @@ export default function SubscriptionsPage() {
 	};
 
 	const getStatusLabel = (status: string) => {
-		return status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, " ");
+		return (
+			status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, " ")
+		);
 	};
 
 	if (isLoading) {
@@ -174,9 +193,11 @@ export default function SubscriptionsPage() {
 					<button
 						onClick={() => handleManageSubscription()}
 						disabled={isRedirecting}
-						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+						className="rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-4000"
 					>
-						{isRedirecting ? "Opening Portal..." : "Manage All Subscriptions"}
+						{isRedirecting
+							? "Opening Portal..."
+							: "Manage All Subscriptions"}
 					</button>
 				)}
 			</div>
@@ -210,7 +231,8 @@ export default function SubscriptionsPage() {
 								No Active Subscriptions
 							</p>
 							<p className="mt-2 text-sm text-slate-400">
-								You don&apos;t have any active campaign subscriptions yet.
+								You don&apos;t have any active campaign subscriptions
+								yet.
 							</p>
 						</div>
 						<Link
@@ -239,31 +261,42 @@ export default function SubscriptionsPage() {
 												{getStatusLabel(subscription.status)}
 											</span>
 										</div>
-										
+
 										<div className="mt-3 grid gap-2 text-sm text-slate-400 sm:grid-cols-2">
 											<div>
-												<span className="text-slate-500">Amount:</span>{" "}
+												<span className="text-slate-500">
+													Amount:
+												</span>{" "}
 												<span className="font-medium text-slate-300">
-													${subscription.amount.toFixed(2)}/{subscription.interval}
+													${subscription.amount.toFixed(2)}/
+													{subscription.interval}
 												</span>
 											</div>
 											<div>
-												<span className="text-slate-500">Next billing:</span>{" "}
+												<span className="text-slate-500">
+													Next billing:
+												</span>{" "}
 												<span className="font-medium text-slate-300">
 													{subscription.cancelAtPeriodEnd
 														? "Canceling"
-														: formatDate(subscription.currentPeriodEnd)}
+														: formatDate(
+																subscription.currentPeriodEnd
+															)}
 												</span>
 											</div>
 											<div>
-												<span className="text-slate-500">Started:</span>{" "}
+												<span className="text-slate-500">
+													Started:
+												</span>{" "}
 												<span className="text-slate-300">
 													{formatDate(subscription.created)}
 												</span>
 											</div>
 											{subscription.canceledAt && (
 												<div>
-													<span className="text-slate-500">Canceled:</span>{" "}
+													<span className="text-slate-500">
+														Canceled:
+													</span>{" "}
 													<span className="text-slate-300">
 														{formatDate(subscription.canceledAt)}
 													</span>
@@ -280,7 +313,8 @@ export default function SubscriptionsPage() {
 
 										{isIncomplete(subscription.status) && (
 											<div className="mt-3 rounded-md border border-orange-500/20 bg-orange-500/10 px-3 py-2 text-xs text-orange-400">
-												This subscription was not completed. You can safely delete it.
+												This subscription was not completed. You can
+												safely delete it.
 											</div>
 										)}
 									</div>
@@ -297,15 +331,21 @@ export default function SubscriptionsPage() {
 									)}
 									{isIncomplete(subscription.status) ? (
 										<button
-											onClick={() => handleDeleteSubscription(subscription.id)}
+											onClick={() =>
+												handleDeleteSubscription(subscription.id)
+											}
 											disabled={deletingIds.has(subscription.id)}
 											className="rounded-lg border border-red-700 bg-red-800/50 px-3 py-1.5 text-xs font-medium text-red-300 transition hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
 										>
-											{deletingIds.has(subscription.id) ? "Deleting..." : "Delete"}
+											{deletingIds.has(subscription.id)
+												? "Deleting..."
+												: "Delete"}
 										</button>
 									) : (
 										<button
-											onClick={() => handleManageSubscription(subscription.id)}
+											onClick={() =>
+												handleManageSubscription(subscription.id)
+											}
 											disabled={isRedirecting}
 											className="rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-sky-500 hover:text-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
 										>

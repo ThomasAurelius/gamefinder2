@@ -582,7 +582,7 @@ export default function FindGamesPage() {
 				<div className="flex gap-2 flex-shrink-0">
 					<Link
 						href="/post"
-						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+						className="rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400focus:ring-offset-slate-950"
 					>
 						Post Game
 					</Link>
@@ -836,7 +836,7 @@ export default function FindGamesPage() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+							className="mt-4 w-full rounded-xl border-amber-500/50 border-1  w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30 flex aling-items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
 							disabled={
 								(!selectedGame &&
 									!selectedDate &&
