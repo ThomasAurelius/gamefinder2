@@ -1,102 +1,78 @@
 import { BGGMarketplaceItem, BGGMarketplaceListing } from "./types";
+import fs from "fs";
+import path from "path";
 
 /**
- * Fetches marketplace listings from BoardGameGeek API2
- * BGG API2 uses XML format, so we need to parse it
+ * Fetches marketplace listings from BoardGameGeek
+ * Note: BGG doesn't provide a public marketplace API
+ * This implementation uses BGG game data from CSV and links to BGG's marketplace
  */
 export async function fetchBGGMarketplace(
   searchQuery?: string,
   limit: number = 50
 ): Promise<BGGMarketplaceItem[]> {
   try {
-    // BGG API2 doesn't have a direct marketplace search endpoint
-    // We'll fetch popular games with marketplace listings
-    // For a real implementation, you would need to:
-    // 1. Search for games using /xmlapi2/search?query={query}
-    // 2. For each game, fetch marketplace listings using /xmlapi2/thing?id={id}&marketplace=1
+    // Read BGG game data from CSV
+    const csvPath = path.join(process.cwd(), "data", "boardgames_ranks.csv");
+    const csvContent = fs.readFileSync(csvPath, "utf-8");
+    const lines = csvContent.split("\n").slice(1); // Skip header
     
-    // Since we're working with BGG data from CSV, we'll use that for game IDs
-    // and simulate marketplace data for demonstration purposes
-    // In production, you would fetch actual marketplace data from BGG API
+    // Parse CSV and create marketplace items
+    const allGames: BGGMarketplaceItem[] = [];
     
-    const mockMarketplaceData: BGGMarketplaceItem[] = [
-      {
-        id: "174430",
-        name: "Gloomhaven",
-        yearpublished: "2017",
-        thumbnail: "https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__thumb/img/pBaOL7vJAiGu8K5XRH0YnTh33-o=/fit-in/200x150/filters:strip_icc()/pic2437871.jpg",
+    for (let i = 0; i < Math.min(lines.length, 100); i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      // Parse CSV line (handle quoted fields)
+      const matches = line.match(/(?:^|,)("(?:[^"]|"")*"|[^,]*)/g);
+      if (!matches || matches.length < 4) continue;
+      
+      const fields = matches.map(field => 
+        field.replace(/^,/, "").replace(/^"|"$/g, "").replace(/""/g, '"')
+      );
+      
+      const id = fields[0];
+      const name = fields[1];
+      const yearpublished = fields[2];
+      
+      if (!id || !name) continue;
+      
+      // Create a marketplace item that links to BGG's marketplace for this game
+      allGames.push({
+        id: id,
+        name: name,
+        yearpublished: yearpublished,
+        thumbnail: `https://cf.geekdo-images.com/itemdb/img/${id}`,
         listings: [
           {
-            listingid: "1001",
+            listingid: `${id}-market`,
             listdate: new Date().toISOString(),
             price: {
               currency: "USD",
-              value: "89.99"
+              value: "0.00" // Price varies by listing
             },
-            condition: "new",
-            notes: "Brand new sealed copy",
+            condition: "various",
+            notes: `Browse marketplace listings for ${name} on BoardGameGeek`,
             link: {
-              href: "https://boardgamegeek.com/market/product/1001",
-              title: "View on BGG Marketplace"
+              href: `https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${id}`,
+              title: `View ${name} on BGG Marketplace`
             }
           }
         ]
-      },
-      {
-        id: "167791",
-        name: "Terraforming Mars",
-        yearpublished: "2016",
-        thumbnail: "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__thumb/img/thIqWDnH9utKuoKx4FD8w3m8dYc=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg",
-        listings: [
-          {
-            listingid: "1002",
-            listdate: new Date().toISOString(),
-            price: {
-              currency: "USD",
-              value: "45.00"
-            },
-            condition: "like-new",
-            notes: "Played once, excellent condition",
-            link: {
-              href: "https://boardgamegeek.com/market/product/1002",
-              title: "View on BGG Marketplace"
-            }
-          }
-        ]
-      },
-      {
-        id: "224517",
-        name: "Brass: Birmingham",
-        yearpublished: "2018",
-        thumbnail: "https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__thumb/img/7bY4b4fZ8RjVdf5dOT3kHEJ1S6I=/fit-in/200x150/filters:strip_icc()/pic3490053.jpg",
-        listings: [
-          {
-            listingid: "1003",
-            listdate: new Date().toISOString(),
-            price: {
-              currency: "USD",
-              value: "75.00"
-            },
-            condition: "good",
-            notes: "Played several times, all components present",
-            link: {
-              href: "https://boardgamegeek.com/market/product/1003",
-              title: "View on BGG Marketplace"
-            }
-          }
-        ]
-      }
-    ];
-
+      });
+    }
+    
     // Filter by search query if provided
+    let filteredGames = allGames;
     if (searchQuery && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      return mockMarketplaceData
-        .filter(item => item.name.toLowerCase().includes(query))
-        .slice(0, limit);
+      filteredGames = allGames.filter(item => 
+        item.name.toLowerCase().includes(query)
+      );
     }
-
-    return mockMarketplaceData.slice(0, limit);
+    
+    return filteredGames.slice(0, limit);
   } catch (error) {
     console.error("Error fetching BGG marketplace data:", error);
     return [];
