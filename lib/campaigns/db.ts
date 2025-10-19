@@ -25,11 +25,16 @@ export async function listCampaigns(filters?: {
   // Build query based on filters
   const query: Record<string, unknown> = {};
   
+  // Filter out past events - only show events from today onwards
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  query.date = { $gte: today };
+  
   if (filters?.game) {
     query.game = filters.game;
   }
   
   if (filters?.date) {
+    // If a specific date is provided, use it instead of the $gte filter
     query.date = filters.date;
   }
   
