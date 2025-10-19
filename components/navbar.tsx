@@ -133,8 +133,8 @@ export function Navbar() {
 	const toggleAccount = () => setAccountOpen((open) => !open);
 
 	return (
-		<header className="relative z-30 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-			<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+		<header className="relative z-30 border-b border-white/10 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 backdrop-blur">
+			<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-  bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10">
 				<Link
 					href="/"
 					className="flex items-center gap-2 text-lg font-semibold text-white"
