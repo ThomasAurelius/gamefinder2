@@ -1,5 +1,10 @@
 import { ObjectId, type OptionalId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { normalizeHours } from "@/lib/vendor-utils";
+import type { VendorBase, VendorPayload, VendorResponse } from "@/lib/vendor-types";
+
+type VendorDocument = VendorBase & {
+  _id?: ObjectId;
 import { DAYS_OF_WEEK, TIME_SLOTS } from "@/lib/constants";
 
 export type VendorHours = Record<string, string[]>;
@@ -25,6 +30,7 @@ export type VendorDocument = {
   updatedAt: Date;
 };
 
+export type { VendorPayload, VendorResponse } from "@/lib/vendor-types";
 export type VendorResponse = VendorDocument & { id: string };
 
 export type VendorPayload = {

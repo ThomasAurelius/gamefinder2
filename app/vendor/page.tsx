@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS } from "@/lib/constants";
+import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
+import type { VendorResponse } from "@/lib/vendor-types";
 import { createDefaultHours, sortTimeSlots } from "@/lib/vendors";
 
 type VendorResponse = {
