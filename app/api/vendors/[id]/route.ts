@@ -10,12 +10,12 @@ import {
 } from "@/lib/vendors";
 
 type RouteContext = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
@@ -45,7 +45,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PUT(request: Request, context: RouteContext) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
@@ -88,7 +88,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });

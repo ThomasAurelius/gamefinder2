@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { readProfile, getProfileHiddenStatus } from "@/lib/profile-db";
-import { ObjectId } from "mongodb";
+import { isValidObjectId } from "@/lib/mongodb-utils";
 import { TIME_SLOT_GROUPS } from "@/lib/constants";
 import SendMessageButton from "@/components/SendMessageButton";
 import { listPublicCharacters } from "@/lib/characters/db";
@@ -88,7 +88,7 @@ export default async function PlayerDetailPage({
   const { id } = await params;
 
   // Validate the ID format
-  if (!ObjectId.isValid(id)) {
+  if (!isValidObjectId(id)) {
     notFound();
   }
 

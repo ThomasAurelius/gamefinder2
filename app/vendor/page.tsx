@@ -6,7 +6,7 @@ import Link from "next/link";
 import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS } from "@/lib/constants";
 
 import type { VendorResponse } from "@/lib/vendor-types";
-import { createDefaultHours, sortTimeSlots } from "@/lib/vendors";
+import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
 
 const tagButtonClasses = (active: boolean) => {
 	const base = "rounded-full border px-3 py-1.5 text-sm transition";
