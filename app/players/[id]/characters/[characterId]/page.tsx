@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ObjectId } from "mongodb";
+import { isValidObjectId } from "@/lib/mongodb-utils";
 import { readProfile } from "@/lib/profile-db";
 import { listPublicCharacters } from "@/lib/characters/db";
 import { getSkillDisplayName } from "@/lib/characters/skill-attributes";
@@ -117,7 +117,7 @@ export default async function CharacterDetailPage({
   const { id, characterId } = await params;
 
   // Validate the IDs
-  if (!ObjectId.isValid(id)) {
+  if (!isValidObjectId(id)) {
     notFound();
   }
 

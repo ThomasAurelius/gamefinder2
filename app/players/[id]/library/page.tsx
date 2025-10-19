@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { ObjectId } from "mongodb";
+import { isValidObjectId } from "@/lib/mongodb-utils";
 import { getUserLibrary } from "@/lib/boardgames/library";
 import { readProfile } from "@/lib/profile-db";
 import Link from "next/link";
@@ -12,7 +12,7 @@ export default async function PlayerLibraryPage({
   const { id } = await params;
 
   // Validate the ID format
-  if (!ObjectId.isValid(id)) {
+  if (!isValidObjectId(id)) {
     notFound();
   }
 

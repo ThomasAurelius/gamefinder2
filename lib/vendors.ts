@@ -1,6 +1,6 @@
 import { ObjectId, type OptionalId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { normalizeHours } from "@/lib/vendor-utils";
+import { normalizeHours, sortTimeSlots, createDefaultHours } from "@/lib/vendor-utils";
 import type {
 	VendorBase,
 	VendorPayload,
@@ -36,22 +36,22 @@ export type { VendorPayload, VendorResponse } from "@/lib/vendor-types";
 const VALID_DAYS = new Set(DAYS_OF_WEEK);
 const VALID_TIME_SLOTS = new Set(TIME_SLOTS);
 
-export const createDefaultHours = (): VendorHours =>
-	DAYS_OF_WEEK.reduce((acc, day) => {
-		acc[day] = [];
-		return acc;
-	}, {} as VendorHours);
-
-export function sortTimeSlots(slots: string[]): string[] {
-	return Array.from(new Set(slots))
-		.filter((slot) => VALID_TIME_SLOTS.has(slot))
-		.sort((a, b) => TIME_SLOTS.indexOf(a) - TIME_SLOTS.indexOf(b));
-}
+export { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
 
 function ensureString(
 	value: unknown,
 	field: string,
-	{ optional = false, allowEmpty = false } = {}
+	options?: { optional?: false; allowEmpty?: boolean }
+): string;
+function ensureString(
+	value: unknown,
+	field: string,
+	options: { optional: true; allowEmpty?: boolean }
+): string | undefined;
+function ensureString(
+	value: unknown,
+	field: string,
+	{ optional = false, allowEmpty = false }: { optional?: boolean; allowEmpty?: boolean } = {}
 ): string | undefined {
 	if (value === undefined || value === null) {
 		if (optional) {

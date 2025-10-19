@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+	serverExternalPackages: ["mongodb", "firebase-admin", "@google-cloud/storage"],
 	images: {
 		remotePatterns: [
 			{
