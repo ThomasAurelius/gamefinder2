@@ -63,7 +63,36 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							5. Prohibited Uses
+							5. Third-Party Services and BoardGameGeek Integration
+						</h2>
+						<p>
+							The Gathering Call uses BoardGameGeek&apos;s XML API2 (BGG API2) to provide enhanced features and functionality. By using our Service, you acknowledge and agree to the following:
+						</p>
+						<ul className="list-disc list-inside space-y-2 ml-2">
+							<li>
+								<strong>User Profile Integration:</strong> We use BGG API2 to allow you to link your BoardGameGeek username and profile to your account on The Gathering Call
+							</li>
+							<li>
+								<strong>Collection Integration:</strong> When you provide your BGG username, we access your BoardGameGeek collection data through their API to display your game library and preferences
+							</li>
+							<li>
+								<strong>Marketplace:</strong> Our marketplace feature is powered by BoardGameGeek&apos;s game database and marketplace listings accessed through BGG API2
+							</li>
+							<li>
+								<strong>Game Library:</strong> Game search and library features use BoardGameGeek&apos;s comprehensive game database accessed through their API
+							</li>
+						</ul>
+						<p>
+							When you link your BoardGameGeek username or access features powered by BGG API2, you are also subject to BoardGameGeek&apos;s own terms of service and privacy policy. We are not responsible for BoardGameGeek&apos;s services, data accuracy, or availability. BoardGameGeek is a third-party service independent of The Gathering Call.
+						</p>
+						<p>
+							BoardGameGeek, its trademarks, service marks, and logos are the property of BoardGameGeek, LLC. All rights reserved.
+						</p>
+					</div>
+
+					<div className="space-y-3">
+						<h2 className="text-lg font-semibold text-slate-100">
+							6. Prohibited Uses
 						</h2>
 						<p>
 							You may use the Service only for lawful purposes and in accordance with these Terms. You agree not to use the Service:
@@ -79,7 +108,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							6. Non-Discrimination and Community Standards
+							7. Non-Discrimination and Community Standards
 						</h2>
 						<p>
 							The Gathering Call is committed to maintaining an inclusive and welcoming community for all users. We have zero tolerance for discrimination or harassment of any kind.
@@ -105,7 +134,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							7. Termination
+							8. Termination
 						</h2>
 						<p>
 							We may terminate or suspend your account and bar access to the Service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever and without limitation, including but not limited to a breach of the Terms.
@@ -117,7 +146,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							8. Limitation of Liability
+							9. Limitation of Liability
 						</h2>
 						<p>
 							In no event shall The Gathering Call, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
@@ -126,7 +155,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							9. Disclaimer
+							10. Disclaimer
 						</h2>
 						<p>
 							Your use of the Service is at your sole risk. The Service is provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis. The Service is provided without warranties of any kind, whether express or implied, including, but not limited to, implied warranties of merchantability, fitness for a particular purpose, non-infringement or course of performance.
@@ -135,7 +164,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							10. Governing Law
+							11. Governing Law
 						</h2>
 						<p>
 							These Terms shall be governed and construed in accordance with the laws of the jurisdiction in which The Gathering Call operates, without regard to its conflict of law provisions.
@@ -144,7 +173,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							11. Changes to Terms
+							12. Changes to Terms
 						</h2>
 						<p>
 							We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
@@ -156,7 +185,7 @@ export default function TermsPage() {
 
 					<div className="space-y-3">
 						<h2 className="text-lg font-semibold text-slate-100">
-							12. Contact Us
+							13. Contact Us
 						</h2>
 						<p>
 							If you have any questions about these Terms, please contact us through the platform&apos;s support channels.
