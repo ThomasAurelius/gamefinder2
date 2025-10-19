@@ -617,7 +617,7 @@ export default function ProfilePage() {
 										View Collection
 									</a>
 								</div>
-								<div className="bg-white/50 p-.5 rounded-md">
+								<div className="bg-white/50 p-0.5 rounded-md">
 									<img
 										src="/powered_by_BGG_02_MED.png"
 										alt="Powered by BoardGameGeek"

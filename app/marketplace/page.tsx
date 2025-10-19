@@ -112,7 +112,7 @@ export default function MarketplacePage() {
 					Browse games for sale from BoardGameGeek&apos;s marketplace.
 				</p>
 				<div className="mt-2 flex items-center gap-2">
-					<div className="bg-white/50 p-.5 rounded-md">
+					<div className="bg-white/50 p-0.5 rounded-md">
 						<img
 							src="/powered_by_BGG_02_MED.png"
 							alt="Powered by BoardGameGeek"
