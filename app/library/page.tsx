@@ -171,6 +171,13 @@ export default function LibraryPage() {
 				<p className="text-sm text-slate-300">
 					Search and manage your collection of owned and wishlist games
 				</p>
+				<div className="mt-2 flex items-center gap-2">
+					<img 
+						src="/images/bgg-placeholder.svg" 
+						alt="Powered by BoardGameGeek" 
+						className="h-5"
+					/>
+				</div>
 			</div>
 
 			{/* Tabs */}
