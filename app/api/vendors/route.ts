@@ -1,0 +1,61 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
+import { createVendor, listVendors, parseVendorPayload } from "@/lib/vendors";
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const ownerParam = searchParams.get("owner");
+    const includeUnapproved = searchParams.get("includeUnapproved") === "true";
+
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+    const isAdmin = cookieStore.get("isAdmin")?.value === "true";
+
+    if (ownerParam === "me") {
+      if (!userId) {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+
+      const vendors = await listVendors({ ownerUserId: userId, includeUnapproved: true });
+      return NextResponse.json({ vendors });
+    }
+
+    if (includeUnapproved) {
+      if (!isAdmin) {
+        return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+      }
+
+      const vendors = await listVendors({ includeUnapproved: true });
+      return NextResponse.json({ vendors });
+    }
+
+    const vendors = await listVendors();
+    return NextResponse.json({ vendors });
+  } catch (error) {
+    console.error("Failed to list vendors", error);
+    return NextResponse.json({ error: "Unable to fetch vendors" }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
+    if (!userId) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const payload = await request.json();
+    const vendorData = parseVendorPayload(payload);
+    const vendor = await createVendor(userId, vendorData);
+
+    return NextResponse.json({ vendor }, { status: 201 });
+  } catch (error) {
+    console.error("Failed to create vendor", error);
+    const message = error instanceof Error ? error.message : "Unable to create vendor";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+}
