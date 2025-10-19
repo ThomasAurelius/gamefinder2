@@ -1,7 +1,7 @@
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { CampaignPayload, StoredCampaign } from "./types";
-import { getTodayDateString } from "@/lib/date-utils";
+import { getTodayDateString, isTodayOrFuture } from "@/lib/date-utils";
 
 type CampaignDocument = Omit<StoredCampaign, 'id'> & {
   _id: ObjectId;
@@ -35,8 +35,8 @@ export async function listCampaigns(filters?: {
   
   if (filters?.date) {
     // Even when a specific date is provided, ensure it's not in the past
-    // Use the later of today or the specified date
-    query.date = filters.date >= today ? filters.date : { $gte: today };
+    // Use the specific date if it's today or future, otherwise show all future events
+    query.date = isTodayOrFuture(filters.date) ? filters.date : { $gte: today };
   } else {
     // Default: show only future events
     query.date = { $gte: today };
