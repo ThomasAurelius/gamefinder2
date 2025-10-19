@@ -76,24 +76,16 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const listing = await getMarketplaceListing(id);
-
-    if (!listing) {
-      return NextResponse.json(
-        { error: "Listing not found" },
-        { status: 404 }
-      );
-    }
-
-    // Add host information
-    const hostsMap = await getUsersBasicInfo([listing.userId]);
-    const hostInfo = hostsMap.get(listing.userId);
-
-    return NextResponse.json({
-      ...listing,
-      hostName: hostInfo?.name || "Unknown User",
-      hostAvatarUrl: hostInfo?.avatarUrl,
-    });
+    
+    // Since we're now using BGG marketplace data, redirect to BGG marketplace
+    // The listing ID from BGG should be used to construct the BGG marketplace URL
+    return NextResponse.json(
+      { 
+        error: "This marketplace listing is from BoardGameGeek. Please visit the BGG marketplace directly.",
+        redirectUrl: `https://boardgamegeek.com/market/product/${id}`
+      },
+      { status: 410 } // 410 Gone - resource is no longer available
+    );
   } catch (error) {
     console.error("Error fetching marketplace listing:", error);
     return NextResponse.json(
