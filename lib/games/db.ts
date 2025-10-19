@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { GameSessionPayload, StoredGameSession } from "./types";
+import { getTodayDateString, isTodayOrFuture } from "@/lib/date-utils";
 
 type GameSessionDocument = StoredGameSession & {
   _id?: ObjectId;
@@ -19,12 +20,20 @@ export async function listGameSessions(filters?: {
   // Build query based on filters
   const query: Record<string, unknown> = {};
   
+  // Filter out past events - only show events from today onwards
+  const today = getTodayDateString();
+  
   if (filters?.game) {
     query.game = filters.game;
   }
   
   if (filters?.date) {
-    query.date = filters.date;
+    // Even when a specific date is provided, ensure it's not in the past
+    // Use the specific date if it's today or future, otherwise show all future events
+    query.date = isTodayOrFuture(filters.date) ? filters.date : { $gte: today };
+  } else {
+    // Default: show only future events
+    query.date = { $gte: today };
   }
   
   if (filters?.times && filters.times.length > 0) {
