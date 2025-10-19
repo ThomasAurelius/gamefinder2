@@ -189,6 +189,39 @@ export default function TechnicalReferencePage() {
 			</section>
 
 			<section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
+				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div>
+						<h2 className="text-2xl font-semibold text-slate-50">
+							API Surface Area
+						</h2>
+						<p className="mt-2 text-sm text-slate-300">
+							Includes authenticated, public, admin, and utility
+							endpoints exposed under{" "}
+							<code className="rounded bg-slate-800 px-1.5 py-0.5 text-xs">
+								/api
+							</code>
+							.
+						</p>
+					</div>
+					<div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-right">
+						<p className="text-xs uppercase tracking-wide text-emerald-200">
+							Documented Endpoints
+						</p>
+						<p className="text-2xl font-semibold text-emerald-100">119</p>
+					</div>
+				</div>
+				<p className="mt-6 text-sm text-slate-300">
+					Authentication, campaign management, messaging, feedback,
+					marketplace, advertisements, and auxiliary utilities are all
+					surfaced through modular route handlers within the{" "}
+					<code className="rounded bg-slate-800 px-1.5 py-0.5 text-xs">
+						app/api
+					</code>{" "}
+					tree.
+				</p>
+			</section>
+
+			<section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
 				<div className="flex flex-col gap-4 md:flex-row md:items-baseline md:justify-between">
 					<div>
 						<h2 className="text-2xl font-semibold text-slate-50">
@@ -249,45 +282,12 @@ export default function TechnicalReferencePage() {
 				</div>
 			</section>
 
-			<section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
-				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-					<div>
-						<h2 className="text-2xl font-semibold text-slate-50">
-							API Surface Area
-						</h2>
-						<p className="mt-2 text-sm text-slate-300">
-							Includes authenticated, public, admin, and utility
-							endpoints exposed under{" "}
-							<code className="rounded bg-slate-800 px-1.5 py-0.5 text-xs">
-								/api
-							</code>
-							.
-						</p>
-					</div>
-					<div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-right">
-						<p className="text-xs uppercase tracking-wide text-emerald-200">
-							Documented Endpoints
-						</p>
-						<p className="text-2xl font-semibold text-emerald-100">119</p>
-					</div>
-				</div>
-				<p className="mt-6 text-sm text-slate-300">
-					Authentication, campaign management, messaging, feedback,
-					marketplace, advertisements, and auxiliary utilities are all
-					surfaced through modular route handlers within the{" "}
-					<code className="rounded bg-slate-800 px-1.5 py-0.5 text-xs">
-						app/api
-					</code>{" "}
-					tree.
-				</p>
-			</section>
-
 			<footer className="pt-4 text-center">
 				<Link
 					href="/"
-					className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-5 py-2 text-sm font-semibold text-amber-100 transition hover:border-amber-400 hover:bg-amber-400/20"
+					className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-2"
 				>
-					Return to Home
+					Home
 				</Link>
 			</footer>
 		</div>
