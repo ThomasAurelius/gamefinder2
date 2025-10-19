@@ -3,11 +3,10 @@ import { cookies } from "next/headers";
 
 import {
   createMarketplaceListing,
-  listMarketplaceListings,
 } from "@/lib/marketplace/db";
 import { MarketplaceListingPayload } from "@/lib/marketplace/types";
-import { geocodeLocation, calculateDistance } from "@/lib/geolocation";
-import { getUsersBasicInfo } from "@/lib/users";
+import { geocodeLocation } from "@/lib/geolocation";
+import { fetchBGGMarketplace } from "@/lib/bgg/marketplace";
 
 function parseMarketplaceListingPayload(data: unknown): MarketplaceListingPayload | null {
   if (!data || typeof data !== "object") {
@@ -71,66 +70,45 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     
-    // Extract filter parameters
-    const gameSystem = searchParams.get("gameSystem") || undefined;
-    const tagsParam = searchParams.get("tags");
-    const tags = tagsParam ? tagsParam.split(",") : undefined;
-    const listingType = searchParams.get("listingType") as "sell" | "want" | undefined;
-    const condition = searchParams.get("condition") || undefined;
-    const minPrice = searchParams.get("minPrice") ? parseFloat(searchParams.get("minPrice")!) : undefined;
-    const maxPrice = searchParams.get("maxPrice") ? parseFloat(searchParams.get("maxPrice")!) : undefined;
-    const locationSearch = searchParams.get("location") || "";
-    const radiusMiles = parseFloat(searchParams.get("radius") || "50");
+    // Extract search query for BGG marketplace
+    const searchQuery = searchParams.get("q") || searchParams.get("search") || undefined;
+    const limit = parseInt(searchParams.get("limit") || "50");
 
-    const listings = await listMarketplaceListings({ 
-      gameSystem, 
-      tags, 
-      listingType,
-      condition,
-      minPrice,
-      maxPrice,
-    });
-
-    // Fetch host information for all listings
-    const hostIds = [...new Set(listings.map(l => l.userId))];
-    const hostsMap = await getUsersBasicInfo(hostIds);
+    // Fetch marketplace listings from BoardGameGeek
+    const bggItems = await fetchBGGMarketplace(searchQuery, limit);
     
-    // Add host information to listings
-    let listingsWithHosts = listings.map(listing => ({
-      ...listing,
-      hostName: hostsMap.get(listing.userId)?.name || "Unknown User",
-      hostAvatarUrl: hostsMap.get(listing.userId)?.avatarUrl,
-    }));
+    // Transform BGG items to match our marketplace listing format
+    const listings = bggItems.flatMap(item => 
+      item.listings.map(listing => ({
+        id: listing.listingid,
+        userId: "bgg",
+        title: item.name,
+        description: listing.notes || "BoardGameGeek Marketplace Listing",
+        gameSystem: undefined,
+        tags: item.yearpublished ? [item.yearpublished] : [],
+        price: parseFloat(listing.price.value),
+        condition: listing.condition,
+        location: undefined,
+        zipCode: undefined,
+        latitude: undefined,
+        longitude: undefined,
+        imageUrls: item.thumbnail ? [item.thumbnail] : [],
+        listingType: "sell" as const,
+        contactInfo: listing.link.href,
+        status: "active",
+        createdAt: listing.listdate,
+        updatedAt: listing.listdate,
+        hostName: "BGG Marketplace",
+        hostAvatarUrl: undefined,
+        distance: undefined,
+        bggGameId: item.id,
+        externalLink: listing.link.href,
+      }))
+    );
 
-    // Filter by distance if location is provided
-    if (locationSearch) {
-      try {
-        const searchCoords = await geocodeLocation(locationSearch);
-        if (searchCoords) {
-          listingsWithHosts = listingsWithHosts
-            .map(listing => {
-              if (listing.latitude && listing.longitude) {
-                const distance = calculateDistance(
-                  searchCoords.latitude,
-                  searchCoords.longitude,
-                  listing.latitude,
-                  listing.longitude
-                );
-                return { ...listing, distance };
-              }
-              return listing;
-            })
-            .filter(listing => !listing.distance || listing.distance <= radiusMiles)
-            .sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-        }
-      } catch (error) {
-        console.error("Error calculating distances:", error);
-      }
-    }
-
-    return NextResponse.json(listingsWithHosts);
+    return NextResponse.json(listings);
   } catch (error) {
-    console.error("Error fetching marketplace listings:", error);
+    console.error("Error fetching BGG marketplace listings:", error);
     return NextResponse.json(
       { error: "Failed to fetch listings" },
       { status: 500 }

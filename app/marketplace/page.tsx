@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS } from "@/lib/constants";
-import CityAutocomplete from "@/components/CityAutocomplete";
 
 type MarketplaceListing = {
   id: string;
@@ -27,19 +25,8 @@ type MarketplaceListing = {
   hostName?: string;
   hostAvatarUrl?: string;
   distance?: number;
-};
-
-const tagButtonClasses = (
-  active: boolean,
-  options?: { size?: "sm" | "md" }
-) => {
-  const sizeClasses =
-    options?.size === "sm" ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm";
-  return `${sizeClasses} rounded-full transition ${
-    active
-      ? "bg-sky-600 text-white"
-      : "border border-slate-700 bg-slate-900/40 text-slate-300 hover:border-sky-500 hover:text-sky-400"
-  }`;
+  bggGameId?: string;
+  externalLink?: string;
 };
 
 export default function MarketplacePage() {
@@ -47,15 +34,6 @@ export default function MarketplacePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearchFormOpen, setIsSearchFormOpen] = useState(true);
-
-  const [selectedGameSystem, setSelectedGameSystem] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedListingType, setSelectedListingType] = useState<"sell" | "want" | "">("");
-  const [selectedCondition, setSelectedCondition] = useState("");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [locationSearch, setLocationSearch] = useState("");
-  const [radiusMiles, setRadiusMiles] = useState("50");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -90,33 +68,8 @@ export default function MarketplacePage() {
     try {
       const params = new URLSearchParams();
       
-      if (selectedGameSystem) {
-        params.append("gameSystem", selectedGameSystem);
-      }
-      
-      if (selectedTags.length > 0) {
-        params.append("tags", selectedTags.join(","));
-      }
-      
-      if (selectedListingType) {
-        params.append("listingType", selectedListingType);
-      }
-
-      if (selectedCondition) {
-        params.append("condition", selectedCondition);
-      }
-
-      if (minPrice) {
-        params.append("minPrice", minPrice);
-      }
-
-      if (maxPrice) {
-        params.append("maxPrice", maxPrice);
-      }
-      
-      if (locationSearch) {
-        params.append("location", locationSearch);
-        params.append("radius", radiusMiles);
+      if (searchQuery) {
+        params.append("q", searchQuery);
       }
 
       const response = await fetch(`/api/marketplace?${params}`);
@@ -135,37 +88,8 @@ export default function MarketplacePage() {
   };
 
   const clearFilters = () => {
-    setSelectedGameSystem("");
-    setSelectedTags([]);
-    setSelectedListingType("");
-    setSelectedCondition("");
-    setMinPrice("");
-    setMaxPrice("");
-    setLocationSearch("");
-    setRadiusMiles("50");
     setSearchQuery("");
   };
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
-
-  const COMMON_TAGS = [
-    "Core Rulebooks",
-    "Adventure Modules",
-    "Dice Sets",
-    "Miniatures",
-    "Maps",
-    "Tokens",
-    "Accessories",
-    "Digital",
-    "Vintage",
-    "Signed",
-  ];
-
-  const CONDITIONS = ["new", "like-new", "good", "fair", "poor"];
 
   // Filter by search query (client-side)
   const filteredListings = listings.filter((listing) => {
@@ -185,8 +109,15 @@ export default function MarketplacePage() {
           Game Marketplace
         </h1>
         <p className="mt-2 text-sm text-slate-400">
-          Buy and sell games, accessories, and more. Post want ads for items you&apos;re looking for.
+          Browse games for sale from BoardGameGeek&apos;s marketplace.
         </p>
+        <div className="mt-2 flex items-center gap-2">
+          <img 
+            src="/images/bgg-placeholder.svg" 
+            alt="Powered by BoardGameGeek" 
+            className="h-5"
+          />
+        </div>
       </div>
 
       <div className="rounded-xl border border-slate-800 bg-slate-900/20">
@@ -207,8 +138,7 @@ export default function MarketplacePage() {
         {isSearchFormOpen && (
           <div className="space-y-4 border-t border-slate-800 p-6">
             <p className="text-xs text-slate-400">
-              Select any combination of filters to search. All filters
-              are optional.
+              Search for board games in the BoardGameGeek marketplace.
             </p>
 
             <div className="space-y-2">
@@ -216,7 +146,7 @@ export default function MarketplacePage() {
                 htmlFor="search-query"
                 className="block text-sm font-medium text-slate-200"
               >
-                Search Title, Description, or Tags
+                Search Title or Description
               </label>
               <input
                 id="search-query"
@@ -226,164 +156,6 @@ export default function MarketplacePage() {
                 placeholder="Search..."
                 className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
               />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="listing-type"
-                className="block text-sm font-medium text-slate-200"
-              >
-                Listing Type
-              </label>
-              <select
-                id="listing-type"
-                value={selectedListingType}
-                onChange={(e) => setSelectedListingType(e.target.value as "sell" | "want" | "")}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-              >
-                <option value="">All Listings</option>
-                <option value="sell">For Sale</option>
-                <option value="want">Want Ads</option>
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="game-system-select"
-                className="block text-sm font-medium text-slate-200"
-              >
-                Game System
-              </label>
-              <select
-                id="game-system-select"
-                value={selectedGameSystem}
-                onChange={(e) => setSelectedGameSystem(e.target.value)}
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-              >
-                <option value="">All Game Systems</option>
-                {GAME_OPTIONS.map((game) => (
-                  <option key={game} value={game}>
-                    {game}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-200">
-                Tags
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {COMMON_TAGS.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className={tagButtonClasses(selectedTags.includes(tag))}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {selectedListingType !== "want" && (
-              <div className="space-y-2">
-                <label
-                  htmlFor="condition-select"
-                  className="block text-sm font-medium text-slate-200"
-                >
-                  Condition
-                </label>
-                <select
-                  id="condition-select"
-                  value={selectedCondition}
-                  onChange={(e) => setSelectedCondition(e.target.value)}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                >
-                  <option value="">All Conditions</option>
-                  {CONDITIONS.map((cond) => (
-                    <option key={cond} value={cond}>
-                      {cond.charAt(0).toUpperCase() + cond.slice(1).replace("-", " ")}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label
-                  htmlFor="min-price"
-                  className="block text-sm font-medium text-slate-200"
-                >
-                  Min Price ($)
-                </label>
-                <input
-                  id="min-price"
-                  type="number"
-                  value={minPrice}
-                  onChange={(e) => setMinPrice(e.target.value)}
-                  placeholder="0"
-                  min="0"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="max-price"
-                  className="block text-sm font-medium text-slate-200"
-                >
-                  Max Price ($)
-                </label>
-                <input
-                  id="max-price"
-                  type="number"
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
-                  placeholder="No limit"
-                  min="0"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="location-search"
-                className="block text-sm font-medium text-slate-200"
-              >
-                Location or Zip Code
-              </label>
-              <CityAutocomplete
-                id="location-search"
-                value={locationSearch}
-                onChange={setLocationSearch}
-                placeholder="Search for a city or enter zip code..."
-                className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-              />
-              {locationSearch && (
-                <div className="space-y-2">
-                  <label
-                    htmlFor="radius-select"
-                    className="block text-sm font-medium text-slate-200"
-                  >
-                    Search Radius
-                  </label>
-                  <select
-                    id="radius-select"
-                    value={radiusMiles}
-                    onChange={(e) => setRadiusMiles(e.target.value)}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-                  >
-                    <option value="10">10 miles</option>
-                    <option value="25">25 miles</option>
-                    <option value="50">50 miles</option>
-                    <option value="100">100 miles</option>
-                    <option value="250">250 miles</option>
-                  </select>
-                </div>
-              )}
             </div>
 
             <div className="flex gap-3">
@@ -407,27 +179,6 @@ export default function MarketplacePage() {
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex gap-3">
-          <Link
-            href="/marketplace/post"
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700"
-          >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Post Listing
-          </Link>
-        </div>
         <p className="text-sm text-slate-400">
           {hasSearched && !isLoading && (
             <>
@@ -467,7 +218,12 @@ export default function MarketplacePage() {
               key={listing.id}
               className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900/40 transition hover:border-sky-500"
             >
-              <Link href={`/marketplace/${listing.id}`} className="block">
+              <a 
+                href={listing.externalLink || `https://boardgamegeek.com/market/product/${listing.id}`} 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
                 {listing.imageUrls && listing.imageUrls.length > 0 ? (
                   <div className="aspect-video w-full overflow-hidden">
                     <img
@@ -569,7 +325,7 @@ export default function MarketplacePage() {
                     )}
                   </div>
                 </div>
-              </Link>
+              </a>
             </div>
           ))}
         </div>

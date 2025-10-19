@@ -43,10 +43,16 @@ export default function MarketplaceListingDetailPage() {
     const fetchListing = async () => {
       try {
         const response = await fetch(`/api/marketplace/${params.id}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch listing");
-        }
         const data = await response.json();
+        
+        if (!response.ok) {
+          // If we get a redirect URL (from BGG marketplace), redirect to it
+          if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+            return;
+          }
+          throw new Error(data.error || "Failed to fetch listing");
+        }
         setListing(data);
 
         // Fetch current user ID and admin status
