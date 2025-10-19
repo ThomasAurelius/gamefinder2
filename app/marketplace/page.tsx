@@ -280,6 +280,18 @@ export default function MarketplacePage() {
 										{listing.description}
 									</p>
 
+									{listing.price !== undefined &&
+										listing.price > 0 && (
+											<p className="mb-2 text-lg font-semibold text-sky-400">
+												${listing.price.toFixed(2)}
+											</p>
+										)}
+
+									{(!listing.price || listing.price === 0) && (
+										<p className="mb-2 text-sm text-slate-400">
+											Click to view available listings and prices
+										</p>
+									)}
 									{listing.price !== undefined && (
 										<p className="mb-2 text-lg font-semibold text-sky-400">
 											${listing.price.toFixed(2)}
