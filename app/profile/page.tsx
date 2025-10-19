@@ -437,8 +437,8 @@ export default function ProfilePage() {
 
 			<form className="space-y-12" onSubmit={handleSubmit}>
 				{/* Avatar Upload Section */}
-				<section className="rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
-					<h2 className="mb-4 text-lg font-semibold text-slate-100">
+				<section className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<h2 className="mb-4 text-lg font-semibold text-amber-100">
 						Avatar
 					</h2>
 					<div className="flex items-center gap-6">
@@ -479,7 +479,7 @@ export default function ProfilePage() {
 					</div>
 				</section>
 
-				<section className="grid gap-6 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30 md:grid-cols-2">
+				<section className="grid gap-6 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30 md:grid-cols-2">
 					<div className="space-y-2">
 						<label
 							htmlFor="common-name"
@@ -634,10 +634,10 @@ export default function ProfilePage() {
 					</div>
 				</section>
 
-				<section className="space-y-3 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+				<section className="space-y-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<div className="flex items-center justify-between gap-4">
 						<div>
-							<h2 className="text-lg font-semibold text-slate-100">
+							<h2 className="text-lg font-semibold text-amber-100">
 								Bio
 							</h2>
 							<p className="text-sm text-slate-400">
@@ -661,9 +661,9 @@ export default function ProfilePage() {
 					/>
 				</section>
 
-				<section className="space-y-6 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+				<section className="space-y-6 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<div className="space-y-1">
-						<h2 className="text-lg font-semibold text-slate-100">
+						<h2 className="text-lg font-semibold text-amber-100">
 							Games
 						</h2>
 						<p className="text-sm text-slate-400">
@@ -736,9 +736,9 @@ export default function ProfilePage() {
 					)}
 				</section>
 
-				<section className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<div className="space-y-1">
-						<h2 className="text-lg font-semibold text-slate-100">
+						<h2 className="text-lg font-semibold text-amber-100">
 							Favorite Games
 						</h2>
 						<p className="text-sm text-slate-400">
@@ -781,9 +781,9 @@ export default function ProfilePage() {
 					</div>
 				</section>
 
-				<section className="space-y-5 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+				<section className="space-y-5 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<div className="space-y-1">
-						<h2 className="text-lg font-semibold text-slate-100">
+						<h2 className="text-lg font-semibold text-amber-100">
 							Availability
 						</h2>
 						<p className="text-sm text-slate-400">
@@ -848,9 +848,9 @@ export default function ProfilePage() {
 					</div>
 				</section>
 
-				<section className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<div className="space-y-1">
-						<h2 className="text-lg font-semibold text-slate-100">
+						<h2 className="text-lg font-semibold text-amber-100">
 							Primary Role
 						</h2>
 						<p className="text-sm text-slate-400">
@@ -877,7 +877,7 @@ export default function ProfilePage() {
 					</div>
 				</section>
 
-				<div className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
+				<div className="flex flex-col items-start gap-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
 					<button
 						type="submit"
 						className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:cursor-not-allowed disabled:opacity-60"

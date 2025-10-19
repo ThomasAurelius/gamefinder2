@@ -123,18 +123,18 @@ export default function MarketplacePage() {
 				</div>
 			</div>
 
-			<div className="rounded-xl border border-slate-800 bg-slate-900/20">
+			<div className="rounded-xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20">
 				<button
 					type="button"
 					onClick={() => setIsSearchFormOpen(!isSearchFormOpen)}
-					className="flex w-full items-center justify-between p-6"
+					className="flex w-full items-center justify-between p-6 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 transition hover:from-amber-600/20 hover:via-purple-600/20 hover:to-indigo-600/20 rounded-t-xl"
 				>
-					<span className="text-base font-medium text-slate-100">
+					<span className="text-base font-medium text-amber-100">
 						{isSearchFormOpen
 							? "Hide search filters"
 							: "Show search filters"}
 					</span>
-					<span className="text-xs uppercase tracking-wide text-slate-400">
+					<span className="text-xs uppercase tracking-wide text-amber-400">
 						{isSearchFormOpen ? "Collapse" : "Expand"}
 					</span>
 				</button>

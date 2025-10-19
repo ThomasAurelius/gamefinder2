@@ -591,18 +591,18 @@ export default function FindGamesPage() {
 
 			<Advertisement />
 
-			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
+			<div className="rounded-lg border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20">
 				<button
 					type="button"
 					onClick={() => setIsSearchFormOpen(!isSearchFormOpen)}
-					className="flex w-full items-center justify-between gap-2 bg-slate-900/50 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:bg-slate-900/80"
+					className="flex w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 px-4 py-3 text-left text-sm font-semibold text-amber-100 transition hover:from-amber-600/20 hover:via-purple-600/20 hover:to-indigo-600/20"
 				>
 					<span>
 						{isSearchFormOpen
 							? "Hide search filters"
 							: "Show search filters"}
 					</span>
-					<span className="text-xs uppercase tracking-wide text-slate-400">
+					<span className="text-xs uppercase tracking-wide text-amber-400">
 						{isSearchFormOpen ? "Collapse" : "Expand"}
 					</span>
 				</button>
