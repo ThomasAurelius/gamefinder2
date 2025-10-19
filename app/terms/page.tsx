@@ -86,7 +86,7 @@ export default function TermsPage() {
 							When you link your BoardGameGeek username or access features powered by BGG API2, you are also subject to BoardGameGeek&apos;s own terms of service and privacy policy. We are not responsible for BoardGameGeek&apos;s services, data accuracy, or availability. BoardGameGeek is a third-party service independent of The Gathering Call.
 						</p>
 						<p>
-							BoardGameGeek&apos;s trademarks, service marks, and logos are the property of BoardGameGeek, LLC. All rights reserved by BoardGameGeek, LLC.
+							BoardGameGeek, its trademarks, service marks, and logos are the property of BoardGameGeek, LLC. All rights reserved.
 						</p>
 					</div>
 
