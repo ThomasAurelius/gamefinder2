@@ -22,15 +22,18 @@ export async function listGameSessions(filters?: {
   
   // Filter out past events - only show events from today onwards
   const today = getTodayDateString();
-  query.date = { $gte: today };
   
   if (filters?.game) {
     query.game = filters.game;
   }
   
   if (filters?.date) {
-    // If a specific date is provided, use it instead of the $gte filter
-    query.date = filters.date;
+    // Even when a specific date is provided, ensure it's not in the past
+    // Use the later of today or the specified date
+    query.date = filters.date >= today ? filters.date : { $gte: today };
+  } else {
+    // Default: show only future events
+    query.date = { $gte: today };
   }
   
   if (filters?.times && filters.times.length > 0) {
