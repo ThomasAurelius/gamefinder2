@@ -288,7 +288,7 @@ export default function TallTalesPage() {
 				<button
 					type="button"
 					onClick={handleToggleForm}
-					className="flex w-full items-center justify-between gap-2 bg-slate-900/50 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:bg-slate-900/80"
+					className="flex w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30"
 				>
 					<span>
 						{isFormOpen ? "Hide post form" : "Share a Tale"}
