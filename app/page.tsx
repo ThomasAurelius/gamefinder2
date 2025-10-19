@@ -55,7 +55,7 @@ export default function HomePage() {
 
 			{/* Main Content Section */}
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">
-				<h2 className="text-3xl font-bold sm:text-4xl">
+				<h2 className="text-3xl font-bold sm:text-4xl bg-gradient-to-r from-amber-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
 					Find Board Games, D&amp;D &amp; TTRPG Sessions
 				</h2>
 				<p className="text-lg text-slate-300 max-w-3xl">
@@ -71,10 +71,10 @@ export default function HomePage() {
 					height={420}
 					className=" w-auto"
 				/>
-				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
+				<section className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-8 shadow-2xl max-w-2xl">
 					<ul className="space-y-3 text-left">
 						<li className="flex items-start gap-3">
-							<span className="text-indigo-400 mt-1">✓</span>
+							<span className="text-amber-400 mt-1 text-xl">✓</span>
 							<p className="text-slate-300">
 								<strong className="text-slate-100">
 									Your Hub for Tabletop & Board Gaming:
@@ -85,7 +85,7 @@ export default function HomePage() {
 							</p>
 						</li>
 						<li className="flex items-start gap-3">
-							<span className="text-indigo-400 mt-1">✓</span>
+							<span className="text-amber-400 mt-1 text-xl">✓</span>
 							<p className="text-slate-300">
 								<strong className="text-slate-100">Free to Use:</strong>{" "}
 								Enjoy a robust set of features at no cost. Optional paid
@@ -94,7 +94,7 @@ export default function HomePage() {
 							</p>
 						</li>
 						<li className="flex items-start gap-3">
-							<span className="text-indigo-400 mt-1">✓</span>
+							<span className="text-amber-400 mt-1 text-xl">✓</span>
 							<p className="text-slate-300">
 								<strong className="text-slate-100">
 									Find and Join Games:
@@ -116,13 +116,13 @@ export default function HomePage() {
 						<div className="mt-6 flex gap-4 justify-center">
 							<Link
 								href="/auth/register"
-								className="rounded-md bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400"
+								className="rounded-md bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-6 py-3 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 							>
 								Create an Account
 							</Link>
 							<Link
 								href="/auth/login"
-								className="rounded-md border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+								className="rounded-md border-2 border-indigo-500/50 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
 							>
 								Log In
 							</Link>
@@ -204,13 +204,13 @@ export default function HomePage() {
 						</ul>
 					</article> 
 				</section> */}
-				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
-					<h2 className="text-2xl font-bold text-slate-100 mb-4">
+				<section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl max-w-2xl">
+					<h2 className="text-2xl font-bold text-purple-400 mb-4">
 						Games vs. Campaigns
 					</h2>
 					<div className="space-y-4 text-left">
 						<div>
-							<h3 className="text-lg font-semibold text-indigo-400 mb-2">
+							<h3 className="text-lg font-semibold text-amber-400 mb-2">
 								Games (One-Time Sessions)
 							</h3>
 							<p className="text-slate-300">
@@ -221,7 +221,7 @@ export default function HomePage() {
 							</p>
 						</div>
 						<div>
-							<h3 className="text-lg font-semibold text-indigo-400 mb-2">
+							<h3 className="text-lg font-semibold text-amber-400 mb-2">
 								Campaigns (Multiple Sessions)
 							</h3>
 							<p className="text-slate-300">
@@ -233,14 +233,14 @@ export default function HomePage() {
 						</div>
 					</div>
 				</section>
-				<section className="rounded-2xl border border-white/10 bg-slate-900/50 p-8 shadow-xl max-w-2xl">
+				<section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl max-w-2xl">
 					<article className="">
-						<h2 className="text-2xl font-bold text-slate-100 mb-4">
+						<h2 className="text-2xl font-bold text-indigo-400 mb-4">
 							Why choose Paid Campaigns?
 						</h2>
 						<ul className="space-y-3 text-left">
 							<li className="flex items-start gap-3">
-								<span className="text-indigo-400 mt-1">✓</span>
+								<span className="text-amber-400 mt-1 text-xl">✓</span>
 								<p className="text-slate-300">
 									<strong className="text-slate-100">
 										Professional Game Masters:
@@ -250,7 +250,7 @@ export default function HomePage() {
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
-								<span className="text-indigo-400 mt-1">✓</span>
+								<span className="text-amber-400 mt-1 text-xl">✓</span>
 								<p className="text-slate-300">
 									<strong className="text-slate-100">
 										Financial Commitment:
@@ -260,7 +260,7 @@ export default function HomePage() {
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
-								<span className="text-indigo-400 mt-1">✓</span>
+								<span className="text-amber-400 mt-1 text-xl">✓</span>
 								<p className="text-slate-300">
 									<strong className="text-slate-100">
 										Share Adventures:
@@ -269,7 +269,7 @@ export default function HomePage() {
 								</p>
 							</li>
 							<li className="flex items-start gap-3">
-								<span className="text-indigo-400 mt-1">✓</span>
+								<span className="text-amber-400 mt-1 text-xl">✓</span>
 								<p className="text-slate-300">
 									<strong className="text-slate-100">
 										Free Games and Campaigns will always be an option.
@@ -282,10 +282,10 @@ export default function HomePage() {
 
 						<Link
 							href="/about-hosting-paid-games"
-							className="inline-block  text-sm  hover:underline"
+							className="inline-block text-sm hover:underline"
 						>
-							<div className="flex justify-center items-center rounded-2xl bg-amber-600/50 p-2 m-4 shadow-xl">
-								<p className="text-amber-200 hover:text-white font-medium">
+							<div className="flex justify-center items-center rounded-2xl bg-gradient-to-r from-amber-600/50 via-purple-600/30 to-indigo-600/50 border border-amber-500/30 p-3 m-4 shadow-xl transition hover:from-amber-600/60 hover:via-purple-600/40 hover:to-indigo-600/60">
+								<p className="text-amber-200 hover:text-white font-semibold">
 									Learn more about hosting paid games →
 								</p>
 							</div>
