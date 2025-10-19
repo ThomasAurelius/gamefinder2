@@ -80,7 +80,8 @@ export default function RootLayout({
 						<Link href="http://midnightoil.software">
 							Midnight Oil Software
 						</Link>{" "}
-						2025
+						2025 -{" "}
+						<Link href="https://discord.gg/Nx9jPfn6Sb">Support</Link>
 					</div>
 				</footer>
 			</body>
