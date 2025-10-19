@@ -598,7 +598,7 @@ export default function ProfilePage() {
 						/>
 						{bggUsername && (
 							<div className="flex items-center gap-3">
-								<div className="flex items-center gap-2 text-xs text-slate-400">
+								<div className="flex items-center gap-2 text-x text-slate-400">
 									<a
 										href={`https://boardgamegeek.com/user/${encodeURIComponent(bggUsername)}`}
 										target="_blank"

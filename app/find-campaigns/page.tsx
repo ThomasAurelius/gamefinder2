@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "@/lib/constants";
+import {
+	GAME_OPTIONS,
+	TIME_SLOTS,
+	TIME_SLOT_GROUPS,
+	mapGameToSystemKey,
+} from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
@@ -97,7 +102,9 @@ function CampaignCard({
 						href={`/campaigns/${campaign.id}`}
 						className="hover:text-sky-300 transition-colors"
 					>
-						<h3 className="font-medium text-slate-100">{campaign.game}</h3>
+						<h3 className="font-medium text-slate-100">
+							{campaign.game}
+						</h3>
 					</Link>
 				</div>
 				<div className="mt-2 space-y-1 text-sm text-slate-400">
@@ -135,7 +142,9 @@ function CampaignCard({
 					{campaign.sessionsLeft && (
 						<p>
 							<span className="text-slate-500">Sessions Left:</span>{" "}
-							<span className="text-green-400">{campaign.sessionsLeft}</span>
+							<span className="text-green-400">
+								{campaign.sessionsLeft}
+							</span>
 						</p>
 					)}
 					{campaign.classesNeeded && campaign.classesNeeded.length > 0 && (
@@ -175,9 +184,7 @@ function CampaignCard({
 					<p>
 						<span className="text-slate-500">Players:</span>{" "}
 						<span
-							className={
-								isFull ? "text-orange-400" : "text-green-400"
-							}
+							className={isFull ? "text-orange-400" : "text-green-400"}
 						>
 							{campaign.signedUpPlayers.length}/{campaign.maxPlayers}
 						</span>
@@ -196,9 +203,7 @@ function CampaignCard({
 						</p>
 					)}
 					{campaign.description && (
-						<p className="mt-2 text-slate-300">
-							{campaign.description}
-						</p>
+						<p className="mt-2 text-slate-300">{campaign.description}</p>
 					)}
 				</div>
 				<div className="flex gap-2 mt-4 flex-wrap">
@@ -229,7 +234,8 @@ function CampaignCard({
 					</Link>
 					{isHost && campaign.pendingPlayers.length > 0 && (
 						<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
-							{campaign.pendingPlayers.length} pending approval{campaign.pendingPlayers.length !== 1 ? 's' : ''}
+							{campaign.pendingPlayers.length} pending approval
+							{campaign.pendingPlayers.length !== 1 ? "s" : ""}
 						</span>
 					)}
 				</div>
@@ -262,7 +268,9 @@ export default function FindCampaignsPage() {
 	const [campaignToJoin, setCampaignToJoin] = useState<Campaign | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 	const [hostSearch, setHostSearch] = useState("");
-	const [hostSearchResults, setHostSearchResults] = useState<{ id: string; name: string; avatarUrl?: string }[]>([]);
+	const [hostSearchResults, setHostSearchResults] = useState<
+		{ id: string; name: string; avatarUrl?: string }[]
+	>([]);
 	const [selectedHostId, setSelectedHostId] = useState<string>("");
 	const [selectedHostName, setSelectedHostName] = useState<string>("");
 	const [showHostResults, setShowHostResults] = useState(false);
@@ -328,7 +336,9 @@ export default function FindCampaignsPage() {
 			}
 
 			try {
-				const response = await fetch(`/api/users/search?name=${encodeURIComponent(hostSearch)}`);
+				const response = await fetch(
+					`/api/users/search?name=${encodeURIComponent(hostSearch)}`
+				);
 				if (response.ok) {
 					const users = await response.json();
 					setHostSearchResults(users);
@@ -347,15 +357,22 @@ export default function FindCampaignsPage() {
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			const target = e.target as HTMLElement;
-			const hostSearchInput = document.getElementById("host-search-campaigns");
-			if (hostSearchInput && !hostSearchInput.contains(target) && !target.closest(".host-results-dropdown")) {
+			const hostSearchInput = document.getElementById(
+				"host-search-campaigns"
+			);
+			if (
+				hostSearchInput &&
+				!hostSearchInput.contains(target) &&
+				!target.closest(".host-results-dropdown")
+			) {
 				setShowHostResults(false);
 			}
 		};
 
 		if (showHostResults) {
 			document.addEventListener("mousedown", handleClickOutside);
-			return () => document.removeEventListener("mousedown", handleClickOutside);
+			return () =>
+				document.removeEventListener("mousedown", handleClickOutside);
 		}
 	}, [showHostResults]);
 
@@ -468,13 +485,16 @@ export default function FindCampaignsPage() {
 		setJoinError(null);
 
 		try {
-			const response = await fetch(`/api/campaigns/${campaignToJoin.id}/join`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ characterId, characterName }),
-			});
+			const response = await fetch(
+				`/api/campaigns/${campaignToJoin.id}/join`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ characterId, characterName }),
+				}
+			);
 
 			if (!response.ok) {
 				const errorData = await response.json();
@@ -501,9 +521,7 @@ export default function FindCampaignsPage() {
 			);
 		} catch (error) {
 			setJoinError(
-				error instanceof Error
-					? error.message
-					: "Failed to join campaign"
+				error instanceof Error ? error.message : "Failed to join campaign"
 			);
 		} finally {
 			setJoiningCampaignId(null);
@@ -552,8 +570,8 @@ export default function FindCampaignsPage() {
 						Find Campaigns
 					</h1>
 					<p className="mt-2 text-sm text-slate-400">
-						Search for available campaigns by game, date, time, or any
-						combination.
+						Search for available in-person, free and paid campaigns by
+						game, date, time, or any combination.
 					</p>
 				</div>
 				<div className="flex gap-2 flex-shrink-0">
@@ -711,7 +729,10 @@ export default function FindCampaignsPage() {
 							{selectedHostId && (
 								<div className="flex items-center gap-2 mt-2">
 									<span className="text-xs text-slate-400">
-										Filtering by: <span className="text-sky-400">{selectedHostName}</span>
+										Filtering by:{" "}
+										<span className="text-sky-400">
+											{selectedHostName}
+										</span>
 									</span>
 									<button
 										type="button"
@@ -793,7 +814,9 @@ export default function FindCampaignsPage() {
 													<button
 														key={slot}
 														type="button"
-														onClick={(e) => toggleTime(slot, e.shiftKey)}
+														onClick={(e) =>
+															toggleTime(slot, e.shiftKey)
+														}
 														className={tagButtonClasses(active, {
 															size: "sm",
 														})}
@@ -942,7 +965,9 @@ export default function FindCampaignsPage() {
 					</p>
 
 					{isLoadingEvents ? (
-						<p className="mt-4 text-sm text-slate-500">Loading events...</p>
+						<p className="mt-4 text-sm text-slate-500">
+							Loading events...
+						</p>
 					) : allEvents.length > 0 ? (
 						<div className="mt-4 space-y-3 max-w-3xl mx-auto">
 							{allEvents.map((event) => (

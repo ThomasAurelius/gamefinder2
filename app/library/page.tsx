@@ -172,11 +172,14 @@ export default function LibraryPage() {
 					Search and manage your collection of owned and wishlist games
 				</p>
 				<div className="mt-2 flex items-center gap-2">
-					<img 
-						src="/images/bgg-placeholder.svg" 
-						alt="Powered by BoardGameGeek" 
-						className="h-5"
-					/>
+					<div className="bg-white/50 p-.5 rounded-md">
+						<img
+							src="/powered_by_BGG_02_MED.png"
+							alt="Powered by BoardGameGeek"
+							className="h-[45px] w-[150px]"
+							title="Powered by BoardGameGeek"
+						/>
+					</div>
 				</div>
 			</div>
 
@@ -320,10 +323,10 @@ export default function LibraryPage() {
 					)}
 					<div className="mt-6 flex justify-center">
 						<p className="text-center w-160 text-slate-400">
-							Game Search is powered by a download of BoardGameGeek&apos;s
-							games database. Future enhancements may include real-time
-							search via BGG API, allowing you to bring in info from your
-							BGG collection.
+							Game Search is powered by a download of
+							BoardGameGeek&apos;s games database. Future enhancements
+							may include real-time search via BGG API, allowing you to
+							bring in info from your BGG collection.
 						</p>
 					</div>
 				</div>
@@ -343,72 +346,75 @@ export default function LibraryPage() {
 									if (a.isFavorite && !b.isFavorite) return -1;
 									if (!a.isFavorite && b.isFavorite) return 1;
 									// Then by addedAt (newest first)
-									return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+									return (
+										new Date(b.addedAt).getTime() -
+										new Date(a.addedAt).getTime()
+									);
 								})
 								.map((entry) => (
-								<div
-									key={entry.gameId}
-									className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
-								>
-									<div className="flex items-center justify-between">
-										<div className="flex items-center gap-3">
-											<button
-												onClick={() =>
-													handleToggleFavorite(
-														entry.gameId,
-														"owned"
-													)
-												}
-												className="text-2xl hover:scale-110 transition-transform"
-												title={
-													entry.isFavorite
-														? "Remove from favorites"
-														: "Add to favorites"
-												}
-											>
-												{entry.isFavorite ? "⭐" : "☆"}
-											</button>
-											<div>
-												<h3 className="font-semibold text-slate-100">
-													{entry.gameName}
-												</h3>
-												<p className="text-sm text-slate-400">
-													Added:{" "}
-													{new Date(
-														entry.addedAt
-													).toLocaleDateString()}
-												</p>
+									<div
+										key={entry.gameId}
+										className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
+									>
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-3">
+												<button
+													onClick={() =>
+														handleToggleFavorite(
+															entry.gameId,
+															"owned"
+														)
+													}
+													className="text-2xl hover:scale-110 transition-transform"
+													title={
+														entry.isFavorite
+															? "Remove from favorites"
+															: "Add to favorites"
+													}
+												>
+													{entry.isFavorite ? "⭐" : "☆"}
+												</button>
+												<div>
+													<h3 className="font-semibold text-slate-100">
+														{entry.gameName}
+													</h3>
+													<p className="text-sm text-slate-400">
+														Added:{" "}
+														{new Date(
+															entry.addedAt
+														).toLocaleDateString()}
+													</p>
+												</div>
+											</div>
+											<div className="flex gap-2">
+												<button
+													onClick={() =>
+														handleMoveGame(
+															entry,
+															"owned",
+															"wishlist"
+														)
+													}
+													className="rounded bg-yellow-600 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-700"
+													title="Move to wishlist"
+												>
+													→ Wish
+												</button>
+												<button
+													onClick={() =>
+														handleRemoveFromLibrary(
+															entry.gameId,
+															"owned"
+														)
+													}
+													className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+												>
+													Remove
+												</button>
 											</div>
 										</div>
-										<div className="flex gap-2">
-											<button
-												onClick={() =>
-													handleMoveGame(
-														entry,
-														"owned",
-														"wishlist"
-													)
-												}
-												className="rounded bg-yellow-600 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-700"
-												title="Move to wishlist"
-											>
-												→ Wish
-											</button>
-											<button
-												onClick={() =>
-													handleRemoveFromLibrary(
-														entry.gameId,
-														"owned"
-													)
-												}
-												className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-											>
-												Remove
-											</button>
-										</div>
 									</div>
-								</div>
-							))}
+								))}
 						</div>
 					) : (
 						<p className="text-center text-slate-400">
@@ -433,72 +439,75 @@ export default function LibraryPage() {
 									if (a.isFavorite && !b.isFavorite) return -1;
 									if (!a.isFavorite && b.isFavorite) return 1;
 									// Then by addedAt (newest first)
-									return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+									return (
+										new Date(b.addedAt).getTime() -
+										new Date(a.addedAt).getTime()
+									);
 								})
 								.map((entry) => (
-								<div
-									key={entry.gameId}
-									className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
-								>
-									<div className="flex items-center justify-between">
-										<div className="flex items-center gap-3">
-											<button
-												onClick={() =>
-													handleToggleFavorite(
-														entry.gameId,
-														"wishlist"
-													)
-												}
-												className="text-2xl hover:scale-110 transition-transform"
-												title={
-													entry.isFavorite
-														? "Remove from favorites"
-														: "Add to favorites"
-												}
-											>
-												{entry.isFavorite ? "⭐" : "☆"}
-											</button>
-											<div>
-												<h3 className="font-semibold text-slate-100">
-													{entry.gameName}
-												</h3>
-												<p className="text-sm text-slate-400">
-													Added:{" "}
-													{new Date(
-														entry.addedAt
-													).toLocaleDateString()}
-												</p>
+									<div
+										key={entry.gameId}
+										className="rounded-lg border border-slate-800 bg-slate-900/70 p-4"
+									>
+										<div className="flex items-center justify-between">
+											<div className="flex items-center gap-3">
+												<button
+													onClick={() =>
+														handleToggleFavorite(
+															entry.gameId,
+															"wishlist"
+														)
+													}
+													className="text-2xl hover:scale-110 transition-transform"
+													title={
+														entry.isFavorite
+															? "Remove from favorites"
+															: "Add to favorites"
+													}
+												>
+													{entry.isFavorite ? "⭐" : "☆"}
+												</button>
+												<div>
+													<h3 className="font-semibold text-slate-100">
+														{entry.gameName}
+													</h3>
+													<p className="text-sm text-slate-400">
+														Added:{" "}
+														{new Date(
+															entry.addedAt
+														).toLocaleDateString()}
+													</p>
+												</div>
+											</div>
+											<div className="flex gap-2">
+												<button
+													onClick={() =>
+														handleMoveGame(
+															entry,
+															"wishlist",
+															"owned"
+														)
+													}
+													className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700"
+													title="Move to owned"
+												>
+													→ Own
+												</button>
+												<button
+													onClick={() =>
+														handleRemoveFromLibrary(
+															entry.gameId,
+															"wishlist"
+														)
+													}
+													className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+												>
+													Remove
+												</button>
 											</div>
 										</div>
-										<div className="flex gap-2">
-											<button
-												onClick={() =>
-													handleMoveGame(
-														entry,
-														"wishlist",
-														"owned"
-													)
-												}
-												className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700"
-												title="Move to owned"
-											>
-												→ Own
-											</button>
-											<button
-												onClick={() =>
-													handleRemoveFromLibrary(
-														entry.gameId,
-														"wishlist"
-													)
-												}
-												className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
-											>
-												Remove
-											</button>
-										</div>
 									</div>
-								</div>
-							))}
+								))}
 						</div>
 					) : (
 						<p className="text-center text-slate-400">

@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "@/lib/constants";
+import {
+	GAME_OPTIONS,
+	TIME_SLOTS,
+	TIME_SLOT_GROUPS,
+	mapGameToSystemKey,
+} from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
@@ -129,9 +134,7 @@ function GameSessionCard({
 					<p>
 						<span className="text-slate-500">Players:</span>{" "}
 						<span
-							className={
-								isFull ? "text-orange-400" : "text-green-400"
-							}
+							className={isFull ? "text-orange-400" : "text-green-400"}
 						>
 							{session.signedUpPlayers.length}/{session.maxPlayers}
 						</span>
@@ -150,9 +153,7 @@ function GameSessionCard({
 						</p>
 					)}
 					{session.description && (
-						<p className="mt-2 text-slate-300">
-							{session.description}
-						</p>
+						<p className="mt-2 text-slate-300">{session.description}</p>
 					)}
 				</div>
 				<div className="flex gap-2 mt-4 flex-wrap">
@@ -195,7 +196,8 @@ function GameSessionCard({
 					</Link>
 					{isHost && session.pendingPlayers.length > 0 && (
 						<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
-							{session.pendingPlayers.length} pending approval{session.pendingPlayers.length !== 1 ? 's' : ''}
+							{session.pendingPlayers.length} pending approval
+							{session.pendingPlayers.length !== 1 ? "s" : ""}
 						</span>
 					)}
 				</div>
@@ -228,7 +230,9 @@ export default function FindGamesPage() {
 	const [sessionToJoin, setSessionToJoin] = useState<GameSession | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 	const [hostSearch, setHostSearch] = useState("");
-	const [hostSearchResults, setHostSearchResults] = useState<{ id: string; name: string; avatarUrl?: string }[]>([]);
+	const [hostSearchResults, setHostSearchResults] = useState<
+		{ id: string; name: string; avatarUrl?: string }[]
+	>([]);
 	const [selectedHostId, setSelectedHostId] = useState<string>("");
 	const [selectedHostName, setSelectedHostName] = useState<string>("");
 	const [showHostResults, setShowHostResults] = useState(false);
@@ -296,7 +300,9 @@ export default function FindGamesPage() {
 			}
 
 			try {
-				const response = await fetch(`/api/users/search?name=${encodeURIComponent(hostSearch)}`);
+				const response = await fetch(
+					`/api/users/search?name=${encodeURIComponent(hostSearch)}`
+				);
 				if (response.ok) {
 					const users = await response.json();
 					setHostSearchResults(users);
@@ -316,14 +322,19 @@ export default function FindGamesPage() {
 		const handleClickOutside = (e: MouseEvent) => {
 			const target = e.target as HTMLElement;
 			const hostSearchInput = document.getElementById("host-search");
-			if (hostSearchInput && !hostSearchInput.contains(target) && !target.closest(".host-results-dropdown")) {
+			if (
+				hostSearchInput &&
+				!hostSearchInput.contains(target) &&
+				!target.closest(".host-results-dropdown")
+			) {
 				setShowHostResults(false);
 			}
 		};
 
 		if (showHostResults) {
 			document.addEventListener("mousedown", handleClickOutside);
-			return () => document.removeEventListener("mousedown", handleClickOutside);
+			return () =>
+				document.removeEventListener("mousedown", handleClickOutside);
 		}
 	}, [showHostResults]);
 
@@ -411,13 +422,13 @@ export default function FindGamesPage() {
 		if (showCharacterDialog) {
 			return;
 		}
-		
+
 		// Check if user is logged in - redirect to login if not
 		if (!currentUserId) {
 			router.push("/auth/login");
 			return;
 		}
-		
+
 		// Find the session to check if user is already signed up
 		const session = [...gameSessions, ...allEvents].find(
 			(s) => s.id === sessionId
@@ -564,8 +575,8 @@ export default function FindGamesPage() {
 						Find Games
 					</h1>
 					<p className="mt-2 text-sm text-slate-400">
-						Search for available game sessions by game, date, time, or any
-						combination.
+						Search for available in-person game sessions by game, date,
+						time, or any combination.
 					</p>
 				</div>
 				<div className="flex gap-2 flex-shrink-0">
@@ -717,7 +728,10 @@ export default function FindGamesPage() {
 							{selectedHostId && (
 								<div className="flex items-center gap-2 mt-2">
 									<span className="text-xs text-slate-400">
-										Filtering by: <span className="text-sky-400">{selectedHostName}</span>
+										Filtering by:{" "}
+										<span className="text-sky-400">
+											{selectedHostName}
+										</span>
 									</span>
 									<button
 										type="button"
@@ -799,7 +813,9 @@ export default function FindGamesPage() {
 													<button
 														key={slot}
 														type="button"
-														onClick={(e) => toggleTime(slot, e.shiftKey)}
+														onClick={(e) =>
+															toggleTime(slot, e.shiftKey)
+														}
 														className={tagButtonClasses(active, {
 															size: "sm",
 														})}
@@ -948,7 +964,9 @@ export default function FindGamesPage() {
 					</p>
 
 					{isLoadingEvents ? (
-						<p className="mt-4 text-sm text-slate-500">Loading events...</p>
+						<p className="mt-4 text-sm text-slate-500">
+							Loading events...
+						</p>
 					) : allEvents.length > 0 ? (
 						<div className="mt-4 space-y-3 max-w-3xl mx-auto">
 							{allEvents.map((event) => (
