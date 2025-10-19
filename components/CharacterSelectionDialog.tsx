@@ -78,6 +78,12 @@ export default function CharacterSelectionDialog({
           </p>
         </div>
 
+        <div className="mx-6 mt-4 rounded-lg border border-sky-700/30 bg-sky-950/20 p-4">
+          <p className="text-sm text-sky-200 leading-relaxed">
+            <strong className="text-sky-100">Note:</strong> Having a fully fleshed out character helps the DM plan better sessions and enhances the overall game experience. While you can join without one, your experience will be significantly better with a properly developed character.
+          </p>
+        </div>
+
         <div className="p-6 space-y-4">
           {loadingCharacters ? (
             <p className="text-sm text-slate-400">Loading characters...</p>
