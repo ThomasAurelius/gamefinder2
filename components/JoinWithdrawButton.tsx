@@ -62,7 +62,7 @@ export default function JoinWithdrawButton({
         );
       }
 
-      // Refresh the page to show updated data
+      // Update the game session data
       onSessionUpdate();
     } catch (error) {
       setError(
@@ -97,7 +97,7 @@ export default function JoinWithdrawButton({
         throw new Error(errorData.error || "Failed to join game session");
       }
 
-      // Refresh the page to show updated data
+      // Update the game session data
       onSessionUpdate();
     } catch (error) {
       setError(
@@ -134,7 +134,7 @@ export default function JoinWithdrawButton({
         throw new Error(errorData.error || "Failed to update character");
       }
 
-      // Refresh the page to show updated data
+      // Update the game session data
       onSessionUpdate();
     } catch (error) {
       setError(
