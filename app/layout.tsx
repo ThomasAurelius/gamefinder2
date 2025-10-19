@@ -76,7 +76,7 @@ export default function RootLayout({
 						<Link href="/sms-consent">SMS Consent</Link>
 					</div>
 					<div>
-						<Link href="/mission">Mission</Link> - ©{" "}
+						<Link href="/mission">Mission</Link> -{" "}©{" "}
 						<Link href="http://midnightoil.software">
 							Midnight Oil Software
 						</Link>{" "}
