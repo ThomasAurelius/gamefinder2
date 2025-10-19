@@ -6,8 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { DAYS_OF_WEEK } from "@/lib/constants";
-import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
-import type { VendorResponse } from "@/lib/vendor-types";
+import { createDefaultHours, sortTimeSlots, type VendorResponse } from "@/lib/vendors";
 
 type AuthInfo = {
   userId: string;

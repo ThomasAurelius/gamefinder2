@@ -6,6 +6,26 @@ import Link from "next/link";
 import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS } from "@/lib/constants";
 import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
 import type { VendorResponse } from "@/lib/vendor-types";
+import { createDefaultHours, sortTimeSlots } from "@/lib/vendors";
+
+type VendorResponse = {
+  id: string;
+  primaryImage: string;
+  images: string[];
+  vendorName: string;
+  description: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  phone?: string;
+  website?: string;
+  hoursOfOperation: Record<string, string[]>;
+  ownerUserId: string;
+  isApproved: boolean;
+  isFeatured: boolean;
+};
 
 const tagButtonClasses = (active: boolean) => {
   const base = "rounded-full border px-3 py-1.5 text-sm transition";
