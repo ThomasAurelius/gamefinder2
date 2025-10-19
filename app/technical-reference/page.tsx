@@ -40,7 +40,7 @@ const apiIntegrations = [
 const pageGroups = [
 	{
 		title: "Public Pages",
-		count: 12,
+		count: 8,
 		summary:
 			"Landing and discovery surfaces available without authentication.",
 		routes: [
@@ -50,12 +50,8 @@ const pageGroups = [
 			{ label: "Player Search", path: "/players" },
 			{ label: "Tall Tales", path: "/tall-tales" },
 			{ label: "Mission", path: "/mission" },
-			{ label: "Terms of Service", path: "/terms" },
-			{ label: "Privacy Policy", path: "/privacy" },
-			{ label: "SMS Consent", path: "/sms-consent" },
 			{ label: "Advertising", path: "/advertising" },
-			{ label: "Paid Games Terms", path: "/terms-paid-games" },
-			{ label: "Support", path: "/support" },
+			{ label: "Ambassador Program", path: "/ambassador" },
 		],
 	},
 	{
