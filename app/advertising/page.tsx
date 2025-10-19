@@ -1,252 +1,262 @@
 import Link from "next/link";
 
+function MegaphoneIcon({ className }: { className?: string }) {
+        return (
+                <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={className}
+                        aria-hidden="true"
+                >
+                        <path d="m3 11 18-5v12L3 13v8H1V5h2z" />
+                        <path d="M11 12v9" />
+                </svg>
+        );
+}
+
+function TargetIcon({ className }: { className?: string }) {
+        return (
+                <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={className}
+                        aria-hidden="true"
+                >
+                        <circle cx="12" cy="12" r="9" />
+                        <circle cx="12" cy="12" r="5" />
+                        <circle cx="12" cy="12" r="1" />
+                </svg>
+        );
+}
+
+function ChartIcon({ className }: { className?: string }) {
+        return (
+                <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={className}
+                        aria-hidden="true"
+                >
+                        <path d="M3 3v18h18" />
+                        <rect x="7" y="12" width="3" height="6" rx="0.5" />
+                        <rect x="12" y="9" width="3" height="9" rx="0.5" />
+                        <rect x="17" y="6" width="3" height="12" rx="0.5" />
+                </svg>
+        );
+}
+
+const keyFeatures = [
+        "2:1 Aspect Ratio Images (800x400px recommended) that auto-scale for mobile",
+        "Location-Based Targeting that reaches users within 50 miles of your chosen zip code",
+        "Smart competition handling so the closest ad is shown when multiple target the same area",
+        "Clickable ads with a URL that opens in a new window",
+        "Performance tracking for unique impressions (per user per hour) and total clicks",
+];
+
+const howItWorks = [
+        {
+                title: "Geographic Targeting",
+                description:
+                        "Specify a zip code for your advertisement and it will display to players within a 50-mile radius—ideal for stores, events, and regional offerings.",
+        },
+        {
+                title: "Automatic Optimization",
+                description:
+                        "When campaigns overlap, The Gathering Call automatically prioritizes the ad closest to each player, ensuring the most relevant content appears first.",
+        },
+        {
+                title: "Responsive Design",
+                description:
+                        "Your 2:1 artwork scales seamlessly from desktop monitors to phones. On smaller screens, ads resize to 90% width for clear, legible messaging.",
+        },
+        {
+                title: "Click-Through Actions",
+                description:
+                        "Attach a URL to send players directly to your store, registration form, or landing page whenever they tap your banner.",
+        },
+        {
+                title: "Performance Analytics",
+                description:
+                        "Monitor impressions and clicks directly in the platform so you can fine-tune creatives, offers, and timing with confidence.",
+        },
+];
+
+const placements = [
+        { title: "Find Games", description: "Showcase one-shots to active players searching for a new table right now." },
+        { title: "Find Campaigns", description: "Reach long-form adventurers browsing for their next ongoing story." },
+        { title: "My Campaigns", description: "Stay in front of engaged players managing their schedules and groups." },
+];
+
+const idealFor = [
+        {
+                title: "Local Game Stores",
+                description: "Promote in-store events, product releases, or weekly play nights to nearby players.",
+        },
+        {
+                title: "Gaming Conventions",
+                description: "Drive ticket sales and highlight panels, guests, or tournaments before badges sell out.",
+        },
+        {
+                title: "Publishers & Creators",
+                description: "Launch new games, supplements, or crowdfunding campaigns to an audience ready to support you.",
+        },
+        {
+                title: "Gaming Services",
+                description: "Advertise VTT tools, streaming services, character creators, or other tabletop solutions.",
+        },
+];
+
 export default function AdvertisingPage() {
-	return (
-		<div className="mx-auto max-w-4xl px-4 py-12">
-			<div className="space-y-8">
-				<div>
-					<h1 className="text-3xl font-bold text-slate-100">
-						Advertising on The Gathering Call
-					</h1>
-					<p className="mt-2 text-slate-400">
-						Reach your target audience of tabletop gaming enthusiasts with our location-based advertising platform.
-					</p>
-				</div>
+        return (
+                <div className="mx-auto max-w-5xl space-y-8 py-8">
+                        <div className="rounded-3xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-8 shadow-2xl">
+                                <div className="text-center space-y-4">
+                                        <div className="flex justify-center gap-4">
+                                                <MegaphoneIcon className="h-8 w-8 text-amber-400" />
+                                                <TargetIcon className="h-8 w-8 text-purple-300" />
+                                                <ChartIcon className="h-8 w-8 text-indigo-300" />
+                                        </div>
+                                        <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                                                Advertising on The Gathering Call
+                                        </h1>
+                                        <p className="text-slate-200 max-w-2xl mx-auto">
+                                                Reach tabletop fans with location-based promotions crafted specifically for the adventures they love.
+                                        </p>
+                                </div>
+                        </div>
 
-				{/* Overview Section */}
-				<section className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-					<h2 className="text-2xl font-semibold text-slate-100 mb-4">
-						Advertising Capabilities
-					</h2>
-					<p className="text-slate-300 mb-4">
-						The Gathering Call offers a powerful advertising platform designed specifically for reaching 
-						tabletop gaming communities. Our location-based advertising ensures your message reaches the 
-						right audience at the right place.
-					</p>
-					<div className="rounded-lg border border-sky-700/50 bg-sky-900/20 p-4">
-						<h3 className="text-sm font-medium text-sky-200 mb-2">
-							Key Features
-						</h3>
-						<ul className="space-y-2 text-sm text-slate-300">
-							<li className="flex items-start gap-2">
-								<span className="text-sky-400 mt-1">•</span>
-								<span><strong>2:1 Aspect Ratio Images:</strong> Professional banner format (800x400px recommended) that auto-scales for mobile devices</span>
-							</li>
-							<li className="flex items-start gap-2">
-								<span className="text-sky-400 mt-1">•</span>
-								<span><strong>Location-Based Targeting:</strong> Ads are shown to users within 50 miles of your specified zip code</span>
-							</li>
-							<li className="flex items-start gap-2">
-								<span className="text-sky-400 mt-1">•</span>
-								<span><strong>Smart Competition Handling:</strong> If multiple ads target the same area, the geographically closest ad is shown to each user</span>
-							</li>
-							<li className="flex items-start gap-2">
-								<span className="text-sky-400 mt-1">•</span>
-								<span><strong>Clickable Ads:</strong> Include a URL that opens in a new window when users click your advertisement</span>
-							</li>
-							<li className="flex items-start gap-2">
-								<span className="text-sky-400 mt-1">•</span>
-								<span><strong>Performance Tracking:</strong> Track unique impressions (per user per hour) and total clicks on your advertisement</span>
-							</li>
-						</ul>
-					</div>
-				</section>
+                        <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
+                                <h2 className="text-2xl font-semibold text-amber-300">Platform Highlights</h2>
+                                <p className="mt-3 text-sm text-slate-300">
+                                        The Gathering Call provides a dedicated advertising network tailored to the tabletop community. Every placement is curated to put your promotion in front of players and Game Masters who are ready to discover new experiences.
+                                </p>
+                                <ul className="mt-6 space-y-3 text-sm text-slate-200/90">
+                                        {keyFeatures.map((feature) => (
+                                                <li key={feature} className="flex items-start gap-3">
+                                                        <span className="mt-1 text-amber-300">•</span>
+                                                        <span>{feature}</span>
+                                                </li>
+                                        ))}
+                                </ul>
+                        </section>
 
-				{/* How It Works */}
-				<section className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-					<h2 className="text-2xl font-semibold text-slate-100 mb-4">
-						How It Works
-					</h2>
-					<div className="space-y-4 text-slate-300">
-						<div>
-							<h3 className="text-lg font-medium text-slate-200 mb-2">
-								1. Geographic Targeting
-							</h3>
-							<p className="text-sm">
-								Specify a zip code for your advertisement, and it will be shown to all users within 
-								a 50-mile radius of that location. This ensures your ad reaches local gamers who are 
-								most likely to engage with your business or event.
-							</p>
-						</div>
-						
-						<div>
-							<h3 className="text-lg font-medium text-slate-200 mb-2">
-								2. Automatic Optimization
-							</h3>
-							<p className="text-sm">
-								When multiple advertisements compete for the same audience, our system automatically 
-								prioritizes showing the closest advertisement to each user. This ensures the most 
-								relevant local content is displayed.
-							</p>
-						</div>
-						
-						<div>
-							<h3 className="text-lg font-medium text-slate-200 mb-2">
-								3. Responsive Design
-							</h3>
-							<p className="text-sm">
-								Your 2:1 aspect ratio image automatically scales to fit any device, from mobile phones 
-								to desktop computers. On mobile devices (under 900px width), ads scale to 90% of screen 
-								width for optimal viewing.
-							</p>
-						</div>
+                        <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
+                                <h2 className="text-2xl font-semibold text-purple-300">How It Works</h2>
+                                <div className="mt-6 grid gap-6 md:grid-cols-2">
+                                        {howItWorks.map((step) => (
+                                                <div key={step.title} className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-5">
+                                                        <h3 className="text-lg font-semibold text-purple-100">{step.title}</h3>
+                                                        <p className="mt-2 text-sm text-slate-100/80">{step.description}</p>
+                                                </div>
+                                        ))}
+                                </div>
+                        </section>
 
-						<div>
-							<h3 className="text-lg font-medium text-slate-200 mb-2">
-								4. Click-Through Actions
-							</h3>
-							<p className="text-sm">
-								Add a URL to your advertisement to drive traffic to your website, event page, or online store. 
-								When users click your ad, they&apos;re taken to your specified URL in a new browser window.
-							</p>
-						</div>
+                        <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
+                                <h2 className="text-2xl font-semibold text-indigo-300">Where Your Ads Appear</h2>
+                                <p className="mt-3 text-sm text-slate-300">
+                                        Ads are woven into the experience on the highest-traffic surfaces across The Gathering Call platform:
+                                </p>
+                                <div className="mt-6 grid gap-4 md:grid-cols-3">
+                                        {placements.map((placement) => (
+                                                <div key={placement.title} className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4">
+                                                        <h3 className="text-base font-semibold text-indigo-100">{placement.title}</h3>
+                                                        <p className="mt-2 text-xs text-slate-100/80">{placement.description}</p>
+                                                </div>
+                                        ))}
+                                </div>
+                                <p className="mt-6 text-xs text-slate-400 italic">
+                                        Placements sit after the main header and before search tools, maximizing visibility without disrupting discovery.
+                                </p>
+                        </section>
 
-						<div>
-							<h3 className="text-lg font-medium text-slate-200 mb-2">
-								5. Performance Analytics
-							</h3>
-							<p className="text-sm">
-								Track the effectiveness of your advertisement with built-in analytics. Monitor unique 
-								impressions (counted once per user per hour) and total clicks to measure engagement 
-								and adjust your strategy.
-							</p>
-						</div>
-					</div>
-				</section>
+                        <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
+                                <h2 className="text-2xl font-semibold text-amber-300">Ideal For</h2>
+                                <div className="mt-6 grid gap-5 md:grid-cols-2">
+                                        {idealFor.map((item) => (
+                                                <div key={item.title} className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5">
+                                                        <h3 className="text-base font-semibold text-amber-100">{item.title}</h3>
+                                                        <p className="mt-2 text-sm text-amber-50/80">{item.description}</p>
+                                                </div>
+                                        ))}
+                                </div>
+                        </section>
 
-				{/* Placement & Visibility */}
-				<section className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-					<h2 className="text-2xl font-semibold text-slate-100 mb-4">
-						Ad Placement & Visibility
-					</h2>
-					<p className="text-slate-300 mb-3">
-						Your advertisements are prominently displayed on the most visited pages of our platform:
-					</p>
-					<ul className="space-y-2 text-sm text-slate-300 mb-4">
-						<li className="flex items-start gap-2">
-							<span className="text-sky-400">✓</span>
-							<span><strong>Find Games:</strong> Where users search for one-shot gaming sessions</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-sky-400">✓</span>
-							<span><strong>Find Campaigns:</strong> Where users browse ongoing campaign opportunities</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-sky-400">✓</span>
-							<span><strong>My Campaigns:</strong> User dashboard for managing their gaming activities</span>
-						</li>
-					</ul>
-					<p className="text-sm text-slate-400 italic">
-						Advertisements appear after the page header and before search sections, ensuring maximum visibility 
-						without being intrusive to the user experience.
-					</p>
-				</section>
+                        <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-8 shadow-xl">
+                                <h2 className="text-2xl font-semibold text-slate-100">Technical Specs</h2>
+                                <div className="mt-6 grid gap-4 md:grid-cols-2">
+                                        <div className="rounded-xl border border-white/10 bg-slate-950/60 p-5">
+                                                <dl className="space-y-3 text-sm text-slate-200">
+                                                        <div className="flex justify-between">
+                                                                <dt className="text-slate-400">Image Dimensions</dt>
+                                                                <dd className="font-medium text-slate-100">800×400 (2:1)</dd>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                                <dt className="text-slate-400">File Size</dt>
+                                                                <dd className="font-medium text-slate-100">Up to 5 MB</dd>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                                <dt className="text-slate-400">Formats</dt>
+                                                                <dd className="font-medium text-slate-100">PNG or JPG</dd>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                                <dt className="text-slate-400">Destination Links</dt>
+                                                                <dd className="font-medium text-slate-100">Open in a new tab</dd>
+                                                        </div>
+                                                </dl>
+                                        </div>
+                                        <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-5">
+                                                <h3 className="text-lg font-semibold text-indigo-100">Pricing</h3>
+                                                <p className="mt-2 text-sm text-slate-100/80">
+                                                        Flat rate of <strong className="text-indigo-50">$20 per location each month</strong>. Purchase multiple locations to cover additional territories.
+                                                </p>
+                                                <ul className="mt-4 space-y-2 text-xs text-slate-100/80">
+                                                        <li>• Locations are defined by zip code</li>
+                                                        <li>• Each location covers a 50-mile radius</li>
+                                                        <li>• When multiple advertisers target the same area, ads rotate based on user proximity</li>
+                                                </ul>
+                                                <p className="mt-4 text-xs text-slate-400 italic">
+                                                        Pricing is subject to change with advance notice to current advertisers.
+                                                </p>
+                                        </div>
+                                </div>
+                        </section>
 
-				{/* Ideal For */}
-				<section className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-					<h2 className="text-2xl font-semibold text-slate-100 mb-4">
-						Ideal For
-					</h2>
-					<div className="grid gap-4 md:grid-cols-2">
-						<div className="rounded-lg border border-slate-700/50 bg-slate-950/40 p-4">
-							<h3 className="text-base font-medium text-slate-200 mb-2">
-								Local Game Stores
-							</h3>
-							<p className="text-sm text-slate-400">
-								Promote in-store events, new product releases, or gaming nights to players in your area.
-							</p>
-						</div>
-						
-						<div className="rounded-lg border border-slate-700/50 bg-slate-950/40 p-4">
-							<h3 className="text-base font-medium text-slate-200 mb-2">
-								Gaming Conventions
-							</h3>
-							<p className="text-sm text-slate-400">
-								Reach attendees in your convention&apos;s geographic area to boost ticket sales and awareness.
-							</p>
-						</div>
-						
-						<div className="rounded-lg border border-slate-700/50 bg-slate-950/40 p-4">
-							<h3 className="text-base font-medium text-slate-200 mb-2">
-								Publishers & Creators
-							</h3>
-							<p className="text-sm text-slate-400">
-								Launch new games, supplements, or crowdfunding campaigns to an engaged tabletop audience.
-							</p>
-						</div>
-						
-						<div className="rounded-lg border border-slate-700/50 bg-slate-950/40 p-4">
-							<h3 className="text-base font-medium text-slate-200 mb-2">
-								Gaming Services
-							</h3>
-							<p className="text-sm text-slate-400">
-								Advertise virtual tabletops, character tools, streaming services, or other gaming products.
-							</p>
-						</div>
-					</div>
-				</section>
-
-				{/* Technical Specifications */}
-				<section className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-					<h2 className="text-2xl font-semibold text-slate-100 mb-4">
-						Technical Specifications
-					</h2>
-					<div className="space-y-3 text-sm text-slate-300">
-						<div className="rounded-lg bg-slate-950/40 p-4 border border-slate-800">
-							<div className="grid gap-3">
-								<div className="flex justify-between">
-									<span className="text-slate-400">Image Dimensions:</span>
-									<span className="font-medium text-slate-200">800x400 pixels (2:1 ratio)</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-slate-400">File Formats:</span>
-									<span className="font-medium text-slate-200">JPG, PNG, WebP, GIF</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-slate-400">Maximum File Size:</span>
-									<span className="font-medium text-slate-200">5MB</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-slate-400">Geographic Range:</span>
-									<span className="font-medium text-slate-200">50-mile radius from zip code</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-slate-400">Mobile Scaling:</span>
-									<span className="font-medium text-slate-200">Auto-adjusts to 90% width on &lt;900px</span>
-								</div>
-								<div className="flex justify-between">
-									<span className="text-slate-400">Link Behavior:</span>
-									<span className="font-medium text-slate-200">Opens in new window</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</section>
-
-				{/* Get Started */}
-				<section className="rounded-xl border border-sky-600/40 bg-sky-900/20 p-6 text-center">
-					<h2 className="text-2xl font-semibold text-slate-100 mb-3">
-						Interested in Advertising?
-					</h2>
-					<p className="text-slate-300 mb-6 max-w-2xl mx-auto">
-						Contact us to learn more about advertising opportunities on The Gathering Call and 
-						how we can help you reach the tabletop gaming community.
-					</p>
-					<p className="text-sm text-slate-400">
-						For advertising inquiries, please reach out through our support channels.
-					</p>
-				</section>
-
-				{/* Back to Home */}
-				<div className="text-center">
-					<Link
-						href="/"
-						className="inline-block text-sm text-slate-400 hover:text-slate-300 hover:underline"
-					>
-						← Back to Home
-					</Link>
-				</div>
-			</div>
-		</div>
-	);
+                        <section className="rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-8 text-center shadow-2xl">
+                                <h2 className="text-2xl font-semibold text-slate-100">Ready to Advertise?</h2>
+                                <p className="mt-3 text-sm text-slate-200 max-w-2xl mx-auto">
+                                        Partner with our team to choose locations, design standout creatives, and launch campaigns that resonate with players.
+                                </p>
+                                <div className="mt-6 flex flex-wrap justify-center gap-4">
+                                        <Link
+                                                href="/support"
+                                                className="rounded-lg border border-amber-500/50 bg-amber-500/20 px-5 py-2 text-sm font-medium text-amber-200 transition hover:bg-amber-500/30"
+                                        >
+                                                Contact Support
+                                        </Link>
+                                        <Link
+                                                href="https://discord.gg/Nx9jPfn6Sb"
+                                                className="rounded-lg border border-indigo-500/50 bg-indigo-500/20 px-5 py-2 text-sm font-medium text-indigo-200 transition hover:bg-indigo-500/30"
+                                        >
+                                                Chat on Discord
+                                        </Link>
+                                </div>
+                        </section>
+                </div>
+        );
 }
