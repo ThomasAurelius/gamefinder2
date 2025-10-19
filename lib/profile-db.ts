@@ -19,6 +19,7 @@ export type ProfileRecord = {
 	longitude?: number;
 	canPostPaidGames?: boolean; // Flag to allow posting paid campaigns
 	phoneNumber?: string; // Phone number for SMS notifications
+	bggUsername?: string; // BoardGameGeek username for profile linking
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -88,6 +89,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
 		longitude: profile.longitude,
 		canPostPaidGames: profile.canPostPaidGames ?? false,
 		phoneNumber: profile.phoneNumber,
+		bggUsername: profile.bggUsername,
 	};
 }
 

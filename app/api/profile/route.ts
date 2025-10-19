@@ -65,6 +65,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     timezone,
     avatarUrl,
     phoneNumber,
+    bggUsername,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -113,6 +114,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     throw new Error("Phone number must be a string");
   }
 
+  // Validate bggUsername if provided (optional field)
+  if (bggUsername !== undefined && bggUsername !== "" && !isString(bggUsername)) {
+    throw new Error("BGG username must be a string");
+  }
+
   const normalizedGames = dedupe(games);
   const normalizedFavorites = dedupe(favoriteGames);
 
@@ -136,6 +142,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     timezone: timezone || DEFAULT_TIMEZONE,
     avatarUrl: avatarUrl || "",
     phoneNumber: phoneNumber || undefined,
+    bggUsername: bggUsername || undefined,
   };
 };
 

@@ -67,6 +67,7 @@ type ProfilePayload = {
 	timezone?: string;
 	avatarUrl?: string;
 	phoneNumber?: string;
+	bggUsername?: string;
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -92,6 +93,7 @@ export default function ProfilePage() {
 	const [avatarUrl, setAvatarUrl] = useState("");
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 	const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+	const [bggUsername, setBggUsername] = useState("");
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isSaving, setIsSaving] = useState(false);
@@ -132,6 +134,7 @@ export default function ProfilePage() {
 				setCustomGames(customGames);
 				setTimezone(profile.timezone ?? DEFAULT_TIMEZONE);
 				setAvatarUrl(profile.avatarUrl ?? "");
+				setBggUsername(profile.bggUsername ?? "");
 				setFavoriteGames(
 					(profile.favoriteGames ?? []).filter((game) =>
 						normalizedGames.includes(game)
@@ -255,6 +258,7 @@ export default function ProfilePage() {
 				timezone,
 				avatarUrl: url,
 				phoneNumber,
+				bggUsername,
 			};
 
 			const saveResponse = await fetch("/api/profile", {
@@ -363,6 +367,7 @@ export default function ProfilePage() {
 			timezone,
 			avatarUrl,
 			phoneNumber,
+			bggUsername,
 		};
 
 		try {
@@ -547,6 +552,55 @@ export default function ProfilePage() {
 						<p className="text-xs text-slate-400">
 							Select your timezone to ensure dates are displayed
 							correctly.
+						</p>
+					</div>
+
+					<div className="space-y-2">
+						<label
+							htmlFor="bggUsername"
+							className="text-sm font-medium text-slate-200"
+						>
+							BoardGameGeek Username
+						</label>
+						<input
+							id="bggUsername"
+							type="text"
+							value={bggUsername}
+							onChange={(event) => setBggUsername(event.target.value)}
+							placeholder="Your BGG username"
+							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						{bggUsername && (
+							<div className="flex items-center gap-3">
+								<div className="flex items-center gap-2 text-xs text-slate-400">
+									<a
+										href={`https://boardgamegeek.com/user/${encodeURIComponent(bggUsername)}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-sky-400 hover:text-sky-300 underline"
+									>
+										View BGG Profile
+									</a>
+									<span>•</span>
+									<a
+										href={`https://boardgamegeek.com/collection/user/${encodeURIComponent(bggUsername)}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-sky-400 hover:text-sky-300 underline"
+									>
+										View Collection
+									</a>
+								</div>
+								<img
+									src="/powered-by-bgg.png"
+									alt="Powered by BoardGameGeek"
+									className="h-[18px] w-[44px]"
+									title="Powered by BoardGameGeek"
+								/>
+							</div>
+						)}
+						<p className="text-xs text-slate-400">
+							Optional. Link your BoardGameGeek profile and game collection.
 						</p>
 					</div>
 				</section>
