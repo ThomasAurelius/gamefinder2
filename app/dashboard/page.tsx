@@ -331,8 +331,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
-        <h2 className="text-lg font-semibold text-slate-100">My Upcoming Sessions</h2>
+      <div className="rounded-xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6">
+        <h2 className="text-lg font-semibold text-amber-100">My Upcoming Sessions</h2>
         <p className="mt-2 text-sm text-slate-400">
           Your one-time games and multi-session campaigns
         </p>
@@ -366,10 +366,10 @@ export default function DashboardPage() {
       </div>
 
       {!isLoading && pastSessions.length > 0 && (
-        <div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
+        <div className="rounded-xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-slate-100">Past Sessions</h2>
+              <h2 className="text-lg font-semibold text-amber-100">Past Sessions</h2>
               <p className="mt-2 text-sm text-slate-400">
                 Rate your hosts and review past games
               </p>
