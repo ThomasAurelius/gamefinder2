@@ -1,5 +1,17 @@
 # BGG Marketplace Integration - Visual Summary
 
+## Recent Updates (Issue Fix)
+
+**Issue:** Marketplace was only showing 3 hardcoded listings with broken links to non-existent BGG product pages.
+
+**Solution:** 
+- Replaced mock data with real BGG game data from `boardgames_ranks.csv`
+- Now displays up to 100 top-ranked games from BoardGameGeek
+- Links now point to actual BGG marketplace browse pages for each specific game
+- Each link uses the correct BGG game ID (e.g., `https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=174430` for Gloomhaven)
+- Users can click through to view all available marketplace listings for that game on BGG
+- Images are currently placeholders (future enhancement: fetch from BGG XML API2)
+
 ## Overview
 This implementation replaces the internal marketplace with BoardGameGeek's marketplace feed and adds attribution images to pages using BGG API.
 
@@ -108,9 +120,11 @@ Previously had:
 ### `/lib/bgg/marketplace.ts`
 ```typescript
 // Service to fetch BGG marketplace listings
-- fetchBGGMarketplace() - Main function
-- parseBGGMarketplaceXML() - For future XML parsing
-- Currently uses mock data (3 sample listings)
+- fetchBGGMarketplace() - Reads from boardgames_ranks.csv and creates marketplace links
+- parseBGGMarketplaceXML() - Placeholder for future XML parsing
+- fetchBGGThumbnails() - Placeholder for future thumbnail fetching
+- Currently uses 100 top-ranked games from CSV data
+- Links to actual BGG marketplace pages with real game IDs
 ```
 
 ### `/public/images/bgg-placeholder.svg`
@@ -148,36 +162,51 @@ Used as attribution on marketplace and library pages
 BGG marketplace items are transformed to match the existing listing format:
 ```typescript
 {
-  id: listing.listingid,
-  title: item.name,
-  description: listing.notes,
-  price: parseFloat(listing.price.value),
-  condition: listing.condition,
-  imageUrls: [item.thumbnail],
+  id: `${gameId}-market`,
+  title: gameName,
+  description: `Browse available listings for ${gameName} on BoardGameGeek's marketplace. Published in ${year}.`,
+  price: undefined, // Price varies by individual listings
+  condition: "various",
+  imageUrls: [], // Thumbnails would require BGG API integration
   listingType: "sell",
-  hostName: "BGG Marketplace",
-  externalLink: listing.link.href,
-  bggGameId: item.id
+  hostName: "BoardGameGeek",
+  externalLink: `https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameId}`,
+  bggGameId: gameId
 }
 ```
 
-### Mock Data
-Currently includes 3 sample games:
-1. Gloomhaven ($89.99, new)
-2. Terraforming Mars ($45.00, like-new)
-3. Brass: Birmingham ($75.00, good)
+### Data Source
+Uses the existing `boardgames_ranks.csv` file which contains:
+- Top 10,000+ board games from BoardGameGeek
+- Game ID, name, year published, rank, ratings
+- Real BGG game IDs that can be used to construct marketplace URLs
+```
 
-Ready for real API integration when network access is available.
+### Mock Data
+Currently displays top-ranked games from boardgames_ranks.csv:
+- Up to 100 games loaded from the CSV file
+- All games have real BGG game IDs (e.g., 174430 for Gloomhaven)
+- Links point to actual BGG marketplace browse pages
+- Examples: Brass: Birmingham, Gloomhaven, Terraforming Mars, etc.
+- Search functionality filters by game name
+- No images currently (would require BGG XML API2 integration)
+
+Future enhancement: Integrate BGG XML API2 to fetch:
+- Game thumbnails
+- Actual marketplace listing details
+- Real-time pricing information
 
 ## User Experience Flow
 
 ### Browsing Marketplace
 1. User visits `/marketplace`
 2. Sees BGG attribution image
-3. Can search for games
-4. Clicks on listing card
-5. Redirected to BGG marketplace page
-6. Completes transaction on BGG
+3. Sees up to 100 top-ranked games from BGG database
+4. Can search for games by name
+5. Clicks on listing card
+6. Redirected to BGG marketplace browse page for that specific game
+7. Can view all available listings for that game on BGG
+8. Completes transaction on BGG
 
 ### Posting Listing
 1. User clicks "Post Listing" (if button exists)
