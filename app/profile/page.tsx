@@ -128,8 +128,12 @@ export default function ProfilePage() {
 				setBio(profile.bio ?? "");
 				const normalizedGames = profile.games ?? [];
 				// Separate preset games from custom games
-				const presetGames = normalizedGames.filter(game => GAME_OPTIONS.includes(game));
-				const customGames = normalizedGames.filter(game => !GAME_OPTIONS.includes(game));
+				const presetGames = normalizedGames.filter((game) =>
+					GAME_OPTIONS.includes(game)
+				);
+				const customGames = normalizedGames.filter(
+					(game) => !GAME_OPTIONS.includes(game)
+				);
 				setSelectedGames(presetGames);
 				setCustomGames(customGames);
 				setTimezone(profile.timezone ?? DEFAULT_TIMEZONE);
@@ -179,7 +183,11 @@ export default function ProfilePage() {
 
 	const addCustomGame = () => {
 		const trimmedGame = customGameInput.trim();
-		if (trimmedGame && !customGames.includes(trimmedGame) && !GAME_OPTIONS.includes(trimmedGame)) {
+		if (
+			trimmedGame &&
+			!customGames.includes(trimmedGame) &&
+			!GAME_OPTIONS.includes(trimmedGame)
+		) {
 			setCustomGames((prev) => [...prev, trimmedGame]);
 			setCustomGameInput("");
 		}
@@ -289,46 +297,59 @@ export default function ProfilePage() {
 		setImageToCrop(null);
 	};
 
-	const [lastClickedSlot, setLastClickedSlot] = useState<Record<string, string>>({});
+	const [lastClickedSlot, setLastClickedSlot] = useState<
+		Record<string, string>
+	>({});
 
-	const toggleAvailability = (day: string, timeSlot: string, shiftKey: boolean = false) => {
+	const toggleAvailability = (
+		day: string,
+		timeSlot: string,
+		shiftKey: boolean = false
+	) => {
 		setAvailability((prev) => {
 			const daySlots = prev[day] ?? [];
-			
+
 			// Handle range selection with shift key
 			if (shiftKey && lastClickedSlot[day]) {
 				const startIdx = TIME_SLOTS.indexOf(lastClickedSlot[day]);
 				const endIdx = TIME_SLOTS.indexOf(timeSlot);
-				
+
 				if (startIdx !== -1 && endIdx !== -1) {
-					const [minIdx, maxIdx] = [Math.min(startIdx, endIdx), Math.max(startIdx, endIdx)];
+					const [minIdx, maxIdx] = [
+						Math.min(startIdx, endIdx),
+						Math.max(startIdx, endIdx),
+					];
 					const slotsInRange = TIME_SLOTS.slice(minIdx, maxIdx + 1);
-					
+
 					// Check if all slots in range are already selected
-					const allSelected = slotsInRange.every(slot => daySlots.includes(slot));
-					
+					const allSelected = slotsInRange.every((slot) =>
+						daySlots.includes(slot)
+					);
+
 					let updatedSlots: string[];
 					if (allSelected) {
 						// Deselect all slots in range
-						updatedSlots = daySlots.filter(slot => !slotsInRange.includes(slot));
+						updatedSlots = daySlots.filter(
+							(slot) => !slotsInRange.includes(slot)
+						);
 					} else {
 						// Select all slots in range
 						const newSlots = [...daySlots];
-						slotsInRange.forEach(slot => {
+						slotsInRange.forEach((slot) => {
 							if (!newSlots.includes(slot)) {
 								newSlots.push(slot);
 							}
 						});
 						updatedSlots = newSlots;
 					}
-					
+
 					return {
 						...prev,
 						[day]: sortAvailabilitySlots(updatedSlots),
 					};
 				}
 			}
-			
+
 			// Normal toggle behavior
 			const exists = daySlots.includes(timeSlot);
 			const updatedSlots = exists
@@ -336,7 +357,7 @@ export default function ProfilePage() {
 				: [...daySlots, timeSlot];
 
 			// Remember last clicked slot for range selection
-			setLastClickedSlot(prev => ({ ...prev, [day]: timeSlot }));
+			setLastClickedSlot((prev) => ({ ...prev, [day]: timeSlot }));
 
 			return {
 				...prev,
@@ -523,8 +544,13 @@ export default function ProfilePage() {
 							className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 						/>
 						<p className="text-xs text-slate-400">
-							Optional. Used for SMS notifications from campaign hosts. For privacy, your phone number is never displayed after saving.{" "}
-							<Link href="/sms-consent" className="text-sky-400 hover:text-sky-300 underline">
+							Optional. Used for SMS notifications from campaign hosts.
+							For privacy, your phone number is never displayed after
+							saving.{" "}
+							<Link
+								href="/sms-consent"
+								className="text-sky-400 hover:text-sky-300 underline"
+							>
 								Learn more about SMS notifications
 							</Link>
 						</p>
@@ -591,16 +617,19 @@ export default function ProfilePage() {
 										View Collection
 									</a>
 								</div>
-								<img
-									src="/powered-by-bgg.png"
-									alt="Powered by BoardGameGeek"
-									className="h-[18px] w-[44px]"
-									title="Powered by BoardGameGeek"
-								/>
+								<div className="bg-white/50 p-.5 rounded-md">
+									<img
+										src="/powered_by_BGG_02_MED.png"
+										alt="Powered by BoardGameGeek"
+										className="h-[30px] w-[100px]"
+										title="Powered by BoardGameGeek"
+									/>
+								</div>
 							</div>
 						)}
 						<p className="text-xs text-slate-400">
-							Optional. Link your BoardGameGeek profile and game collection.
+							Optional. Link your BoardGameGeek profile and game
+							collection.
 						</p>
 					</div>
 				</section>
@@ -667,7 +696,7 @@ export default function ProfilePage() {
 									value={customGameInput}
 									onChange={(e) => setCustomGameInput(e.target.value)}
 									onKeyDown={(e) => {
-										if (e.key === 'Enter') {
+										if (e.key === "Enter") {
 											e.preventDefault();
 											addCustomGame();
 										}
@@ -760,7 +789,10 @@ export default function ProfilePage() {
 						<p className="text-sm text-slate-400">
 							Toggle the hours you are open to play. Availability is
 							tracked per day with one-hour precision so groups can
-							coordinate easily. <span className="text-sky-400">Tip: Hold Shift and click to select a range of times.</span>
+							coordinate easily.{" "}
+							<span className="text-sky-400">
+								Tip: Hold Shift and click to select a range of times.
+							</span>
 						</p>
 					</div>
 
@@ -783,17 +815,25 @@ export default function ProfilePage() {
 											</div>
 											<div className="flex flex-wrap gap-2">
 												{group.slots.map((slot) => {
-													const active = availability[day]?.includes(slot);
+													const active =
+														availability[day]?.includes(slot);
 													return (
 														<button
 															key={slot}
 															type="button"
 															onClick={(e) =>
-																toggleAvailability(day, slot, e.shiftKey)
+																toggleAvailability(
+																	day,
+																	slot,
+																	e.shiftKey
+																)
 															}
-															className={tagButtonClasses(active, {
-																size: "sm",
-															})}
+															className={tagButtonClasses(
+																active,
+																{
+																	size: "sm",
+																}
+															)}
 														>
 															{slot}
 														</button>
