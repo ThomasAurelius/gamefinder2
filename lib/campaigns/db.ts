@@ -1,6 +1,7 @@
 import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { CampaignPayload, StoredCampaign } from "./types";
+import { getTodayDateString } from "@/lib/date-utils";
 
 type CampaignDocument = Omit<StoredCampaign, 'id'> & {
   _id: ObjectId;
@@ -26,7 +27,7 @@ export async function listCampaigns(filters?: {
   const query: Record<string, unknown> = {};
   
   // Filter out past events - only show events from today onwards
-  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+  const today = getTodayDateString();
   query.date = { $gte: today };
   
   if (filters?.game) {
