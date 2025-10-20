@@ -7,6 +7,8 @@ import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS } from "@/lib/constants";
 
 import type { VendorResponse } from "@/lib/vendor-types";
 import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
+import ImageUploadField from "@/components/ImageUploadField";
+import MultiImageUploadField from "@/components/MultiImageUploadField";
 
 const tagButtonClasses = (active: boolean) => {
 	const base = "rounded-full border px-3 py-1.5 text-sm transition";
@@ -16,16 +18,10 @@ const tagButtonClasses = (active: boolean) => {
 	return `${base} border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500`;
 };
 
-const splitImagesInput = (value: string) =>
-	value
-		.split(/\r?\n|,/) // Allow comma or newline separated entries
-		.map((item) => item.trim())
-		.filter((item) => item.length > 0);
-
 export default function VendorManagementPage() {
 	const [vendorId, setVendorId] = useState<string | null>(null);
 	const [primaryImage, setPrimaryImage] = useState("");
-	const [imagesInput, setImagesInput] = useState("");
+	const [images, setImages] = useState<string[]>([]);
 	const [vendorName, setVendorName] = useState("");
 	const [description, setDescription] = useState("");
 	const [address1, setAddress1] = useState("");
@@ -70,7 +66,7 @@ export default function VendorManagementPage() {
 				if (vendor) {
 					setVendorId(vendor.id);
 					setPrimaryImage(vendor.primaryImage || "");
-					setImagesInput(vendor.images?.join("\n") ?? "");
+					setImages(vendor.images ?? []);
 					setVendorName(vendor.vendorName || "");
 					setDescription(vendor.description || "");
 					setAddress1(vendor.address1 || "");
@@ -151,7 +147,7 @@ export default function VendorManagementPage() {
 	const resetForm = () => {
 		setVendorId(null);
 		setPrimaryImage("");
-		setImagesInput("");
+		setImages([]);
 		setVendorName("");
 		setDescription("");
 		setAddress1("");
@@ -175,7 +171,7 @@ export default function VendorManagementPage() {
 
 		const payload = {
 			primaryImage,
-			images: splitImagesInput(imagesInput),
+			images,
 			vendorName,
 			description,
 			address1,
@@ -315,36 +311,23 @@ export default function VendorManagementPage() {
 								required
 							/>
 						</div>
-						<div>
-							<label className="block text-sm font-medium text-slate-200">
-								Primary Image URL
-							</label>
-							<input
-								type="url"
-								value={primaryImage}
-								onChange={(event) =>
-									setPrimaryImage(event.target.value)
-								}
-								className="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-								placeholder="https://example.com/primary-image.jpg"
-								required
-							/>
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-slate-200">
-								Additional Image URLs
-							</label>
-							<textarea
-								value={imagesInput}
-								onChange={(event) => setImagesInput(event.target.value)}
-								className="mt-1 h-24 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-								placeholder="One URL per line or comma separated"
-							/>
-							<p className="mt-1 text-xs text-slate-500">
-								Provide any additional gallery images. Leave blank if
-								you do not have extra images.
-							</p>
-						</div>
+						<ImageUploadField
+							label="Primary Image"
+							value={primaryImage}
+							onChange={setPrimaryImage}
+							type="vendor"
+							required
+							helpText="Upload an image or enter a URL. Recommended size: 800x600 pixels. Max file size: 5MB."
+							disabled={isSaving}
+						/>
+						<MultiImageUploadField
+							label="Additional Images"
+							images={images}
+							onChange={setImages}
+							type="vendor"
+							helpText="Upload images or add URLs. You can add multiple gallery images."
+							disabled={isSaving}
+						/>
 						<div>
 							<label className="block text-sm font-medium text-slate-200">
 								Website
