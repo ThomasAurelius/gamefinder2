@@ -19,6 +19,10 @@ export async function GET() {
     return NextResponse.json({ isAdmin: userIsAdmin });
   } catch (error) {
     console.error("Error checking admin status:", error);
-    return NextResponse.json({ isAdmin: false });
+    // Return 503 Service Unavailable for database/server errors
+    return NextResponse.json(
+      { error: "Service temporarily unavailable", isAdmin: false },
+      { status: 503 }
+    );
   }
 }
