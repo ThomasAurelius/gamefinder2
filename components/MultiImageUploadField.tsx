@@ -49,7 +49,6 @@ export default function MultiImageUploadField({
       const { url } = await response.json();
       // Add the new URL to the existing images
       onChange([...images, url]);
-      setUploadError(null);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to upload image";
@@ -141,6 +140,10 @@ export default function MultiImageUploadField({
                   src={imageUrl}
                   alt={`Gallery ${index + 1}`}
                   className="h-24 w-full rounded-lg border border-slate-700 object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
                 />
                 <button
                   type="button"

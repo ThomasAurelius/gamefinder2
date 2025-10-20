@@ -49,7 +49,6 @@ export default function ImageUploadField({
 
       const { url } = await response.json();
       onChange(url);
-      setUploadError(null);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to upload image";
@@ -118,6 +117,10 @@ export default function ImageUploadField({
               src={value}
               alt="Preview"
               className="h-24 w-auto rounded-lg border border-slate-700 object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+              }}
             />
           </div>
         )}
