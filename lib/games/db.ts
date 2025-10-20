@@ -13,6 +13,7 @@ export async function listGameSessions(filters?: {
   date?: string;
   times?: string[];
   hostId?: string;
+  vendorId?: string;
 }): Promise<StoredGameSession[]> {
   const db = await getDb();
   const gamesCollection = db.collection<GameSessionDocument>("gameSessions");
@@ -44,6 +45,10 @@ export async function listGameSessions(filters?: {
   if (filters?.hostId) {
     query.userId = filters.hostId;
   }
+  
+  if (filters?.vendorId) {
+    query.vendorId = filters.vendorId;
+  }
 
   const sessions = await gamesCollection
     .find(query)
@@ -73,6 +78,7 @@ export async function listGameSessions(filters?: {
     longitude: session.longitude,
     costPerSession: session.costPerSession,
     stripeConnectAccountId: session.stripeConnectAccountId,
+    vendorId: session.vendorId,
   }));
 }
 

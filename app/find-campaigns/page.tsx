@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
 	GAME_OPTIONS,
 	TIME_SLOTS,
@@ -40,6 +41,8 @@ type Campaign = {
 	costPerSession?: number;
 	meetingFrequency?: string;
 	daysOfWeek?: string[];
+	vendorId?: string;
+	vendorName?: string;
 };
 
 const tagButtonClasses = (
@@ -139,6 +142,17 @@ function CampaignCard({
 						<span className="text-slate-500">Times:</span>{" "}
 						{campaign.times.join(", ")}
 					</p>
+					{campaign.vendorId && campaign.vendorName && (
+						<p>
+							<span className="text-slate-500">Venue:</span>{" "}
+							<Link
+								href={`/vendor/${campaign.vendorId}`}
+								className="text-slate-300 hover:text-sky-300 transition-colors"
+							>
+								{campaign.vendorName}
+							</Link>
+						</p>
+					)}
 					{campaign.sessionsLeft && (
 						<p>
 							<span className="text-slate-500">Sessions Left:</span>{" "}
@@ -245,6 +259,7 @@ function CampaignCard({
 }
 
 export default function FindCampaignsPage() {
+	const searchParams = useSearchParams();
 	const [selectedGame, setSelectedGame] = useState("");
 	const [customGameName, setCustomGameName] = useState("");
 	const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
@@ -274,6 +289,13 @@ export default function FindCampaignsPage() {
 	const [selectedHostId, setSelectedHostId] = useState<string>("");
 	const [selectedHostName, setSelectedHostName] = useState<string>("");
 	const [showHostResults, setShowHostResults] = useState(false);
+	const [venueSearch, setVenueSearch] = useState("");
+	const [venueSearchResults, setVenueSearchResults] = useState<
+		{ id: string; vendorName: string }[]
+	>([]);
+	const [selectedVenueId, setSelectedVenueId] = useState<string>("");
+	const [selectedVenueName, setSelectedVenueName] = useState<string>("");
+	const [showVenueResults, setShowVenueResults] = useState(false);
 
 	useEffect(() => {
 		const fetchTimezone = async () => {
@@ -313,6 +335,8 @@ export default function FindCampaignsPage() {
 				const response = await fetch(`/api/campaigns`);
 				if (response.ok) {
 					const events = await response.json();
+					// Fetch vendor information for events with vendorId
+					await enrichEventsWithVendorInfo(events);
 					setAllEvents(events);
 				}
 			} catch (error) {
@@ -325,6 +349,32 @@ export default function FindCampaignsPage() {
 		fetchTimezone();
 		fetchUserProfileAndEvents();
 	}, []);
+
+	// Handle URL parameters separately
+	useEffect(() => {
+		const venueIdParam = searchParams.get("vendorId");
+		if (venueIdParam && !selectedVenueId) {
+			const fetchVendorFromUrl = async () => {
+				try {
+					const response = await fetch(`/api/vendors/${venueIdParam}`);
+					if (response.ok) {
+						const data = await response.json();
+						if (data.vendor) {
+							setSelectedVenueId(data.vendor.id);
+							setSelectedVenueName(data.vendor.vendorName);
+							setIsSearchFormOpen(true);
+							// Automatically trigger search
+							setTimeout(() => handleSearch(), 100);
+						}
+					}
+				} catch (error) {
+					console.error("Failed to fetch vendor from URL:", error);
+				}
+			};
+			fetchVendorFromUrl();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [searchParams]);
 
 	// Search for hosts as user types
 	useEffect(() => {
@@ -353,6 +403,35 @@ export default function FindCampaignsPage() {
 		return () => clearTimeout(debounceTimer);
 	}, [hostSearch]);
 
+	// Search for venues as user types
+	useEffect(() => {
+		const searchVenues = async () => {
+			if (!venueSearch || venueSearch.trim().length < 2) {
+				setVenueSearchResults([]);
+				setShowVenueResults(false);
+				return;
+			}
+
+			try {
+				const response = await fetch("/api/vendors");
+				if (response.ok) {
+					const data = await response.json();
+					const venues = data.vendors || [];
+					const filteredVenues = venues.filter((v: { vendorName: string }) =>
+						v.vendorName.toLowerCase().includes(venueSearch.toLowerCase())
+					);
+					setVenueSearchResults(filteredVenues);
+					setShowVenueResults(true);
+				}
+			} catch (error) {
+				console.error("Failed to search venues:", error);
+			}
+		};
+
+		const debounceTimer = setTimeout(searchVenues, 300);
+		return () => clearTimeout(debounceTimer);
+	}, [venueSearch]);
+
 	// Close host search dropdown when clicking outside
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -375,6 +454,60 @@ export default function FindCampaignsPage() {
 				document.removeEventListener("mousedown", handleClickOutside);
 		}
 	}, [showHostResults]);
+
+	// Close venue search dropdown when clicking outside
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			const venueSearchInput = document.getElementById("venue-search-campaigns");
+			if (
+				venueSearchInput &&
+				!venueSearchInput.contains(target) &&
+				!target.closest(".venue-results-dropdown")
+			) {
+				setShowVenueResults(false);
+			}
+		};
+
+		if (showVenueResults) {
+			document.addEventListener("mousedown", handleClickOutside);
+			return () =>
+				document.removeEventListener("mousedown", handleClickOutside);
+		}
+	}, [showVenueResults]);
+
+	const enrichEventsWithVendorInfo = async (events: Campaign[]) => {
+		const vendorIds = events
+			.map((e) => e.vendorId)
+			.filter((id): id is string => !!id);
+		const uniqueVendorIds = [...new Set(vendorIds)];
+
+		if (uniqueVendorIds.length > 0) {
+			try {
+				const vendorPromises = uniqueVendorIds.map((id) =>
+					fetch(`/api/vendors/${id}`).then((r) =>
+						r.ok ? r.json() : null
+					)
+				);
+				const vendorResponses = await Promise.all(vendorPromises);
+				const vendorMap = new Map<string, string>();
+
+				vendorResponses.forEach((data) => {
+					if (data?.vendor) {
+						vendorMap.set(data.vendor.id, data.vendor.vendorName);
+					}
+				});
+
+				events.forEach((event) => {
+					if (event.vendorId && vendorMap.has(event.vendorId)) {
+						event.vendorName = vendorMap.get(event.vendorId);
+					}
+				});
+			} catch (error) {
+				console.error("Failed to fetch vendor info:", error);
+			}
+		}
+	};
 
 	const toggleTime = (slot: string, shiftKey: boolean = false) => {
 		setSelectedTimes((prev) => {
@@ -440,6 +573,9 @@ export default function FindCampaignsPage() {
 			if (selectedHostId) {
 				params.append("hostId", selectedHostId);
 			}
+			if (selectedVenueId) {
+				params.append("vendorId", selectedVenueId);
+			}
 
 			const response = await fetch(`/api/campaigns?${params.toString()}`);
 			if (!response.ok) {
@@ -447,6 +583,7 @@ export default function FindCampaignsPage() {
 			}
 
 			const campaigns = await response.json();
+			await enrichEventsWithVendorInfo(campaigns);
 			setCampaigns(campaigns);
 		} catch (error) {
 			console.error("Failed to fetch campaigns", error);
@@ -752,6 +889,78 @@ export default function FindCampaignsPage() {
 							</p>
 						</div>
 
+						<div className="space-y-2 relative">
+							<label
+								htmlFor="venue-search-campaigns"
+								className="block text-sm font-medium text-slate-200"
+							>
+								Venue Name
+							</label>
+							<input
+								id="venue-search-campaigns"
+								type="text"
+								value={selectedVenueId ? selectedVenueName : venueSearch}
+								onChange={(e) => {
+									const value = e.target.value;
+									setVenueSearch(value);
+									if (selectedVenueId) {
+										setSelectedVenueId("");
+										setSelectedVenueName("");
+									}
+								}}
+								onFocus={() => {
+									if (venueSearchResults.length > 0) {
+										setShowVenueResults(true);
+									}
+								}}
+								placeholder="Search for a venue by name..."
+								className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+							/>
+							{showVenueResults && venueSearchResults.length > 0 && (
+								<div className="venue-results-dropdown absolute z-10 w-full mt-1 rounded-lg border border-slate-700 bg-slate-900 shadow-lg max-h-60 overflow-y-auto">
+									{venueSearchResults.map((venue) => (
+										<button
+											key={venue.id}
+											type="button"
+											onClick={() => {
+												setSelectedVenueId(venue.id);
+												setSelectedVenueName(venue.vendorName);
+												setVenueSearch("");
+												setShowVenueResults(false);
+											}}
+											className="w-full px-4 py-2 text-left text-sm text-slate-200 hover:bg-slate-800 transition-colors"
+										>
+											{venue.vendorName}
+										</button>
+									))}
+								</div>
+							)}
+							{selectedVenueId && (
+								<div className="flex items-center gap-2 mt-2">
+									<span className="text-xs text-slate-400">
+										Filtering by:{" "}
+										<span className="text-sky-400">
+											{selectedVenueName}
+										</span>
+									</span>
+									<button
+										type="button"
+										onClick={() => {
+											setSelectedVenueId("");
+											setSelectedVenueName("");
+											setVenueSearch("");
+										}}
+										className="text-xs text-red-400 hover:text-red-300"
+									>
+										Clear
+									</button>
+								</div>
+							)}
+							<p className="text-xs text-slate-500">
+								Find campaigns at a specific venue
+							</p>
+						</div>
+
 						<div className="space-y-2">
 							<label
 								htmlFor="location-search"
@@ -843,7 +1052,8 @@ export default function FindCampaignsPage() {
 									!selectedDate &&
 									selectedTimes.length === 0 &&
 									!locationSearch &&
-									!selectedHostId) ||
+									!selectedHostId &&
+									!selectedVenueId) ||
 								(selectedGame === "Other" && !customGameName.trim()) ||
 								isLoading
 							}
@@ -870,7 +1080,8 @@ export default function FindCampaignsPage() {
 						selectedDate ||
 						selectedTimes.length > 0 ||
 						locationSearch ||
-						selectedHostId ? (
+						selectedHostId ||
+						selectedVenueId ? (
 							<>
 								Showing games
 								{selectedGame && (
@@ -891,6 +1102,15 @@ export default function FindCampaignsPage() {
 										hosted by{" "}
 										<span className="text-sky-400">
 											{selectedHostName}
+										</span>
+									</>
+								)}
+								{selectedVenueId && (
+									<>
+										{" "}
+										at{" "}
+										<span className="text-sky-400">
+											{selectedVenueName}
 										</span>
 									</>
 								)}

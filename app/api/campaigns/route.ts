@@ -71,8 +71,9 @@ export async function GET(request: Request) {
     const radiusMiles = parseFloat(searchParams.get("radius") || "25");
     const userFilter = searchParams.get("userFilter") || undefined;
     const hostId = searchParams.get("hostId") || undefined;
+    const vendorId = searchParams.get("vendorId") || undefined;
 
-    const campaigns = await listCampaigns({ game, date, times, userFilter, hostId });
+    const campaigns = await listCampaigns({ game, date, times, userFilter, hostId, vendorId });
 
     // Fetch host information for all campaigns
     const hostIds = [...new Set(campaigns.map(c => c.userId))];
