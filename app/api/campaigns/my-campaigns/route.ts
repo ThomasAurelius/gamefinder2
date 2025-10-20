@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { listCampaigns } from "@/lib/campaigns/db";
 import { getUsersBasicInfo } from "@/lib/users";
+import { getVendorsBasicInfo } from "@/lib/vendors";
 
 export async function GET() {
   try {
@@ -22,11 +23,16 @@ export async function GET() {
     const hostIds = [...new Set(campaigns.map(c => c.userId))];
     const hostsMap = await getUsersBasicInfo(hostIds);
     
-    // Add host information to campaigns
+    // Fetch vendor information for all campaigns that have a vendorId
+    const vendorIds = [...new Set(campaigns.map(c => c.vendorId).filter((id): id is string => !!id))];
+    const vendorsMap = await getVendorsBasicInfo(vendorIds);
+    
+    // Add host and vendor information to campaigns
     const campaignsWithHosts = campaigns.map(campaign => ({
       ...campaign,
       hostName: hostsMap.get(campaign.userId)?.name || "Unknown Host",
       hostAvatarUrl: hostsMap.get(campaign.userId)?.avatarUrl,
+      vendorName: campaign.vendorId ? vendorsMap.get(campaign.vendorId)?.vendorName : undefined,
     }));
     
     return NextResponse.json(campaignsWithHosts, { status: 200 });

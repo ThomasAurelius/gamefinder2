@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { listUserGameSessions } from "@/lib/games/db";
 import { getUsersBasicInfo } from "@/lib/users";
+import { getVendorsBasicInfo } from "@/lib/vendors";
 
 export async function GET() {
   try {
@@ -21,11 +22,16 @@ export async function GET() {
     const hostIds = [...new Set(sessions.map(s => s.userId))];
     const hostsMap = await getUsersBasicInfo(hostIds);
     
-    // Add host information to sessions
+    // Fetch vendor information for all sessions that have a vendorId
+    const vendorIds = [...new Set(sessions.map(s => s.vendorId).filter((id): id is string => !!id))];
+    const vendorsMap = await getVendorsBasicInfo(vendorIds);
+    
+    // Add host and vendor information to sessions
     const sessionsWithHosts = sessions.map(session => ({
       ...session,
       hostName: hostsMap.get(session.userId)?.name || "Unknown Host",
       hostAvatarUrl: hostsMap.get(session.userId)?.avatarUrl,
+      vendorName: session.vendorId ? vendorsMap.get(session.vendorId)?.vendorName : undefined,
     }));
     
     return NextResponse.json(sessionsWithHosts, { status: 200 });
