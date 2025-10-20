@@ -432,10 +432,13 @@ export default function VendorDetailsPage() {
 
 					<div className="space-y-2 text-sm text-slate-300">
 						<p>
-							Owner User ID:{" "}
-							<span className="text-slate-100">
+							Vendor Manager:{" "}
+							<Link
+								href={`/user/${vendor.ownerUserId}`}
+								className="text-sky-400 hover:underline"
+							>
 								{vendor.ownerUserId}
-							</span>
+							</Link>
 						</p>
 						{canEdit ? (
 							<button
