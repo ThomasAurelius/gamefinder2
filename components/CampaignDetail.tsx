@@ -67,6 +67,15 @@ type PlayerWithInfo = {
   hasActiveSubscription?: boolean;
 };
 
+type Vendor = {
+  id: string;
+  vendorName: string;
+  address1: string;
+  city: string;
+  state: string;
+  zip: string;
+};
+
 type CampaignNote = {
   id: string;
   campaignId: string;
@@ -84,7 +93,7 @@ type CampaignDetailProps = {
 export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDetailProps) {
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [vendor, setVendor] = useState<{ id: string; vendorName: string; address1: string; city: string; state: string; zip: string } | null>(null);
+  const [vendor, setVendor] = useState<Vendor | null>(null);
   const [notes, setNotes] = useState<CampaignNote[]>([]);
   const [pendingPlayersList, setPendingPlayersList] = useState<PendingPlayer[]>([]);
   const [signedUpPlayersList, setSignedUpPlayersList] = useState<PlayerWithInfo[]>([]);
@@ -133,10 +142,15 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
 
         // Fetch vendor information if vendorId is present
         if (campaignData.vendorId) {
-          const vendorResponse = await fetch(`/api/vendors/${campaignData.vendorId}`);
-          if (vendorResponse.ok) {
-            const vendorData = await vendorResponse.json();
-            setVendor(vendorData);
+          try {
+            const vendorResponse = await fetch(`/api/vendors/${campaignData.vendorId}`);
+            if (vendorResponse.ok) {
+              const vendorData = await vendorResponse.json();
+              setVendor(vendorData);
+            }
+          } catch (vendorError) {
+            console.error("Error fetching vendor:", vendorError);
+            // Continue without vendor data
           }
         }
 
