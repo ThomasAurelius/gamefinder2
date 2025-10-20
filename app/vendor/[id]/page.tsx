@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { DAYS_OF_WEEK } from "@/lib/constants";
-import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
+import { createDefaultHours, sortTimeSlots, getOpeningClosingTimes } from "@/lib/vendor-utils";
 import type { VendorResponse } from "@/lib/vendor-types";
 
 type AuthInfo = {
@@ -377,11 +377,7 @@ export default function VendorDetailsPage() {
 								>
 									<dt className="font-medium text-slate-200">{day}</dt>
 									<dd className="text-right text-slate-300">
-										{slots.length > 0 ? (
-											slots.join(", ")
-										) : (
-											<span className="text-slate-500">Closed</span>
-										)}
+										{getOpeningClosingTimes(slots)}
 									</dd>
 								</div>
 							))}
