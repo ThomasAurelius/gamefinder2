@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 import { createVendor, listVendors, parseVendorPayload } from "@/lib/vendors";
+import { isAdmin } from "@/lib/admin";
 
 export async function GET(request: Request) {
   try {
@@ -11,7 +12,6 @@ export async function GET(request: Request) {
 
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const isAdmin = cookieStore.get("isAdmin")?.value === "true";
 
     if (ownerParam === "me") {
       if (!userId) {
@@ -23,7 +23,12 @@ export async function GET(request: Request) {
     }
 
     if (includeUnapproved) {
-      if (!isAdmin) {
+      if (!userId) {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
+
+      const userIsAdmin = await isAdmin(userId);
+      if (!userIsAdmin) {
         return NextResponse.json({ error: "Admin access required" }, { status: 403 });
       }
 
