@@ -14,6 +14,7 @@ import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 import CommitmentDialog from "@/components/CommitmentDialog";
 import Advertisement from "@/components/Advertisement";
+import PageLoadingFallback from "@/components/PageLoadingFallback";
 
 type Campaign = {
 	id: string;
@@ -1214,7 +1215,7 @@ function FindCampaignsPageContent() {
 
 export default function FindCampaignsPage() {
 	return (
-		<Suspense fallback={<div className="space-y-6"><div className="text-center text-slate-400">Loading...</div></div>}>
+		<Suspense fallback={<PageLoadingFallback />}>
 			<FindCampaignsPageContent />
 		</Suspense>
 	);

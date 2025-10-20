@@ -13,6 +13,7 @@ import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 import Advertisement from "@/components/Advertisement";
+import PageLoadingFallback from "@/components/PageLoadingFallback";
 
 type GameSession = {
 	id: string;
@@ -1210,7 +1211,7 @@ function FindGamesPageContent() {
 
 export default function FindGamesPage() {
 	return (
-		<Suspense fallback={<div className="space-y-6"><div className="text-center text-slate-400">Loading...</div></div>}>
+		<Suspense fallback={<PageLoadingFallback />}>
 			<FindGamesPageContent />
 		</Suspense>
 	);
