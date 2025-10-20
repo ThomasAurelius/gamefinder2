@@ -21,6 +21,15 @@ type Player = {
   characterIsPublic?: boolean;
 };
 
+type Vendor = {
+  id: string;
+  vendorName: string;
+  address1: string;
+  city: string;
+  state: string;
+  zip: string;
+};
+
 type GameSession = {
   id: string;
   userId: string;
@@ -41,6 +50,7 @@ type GameSession = {
 type GameDetailClientProps = {
   session: GameSession;
   host: Player | null;
+  vendor: Vendor | null;
   signedUpPlayersList: Player[];
   waitlistPlayersList: Player[];
   pendingPlayersList: Player[];
@@ -54,6 +64,7 @@ type GameDetailClientProps = {
 export default function GameDetailClient({
   session,
   host,
+  vendor,
   signedUpPlayersList,
   waitlistPlayersList,
   pendingPlayersList,
@@ -237,6 +248,31 @@ export default function GameDetailClient({
           </Link>
         </div>
       </section>
+
+      {/* Venue Information */}
+      {vendor && (
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-slate-100">
+            Venue
+          </h2>
+          <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-4">
+            <Link
+              href={`/vendor/${vendor.id}`}
+              className="block hover:opacity-80 transition-opacity"
+            >
+              <p className="text-base font-medium text-sky-400 hover:text-sky-300">
+                {vendor.vendorName}
+              </p>
+              <p className="text-sm text-slate-400 mt-1">
+                {vendor.address1}
+              </p>
+              <p className="text-sm text-slate-400">
+                {vendor.city}, {vendor.state} {vendor.zip}
+              </p>
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* Pending Players (only visible to host) */}
       {isHost && pendingPlayersList.length > 0 && (

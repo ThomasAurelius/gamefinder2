@@ -43,6 +43,7 @@ type Campaign = {
   daysOfWeek?: string[];
   hostName?: string;
   hostAvatarUrl?: string;
+  vendorId?: string;
 };
 
 type PendingPlayer = {
@@ -83,6 +84,7 @@ type CampaignDetailProps = {
 export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDetailProps) {
   const router = useRouter();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [vendor, setVendor] = useState<{ id: string; vendorName: string; address1: string; city: string; state: string; zip: string } | null>(null);
   const [notes, setNotes] = useState<CampaignNote[]>([]);
   const [pendingPlayersList, setPendingPlayersList] = useState<PendingPlayer[]>([]);
   const [signedUpPlayersList, setSignedUpPlayersList] = useState<PlayerWithInfo[]>([]);
@@ -128,6 +130,15 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
         }
         const campaignData = await campaignResponse.json();
         setCampaign(campaignData);
+
+        // Fetch vendor information if vendorId is present
+        if (campaignData.vendorId) {
+          const vendorResponse = await fetch(`/api/vendors/${campaignData.vendorId}`);
+          if (vendorResponse.ok) {
+            const vendorData = await vendorResponse.json();
+            setVendor(vendorData);
+          }
+        }
 
         // Fetch current user
         const userResponse = await fetch("/api/auth/user");
@@ -641,6 +652,17 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                   {campaign.location || campaign.zipCode}
                 </p>
               )}
+              {vendor && (
+                <p>
+                  <span className="text-slate-500">Venue:</span>{" "}
+                  <Link
+                    href={`/vendor/${vendor.id}`}
+                    className="text-sky-400 hover:text-sky-300 transition-colors"
+                  >
+                    {vendor.vendorName}
+                  </Link>
+                </p>
+              )}
               <p>
                 <span className="text-slate-500">Players:</span>{" "}
                 <span className={isFull ? "text-orange-400" : "text-green-400"}>
@@ -712,6 +734,17 @@ export default function CampaignDetail({ campaignId, campaignUrl }: CampaignDeta
                   <p>
                     <span className="text-slate-500">Location:</span>{" "}
                     {campaign.location || campaign.zipCode}
+                  </p>
+                )}
+                {vendor && (
+                  <p>
+                    <span className="text-slate-500">Venue:</span>{" "}
+                    <Link
+                      href={`/vendor/${vendor.id}`}
+                      className="text-sky-400 hover:text-sky-300 transition-colors"
+                    >
+                      {vendor.vendorName}
+                    </Link>
                   </p>
                 )}
                 <p>
