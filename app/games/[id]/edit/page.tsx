@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import VenueSelector from "@/components/VenueSelector";
 
 const tagButtonClasses = (
 	active: boolean,
@@ -39,6 +40,7 @@ export default function EditGamePage() {
 	const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
+	const [vendorId, setVendorId] = useState("");
 	
 	// Payment-related state
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
@@ -82,6 +84,7 @@ export default function EditGamePage() {
 				setImageUrl(game.imageUrl || "");
 				setLocation(game.location || "");
 				setZipCode(game.zipCode || "");
+				setVendorId(game.vendorId || "");
 				setCostPerSession(game.costPerSession || '');
 			} catch (err) {
 				setError(
@@ -215,6 +218,7 @@ export default function EditGamePage() {
 				location: string;
 				zipCode: string;
 				costPerSession?: number;
+				vendorId?: string;
 			} = {
 				game: gameName,
 				date: selectedDate,
@@ -224,6 +228,7 @@ export default function EditGamePage() {
 				imageUrl: imageUrl || undefined,
 				location: location,
 				zipCode: zipCode,
+				vendorId: vendorId || undefined,
 			};
 
 			// Add costPerSession if it's set and greater than 0
@@ -383,6 +388,24 @@ export default function EditGamePage() {
 					/>
 					<p className="text-xs text-slate-500">
 						Optional. Provides more accurate location than city/state.
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="venue"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Venue
+					</label>
+					<VenueSelector
+						zipCode={zipCode}
+						value={vendorId}
+						onChange={setVendorId}
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						Optional. Select an approved venue for this game.
 					</p>
 				</div>
 

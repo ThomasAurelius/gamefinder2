@@ -94,6 +94,7 @@ export async function listCampaigns(filters?: {
     costPerSession: campaign.costPerSession,
     meetingFrequency: campaign.meetingFrequency,
     daysOfWeek: campaign.daysOfWeek,
+    vendorId: campaign.vendorId,
   }));
 }
 
@@ -148,6 +149,7 @@ export async function getCampaign(id: string): Promise<StoredCampaign | null> {
     costPerSession: campaign.costPerSession,
     meetingFrequency: campaign.meetingFrequency,
     daysOfWeek: campaign.daysOfWeek,
+    vendorId: campaign.vendorId,
   };
 }
 
@@ -185,6 +187,7 @@ export async function createCampaign(
     costPerSession: payload.costPerSession,
     meetingFrequency: payload.meetingFrequency,
     daysOfWeek: payload.daysOfWeek,
+    vendorId: payload.vendorId,
   };
 
   const result = await campaignsCollection.insertOne(newCampaign as CampaignDocument);
@@ -215,6 +218,7 @@ export async function createCampaign(
     costPerSession: newCampaign.costPerSession,
     meetingFrequency: newCampaign.meetingFrequency,
     daysOfWeek: newCampaign.daysOfWeek,
+    vendorId: newCampaign.vendorId,
   };
 }
 

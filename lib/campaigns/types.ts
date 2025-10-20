@@ -20,6 +20,7 @@ export type CampaignPayload = {
   meetingFrequency?: string;
   daysOfWeek?: string[];
   stripeConnectAccountId?: string; // Host's Stripe Connect account ID for payment splitting
+  vendorId?: string; // Vendor ID for the venue
 };
 
 export type PlayerSignup = {
