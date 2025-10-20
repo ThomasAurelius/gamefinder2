@@ -36,7 +36,11 @@ async function getClient(): Promise<MongoClient> {
 
   if (!cache.promise) {
     const uri = resolveMongoUri();
-    const client = new MongoClient(uri);
+    const client = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 5000, // 5 second timeout for server selection
+      connectTimeoutMS: 10000, // 10 second timeout for initial connection
+      socketTimeoutMS: 45000, // 45 second timeout for socket operations
+    });
     cache.promise = client.connect().then((connectedClient) => {
       cache.client = connectedClient;
       return connectedClient;

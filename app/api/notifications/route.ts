@@ -18,22 +18,36 @@ export async function GET() {
 			);
 		}
 
-		// Check profile completeness
-		const profile = await readProfile(userId);
-		const hasIncompleteSettings =
-			!profile.commonName ||
-			!profile.location ||
-			!profile.zipCode ||
-			!profile.bio ||
-			!profile.availability ||
-			!profile.games ||
-			!profile.primaryRole;
-
-		// Get unread message count
-		const unreadMessageCount = await getUnreadCount(userId);
-
-		// Get new posts count since last login
+		// Initialize response with defaults
+		let hasIncompleteSettings = false;
+		let unreadMessageCount = 0;
 		let newPostsCount = 0;
+
+		// Check profile completeness with error handling
+		try {
+			const profile = await readProfile(userId);
+			hasIncompleteSettings =
+				!profile.commonName ||
+				!profile.location ||
+				!profile.zipCode ||
+				!profile.bio ||
+				!profile.availability ||
+				!profile.games ||
+				!profile.primaryRole;
+		} catch (error) {
+			console.error("Error reading profile:", error);
+			// Continue with default value
+		}
+
+		// Get unread message count with error handling
+		try {
+			unreadMessageCount = await getUnreadCount(userId);
+		} catch (error) {
+			console.error("Error getting unread count:", error);
+			// Continue with default value
+		}
+
+		// Get new posts count since last login with error handling
 		try {
 			const db = await getDb();
 			const usersCollection = db.collection("users");
@@ -51,7 +65,7 @@ export async function GET() {
 			}
 		} catch (error) {
 			console.error("Error counting new posts:", error);
-			// Continue with newPostsCount = 0
+			// Continue with default value
 		}
 
 		return NextResponse.json({
@@ -61,9 +75,10 @@ export async function GET() {
 		});
 	} catch (error) {
 		console.error("Error fetching notifications:", error);
+		// Return 503 Service Unavailable for critical errors
 		return NextResponse.json(
-			{ error: "Failed to fetch notifications" },
-			{ status: 500 }
+			{ error: "Service temporarily unavailable" },
+			{ status: 503 }
 		);
 	}
 }
