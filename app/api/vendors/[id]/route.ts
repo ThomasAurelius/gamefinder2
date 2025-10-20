@@ -8,6 +8,7 @@ import {
   parseVendorPayload,
   updateVendor,
 } from "@/lib/vendors";
+import { isAdmin } from "@/lib/admin";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -29,10 +30,10 @@ export async function GET(_request: Request, context: RouteContext) {
 
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const isAdmin = cookieStore.get("isAdmin")?.value === "true";
 
+    const userIsAdmin = userId ? await isAdmin(userId) : false;
     const isOwner = userId && vendor.ownerUserId === userId;
-    if (!vendor.isApproved && !isOwner && !isAdmin) {
+    if (!vendor.isApproved && !isOwner && !userIsAdmin) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
     }
 
@@ -58,21 +59,21 @@ export async function PUT(request: Request, context: RouteContext) {
 
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const isAdmin = cookieStore.get("isAdmin")?.value === "true";
 
     if (!userId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
+    const userIsAdmin = await isAdmin(userId);
     const isOwner = existingVendor.ownerUserId === userId;
-    if (!isOwner && !isAdmin) {
+    if (!isOwner && !userIsAdmin) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 
     const payload = await request.json();
-    const vendorData = parseVendorPayload(payload, { allowApprovalFields: isAdmin });
+    const vendorData = parseVendorPayload(payload, { allowApprovalFields: userIsAdmin });
 
-    const updatedVendor = await updateVendor(id, vendorData, { allowApprovalFields: isAdmin });
+    const updatedVendor = await updateVendor(id, vendorData, { allowApprovalFields: userIsAdmin });
 
     if (!updatedVendor) {
       return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
@@ -101,14 +102,14 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
-    const isAdmin = cookieStore.get("isAdmin")?.value === "true";
 
     if (!userId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
+    const userIsAdmin = await isAdmin(userId);
     const isOwner = existingVendor.ownerUserId === userId;
-    if (!isOwner && !isAdmin) {
+    if (!isOwner && !userIsAdmin) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
 

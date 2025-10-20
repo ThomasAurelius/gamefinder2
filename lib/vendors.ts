@@ -1,14 +1,12 @@
 import { ObjectId, type OptionalId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { normalizeHours, sortTimeSlots, createDefaultHours } from "@/lib/vendor-utils";
+import { normalizeHours, type VendorHours } from "@/lib/vendor-utils";
 import type {
-	VendorBase,
 	VendorPayload,
 	VendorResponse,
 } from "@/lib/vendor-types";
-import { DAYS_OF_WEEK, TIME_SLOTS } from "@/lib/constants";
 
-export type VendorHours = Record<string, string[]>;
+export type { VendorHours };
 
 export type VendorDocument = {
 	_id?: ObjectId;
@@ -32,9 +30,6 @@ export type VendorDocument = {
 };
 
 export type { VendorPayload, VendorResponse } from "@/lib/vendor-types";
-
-const VALID_DAYS = new Set(DAYS_OF_WEEK);
-const VALID_TIME_SLOTS = new Set(TIME_SLOTS);
 
 export { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
 
