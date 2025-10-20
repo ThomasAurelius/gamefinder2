@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -13,6 +13,7 @@ import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 import Advertisement from "@/components/Advertisement";
+import PageLoadingFallback from "@/components/PageLoadingFallback";
 
 type GameSession = {
 	id: string;
@@ -219,7 +220,7 @@ function GameSessionCard({
 	);
 }
 
-export default function FindGamesPage() {
+function FindGamesPageContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [selectedGame, setSelectedGame] = useState("");
@@ -1205,5 +1206,13 @@ export default function FindGamesPage() {
 				</div>
 			)}
 		</section>
+	);
+}
+
+export default function FindGamesPage() {
+	return (
+		<Suspense fallback={<PageLoadingFallback />}>
+			<FindGamesPageContent />
+		</Suspense>
 	);
 }

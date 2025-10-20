@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -14,6 +14,7 @@ import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
 import CommitmentDialog from "@/components/CommitmentDialog";
 import Advertisement from "@/components/Advertisement";
+import PageLoadingFallback from "@/components/PageLoadingFallback";
 
 type Campaign = {
 	id: string;
@@ -258,7 +259,7 @@ function CampaignCard({
 	);
 }
 
-export default function FindCampaignsPage() {
+function FindCampaignsPageContent() {
 	const searchParams = useSearchParams();
 	const [selectedGame, setSelectedGame] = useState("");
 	const [customGameName, setCustomGameName] = useState("");
@@ -1209,5 +1210,13 @@ export default function FindCampaignsPage() {
 				</div>
 			)}
 		</section>
+	);
+}
+
+export default function FindCampaignsPage() {
+	return (
+		<Suspense fallback={<PageLoadingFallback />}>
+			<FindCampaignsPageContent />
+		</Suspense>
 	);
 }
