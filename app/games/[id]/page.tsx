@@ -4,6 +4,7 @@ import { getGameSession } from "@/lib/games/db";
 import { getUsersBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import { getCharactersPublicStatus } from "@/lib/characters/db";
+import { getVendorById } from "@/lib/vendors";
 import GameDetailClient from "@/components/GameDetailClient";
 import type { Metadata } from "next";
 
@@ -89,6 +90,12 @@ export default async function GameDetailPage({
 
 	const host = usersMap.get(session.userId);
 	
+	// Fetch vendor information if vendorId is present
+	let vendor = null;
+	if (session.vendorId) {
+		vendor = await getVendorById(session.vendorId);
+	}
+	
 	// Collect all character IDs to fetch their public status
 	const signedUpPlayersWithCharacters = session.signedUpPlayersWithCharacters || [];
 	const waitlistWithCharacters = session.waitlistWithCharacters || [];
@@ -161,6 +168,7 @@ export default async function GameDetailPage({
 		<GameDetailClient
 			session={session}
 			host={host || null}
+			vendor={vendor}
 			signedUpPlayersList={signedUpPlayersList}
 			waitlistPlayersList={waitlistPlayersList}
 			pendingPlayersList={pendingPlayersList}

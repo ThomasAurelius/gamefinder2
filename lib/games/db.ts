@@ -109,6 +109,7 @@ export async function getGameSession(id: string): Promise<StoredGameSession | nu
     longitude: session.longitude,
     costPerSession: session.costPerSession,
     stripeConnectAccountId: session.stripeConnectAccountId,
+    vendorId: session.vendorId,
   };
 }
 
@@ -144,6 +145,7 @@ export async function createGameSession(
     longitude: payload.longitude,
     costPerSession: payload.costPerSession,
     stripeConnectAccountId: payload.stripeConnectAccountId,
+    vendorId: payload.vendorId,
   };
 
   await gamesCollection.insertOne(newSession);
@@ -171,6 +173,7 @@ export async function createGameSession(
     longitude: newSession.longitude,
     costPerSession: newSession.costPerSession,
     stripeConnectAccountId: newSession.stripeConnectAccountId,
+    vendorId: newSession.vendorId,
   };
 }
 

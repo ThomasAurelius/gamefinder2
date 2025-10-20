@@ -40,6 +40,7 @@ function parseGameSessionPayload(data: unknown): GameSessionPayload | null {
     longitude: typeof payload.longitude === "number" ? payload.longitude : undefined,
     costPerSession: typeof payload.costPerSession === "number" && payload.costPerSession >= 0 ? payload.costPerSession : undefined,
     stripeConnectAccountId: typeof payload.stripeConnectAccountId === "string" ? payload.stripeConnectAccountId : undefined,
+    vendorId: typeof payload.vendorId === "string" ? payload.vendorId : undefined,
   };
 }
 
