@@ -30,16 +30,25 @@ const primaryLinks: NavItem[] = [
 	{ href: "/find-campaigns", label: "Campaigns" },
 ];
 
-const accountLinks: NavLink[] = [
-	{ href: "/profile", label: "Profile" },
-	{ href: "/host/dashboard", label: "Host Dashboard" },
-	{ href: "/subscriptions", label: "Subscriptions" },
-	{ href: "/messages", label: "Messages" },
-	{ href: "/settings", label: "Settings" },
-	{ href: "/characters", label: "Characters" },
-	{ href: "/settings/games-history", label: "Sessions History" },
-	{ href: "/auth/login", label: "Logout" },
-];
+const getAccountLinks = (isAdmin: boolean): NavLink[] => {
+	const links: NavLink[] = [
+		{ href: "/profile", label: "Profile" },
+		{ href: "/host/dashboard", label: "Host Dashboard" },
+		{ href: "/subscriptions", label: "Subscriptions" },
+		{ href: "/messages", label: "Messages" },
+		{ href: "/settings", label: "Settings" },
+		{ href: "/characters", label: "Characters" },
+		{ href: "/settings/games-history", label: "Sessions History" },
+	];
+
+	if (isAdmin) {
+		links.push({ href: "/settings/vendors", label: "Vendors" });
+	}
+
+	links.push({ href: "/auth/login", label: "Logout" });
+
+	return links;
+};
 
 function isActive(pathname: string, href: string) {
 	return pathname === href;
@@ -74,6 +83,7 @@ export function Navbar() {
 	const [newPostsCount, setNewPostsCount] = useState(0);
 	const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
 	const [userCommonName, setUserCommonName] = useState<string>("");
+	const [isAdmin, setIsAdmin] = useState(false);
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -124,8 +134,23 @@ export function Navbar() {
 			}
 		};
 
+		const fetchAdminStatus = async () => {
+			if (!isAuthenticated || authLoading) return;
+
+			try {
+				const response = await fetch("/api/admin/status");
+				if (response.ok) {
+					const data = await response.json();
+					setIsAdmin(data.isAdmin);
+				}
+			} catch (error) {
+				console.error("Failed to fetch admin status:", error);
+			}
+		};
+
 		fetchNotifications();
 		fetchUserProfile();
+		fetchAdminStatus();
 	}, [isAuthenticated, authLoading, pathname]);
 
 	const toggleMenu = () => setMenuOpen((open) => !open);
@@ -311,7 +336,7 @@ export function Navbar() {
 									</button>
 									{accountOpen ? (
 										<div className="absolute right-0 z-20 mt-2 w-48 overflow-hidden rounded-lg border border-white/10 bg-slate-900 shadow-lg">
-											{accountLinks.map((link) => (
+											{getAccountLinks(isAdmin).map((link) => (
 												<Link
 													key={link.href}
 													href={link.href}
@@ -459,7 +484,7 @@ export function Navbar() {
 									<p className="px-3 text-xs uppercase tracking-wide text-slate-400">
 										Account
 									</p>
-									{accountLinks.map((link) => (
+									{getAccountLinks(isAdmin).map((link) => (
 										<Link
 											key={link.href}
 											href={link.href}
