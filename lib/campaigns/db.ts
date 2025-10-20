@@ -19,6 +19,7 @@ export async function listCampaigns(filters?: {
   times?: string[];
   userFilter?: string;
   hostId?: string;
+  vendorId?: string;
 }): Promise<StoredCampaign[]> {
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
@@ -50,6 +51,11 @@ export async function listCampaigns(filters?: {
   // If hostId is provided, filter by host
   if (filters?.hostId) {
     query.userId = filters.hostId;
+  }
+
+  // If vendorId is provided, filter by venue
+  if (filters?.vendorId) {
+    query.vendorId = filters.vendorId;
   }
 
   // If userFilter is provided, find campaigns where the user is hosting or playing
