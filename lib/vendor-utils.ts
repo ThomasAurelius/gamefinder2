@@ -32,3 +32,29 @@ export function normalizeHours(hours: VendorHours | undefined): VendorHours {
 
   return normalized;
 }
+
+/**
+ * Get opening and closing times from an array of time slots
+ * @param slots - Array of time slot strings (e.g., ["9:00 AM", "10:00 AM", "5:00 PM"])
+ * @returns Opening and closing times as a string (e.g., "9:00 AM - 5:00 PM") or "Closed"
+ */
+export function getOpeningClosingTimes(slots: string[]): string {
+  if (!slots || slots.length === 0) {
+    return "Closed";
+  }
+
+  const sortedSlots = sortTimeSlots(slots);
+  
+  if (sortedSlots.length === 0) {
+    return "Closed";
+  }
+
+  if (sortedSlots.length === 1) {
+    return sortedSlots[0];
+  }
+
+  const openingTime = sortedSlots[0];
+  const closingTime = sortedSlots[sortedSlots.length - 1];
+
+  return `${openingTime} - ${closingTime}`;
+}

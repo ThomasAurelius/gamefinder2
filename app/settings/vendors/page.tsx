@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { VendorResponse } from "@/lib/vendor-types";
+import { getOpeningClosingTimes } from "@/lib/vendor-utils";
 
 export default function VendorsAdminPage() {
 	const [vendors, setVendors] = useState<VendorResponse[]>([]);
@@ -301,7 +302,8 @@ export default function VendorsAdminPage() {
 								<div className="mt-2 grid gap-2 md:grid-cols-2">
 									{Object.entries(selectedVendor.hoursOfOperation).map(
 										([day, hours]) => {
-											if (!hours || hours.length === 0) return null;
+											const timeDisplay = getOpeningClosingTimes(hours);
+											if (timeDisplay === "Closed") return null;
 											return (
 												<div
 													key={day}
@@ -311,7 +313,7 @@ export default function VendorsAdminPage() {
 														{day}:
 													</span>{" "}
 													<span className="text-sm text-slate-400">
-														{hours.join(", ")}
+														{timeDisplay}
 													</span>
 												</div>
 											);
