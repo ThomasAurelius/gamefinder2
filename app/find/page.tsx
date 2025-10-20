@@ -307,10 +307,15 @@ export default function FindGamesPage() {
 			}
 		};
 
-		const initializeFromUrlParams = async () => {
-			// Check for vendorId in URL parameters
-			const venueIdParam = searchParams.get("vendorId");
-			if (venueIdParam) {
+		fetchTimezone();
+		fetchUserProfileAndEvents();
+	}, []);
+
+	// Handle URL parameters separately
+	useEffect(() => {
+		const venueIdParam = searchParams.get("vendorId");
+		if (venueIdParam && !selectedVenueId) {
+			const fetchVendorFromUrl = async () => {
 				try {
 					const response = await fetch(`/api/vendors/${venueIdParam}`);
 					if (response.ok) {
@@ -326,12 +331,10 @@ export default function FindGamesPage() {
 				} catch (error) {
 					console.error("Failed to fetch vendor from URL:", error);
 				}
-			}
-		};
-
-		fetchTimezone();
-		fetchUserProfileAndEvents();
-		initializeFromUrlParams();
+			};
+			fetchVendorFromUrl();
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParams]);
 
 	// Search for hosts as user types
