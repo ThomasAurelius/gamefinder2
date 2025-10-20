@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -219,7 +219,7 @@ function GameSessionCard({
 	);
 }
 
-export default function FindGamesPage() {
+function FindGamesPageContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [selectedGame, setSelectedGame] = useState("");
@@ -1205,5 +1205,13 @@ export default function FindGamesPage() {
 				</div>
 			)}
 		</section>
+	);
+}
+
+export default function FindGamesPage() {
+	return (
+		<Suspense fallback={<div className="space-y-6"><div className="text-center text-slate-400">Loading...</div></div>}>
+			<FindGamesPageContent />
+		</Suspense>
 	);
 }

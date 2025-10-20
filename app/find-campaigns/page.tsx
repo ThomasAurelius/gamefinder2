@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -258,7 +258,7 @@ function CampaignCard({
 	);
 }
 
-export default function FindCampaignsPage() {
+function FindCampaignsPageContent() {
 	const searchParams = useSearchParams();
 	const [selectedGame, setSelectedGame] = useState("");
 	const [customGameName, setCustomGameName] = useState("");
@@ -1209,5 +1209,13 @@ export default function FindCampaignsPage() {
 				</div>
 			)}
 		</section>
+	);
+}
+
+export default function FindCampaignsPage() {
+	return (
+		<Suspense fallback={<div className="space-y-6"><div className="text-center text-slate-400">Loading...</div></div>}>
+			<FindCampaignsPageContent />
+		</Suspense>
 	);
 }
