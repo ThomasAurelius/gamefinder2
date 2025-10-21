@@ -12,12 +12,23 @@ import {
 	type UserCredential,
 } from "firebase/auth";
 import { getFirebaseApp } from "./firebase";
+import { getFirebaseConfig } from "./firebase-config";
 
 let auth: Auth | null = null;
 
 export function getFirebaseAuth(): Auth {
 	if (auth) return auth;
 	try {
+		// Validate that Firebase is properly configured before initializing
+		const config = getFirebaseConfig();
+		
+		// Check if any required config is missing
+		if (!config.apiKey || !config.authDomain || !config.projectId) {
+			throw new Error(
+				"Firebase configuration is incomplete. Please ensure all NEXT_PUBLIC_FIREBASE_* environment variables are set in your .env.local file."
+			);
+		}
+		
 		const app = getFirebaseApp();
 		auth = getAuth(app);
 		return auth;
