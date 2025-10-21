@@ -6,6 +6,11 @@ function getRequiredEnvVar(name: string, value: string | undefined): string {
 	if (!value || value === "undefined" || value.trim() === "") {
 		// Only throw if we're in the browser (not during SSR/build)
 		if (typeof window !== "undefined") {
+			console.error(
+				`Missing required Firebase configuration: ${name}. ` +
+				`Please add this to your .env.local file and restart the dev server. ` +
+				`See .env.example for required environment variables.`
+			);
 			throw new Error(
 				`Missing required Firebase configuration: ${name}. ` +
 				`Please add this to your .env.local file and restart the dev server. ` +

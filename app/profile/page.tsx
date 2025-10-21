@@ -6,6 +6,7 @@ import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import AvatarCropper from "@/components/AvatarCropper";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import { AuthGuard } from "@/components/auth-guard";
 
 const ROLE_OPTIONS = [
 	"Healer",
@@ -418,6 +419,7 @@ export default function ProfilePage() {
 	const isSubmitDisabled = isSaving || isLoading;
 
 	return (
+		<AuthGuard>
 		<section className="space-y-10">
 			{imageToCrop && (
 				<AvatarCropper
@@ -902,5 +904,6 @@ export default function ProfilePage() {
 				</div>
 			</form>
 		</section>
+		</AuthGuard>
 	);
 }
