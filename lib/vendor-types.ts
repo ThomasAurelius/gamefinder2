@@ -16,6 +16,8 @@ export type VendorBase = {
   ownerUserId: string;
   isApproved: boolean;
   isFeatured: boolean;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type VendorPayload = Omit<VendorBase, "ownerUserId" | "isApproved" | "isFeatured"> & {
@@ -27,4 +29,5 @@ export type VendorResponse = VendorBase & {
   id: string;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  distance?: number;
 };

@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-import { createVendor, listVendors, parseVendorPayload } from "@/lib/vendors";
+import { createVendor, listVendors, listVendorsByLocation, parseVendorPayload } from "@/lib/vendors";
 import { isAdmin } from "@/lib/admin";
+import { readProfile } from "@/lib/profile-db";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const ownerParam = searchParams.get("owner");
     const includeUnapproved = searchParams.get("includeUnapproved") === "true";
+    const nearMe = searchParams.get("nearMe") === "true";
 
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
@@ -19,6 +21,22 @@ export async function GET(request: Request) {
       }
 
       const vendors = await listVendors({ ownerUserId: userId, includeUnapproved: true });
+      return NextResponse.json({ vendors });
+    }
+
+    if (nearMe) {
+      if (!userId) {
+        // Return empty array if not authenticated
+        return NextResponse.json({ vendors: [] });
+      }
+
+      const profile = await readProfile(userId);
+      if (!profile.latitude || !profile.longitude) {
+        // Return empty array if user has no location
+        return NextResponse.json({ vendors: [] });
+      }
+
+      const vendors = await listVendorsByLocation(profile.latitude, profile.longitude, 50);
       return NextResponse.json({ vendors });
     }
 

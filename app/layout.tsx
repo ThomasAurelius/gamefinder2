@@ -3,6 +3,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import Link from "next/link";
 import StructuredData from "@/components/StructuredData";
+import FeaturedVendorsFeed from "@/components/FeaturedVendorsFeed";
 
 export const metadata: Metadata = {
 	title: "The Gathering Call - Find Board Games, D&D, Pathfinder & TTRPG Sessions",
@@ -66,9 +67,12 @@ export default function RootLayout({
 			<body className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
 				<StructuredData />
 				<Navbar />
-				<main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-					{children}
-				</main>
+				<div className="mx-auto w-full max-w-[1600px] px-4 py-10 sm:px-6 flex">
+					<main className="flex-1 min-w-0">
+						{children}
+					</main>
+					<FeaturedVendorsFeed />
+				</div>
 				<footer className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 text-center text-sm text-slate-500">
 					<div>
 						<Link href="/privacy">Privacy Policy</Link> -{" "}
