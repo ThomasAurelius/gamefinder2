@@ -2,8 +2,7 @@
 "use client";
 
 // Validate environment variables at runtime (not build time)
-function getRequiredEnvVar(name: string): string {
-	const value = process.env[name];
+function getRequiredEnvVar(name: string, value: string | undefined): string {
 	if (!value || value === "undefined" || value.trim() === "") {
 		// Only throw if we're in the browser (not during SSR/build)
 		if (typeof window !== "undefined") {
@@ -32,12 +31,13 @@ let _config: {
 export function getFirebaseConfig() {
 	if (_config) return _config;
 	
+	// Access environment variables directly - Next.js replaces these at build time
 	_config = {
-		apiKey: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_API_KEY"),
-		authDomain: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
-		projectId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_PROJECT_ID"),
-		storageBucket: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"),
-		appId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_APP_ID"),
+		apiKey: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_API_KEY", process.env.NEXT_PUBLIC_FIREBASE_API_KEY),
+		authDomain: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN", process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN),
+		projectId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_PROJECT_ID", process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID),
+		storageBucket: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET", process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET),
+		appId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_APP_ID", process.env.NEXT_PUBLIC_FIREBASE_APP_ID),
 	};
 	
 	return _config;
