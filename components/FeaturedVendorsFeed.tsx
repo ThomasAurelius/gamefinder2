@@ -7,14 +7,31 @@ import type { VendorResponse } from "@/lib/vendor-types";
 export default function FeaturedVendorsFeed() {
 	const [vendors, setVendors] = useState<VendorResponse[]>([]);
 	const [loading, setLoading] = useState(true);
+	const [isNearbyVendors, setIsNearbyVendors] = useState(false);
 
 	useEffect(() => {
 		const fetchVendors = async () => {
 			try {
-				const response = await fetch("/api/vendors?nearMe=true");
-				if (response.ok) {
-					const data = await response.json();
-					setVendors(data.vendors || []);
+				// First try to get nearby vendors
+				const nearbyResponse = await fetch("/api/vendors?nearMe=true");
+				if (nearbyResponse.ok) {
+					const nearbyData = await nearbyResponse.json();
+					const nearbyVendors = nearbyData.vendors || [];
+					
+					// If we have nearby vendors, use them
+					if (nearbyVendors.length > 0) {
+						setVendors(nearbyVendors);
+						setIsNearbyVendors(true);
+						return;
+					}
+				}
+				
+				// Fall back to all approved vendors if no nearby vendors found
+				const allResponse = await fetch("/api/vendors");
+				if (allResponse.ok) {
+					const allData = await allResponse.json();
+					setVendors(allData.vendors || []);
+					setIsNearbyVendors(false);
 				}
 			} catch (error) {
 				console.error("Failed to fetch vendors", error);
@@ -60,7 +77,7 @@ export default function FeaturedVendorsFeed() {
 			{regularVendors.length > 0 && (
 				<div className="space-y-3">
 					<h2 className="text-lg font-semibold text-slate-300 px-2">
-						Nearby Venues
+						{isNearbyVendors ? "Nearby Venues" : "All Venues"}
 					</h2>
 					{regularVendors.map((vendor) => (
 						<VendorCard

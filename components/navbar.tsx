@@ -26,6 +26,7 @@ const primaryLinks: NavItem[] = [
 	{ href: "/library", label: "Library" },
 	{ href: "/players", label: "Players" },
 	{ href: "/marketplace", label: "Marketplace" },
+	{ href: "/venues", label: "Venues" },
 	{ href: "/find", label: "Games" },
 	{ href: "/find-campaigns", label: "Campaigns" },
 ];
