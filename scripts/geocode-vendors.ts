@@ -28,10 +28,10 @@ async function geocodeVendors() {
         $or: [
           { latitude: { $exists: false } },
           { longitude: { $exists: false } },
-          { latitude: null },
-          { longitude: null }
+          { latitude: null as unknown as undefined },
+          { longitude: null as unknown as undefined }
         ]
-      })
+      } as any)
       .toArray();
 
     console.log(`\n📊 Found ${vendorsToGeocode.length} vendors to geocode\n`);
