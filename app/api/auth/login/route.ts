@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const { idToken, email } = await request.json();
 
     if (!idToken || typeof idToken !== "string") {
+      console.error("Login attempt without valid ID token");
       return NextResponse.json(
         { error: "ID token is required" },
         { status: 400 },

@@ -91,6 +91,10 @@ export default function LoginPage() {
         // Get the ID token to send to the backend
         const idToken = await user.getIdToken();
 
+        if (!idToken) {
+          throw new Error("Failed to get authentication token. Please try again.");
+        }
+
         // Call the backend API to create a session
         const response = await fetch("/api/auth/login", {
           method: "POST",
