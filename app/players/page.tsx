@@ -438,7 +438,7 @@ export default function PlayersPage() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-2 text-md"
+							className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-50 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-2 text-md"
 							disabled={isLoading}
 						>
 							{isLoading ? "Searching..." : "Search Players"}

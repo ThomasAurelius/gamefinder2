@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, mapGameToSystemKey } from "@/lib/constants";
+import {
+	GAME_OPTIONS,
+	TIME_SLOTS,
+	TIME_SLOT_GROUPS,
+	mapGameToSystemKey,
+} from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
@@ -52,8 +57,9 @@ const tagButtonClasses = (
 };
 
 function getRoleBadgeClasses(role: string): string {
-	const baseClasses = "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border";
-	
+	const baseClasses =
+		"inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium border";
+
 	switch (role) {
 		case "Hosting":
 			return `${baseClasses} bg-purple-500/20 text-purple-300 border-purple-400`;
@@ -99,16 +105,16 @@ function CampaignCard({
 			campaign.pendingPlayers.includes(currentUserId));
 
 	// Determine user's role in the campaign
-	const userRole = !currentUserId 
+	const userRole = !currentUserId
 		? ""
-		: isHost 
-			? "Hosting" 
-			: campaign.signedUpPlayers.includes(currentUserId) 
-				? "Playing" 
-				: campaign.waitlist.includes(currentUserId) 
-					? "Waitlisted" 
-					: campaign.pendingPlayers.includes(currentUserId) 
-						? "Pending Approval" 
+		: isHost
+			? "Hosting"
+			: campaign.signedUpPlayers.includes(currentUserId)
+				? "Playing"
+				: campaign.waitlist.includes(currentUserId)
+					? "Waitlisted"
+					: campaign.pendingPlayers.includes(currentUserId)
+						? "Pending Approval"
 						: "";
 
 	return (
@@ -131,7 +137,9 @@ function CampaignCard({
 						href={`/campaigns/${campaign.id}`}
 						className="hover:text-sky-300 transition-colors"
 					>
-						<h3 className="font-medium text-slate-100">{campaign.game}</h3>
+						<h3 className="font-medium text-slate-100">
+							{campaign.game}
+						</h3>
 					</Link>
 					{userRole && (
 						<span className={getRoleBadgeClasses(userRole)}>
@@ -174,7 +182,9 @@ function CampaignCard({
 					{campaign.sessionsLeft && (
 						<p>
 							<span className="text-slate-500">Sessions Left:</span>{" "}
-							<span className="text-green-400">{campaign.sessionsLeft}</span>
+							<span className="text-green-400">
+								{campaign.sessionsLeft}
+							</span>
 						</p>
 					)}
 					{campaign.classesNeeded && campaign.classesNeeded.length > 0 && (
@@ -214,9 +224,7 @@ function CampaignCard({
 					<p>
 						<span className="text-slate-500">Players:</span>{" "}
 						<span
-							className={
-								isFull ? "text-orange-400" : "text-green-400"
-							}
+							className={isFull ? "text-orange-400" : "text-green-400"}
 						>
 							{campaign.signedUpPlayers.length}/{campaign.maxPlayers}
 						</span>
@@ -235,9 +243,7 @@ function CampaignCard({
 						</p>
 					)}
 					{campaign.description && (
-						<p className="mt-2 text-slate-300">
-							{campaign.description}
-						</p>
+						<p className="mt-2 text-slate-300">{campaign.description}</p>
 					)}
 				</div>
 				<div className="flex gap-2 mt-4 flex-wrap">
@@ -279,7 +285,8 @@ function CampaignCard({
 					</Link>
 					{isHost && campaign.pendingPlayers.length > 0 && (
 						<span className="inline-flex items-center rounded-full border border-orange-400 bg-orange-500/20 px-2 py-0.5 text-xs text-orange-100">
-							{campaign.pendingPlayers.length} pending approval{campaign.pendingPlayers.length !== 1 ? 's' : ''}
+							{campaign.pendingPlayers.length} pending approval
+							{campaign.pendingPlayers.length !== 1 ? "s" : ""}
 						</span>
 					)}
 				</div>
@@ -299,9 +306,9 @@ export default function MyCampaignsPage() {
 	const [joiningCampaignId, setJoiningCampaignId] = useState<string | null>(
 		null
 	);
-	const [withdrawingCampaignId, setWithdrawingCampaignId] = useState<string | null>(
-		null
-	);
+	const [withdrawingCampaignId, setWithdrawingCampaignId] = useState<
+		string | null
+	>(null);
 	const [joinError, setJoinError] = useState<string | null>(null);
 	const [withdrawError, setWithdrawError] = useState<string | null>(null);
 	const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
@@ -342,11 +349,13 @@ export default function MyCampaignsPage() {
 					// Set the current user ID
 					if (profile.userId) {
 						setCurrentUserId(profile.userId);
-						
+
 						// Fetch campaigns for this user
 						setIsLoadingEvents(true);
 						try {
-							const campaignsResponse = await fetch(`/api/campaigns?userFilter=${profile.userId}`);
+							const campaignsResponse = await fetch(
+								`/api/campaigns?userFilter=${profile.userId}`
+							);
 							if (campaignsResponse.ok) {
 								const events = await campaignsResponse.json();
 								setAllEvents(events);
@@ -419,7 +428,7 @@ export default function MyCampaignsPage() {
 		try {
 			const params = new URLSearchParams();
 			params.append("userFilter", currentUserId);
-			
+
 			// Use custom game name if "Other" is selected and a custom name is provided
 			const gameName =
 				selectedGame === "Other" && customGameName.trim()
@@ -479,13 +488,16 @@ export default function MyCampaignsPage() {
 		setJoinError(null);
 
 		try {
-			const response = await fetch(`/api/campaigns/${campaignToJoin.id}/join`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ characterId, characterName }),
-			});
+			const response = await fetch(
+				`/api/campaigns/${campaignToJoin.id}/join`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ characterId, characterName }),
+				}
+			);
 
 			if (!response.ok) {
 				const errorData = await response.json();
@@ -507,16 +519,14 @@ export default function MyCampaignsPage() {
 			// Update the session in the all events list, preserving the distance property
 			setAllEvents((prevEvents) =>
 				prevEvents.map((event) =>
-					event.id === campaignToJoin.id 
+					event.id === campaignToJoin.id
 						? { ...updatedSession, distance: event.distance }
 						: event
 				)
 			);
 		} catch (error) {
 			setJoinError(
-				error instanceof Error
-					? error.message
-					: "Failed to join campaign"
+				error instanceof Error ? error.message : "Failed to join campaign"
 			);
 		} finally {
 			setJoiningCampaignId(null);
@@ -559,7 +569,9 @@ export default function MyCampaignsPage() {
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to withdraw from campaign");
+				throw new Error(
+					errorData.error || "Failed to withdraw from campaign"
+				);
 			}
 
 			const updatedCampaign = await response.json();
@@ -576,7 +588,7 @@ export default function MyCampaignsPage() {
 			// Update the campaign in the all events list, preserving the distance property
 			setAllEvents((prevEvents) =>
 				prevEvents.map((event) =>
-					event.id === campaignId 
+					event.id === campaignId
 						? { ...updatedCampaign, distance: event.distance }
 						: event
 				)
@@ -621,11 +633,11 @@ export default function MyCampaignsPage() {
 
 			<Advertisement />
 
-			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
+			<div className="rounded-lg border bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 hover:from-amber-600/20 hover:via-purple-600/20 hover:to-indigo-600/20 border-slate-800 bg-slate-950/60">
 				<button
 					type="button"
 					onClick={() => setIsSearchFormOpen(!isSearchFormOpen)}
-					className="flex w-full items-center justify-between gap-2 bg-slate-900/50 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:bg-slate-900/80"
+					className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 hover:from-amber-600/20 hover:via-purple-600/20 hover:to-indigo-600/20"
 				>
 					<span>
 						{isSearchFormOpen
@@ -764,7 +776,9 @@ export default function MyCampaignsPage() {
 													<button
 														key={slot}
 														type="button"
-														onClick={(e) => toggleTime(slot, e.shiftKey)}
+														onClick={(e) =>
+															toggleTime(slot, e.shiftKey)
+														}
 														className={tagButtonClasses(active, {
 															size: "sm",
 														})}
@@ -785,7 +799,7 @@ export default function MyCampaignsPage() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+							className="mt-4 w-full rounded-xl bg-sky-600 font-medium text-white transition bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-3 text-md focus:ring-offset-slate-950"
 							disabled={isLoading || !currentUserId}
 						>
 							{isLoading ? "Searching..." : "Search My Campaigns"}
@@ -903,7 +917,9 @@ export default function MyCampaignsPage() {
 					</p>
 
 					{isLoadingEvents ? (
-						<p className="mt-4 text-sm text-slate-500">Loading campaigns...</p>
+						<p className="mt-4 text-sm text-slate-500">
+							Loading campaigns...
+						</p>
 					) : allEvents.length > 0 ? (
 						<div className="mt-4 space-y-3 max-w-3xl mx-auto">
 							{allEvents.map((event) => (

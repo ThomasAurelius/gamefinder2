@@ -233,7 +233,7 @@ function CampaignCard({
 						<button
 							onClick={() => onJoin(campaign.id)}
 							disabled={joiningCampaignId === campaign.id}
-							className="rounded-lg px-4 py-2 text-sm font-medium text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50 bg-sky-600 hover:bg-sky-700 focus:ring-sky-500"
+							className="rounded-lg px-4 py-2 text-sm font-medium  transition bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white  hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
 							title="Request to join"
 						>
 							{joiningCampaignId === campaign.id
@@ -374,7 +374,7 @@ function FindCampaignsPageContent() {
 			};
 			fetchVendorFromUrl();
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParams]);
 
 	// Search for hosts as user types
@@ -418,8 +418,11 @@ function FindCampaignsPageContent() {
 				if (response.ok) {
 					const data = await response.json();
 					const venues = data.vendors || [];
-					const filteredVenues = venues.filter((v: { vendorName: string }) =>
-						v.vendorName.toLowerCase().includes(venueSearch.toLowerCase())
+					const filteredVenues = venues.filter(
+						(v: { vendorName: string }) =>
+							v.vendorName
+								.toLowerCase()
+								.includes(venueSearch.toLowerCase())
 					);
 					setVenueSearchResults(filteredVenues);
 					setShowVenueResults(true);
@@ -460,7 +463,9 @@ function FindCampaignsPageContent() {
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
 			const target = e.target as HTMLElement;
-			const venueSearchInput = document.getElementById("venue-search-campaigns");
+			const venueSearchInput = document.getElementById(
+				"venue-search-campaigns"
+			);
 			if (
 				venueSearchInput &&
 				!venueSearchInput.contains(target) &&
@@ -486,9 +491,7 @@ function FindCampaignsPageContent() {
 		if (uniqueVendorIds.length > 0) {
 			try {
 				const vendorPromises = uniqueVendorIds.map((id) =>
-					fetch(`/api/vendors/${id}`).then((r) =>
-						r.ok ? r.json() : null
-					)
+					fetch(`/api/vendors/${id}`).then((r) => (r.ok ? r.json() : null))
 				);
 				const vendorResponses = await Promise.all(vendorPromises);
 				const vendorMap = new Map<string, string>();
@@ -900,7 +903,9 @@ function FindCampaignsPageContent() {
 							<input
 								id="venue-search-campaigns"
 								type="text"
-								value={selectedVenueId ? selectedVenueName : venueSearch}
+								value={
+									selectedVenueId ? selectedVenueName : venueSearch
+								}
 								onChange={(e) => {
 									const value = e.target.value;
 									setVenueSearch(value);
@@ -1047,7 +1052,7 @@ function FindCampaignsPageContent() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
+							className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 py-3 text-md"
 							disabled={
 								(!selectedGame &&
 									!selectedDate &&

@@ -2940,7 +2940,7 @@ export default function CharactersPage() {
 									key={item.id}
 									className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
 								>
-									<summary className="flex cursor-pointer items-center gap-3 border-amber-500/30 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 p-4">
+									<summary className="flex cursor-pointer items-center gap-3 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 px-4 py-3 text-left text-sm font-semibold text-amber-100 transition hover:from-amber-600/20 hover:via-purple-600/20 hover:to-indigo-600/20 p-4">
 										{item.avatarUrl ? (
 											<img
 												src={item.avatarUrl}

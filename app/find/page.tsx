@@ -335,7 +335,7 @@ function FindGamesPageContent() {
 			};
 			fetchVendorFromUrl();
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchParams]);
 
 	// Search for hosts as user types
@@ -379,8 +379,11 @@ function FindGamesPageContent() {
 				if (response.ok) {
 					const data = await response.json();
 					const venues = data.vendors || [];
-					const filteredVenues = venues.filter((v: { vendorName: string }) =>
-						v.vendorName.toLowerCase().includes(venueSearch.toLowerCase())
+					const filteredVenues = venues.filter(
+						(v: { vendorName: string }) =>
+							v.vendorName
+								.toLowerCase()
+								.includes(venueSearch.toLowerCase())
 					);
 					setVenueSearchResults(filteredVenues);
 					setShowVenueResults(true);
@@ -445,9 +448,7 @@ function FindGamesPageContent() {
 		if (uniqueVendorIds.length > 0) {
 			try {
 				const vendorPromises = uniqueVendorIds.map((id) =>
-					fetch(`/api/vendors/${id}`).then((r) =>
-						r.ok ? r.json() : null
-					)
+					fetch(`/api/vendors/${id}`).then((r) => (r.ok ? r.json() : null))
 				);
 				const vendorResponses = await Promise.all(vendorPromises);
 				const vendorMap = new Map<string, string>();
@@ -896,7 +897,9 @@ function FindGamesPageContent() {
 							<input
 								id="venue-search"
 								type="text"
-								value={selectedVenueId ? selectedVenueName : venueSearch}
+								value={
+									selectedVenueId ? selectedVenueName : venueSearch
+								}
 								onChange={(e) => {
 									const value = e.target.value;
 									setVenueSearch(value);
@@ -1043,7 +1046,7 @@ function FindGamesPageContent() {
 						<button
 							type="button"
 							onClick={handleSearch}
-							className="mt-4 w-full rounded-xl border-amber-500/50 border-1  w-full items-center justify-between gap-2 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 px-4 py-3 text-left text-sm font-semibold text-slate-100 transition hover:from-amber-600/30 hover:via-purple-600/30 hover:to-indigo-600/30 flex aling-items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+							className="mt-4 w-full rounded-xl border-amber-500/50 border-1  w-full items-center justify-between gap-2 bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50 px-4 py-3 text-md focus:ring-offset-slate-950"
 							disabled={
 								(!selectedGame &&
 									!selectedDate &&

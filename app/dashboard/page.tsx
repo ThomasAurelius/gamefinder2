@@ -356,19 +356,19 @@ export default function DashboardPage() {
 			<div className="flex flex-wrap gap-3">
 				<Link
 					href="/post"
-					className="inline-flex items-center rounded-lg py-2 px-2 bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+					className="inline-flex items-center rounded-lg py-2 px-2 bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					Post Game
 				</Link>
 				<Link
 					href="/post-campaign"
-					className="inline-flex items-center rounded-lg p-2 bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+					className="inline-flex items-center rounded-lg p-2 bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					Post Campaign
 				</Link>
 				<Link
 					href="/tall-tales"
-					className="inline-flex items-center rounded-lg p-2 bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+					className="inline-flex items-center rounded-lg p-2 bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					Post Tall Tale
 				</Link>

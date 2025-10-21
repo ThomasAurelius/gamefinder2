@@ -495,7 +495,7 @@ export default function TallTalesPage() {
 						<button
 							type="submit"
 							disabled={isSubmitting || content.length > 5000}
-							className="w-full rounded-xl bg-sky-500 px-6 py-3 font-medium bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+							className="w-full rounded-xl bg-sky-500 px-6 py-3 font-medium bg-gradient-to-r from-amber-600 via-purple-500 to-indigo-500 font-semibold text-white transition hover:from-amber-500 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							{isSubmitting ? "Posting..." : "Share Your Tale"}
 						</button>
