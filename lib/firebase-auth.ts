@@ -17,8 +17,17 @@ let auth: Auth | null = null;
 
 export function getFirebaseAuth(): Auth {
 	if (auth) return auth;
-	auth = getAuth(getFirebaseApp());
-	return auth;
+	try {
+		const app = getFirebaseApp();
+		auth = getAuth(app);
+		return auth;
+	} catch (error) {
+		const errorMsg = error instanceof Error ? error.message : String(error);
+		console.error("Failed to initialize Firebase Auth:", errorMsg);
+		throw new Error(
+			`Firebase Authentication is not properly configured. ${errorMsg}`
+		);
+	}
 }
 
 export async function signInWithEmail(
