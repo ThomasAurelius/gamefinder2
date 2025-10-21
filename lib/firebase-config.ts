@@ -20,11 +20,39 @@ function getRequiredEnvVar(name: string): string {
 	return value;
 }
 
-// Export the config so Next inlines NEXT_PUBLIC_* properly in the client bundle
-export const FIREBASE_CONFIG = {
-	apiKey: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_API_KEY"),
-	authDomain: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
-	projectId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_PROJECT_ID"),
-	storageBucket: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"),
-	appId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_APP_ID"),
-};
+// Lazy initialization - only validate when accessed
+let _config: {
+	apiKey: string;
+	authDomain: string;
+	projectId: string;
+	storageBucket: string;
+	appId: string;
+} | null = null;
+
+export function getFirebaseConfig() {
+	if (_config) return _config;
+	
+	_config = {
+		apiKey: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_API_KEY"),
+		authDomain: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
+		projectId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_PROJECT_ID"),
+		storageBucket: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"),
+		appId: getRequiredEnvVar("NEXT_PUBLIC_FIREBASE_APP_ID"),
+	};
+	
+	return _config;
+}
+
+// Keep FIREBASE_CONFIG for backwards compatibility but make it lazy
+export const FIREBASE_CONFIG = new Proxy({} as {
+	apiKey: string;
+	authDomain: string;
+	projectId: string;
+	storageBucket: string;
+	appId: string;
+}, {
+	get(_target, prop: string) {
+		const config = getFirebaseConfig();
+		return config[prop as keyof typeof config];
+	}
+});
