@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useLogout } from "./logout-handler";
 
 type NavLink = {
 	href: string;
@@ -46,8 +47,6 @@ const getAccountLinks = (isAdmin: boolean): NavLink[] => {
 		links.push({ href: "/settings/vendors", label: "Vendors" });
 	}
 
-	links.push({ href: "/auth/login", label: "Logout" });
-
 	return links;
 };
 
@@ -85,6 +84,7 @@ export function Navbar() {
 	const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null);
 	const [userCommonName, setUserCommonName] = useState<string>("");
 	const [isAdmin, setIsAdmin] = useState(false);
+	const handleLogout = useLogout();
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -367,6 +367,16 @@ export function Navbar() {
 														)}
 												</Link>
 											))}
+											<button
+												onClick={() => {
+													setAccountOpen(false);
+													closeMenu();
+													handleLogout();
+												}}
+												className="flex w-full items-center justify-between px-4 py-2 text-sm text-slate-200 transition hover:bg-white/10"
+											>
+												<span>Logout</span>
+											</button>
 										</div>
 									) : null}
 								</div>
@@ -512,6 +522,15 @@ export function Navbar() {
 												)}
 										</Link>
 									))}
+									<button
+										onClick={() => {
+											closeMenu();
+											handleLogout();
+										}}
+										className="mt-1 flex w-full items-center justify-between rounded-md px-3 py-2 text-slate-200 transition hover:bg-white/10"
+									>
+										<span>Logout</span>
+									</button>
 								</div>
 							) : (
 								<div className="border-t border-white/5 pt-2">
