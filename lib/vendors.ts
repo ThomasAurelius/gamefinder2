@@ -25,6 +25,8 @@ export type VendorDocument = {
 	ownerUserId: string;
 	isApproved: boolean;
 	isFeatured: boolean;
+	latitude?: number;
+	longitude?: number;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -113,7 +115,9 @@ export function parseVendorPayload(
 		hoursOfOperation,
 		isApproved,
 		isFeatured,
-	} = payload as Partial<VendorPayload>;
+		latitude,
+		longitude,
+	} = payload as Partial<VendorPayload & { latitude?: number; longitude?: number }>;
 
 	const normalized: VendorPayload = {
 		primaryImage: ensureString(primaryImage, "primaryImage"),
@@ -143,6 +147,10 @@ export function parseVendorPayload(
 		}
 		if (Object.prototype.hasOwnProperty.call(rawPayload, "isFeatured")) {
 			normalized.isFeatured = Boolean(isFeatured);
+		}
+		if (typeof latitude === "number" && typeof longitude === "number") {
+			(normalized as VendorPayload & { latitude?: number; longitude?: number }).latitude = latitude;
+			(normalized as VendorPayload & { latitude?: number; longitude?: number }).longitude = longitude;
 		}
 	}
 
@@ -275,6 +283,73 @@ export async function deleteVendor(id: string): Promise<boolean> {
 	return result.deletedCount > 0;
 }
 
+/**
+ * Calculate distance between two points in miles using Haversine formula
+ */
+function calculateDistance(
+	lat1: number,
+	lon1: number,
+	lat2: number,
+	lon2: number
+): number {
+	const R = 3959; // Earth's radius in miles
+	const dLat = ((lat2 - lat1) * Math.PI) / 180;
+	const dLon = ((lon2 - lon1) * Math.PI) / 180;
+	const a =
+		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+		Math.cos((lat1 * Math.PI) / 180) *
+			Math.cos((lat2 * Math.PI) / 180) *
+			Math.sin(dLon / 2) *
+			Math.sin(dLon / 2);
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	return R * c;
+}
+
+/**
+ * List vendors within a certain radius of a location
+ */
+export async function listVendorsByLocation(
+	userLat: number,
+	userLon: number,
+	radiusMiles: number = 50
+): Promise<VendorResponse[]> {
+	const db = await getDb();
+	const collection = db.collection<VendorDocument>("vendors");
+
+	// Get all approved vendors that have coordinates
+	const vendors = await collection
+		.find({
+			isApproved: true,
+			latitude: { $exists: true, $type: "number" } as unknown as number,
+			longitude: { $exists: true, $type: "number" } as unknown as number,
+		})
+		.toArray();
+
+	// Calculate distances and filter by radius
+	const vendorsWithDistance = vendors
+		.map((vendor) => {
+			const distance = calculateDistance(
+				userLat,
+				userLon,
+				vendor.latitude!,
+				vendor.longitude!
+			);
+			return {
+				...toVendorResponse(vendor),
+				distance,
+			};
+		})
+		.filter((vendor) => vendor.distance <= radiusMiles);
+
+	// Sort: featured first, then by distance
+	vendorsWithDistance.sort((a, b) => {
+		if (a.isFeatured !== b.isFeatured) {
+			return a.isFeatured ? -1 : 1;
+		}
+		return a.distance - b.distance;
+	});
+
+	return vendorsWithDistance;
 export type VendorBasicInfo = {
 	id: string;
 	vendorName: string;
