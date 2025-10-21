@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
+import { DashboardSidebar } from "@/components/DashboardSidebar";
 import Link from "next/link";
 import StructuredData from "@/components/StructuredData";
 
@@ -66,9 +67,12 @@ export default function RootLayout({
 			<body className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
 				<StructuredData />
 				<Navbar />
-				<main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-					{children}
-				</main>
+				<div className="mx-auto w-full max-w-7xl px-4 sm:px-6 3xl:flex 3xl:gap-6 3xl:items-start">
+					<DashboardSidebar />
+					<main className="flex-1 py-10 min-w-0">
+						{children}
+					</main>
+				</div>
 				<footer className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 text-center text-sm text-slate-500">
 					<div>
 						<Link href="/privacy">Privacy Policy</Link> -{" "}
