@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { signInWithEmail } from "@/lib/firebase-auth";
 
 type FormData = {
   email: string;
@@ -83,14 +84,22 @@ export default function LoginPage() {
 
     (async () => {
       try {
+        // Sign in with Firebase Authentication
+        const userCredential = await signInWithEmail(trimmedEmail, trimmedPassword);
+        const user = userCredential.user;
+
+        // Get the ID token to send to the backend
+        const idToken = await user.getIdToken();
+
+        // Call the backend API to create a session
         const response = await fetch("/api/auth/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            idToken,
             email: trimmedEmail,
-            password: trimmedPassword,
           }),
         });
 
@@ -108,9 +117,22 @@ export default function LoginPage() {
         window.setTimeout(() => {
           router.push("/dashboard");
         }, 800);
-      } catch (submitError) {
+      } catch (submitError: any) {
         console.error("Failed to sign in", submitError);
-        setError("Something went wrong. Please try again.");
+        
+        // Handle Firebase Auth errors
+        let errorMessage = "Something went wrong. Please try again.";
+        if (submitError?.code === "auth/invalid-credential" || submitError?.code === "auth/wrong-password") {
+          errorMessage = "Invalid email or password.";
+        } else if (submitError?.code === "auth/user-not-found") {
+          errorMessage = "No account found with this email.";
+        } else if (submitError?.code === "auth/too-many-requests") {
+          errorMessage = "Too many failed attempts. Please try again later.";
+        } else if (submitError?.code === "auth/network-request-failed") {
+          errorMessage = "Network error. Please check your connection.";
+        }
+        
+        setError(errorMessage);
       } finally {
         setIsSubmitting(false);
       }

@@ -1,28 +1,47 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
-import { hashPassword } from "@/lib/password";
 import { UserDocument } from "@/lib/user-types";
 import { AMBASSADOR_EXPIRATION_DATE } from "@/lib/ambassador-config";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { getAuth } from "firebase-admin/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name, isAmbassador } = await request.json();
+    const { idToken, email, name, isAmbassador } = await request.json();
 
-    if (!email || typeof email !== "string") {
+    if (!idToken || typeof idToken !== "string") {
+      return NextResponse.json(
+        { error: "ID token is required" },
+        { status: 400 },
+      );
+    }
+
+    // Verify the Firebase ID token
+    const app = getFirebaseAdminApp();
+    const auth = getAuth(app);
+    let decodedToken;
+    
+    try {
+      decodedToken = await auth.verifyIdToken(idToken);
+    } catch (error) {
+      console.error("Failed to verify ID token", error);
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 },
+      );
+    }
+
+    const firebaseUid = decodedToken.uid;
+    const userEmail = decodedToken.email || email;
+
+    if (!userEmail || typeof userEmail !== "string") {
       return NextResponse.json(
         { error: "Email is required" },
         { status: 400 },
       );
     }
 
-    if (!password || typeof password !== "string") {
-      return NextResponse.json(
-        { error: "Password is required" },
-        { status: 400 },
-      );
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = userEmail.trim().toLowerCase();
     const displayName = typeof name === "string" && name.trim().length > 0 ? name.trim() : normalizedEmail.split("@")[0];
 
     const db = await getDb();
@@ -37,13 +56,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const passwordHash = await hashPassword(password);
     const now = new Date();
 
-    // Set ambassador status and expiration if isAmbassador is true
+    // Create user document with Firebase UID
     const userDocument: Omit<UserDocument, '_id'> = {
       email: normalizedEmail,
-      passwordHash,
+      firebaseUid,
       name: displayName,
       createdAt: now,
       updatedAt: now,

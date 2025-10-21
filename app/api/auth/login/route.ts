@@ -1,66 +1,106 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
-import { verifyPassword } from "@/lib/password";
 import type { UserDocument } from "@/lib/user-types";
+import { getFirebaseAdminApp } from "@/lib/firebaseAdmin";
+import { getAuth } from "firebase-admin/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { idToken, email } = await request.json();
 
-    if (!email || typeof email !== "string") {
+    if (!idToken || typeof idToken !== "string") {
+      return NextResponse.json(
+        { error: "ID token is required" },
+        { status: 400 },
+      );
+    }
+
+    // Verify the Firebase ID token
+    const app = getFirebaseAdminApp();
+    const auth = getAuth(app);
+    let decodedToken;
+    
+    try {
+      decodedToken = await auth.verifyIdToken(idToken);
+    } catch (error) {
+      console.error("Failed to verify ID token", error);
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 },
+      );
+    }
+
+    const firebaseUid = decodedToken.uid;
+    const userEmail = decodedToken.email || email;
+
+    if (!userEmail) {
       return NextResponse.json(
         { error: "Email is required" },
         { status: 400 },
       );
     }
 
-    if (!password || typeof password !== "string") {
-      return NextResponse.json(
-        { error: "Password is required" },
-        { status: 400 },
-      );
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail = userEmail.trim().toLowerCase();
     const db = await getDb();
-    const usersCollection = db.collection<UserDocument>(
-      "users",
-    );
-    const user = await usersCollection.findOne(
-      { email: normalizedEmail },
-    );
-
-    if (!user || !user.passwordHash) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 },
-      );
-    }
-
-    const isValidPassword = await verifyPassword(password, user.passwordHash);
-
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 },
-      );
-    }
-
-    // Check if ambassador status has expired and turn off if necessary
-    const now = new Date();
-    const updateFields: Partial<UserDocument> = { lastLoginAt: now };
+    const usersCollection = db.collection<UserDocument>("users");
     
-    if (user.isAmbassador && user.ambassadorUntil && user.ambassadorUntil <= now) {
-      // Ambassador status has expired, turn it off
-      updateFields.isAmbassador = false;
-      updateFields.updatedAt = now;
-    }
+    // Find or create user in MongoDB
+    let user = await usersCollection.findOne({ email: normalizedEmail });
 
-    // Update user with login timestamp and potentially expired ambassador status
-    await usersCollection.updateOne(
-      { _id: user._id },
-      { $set: updateFields }
-    );
+    const now = new Date();
+
+    if (!user) {
+      // Create a new user profile if it doesn't exist
+      const newUser: Omit<UserDocument, '_id'> = {
+        email: normalizedEmail,
+        firebaseUid,
+        name: normalizedEmail.split("@")[0],
+        createdAt: now,
+        updatedAt: now,
+        lastLoginAt: now,
+        profile: {
+          name: "",
+          commonName: "",
+          location: "",
+          zipCode: "",
+          bio: "",
+          games: [],
+          favoriteGames: [],
+          availability: {
+            Monday: [],
+            Tuesday: [],
+            Wednesday: [],
+            Thursday: [],
+            Friday: [],
+            Saturday: [],
+            Sunday: [],
+          },
+          primaryRole: "",
+          avatarUrl: "",
+          canPostPaidGames: false,
+        },
+      };
+
+      const insertResult = await usersCollection.insertOne(newUser);
+      user = { ...newUser, _id: insertResult.insertedId };
+    } else {
+      // Update existing user with Firebase UID and last login
+      const updateFields: Partial<UserDocument> = { 
+        lastLoginAt: now,
+        firebaseUid,
+      };
+      
+      // Check if ambassador status has expired and turn off if necessary
+      if (user.isAmbassador && user.ambassadorUntil && user.ambassadorUntil <= now) {
+        updateFields.isAmbassador = false;
+        updateFields.updatedAt = now;
+      }
+
+      await usersCollection.updateOne(
+        { _id: user._id },
+        { $set: updateFields }
+      );
+    }
 
     const response = NextResponse.json({
       message: "Login successful",
