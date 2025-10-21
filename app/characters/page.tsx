@@ -2924,7 +2924,9 @@ export default function CharactersPage() {
 				) : characters.length === 0 ? (
 					<div className="rounded-md border border-slate-800 bg-slate-950/40 px-4 py-6 text-sm text-slate-300">
 						You haven&apos;t saved any characters yet. Use the button
-						above to add your first adventurer.
+						above to add your first adventurer. Remember that the more
+						detail you provide, the better experience the DM can craft for
+						you!
 					</div>
 				) : (
 					<div className="space-y-3">
