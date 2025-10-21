@@ -350,6 +350,8 @@ export async function listVendorsByLocation(
 	});
 
 	return vendorsWithDistance;
+}
+
 export type VendorBasicInfo = {
 	id: string;
 	vendorName: string;
