@@ -143,6 +143,7 @@ export default function PlayersPage() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedRole, setSelectedRole] = useState("");
 	const [selectedGames, setSelectedGames] = useState<string[]>([]);
+	const [customGameName, setCustomGameName] = useState("");
 	const [locationSearch, setLocationSearch] = useState("");
 	const [radiusMiles, setRadiusMiles] = useState("50");
 	const [selectedDayOfWeek, setSelectedDayOfWeek] = useState("");
@@ -181,8 +182,18 @@ export default function PlayersPage() {
 			const params = new URLSearchParams();
 			if (searchQuery) params.append("search", searchQuery);
 			if (selectedRole) params.append("role", selectedRole);
-			if (selectedGames.length > 0)
-				params.append("games", selectedGames.join(","));
+			
+			// Build games list, replacing "Other" with custom game name if provided
+			const gamesToSearch = selectedGames.map(game => {
+				if (game === "Other" && customGameName.trim()) {
+					return customGameName.trim();
+				}
+				return game;
+			}).filter(game => game !== "Other" || !customGameName.trim());
+			
+			if (gamesToSearch.length > 0)
+				params.append("games", gamesToSearch.join(","));
+			
 			if (locationSearch) {
 				params.append("location", locationSearch);
 				params.append("radius", radiusMiles);
@@ -359,6 +370,29 @@ export default function PlayersPage() {
 								))}
 							</div>
 						</div>
+
+						{/* Custom Game Name Input - shown when "Other" is selected */}
+						{selectedGames.includes("Other") && (
+							<div>
+								<label
+									htmlFor="custom-game-name"
+									className="mb-2 block text-sm font-medium text-slate-300"
+								>
+									Other Game Name
+								</label>
+								<input
+									type="text"
+									id="custom-game-name"
+									value={customGameName}
+									onChange={(e) => setCustomGameName(e.target.value)}
+									placeholder="Enter the name of the game..."
+									className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+								/>
+								<p className="mt-1 text-xs text-slate-500">
+									Specify the game you want to find players for
+								</p>
+							</div>
+						)}
 
 						{/* Day of Week Filter */}
 						<div>
