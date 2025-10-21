@@ -70,7 +70,7 @@ export default function RootLayout({
 				<Navbar />
 				<div className="mx-auto max-w-[1800px] px-4 py-10 sm:px-6 flex">
 					<DashboardSidebar />
-					<main className="flex-1 justify-center mx-auto max-w-[1000px] min-w-0">
+					<main className="flex-1 justify-center mx-auto max-w-[900px] min-w-0">
 						{children}
 					</main>
 					<FeaturedVendorsFeed />

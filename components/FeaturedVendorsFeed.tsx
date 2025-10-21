@@ -17,7 +17,7 @@ export default function FeaturedVendorsFeed() {
 				if (nearbyResponse.ok) {
 					const nearbyData = await nearbyResponse.json();
 					const nearbyVendors = nearbyData.vendors || [];
-					
+
 					// If we have nearby vendors, use them
 					if (nearbyVendors.length > 0) {
 						setVendors(nearbyVendors);
@@ -25,7 +25,7 @@ export default function FeaturedVendorsFeed() {
 						return;
 					}
 				}
-				
+
 				// Fall back to all approved vendors if no nearby vendors found
 				const allResponse = await fetch("/api/vendors");
 				if (allResponse.ok) {
@@ -45,7 +45,7 @@ export default function FeaturedVendorsFeed() {
 
 	if (loading) {
 		return (
-			<aside className="hidden 3xl:block w-80 ml-8 space-y-4">
+			<aside className="hidden 3xl:block w-64 ml-8 space-y-4">
 				<div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-lg">
 					<div className="text-sm text-slate-400">Loading venues...</div>
 				</div>
@@ -68,7 +68,7 @@ export default function FeaturedVendorsFeed() {
 	});
 
 	return (
-		<aside className="hidden 3xl:block w-80 ml-8 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
+		<aside className="hidden 3xl:block w-64 ml-8 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
 			<div className="space-y-3">
 				<h2 className="text-lg font-semibold text-slate-300 px-2">
 					{isNearbyVendors ? "Nearby Venues" : "All Venues"}
@@ -100,7 +100,7 @@ function VendorCard({
 	const imageWrapperClasses = isFeatured
 		? "w-full mb-3"
 		: "w-1/2 mx-auto mb-3";
-	
+
 	const imageClasses = "w-full aspect-square object-cover rounded-lg";
 
 	return (
