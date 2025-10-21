@@ -96,15 +96,24 @@ function VendorCard({
 		? "rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-4 shadow-xl transition hover:border-amber-500/70"
 		: "rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-lg transition hover:border-slate-700";
 
+	// Image styling: 1:1 aspect ratio, full width for featured, half width centered for non-featured
+	const imageWrapperClasses = isFeatured
+		? "w-full mb-3"
+		: "w-1/2 mx-auto mb-3";
+	
+	const imageClasses = "w-full aspect-square object-cover rounded-lg";
+
 	return (
 		<Link href={`/vendor/${vendor.id}`} className="block">
 			<div className={cardClasses}>
 				{vendor.primaryImage && (
-					<img
-						src={vendor.primaryImage}
-						alt={vendor.vendorName}
-						className="w-full h-32 object-cover rounded-lg mb-3"
-					/>
+					<div className={imageWrapperClasses}>
+						<img
+							src={vendor.primaryImage}
+							alt={vendor.vendorName}
+							className={imageClasses}
+						/>
+					</div>
 				)}
 				<h3 className="font-semibold text-slate-100 mb-1">
 					{vendor.vendorName}
@@ -117,7 +126,7 @@ function VendorCard({
 						{vendor.city}, {vendor.state}
 					</span>
 					{vendor.distance !== undefined && (
-						<span className="text-slate-500">
+						<span className="text-slate-500 ml-auto">
 							{vendor.distance.toFixed(1)} mi
 						</span>
 					)}
