@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { registerWithEmail } from "@/lib/firebase-auth";
 
 type FormData = {
   name: string;
@@ -89,6 +90,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (trimmedPassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
     if (trimmedPassword !== trimmedConfirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -98,15 +104,23 @@ export default function RegisterPage() {
 
     (async () => {
       try {
+        // Register with Firebase Authentication
+        const userCredential = await registerWithEmail(trimmedEmail, trimmedPassword);
+        const user = userCredential.user;
+
+        // Get the ID token to send to the backend
+        const idToken = await user.getIdToken();
+
+        // Call the backend API to create user profile in MongoDB
         const response = await fetch("/api/auth/register", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            idToken,
             name: trimmedName,
             email: trimmedEmail,
-            password: trimmedPassword,
           }),
         });
 
@@ -124,9 +138,22 @@ export default function RegisterPage() {
         window.setTimeout(() => {
           router.push("/auth/login");
         }, 1200);
-      } catch (submitError) {
+      } catch (submitError: any) {
         console.error("Failed to submit registration", submitError);
-        setError("Something went wrong. Please try again.");
+        
+        // Handle Firebase Auth errors
+        let errorMessage = "Something went wrong. Please try again.";
+        if (submitError?.code === "auth/email-already-in-use") {
+          errorMessage = "An account with that email already exists.";
+        } else if (submitError?.code === "auth/invalid-email") {
+          errorMessage = "Invalid email address.";
+        } else if (submitError?.code === "auth/weak-password") {
+          errorMessage = "Password is too weak. Please use at least 6 characters.";
+        } else if (submitError?.code === "auth/network-request-failed") {
+          errorMessage = "Network error. Please check your connection.";
+        }
+        
+        setError(errorMessage);
       } finally {
         setIsSubmitting(false);
       }

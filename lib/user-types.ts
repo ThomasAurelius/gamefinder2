@@ -4,7 +4,8 @@ import type { ProfileRecord } from "./profile-db";
 export type UserDocument = {
   _id?: ObjectId;
   email: string;
-  passwordHash: string;
+  passwordHash?: string; // Optional for backward compatibility with Firebase Auth
+  firebaseUid?: string; // Firebase Authentication UID
   name: string;
   createdAt: Date;
   updatedAt: Date;
