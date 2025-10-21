@@ -4,7 +4,7 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { getAuth, signInAnonymously, type Auth } from "firebase/auth";
-import { FIREBASE_CONFIG } from "./firebase-config";
+import { FIREBASE_CONFIG, getFirebaseConfig } from "./firebase-config";
 
 let app: FirebaseApp | null = null;
 let storage: FirebaseStorage | null = null;
@@ -12,8 +12,19 @@ let auth: Auth | null = null;
 
 export function getFirebaseApp(): FirebaseApp {
 	if (app) return app;
-	app = getApps().length ? getApps()[0]! : initializeApp(FIREBASE_CONFIG);
-	return app!;
+	
+	try {
+		// Get and validate config before initializing
+		// This will throw if configuration is missing
+		const config = getFirebaseConfig();
+		
+		app = getApps().length ? getApps()[0]! : initializeApp(config);
+		return app!;
+	} catch (error) {
+		const errorMsg = error instanceof Error ? error.message : String(error);
+		console.error("Failed to initialize Firebase App:", errorMsg);
+		throw error;
+	}
 }
 
 export async function getFirebaseStorage(): Promise<FirebaseStorage> {
