@@ -165,7 +165,7 @@ export default function MarketplacePage() {
 							<button
 								type="button"
 								onClick={handleSearch}
-								className="flex-1 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-sky-700"
+								className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 							>
 								Search Listings
 							</button>

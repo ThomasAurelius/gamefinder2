@@ -232,7 +232,7 @@ export default function LibraryPage() {
 						<button
 							onClick={handleSearch}
 							disabled={isSearching}
-							className="rounded-lg bg-sky-600 px-6 py-2 font-medium text-white hover:bg-sky-700 disabled:opacity-50"
+							className="rounded-lg  bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-3 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
 						>
 							{isSearching ? "Searching..." : "Search"}
 						</button>
