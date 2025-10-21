@@ -30,7 +30,7 @@ export default function HomePage() {
 		<>
 			<AnnouncementPopup />
 			{/* Hero Section */}
-			<section
+			{/* <section
 				className="relative min-h-screen flex flex-col items-center justify-center -mx-4 sm:-mx-6 -mt-10 w-[100vw]"
 				style={{
 					backgroundImage: "url(/hero.jpg)",
@@ -51,7 +51,7 @@ export default function HomePage() {
 						</p>
 					</div>
 				</div>
-			</section>
+			</section> */}
 
 			{/* Main Content Section */}
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">
