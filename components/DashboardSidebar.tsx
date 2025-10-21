@@ -11,7 +11,9 @@ type UpcomingSession = {
 };
 
 export function DashboardSidebar() {
-	const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>([]);
+	const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>(
+		[]
+	);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -29,7 +31,9 @@ export function DashboardSidebar() {
 				}
 
 				// Fetch user's campaign sessions
-				const campaignsResponse = await fetch("/api/campaigns/my-campaigns");
+				const campaignsResponse = await fetch(
+					"/api/campaigns/my-campaigns"
+				);
 				let campaignSessions: UpcomingSession[] = [];
 				if (campaignsResponse.ok) {
 					campaignSessions = await campaignsResponse.json();
@@ -77,7 +81,7 @@ export function DashboardSidebar() {
 	};
 
 	return (
-		<aside className="hidden 3xl:block w-64 flex-shrink-0">
+		<aside className="hidden mt-4 3xl:block w-64 flex-shrink-0">
 			<div className="sticky top-4 space-y-6">
 				{/* Quick Actions */}
 				<div className="rounded-lg border border-amber-500/30 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 p-4">
