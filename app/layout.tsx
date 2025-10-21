@@ -68,26 +68,31 @@ export default function RootLayout({
 			<body className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
 				<StructuredData />
 				<Navbar />
-				<div className="mx-auto w-full max-w-[1600px] px-4 py-10 sm:px-6 flex">
-          <DashboardSidebar />
-					<main className="flex-1 min-w-0">
+				<div className="mx-auto max-w-[1800px] px-4 py-10 sm:px-6 flex">
+					<DashboardSidebar />
+					<main className="flex-1 justify-center mx-auto max-w-[1000px] min-w-0">
 						{children}
 					</main>
 					<FeaturedVendorsFeed />
 				</div>
-				<footer className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 text-center text-sm text-slate-500">
+				<footer className="mx-auto  max-w-6xl px-4 py-6 sm:px-6 text-center text-sm text-slate-500">
 					<div>
 						<Link href="/privacy">Privacy Policy</Link> -{" "}
 						<Link href="/terms">Terms of Service</Link> -{" "}
 						<Link href="/sms-consent">SMS Consent</Link>
 					</div>
 					<div>
-						<Link href="/mission">Mission</Link> -{" "}©{" "}
+						<Link href="/mission">Mission</Link> - ©{" "}
 						<Link href="http://midnightoil.software">
 							Midnight Oil Software
 						</Link>{" "}
 						2025 -{" "}
-						<Link href="https://discord.gg/Nx9jPfn6Sb" rel="noopener noreferrer">Support</Link>
+						<Link
+							href="https://discord.gg/Nx9jPfn6Sb"
+							rel="noopener noreferrer"
+						>
+							Support
+						</Link>
 					</div>
 				</footer>
 			</body>

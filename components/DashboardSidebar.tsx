@@ -81,10 +81,10 @@ export function DashboardSidebar() {
 	};
 
 	return (
-		<aside className="hidden mt-4 3xl:block w-64 flex-shrink-0">
+		<aside className="hidden m-4 3xl:block w-64 flex-shrink-0">
 			<div className="sticky top-4 space-y-6">
 				{/* Quick Actions */}
-				<div className="rounded-lg border border-amber-500/30 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 p-4">
+				<div className="rounded-lg border border-amber-500/30 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 p-4 ">
 					<h2 className="mb-3 text-sm font-semibold text-amber-100">
 						Quick Actions
 					</h2>

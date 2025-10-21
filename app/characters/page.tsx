@@ -434,7 +434,7 @@ export default function CharactersPage() {
 
 		// Validate file types
 		const invalidFiles = fileArray.filter(
-			(file) => 
+			(file) =>
 				file.type !== "application/pdf" &&
 				file.type !== "image/jpeg" &&
 				file.type !== "image/png" &&
@@ -442,7 +442,9 @@ export default function CharactersPage() {
 				file.type !== "image/gif"
 		);
 		if (invalidFiles.length > 0) {
-			setPdfUploadError("Only PDF and image files (JPEG, PNG, WebP, GIF) are allowed");
+			setPdfUploadError(
+				"Only PDF and image files (JPEG, PNG, WebP, GIF) are allowed"
+			);
 			event.target.value = "";
 			return;
 		}
@@ -919,45 +921,42 @@ export default function CharactersPage() {
 				</div>
 			)}
 
-			{item.system === "dnd" &&
-				item.pdfUrls &&
-				item.pdfUrls.length > 0 && (
-					<div className="space-y-2">
-						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-							Character Sheets
-						</h3>
-						<div className="flex flex-wrap gap-2">
-							{item.pdfUrls.map((url, index) => (
-								<a
-									key={index}
-									href={url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
-								>
-									📄 Character Sheet {index + 1}
-								</a>
-							))}
-						</div>
+			{item.system === "dnd" && item.pdfUrls && item.pdfUrls.length > 0 && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Character Sheets
+					</h3>
+					<div className="flex flex-wrap gap-2">
+						{item.pdfUrls.map((url, index) => (
+							<a
+								key={index}
+								href={url}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="inline-flex items-center rounded-md border border-sky-600/70 bg-sky-900/30 px-3 py-1.5 text-sm text-sky-200 transition hover:bg-sky-900/50"
+							>
+								📄 Character Sheet {index + 1}
+							</a>
+						))}
 					</div>
-				)}
+				</div>
+			)}
 
-			{item.system === "starfinder" &&
-				item.demiplaneUrl && (
-					<div className="space-y-2">
-						<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-							Demiplane Character
-						</h3>
-						<a
-							href={item.demiplaneUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
-						>
-							🔗 View on Demiplane
-						</a>
-					</div>
-				)}
+			{item.system === "starfinder" && item.demiplaneUrl && (
+				<div className="space-y-2">
+					<h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+						Demiplane Character
+					</h3>
+					<a
+						href={item.demiplaneUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex items-center rounded-md border border-purple-600/70 bg-purple-900/30 px-3 py-1.5 text-sm text-purple-200 transition hover:bg-purple-900/50"
+					>
+						🔗 View on Demiplane
+					</a>
+				</div>
+			)}
 		</div>
 	);
 
@@ -1058,7 +1057,8 @@ export default function CharactersPage() {
 												Upload Character Sheets
 											</h3>
 											<p className="text-xs text-sky-300/80">
-												Upload your character sheets as PDF or image files (up to 3 files)
+												Upload your character sheets as PDF or image
+												files (up to 3 files)
 											</p>
 										</div>
 
@@ -1078,7 +1078,8 @@ export default function CharactersPage() {
 														</li>
 														<li>Download the PDF file(s)</li>
 														<li>
-															Upload the files below (max 3 files)
+															Upload the files below (max 3
+															files)
 														</li>
 													</ol>
 												) : (
@@ -1123,8 +1124,8 @@ export default function CharactersPage() {
 													className="hidden"
 												/>
 												<p className="text-xs text-slate-400">
-													PDF or image files (JPEG, PNG, WebP, GIF). Max 10MB per file, up to
-													3 files.
+													PDF or image files (JPEG, PNG, WebP,
+													GIF). Max 10MB per file, up to 3 files.
 												</p>
 											</div>
 
@@ -1304,7 +1305,8 @@ export default function CharactersPage() {
 													<li>Paste it in the field below</li>
 												</ol>
 												<p className="mt-2 text-purple-300">
-													Example: https://app.demiplane.com/nexus/starfinder2e/character/abc123
+													Example:
+													https://app.demiplane.com/nexus/starfinder2e/character/abc123
 												</p>
 											</div>
 
@@ -1398,49 +1400,50 @@ export default function CharactersPage() {
 												</div>
 											</div>
 
-									<div className="grid gap-4 sm:grid-cols-2">
-										<label className="flex flex-col gap-2">
-											<span className="text-sm font-medium text-slate-200">
-												Name
-											</span>
-											<input
-												type="text"
-												value={character.name}
-												onChange={(event) =>
-													setCharacter((prev) => ({
-														...prev,
-														name: event.target.value,
-													}))
-												}
-												placeholder="Eldrin the Bold"
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-											/>
-										</label>
-										<label className="flex flex-col gap-2">
-											<span className="text-sm font-medium text-slate-200">
-												Campaign
-											</span>
-											<input
-												type="text"
-												value={character.campaign}
-												onChange={(event) =>
-													setCharacter((prev) => ({
-														...prev,
-														campaign: event.target.value,
-													}))
-												}
-												placeholder="Shadows of Neverwinter"
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-											/>
-										</label>
-									</div>
+											<div className="grid gap-4 sm:grid-cols-2">
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Name
+													</span>
+													<input
+														type="text"
+														value={character.name}
+														onChange={(event) =>
+															setCharacter((prev) => ({
+																...prev,
+																name: event.target.value,
+															}))
+														}
+														placeholder="Eldrin the Bold"
+														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													/>
+												</label>
+												<label className="flex flex-col gap-2">
+													<span className="text-sm font-medium text-slate-200">
+														Campaign
+													</span>
+													<input
+														type="text"
+														value={character.campaign}
+														onChange={(event) =>
+															setCharacter((prev) => ({
+																...prev,
+																campaign: event.target.value,
+															}))
+														}
+														placeholder="Shadows of Neverwinter"
+														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													/>
+												</label>
+											</div>
+										</div>
+									)}
 								</div>
-							)}
-						</div>
-					) : null}
+							) : null}
 
-					{/* Show normal Name/Campaign/Avatar when no PDFs */}
-					{(!character.pdfUrls || character.pdfUrls.length === 0) && (
+							{/* Show normal Name/Campaign/Avatar when no PDFs */}
+							{(!character.pdfUrls ||
+								character.pdfUrls.length === 0) && (
 								<>
 									{/* Avatar Upload Section */}
 									<div className="space-y-4">
@@ -1558,7 +1561,8 @@ export default function CharactersPage() {
 															onChange={(event) =>
 																setCharacter((prev) => ({
 																	...prev,
-																	alignment: event.target.value,
+																	alignment:
+																		event.target.value,
 																}))
 															}
 															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
@@ -1584,7 +1588,8 @@ export default function CharactersPage() {
 															onChange={(event) =>
 																setCharacter((prev) => ({
 																	...prev,
-																	alignment: event.target.value,
+																	alignment:
+																		event.target.value,
 																}))
 															}
 															placeholder="Chaotic Good"
@@ -1607,12 +1612,19 @@ export default function CharactersPage() {
 															}
 															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														>
-															<option value="">Select race</option>
-															{systemOptions.races.map((race) => (
-																<option key={race} value={race}>
-																	{race}
-																</option>
-															))}
+															<option value="">
+																Select race
+															</option>
+															{systemOptions.races.map(
+																(race) => (
+																	<option
+																		key={race}
+																		value={race}
+																	>
+																		{race}
+																	</option>
+																)
+															)}
 														</select>
 													) : (
 														<input
@@ -1639,7 +1651,8 @@ export default function CharactersPage() {
 															onChange={(event) =>
 																setCharacter((prev) => ({
 																	...prev,
-																	background: event.target.value,
+																	background:
+																		event.target.value,
 																}))
 															}
 															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
@@ -1665,7 +1678,8 @@ export default function CharactersPage() {
 															onChange={(event) =>
 																setCharacter((prev) => ({
 																	...prev,
-																	background: event.target.value,
+																	background:
+																		event.target.value,
 																}))
 															}
 															placeholder="Sage"
@@ -1855,14 +1869,16 @@ export default function CharactersPage() {
 														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 													>
 														<option value="">Select class</option>
-														{systemOptions.classes.map((className) => (
-															<option
-																key={className}
-																value={className}
-															>
-																{className}
-															</option>
-														))}
+														{systemOptions.classes.map(
+															(className) => (
+																<option
+																	key={className}
+																	value={className}
+																>
+																	{className}
+																</option>
+															)
+														)}
 													</select>
 												) : (
 													<input
@@ -1920,8 +1936,8 @@ export default function CharactersPage() {
 														Make this character public
 													</span>
 													<span className="block text-xs text-slate-400">
-														Public characters will be visible on your
-														player profile page
+														Public characters will be visible on
+														your player profile page
 													</span>
 												</span>
 											</label>
@@ -1945,11 +1961,13 @@ export default function CharactersPage() {
 																		setCharacter((prev) => ({
 																			...prev,
 																			items: [
-																				...(prev.items || []),
+																				...(prev.items ||
+																					[]),
 																				value,
 																			],
 																		}));
-																		event.currentTarget.value = "";
+																		event.currentTarget.value =
+																			"";
 																	}
 																}
 															}}
@@ -1958,9 +1976,11 @@ export default function CharactersPage() {
 														<button
 															type="button"
 															onClick={(event) => {
-																const input = event.currentTarget
+																const input = event
+																	.currentTarget
 																	.previousElementSibling as HTMLInputElement;
-																const value = input?.value.trim();
+																const value =
+																	input?.value.trim();
 																if (value) {
 																	setCharacter((prev) => ({
 																		...prev,
@@ -1994,8 +2014,12 @@ export default function CharactersPage() {
 																						(prev) => ({
 																							...prev,
 																							items: prev.items?.filter(
-																								(_, i) =>
-																									i !== index
+																								(
+																									_,
+																									i
+																								) =>
+																									i !==
+																									index
 																							),
 																						})
 																					);
@@ -2038,53 +2062,62 @@ export default function CharactersPage() {
 														)}
 													</div>
 													<span className="text-xs uppercase tracking-wide text-slate-400">
-														{isAbilitiesOpen ? "Collapse" : "Expand"}
+														{isAbilitiesOpen
+															? "Collapse"
+															: "Expand"}
 													</span>
 												</button>
 												{isAbilitiesOpen && (
 													<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-														{character.stats.map((stat, index) => (
-															<div
-																key={`${stat.name}-${index}`}
-																className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
-															>
-																<label className="flex flex-col gap-2">
-																	<span className="text-xs uppercase tracking-wide text-slate-400">
-																		{isCustomSystem ? (
-																			<input
-																				type="text"
-																				value={stat.name}
-																				onChange={(event) =>
-																					updateStat(
-																						index,
-																						"name",
-																						event.target.value
-																					)
-																				}
-																				placeholder="Stat Name"
-																				className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
-																			/>
-																		) : (
-																			stat.name
-																		)}
-																	</span>
-																	<input
-																		type="number"
-																		inputMode="numeric"
-																		value={stat.value}
-																		onChange={(event) =>
-																			updateStat(
-																				index,
-																				"value",
-																				event.target.value
-																			)
-																		}
-																		placeholder="0"
-																		className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-																	/>
-																</label>
-															</div>
-														))}
+														{character.stats.map(
+															(stat, index) => (
+																<div
+																	key={`${stat.name}-${index}`}
+																	className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+																>
+																	<label className="flex flex-col gap-2">
+																		<span className="text-xs uppercase tracking-wide text-slate-400">
+																			{isCustomSystem ? (
+																				<input
+																					type="text"
+																					value={stat.name}
+																					onChange={(
+																						event
+																					) =>
+																						updateStat(
+																							index,
+																							"name",
+																							event
+																								.target
+																								.value
+																						)
+																					}
+																					placeholder="Stat Name"
+																					className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+																				/>
+																			) : (
+																				stat.name
+																			)}
+																		</span>
+																		<input
+																			type="number"
+																			inputMode="numeric"
+																			value={stat.value}
+																			onChange={(event) =>
+																				updateStat(
+																					index,
+																					"value",
+																					event.target
+																						.value
+																				)
+																			}
+																			placeholder="0"
+																			className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																		/>
+																	</label>
+																</div>
+															)
+														)}
 													</div>
 												)}
 											</div>
@@ -2092,7 +2125,9 @@ export default function CharactersPage() {
 											<div className="space-y-4">
 												<button
 													type="button"
-													onClick={() => setIsSkillsOpen(!isSkillsOpen)}
+													onClick={() =>
+														setIsSkillsOpen(!isSkillsOpen)
+													}
 													className="flex w-full items-center justify-between rounded-md border border-slate-800 bg-slate-900/40 px-4 py-3 text-left transition hover:bg-slate-900/60"
 												>
 													<div className="flex items-center gap-2">
@@ -2118,54 +2153,63 @@ export default function CharactersPage() {
 												</button>
 												{isSkillsOpen && (
 													<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-														{character.skills.map((skill, index) => (
-															<div
-																key={`${skill.name}-${index}`}
-																className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
-															>
-																<label className="flex flex-col gap-2">
-																	<span className="text-xs uppercase tracking-wide text-slate-400">
-																		{isCustomSystem ? (
-																			<input
-																				type="text"
-																				value={skill.name}
-																				onChange={(event) =>
-																					updateSkill(
-																						index,
-																						"name",
-																						event.target.value
-																					)
-																				}
-																				placeholder="Skill Name"
-																				className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
-																			/>
-																		) : (
-																			getSkillDisplayName(
-																				skill.name,
-																				selectedSystem
-																			)
-																		)}
-																	</span>
-																	<input
-																		type="text"
-																		value={skill.value}
-																		onChange={(event) =>
-																			updateSkill(
-																				index,
-																				"value",
-																				event.target.value
-																			)
-																		}
-																		placeholder={
-																			isCustomSystem
-																				? "Rank / Modifier"
-																				: "+0"
-																		}
-																		className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
-																	/>
-																</label>
-															</div>
-														))}
+														{character.skills.map(
+															(skill, index) => (
+																<div
+																	key={`${skill.name}-${index}`}
+																	className="rounded-md border border-slate-800 bg-slate-950/50 p-3"
+																>
+																	<label className="flex flex-col gap-2">
+																		<span className="text-xs uppercase tracking-wide text-slate-400">
+																			{isCustomSystem ? (
+																				<input
+																					type="text"
+																					value={
+																						skill.name
+																					}
+																					onChange={(
+																						event
+																					) =>
+																						updateSkill(
+																							index,
+																							"name",
+																							event
+																								.target
+																								.value
+																						)
+																					}
+																					placeholder="Skill Name"
+																					className="w-full rounded border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-100 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/40"
+																				/>
+																			) : (
+																				getSkillDisplayName(
+																					skill.name,
+																					selectedSystem
+																				)
+																			)}
+																		</span>
+																		<input
+																			type="text"
+																			value={skill.value}
+																			onChange={(event) =>
+																				updateSkill(
+																					index,
+																					"value",
+																					event.target
+																						.value
+																				)
+																			}
+																			placeholder={
+																				isCustomSystem
+																					? "Rank / Modifier"
+																					: "+0"
+																			}
+																			className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																		/>
+																	</label>
+																</div>
+															)
+														)}
 													</div>
 												)}
 											</div>
@@ -2896,7 +2940,7 @@ export default function CharactersPage() {
 									key={item.id}
 									className="overflow-hidden rounded-lg border border-slate-800 bg-slate-950/60 shadow"
 								>
-									<summary className="flex cursor-pointer items-center gap-3 bg-slate-900/60 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-900/80">
+									<summary className="flex cursor-pointer items-center gap-3 border-amber-500/30 bg-gradient-to-br from-amber-600/10 via-purple-600/10 to-indigo-600/10 p-4">
 										{item.avatarUrl ? (
 											<img
 												src={item.avatarUrl}

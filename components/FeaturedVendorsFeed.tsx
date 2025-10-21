@@ -63,7 +63,11 @@ export default function FeaturedVendorsFeed() {
 						Nearby Venues
 					</h2>
 					{regularVendors.map((vendor) => (
-						<VendorCard key={vendor.id} vendor={vendor} isFeatured={false} />
+						<VendorCard
+							key={vendor.id}
+							vendor={vendor}
+							isFeatured={false}
+						/>
 					))}
 				</div>
 			)}
