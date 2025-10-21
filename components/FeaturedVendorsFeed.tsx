@@ -28,7 +28,7 @@ export default function FeaturedVendorsFeed() {
 
 	if (loading) {
 		return (
-			<aside className="hidden 2xl:block w-80 ml-8 space-y-4">
+			<aside className="hidden 3xl:block w-80 ml-8 space-y-4">
 				<div className="rounded-2xl border border-slate-800 bg-slate-950/70 p-4 shadow-lg">
 					<div className="text-sm text-slate-400">Loading venues...</div>
 				</div>
@@ -45,7 +45,7 @@ export default function FeaturedVendorsFeed() {
 	const regularVendors = vendors.filter((v) => !v.isFeatured);
 
 	return (
-		<aside className="hidden 2xl:block w-80 ml-8 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
+		<aside className="hidden 3xl:block w-80 ml-8 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
 			{featuredVendors.length > 0 && (
 				<div className="space-y-3">
 					<h2 className="text-lg font-semibold text-amber-400 px-2">
