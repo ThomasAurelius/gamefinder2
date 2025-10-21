@@ -40,6 +40,13 @@ export default function PrivacyPage() {
 						</p>
 
 						<h3 className="text-base font-medium text-slate-200">
+							Mobile Phone Numbers
+						</h3>
+						<p>
+							If you choose to provide your mobile phone number for optional SMS notifications, we collect and store this information. Your mobile phone number will only be shared with our SMS service provider (Twilio) for the sole purpose of delivering campaign-related notifications. We will never share your mobile phone number with third parties or affiliates for marketing or promotional activities.
+						</p>
+
+						<h3 className="text-base font-medium text-slate-200">
 							Derivative Data
 						</h3>
 						<p>

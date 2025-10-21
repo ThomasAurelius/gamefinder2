@@ -350,4 +350,47 @@ export async function listVendorsByLocation(
 	});
 
 	return vendorsWithDistance;
+export type VendorBasicInfo = {
+	id: string;
+	vendorName: string;
+};
+
+export async function getVendorsBasicInfo(
+	vendorIds: string[]
+): Promise<Map<string, VendorBasicInfo>> {
+	const result = new Map<string, VendorBasicInfo>();
+
+	try {
+		const db = await getDb();
+		const collection = db.collection<VendorDocument>("vendors");
+
+		const validIds = vendorIds.filter((id) => ObjectId.isValid(id));
+
+		if (validIds.length === 0) {
+			return result;
+		}
+
+		const objectIds = validIds.map((id) => new ObjectId(id));
+
+		const vendors = await collection
+			.find(
+				{ _id: { $in: objectIds } },
+				{ projection: { _id: 1, vendorName: 1 } }
+			)
+			.toArray();
+
+		for (const vendor of vendors) {
+			const vendorId = vendor._id?.toString();
+			if (vendorId) {
+				result.set(vendorId, {
+					id: vendorId,
+					vendorName: vendor.vendorName || "Unknown Venue",
+				});
+			}
+		}
+	} catch (error) {
+		console.error("Failed to fetch vendors basic info", error);
+	}
+
+	return result;
 }
