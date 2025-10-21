@@ -57,37 +57,30 @@ export default function FeaturedVendorsFeed() {
 		return null;
 	}
 
-	// Split vendors into featured and non-featured
-	const featuredVendors = vendors.filter((v) => v.isFeatured);
-	const regularVendors = vendors.filter((v) => !v.isFeatured);
+	// Sort all vendors by distance (if available), keeping featured status for styling
+	const sortedVendors = [...vendors].sort((a, b) => {
+		// If we have distance data, sort by distance first
+		if (a.distance !== undefined && b.distance !== undefined) {
+			return a.distance - b.distance;
+		}
+		// Otherwise, maintain the original order (which sorts featured first, then by name)
+		return 0;
+	});
 
 	return (
 		<aside className="hidden 3xl:block w-80 ml-8 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
-			{featuredVendors.length > 0 && (
-				<div className="space-y-3">
-					<h2 className="text-lg font-semibold text-amber-400 px-2">
-						Featured Venues
-					</h2>
-					{featuredVendors.map((vendor) => (
-						<VendorCard key={vendor.id} vendor={vendor} isFeatured />
-					))}
-				</div>
-			)}
-
-			{regularVendors.length > 0 && (
-				<div className="space-y-3">
-					<h2 className="text-lg font-semibold text-slate-300 px-2">
-						{isNearbyVendors ? "Nearby Venues" : "All Venues"}
-					</h2>
-					{regularVendors.map((vendor) => (
-						<VendorCard
-							key={vendor.id}
-							vendor={vendor}
-							isFeatured={false}
-						/>
-					))}
-				</div>
-			)}
+			<div className="space-y-3">
+				<h2 className="text-lg font-semibold text-slate-300 px-2">
+					{isNearbyVendors ? "Nearby Venues" : "All Venues"}
+				</h2>
+				{sortedVendors.map((vendor) => (
+					<VendorCard
+						key={vendor.id}
+						vendor={vendor}
+						isFeatured={vendor.isFeatured}
+					/>
+				))}
+			</div>
 		</aside>
 	);
 }
