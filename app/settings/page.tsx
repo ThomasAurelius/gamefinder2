@@ -101,6 +101,10 @@ export default function SettingsPage() {
 	const [ambassadorMessage, setAmbassadorMessage] = useState("");
 	const [ambassadorUntilDate, setAmbassadorUntilDate] = useState("");
 
+	// Venue management state
+	const [hasVenue, setHasVenue] = useState(false);
+	const [venueId, setVenueId] = useState<string | null>(null);
+
 	useEffect(() => {
 		async function checkAdminAndLoadAnnouncement() {
 			try {
@@ -133,6 +137,21 @@ export default function SettingsPage() {
 
 				// Load user badges (for all users)
 				loadUserBadges();
+
+				// Check if user has a venue
+				try {
+					const venueRes = await fetch("/api/vendors?owner=me");
+					if (venueRes.ok) {
+						const venueData = await venueRes.json();
+						const userVenue = venueData.vendors?.[0];
+						if (userVenue) {
+							setHasVenue(true);
+							setVenueId(userVenue.id);
+						}
+					}
+				} catch (err) {
+					console.error("Failed to check venue status:", err);
+				}
 
 				// Load user profile to check canPostPaidGames
 				const profileRes = await fetch("/api/profile");
@@ -808,6 +827,23 @@ export default function SettingsPage() {
 							</Link>
 						)}
 					</div>
+
+					{hasVenue && (
+						<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
+							<h2 className="text-sm font-medium text-slate-200">
+								Manage Venue
+							</h2>
+							<p className="mt-2 text-xs text-slate-400">
+								Update your venue information, hours, and images.
+							</p>
+							<Link
+								href="/vendor"
+								className="mt-3 inline-block rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
+							>
+								Manage Venue
+							</Link>
+						</div>
+					)}
 
 					{loading ? (
 						<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
