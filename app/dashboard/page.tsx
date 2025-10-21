@@ -32,6 +32,7 @@ type GameSession = {
   meetingFrequency?: string;
   daysOfWeek?: string[];
   isCampaign?: boolean;
+  vendorName?: string;
 };
 
 function GameSessionCard({
@@ -136,6 +137,12 @@ function GameSessionCard({
                 >
                   {session.hostName}
                 </Link>
+              </p>
+            )}
+            {session.vendorName && (
+              <p>
+                <span className="text-slate-500">Venue:</span>{" "}
+                <span className="text-slate-300">{session.vendorName}</span>
               </p>
             )}
             <p>

@@ -360,6 +360,7 @@ export async function listUserGameSessions(userId: string): Promise<StoredGameSe
     longitude: session.longitude,
     costPerSession: session.costPerSession,
     stripeConnectAccountId: session.stripeConnectAccountId,
+    vendorId: session.vendorId,
   }));
 }
 

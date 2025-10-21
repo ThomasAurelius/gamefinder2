@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@theme {
+	--breakpoint-3xl: 1600px;
+}
 
 :root {
   color-scheme: dark;
