@@ -11,10 +11,24 @@ export default function FeaturedVendorsFeed() {
 	useEffect(() => {
 		const fetchVendors = async () => {
 			try {
-				const response = await fetch("/api/vendors?nearMe=true");
-				if (response.ok) {
-					const data = await response.json();
-					setVendors(data.vendors || []);
+				// First try to get nearby vendors
+				const nearbyResponse = await fetch("/api/vendors?nearMe=true");
+				if (nearbyResponse.ok) {
+					const nearbyData = await nearbyResponse.json();
+					const nearbyVendors = nearbyData.vendors || [];
+					
+					// If we have nearby vendors, use them
+					if (nearbyVendors.length > 0) {
+						setVendors(nearbyVendors);
+						return;
+					}
+				}
+				
+				// Fall back to all approved vendors if no nearby vendors found
+				const allResponse = await fetch("/api/vendors");
+				if (allResponse.ok) {
+					const allData = await allResponse.json();
+					setVendors(allData.vendors || []);
 				}
 			} catch (error) {
 				console.error("Failed to fetch vendors", error);
