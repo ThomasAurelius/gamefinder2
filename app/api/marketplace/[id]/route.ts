@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import {
-  getMarketplaceListing,
   updateMarketplaceListing,
   deleteMarketplaceListing,
   updateMarketplaceListingByAdmin,
   deleteMarketplaceListingByAdmin,
 } from "@/lib/marketplace/db";
-import { getUsersBasicInfo } from "@/lib/users";
 import { isAdmin } from "@/lib/admin";
 import { MarketplaceListingPayload } from "@/lib/marketplace/types";
 
