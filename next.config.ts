@@ -45,8 +45,8 @@ const nextConfig: NextConfig = {
 							"img-src 'self' data: https://*.stripe.com https://storage.googleapis.com https://firebasestorage.googleapis.com https://cf.geekdo-images.com",
 							// Allow fonts from self, data URIs (required for Stripe), and Google Fonts
 							"font-src 'self' data: https://fonts.gstatic.com",
-							// Allow connections to self and all Stripe domains (simplified with wildcard)
-							"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com",
+							// Allow connections to self, Stripe domains, Firebase services, and Google APIs
+							"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseapp.com",
 							// Allow iframes from Stripe (for embedded payment forms)
 							"frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
 							// Disallow object, embed, and applet elements
