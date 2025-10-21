@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ConversationMessage } from "@/lib/messages";
+import UserAutocomplete from "@/components/UserAutocomplete";
 
 type Conversation = {
 	userId: string;
@@ -151,7 +152,7 @@ function MessagesContent() {
 
 		try {
 			if (!newMessage.recipientId || !newMessage.recipientName) {
-				setSendError("Please enter recipient ID and name");
+				setSendError("Please select a recipient");
 				return;
 			}
 
@@ -332,36 +333,29 @@ function MessagesContent() {
 				<div className="rounded-lg border border-white/10 bg-slate-900 p-6">
 					<h2 className="mb-4 text-xl font-semibold">Compose Message</h2>
 					<form onSubmit={handleSendMessage} className="space-y-4">
-						<input
-							type="hidden"
-							id="recipientId"
-							value={newMessage.recipientId}
-							onChange={(e) =>
-								setNewMessage({
-									...newMessage,
-									recipientId: e.target.value,
-								})
-							}
-						/>
 						<div>
 							<label
 								htmlFor="recipientName"
 								className="block text-sm font-medium text-slate-300"
 							>
-								Recipient Name
+								Recipient
 							</label>
-							<input
-								type="text"
+							<UserAutocomplete
 								id="recipientName"
-								value={newMessage.recipientName}
-								onChange={(e) =>
+								selectedUser={
+									newMessage.recipientId && newMessage.recipientName
+										? { id: newMessage.recipientId, name: newMessage.recipientName }
+										: null
+								}
+								onSelectUser={(user) => {
 									setNewMessage({
 										...newMessage,
-										recipientName: e.target.value,
-									})
-								}
+										recipientId: user.id,
+										recipientName: user.name,
+									});
+								}}
+								placeholder="Search for a user..."
 								className="mt-1 w-full rounded-md border border-white/10 bg-slate-800 px-3 py-2 text-slate-100"
-								placeholder="Enter recipient name"
 							/>
 						</div>
 						<div>
