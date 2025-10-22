@@ -17,7 +17,7 @@ export default function VenuesPage() {
 				if (nearbyResponse.ok) {
 					const nearbyData = await nearbyResponse.json();
 					const nearbyVendors = nearbyData.vendors || [];
-					
+
 					// If we have nearby vendors, use them
 					if (nearbyVendors.length > 0) {
 						setVendors(nearbyVendors);
@@ -25,7 +25,7 @@ export default function VenuesPage() {
 						return;
 					}
 				}
-				
+
 				// Fall back to all approved vendors if no nearby vendors found
 				const allResponse = await fetch("/api/vendors");
 				if (allResponse.ok) {
@@ -82,7 +82,11 @@ export default function VenuesPage() {
 							</h2>
 							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 								{featuredVendors.map((vendor) => (
-									<VendorCard key={vendor.id} vendor={vendor} isFeatured />
+									<VendorCard
+										key={vendor.id}
+										vendor={vendor}
+										isFeatured
+									/>
 								))}
 							</div>
 						</section>
@@ -124,6 +128,11 @@ function VendorCard({
 	return (
 		<Link href={`/vendor/${vendor.id}`} className="block">
 			<div className={cardClasses}>
+				{isFeatured && (
+					<span className="inline-block rounded-full bg-amber-500/80 px-3 py-1 text-xs font-semibold text-amber-900 mb-3">
+						Featured Venue
+					</span>
+				)}
 				{vendor.primaryImage && (
 					<img
 						src={vendor.primaryImage}
