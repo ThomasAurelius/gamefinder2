@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import { sortTimesByChronology } from "@/lib/constants";
 import HostFeedbackDialog from "@/components/HostFeedbackDialog";
 import HostFeedbackSection from "@/components/HostFeedbackSection";
 import PlayerFeedbackSection from "@/components/PlayerFeedbackSection";
@@ -171,7 +172,7 @@ function GameSessionCard({
 						</p>
 						<p>
 							<span className="text-slate-500">Times:</span>{" "}
-							{session.times.join(", ")}
+							{sortTimesByChronology(session.times).join(", ")}
 						</p>
 						{(session.location || session.zipCode) && (
 							<p>

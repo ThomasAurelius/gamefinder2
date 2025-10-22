@@ -8,6 +8,7 @@ import {
 	TIME_SLOTS,
 	TIME_SLOT_GROUPS,
 	mapGameToSystemKey,
+	sortTimesByChronology,
 } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
@@ -141,7 +142,7 @@ function CampaignCard({
 					)}
 					<p>
 						<span className="text-slate-500">Times:</span>{" "}
-						{campaign.times.join(", ")}
+						{sortTimesByChronology(campaign.times).join(", ")}
 					</p>
 					{campaign.vendorId && campaign.vendorName && (
 						<p>
