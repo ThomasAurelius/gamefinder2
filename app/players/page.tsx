@@ -57,20 +57,6 @@ function PlayerCard({ player }: { player: Player }) {
 			className="group block rounded-xl border border-slate-800 bg-slate-900/60 p-6 transition hover:border-sky-500/60 hover:bg-slate-900"
 		>
 			<div className="flex items-start gap-4">
-				{/* Badges column on far left */}
-				{player.badges && player.badges.length > 0 && (
-					<div className="flex flex-col gap-1">
-						{player.badges.map((badge) => (
-							<Badge
-								key={`${player.id}-${badge.name}-${badge.imageUrl}`}
-								name={badge.name}
-								imageUrl={badge.imageUrl}
-								size="sm"
-								showTooltip={true}
-							/>
-						))}
-					</div>
-				)}
 				{/* Avatar column */}
 				<div className="flex flex-col items-center">
 					{player.avatarUrl ? (
@@ -82,6 +68,20 @@ function PlayerCard({ player }: { player: Player }) {
 					) : (
 						<div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-700 bg-slate-800 text-xl font-semibold text-slate-400">
 							{displayName.charAt(0).toUpperCase()}
+						</div>
+					)}
+					{/* Badges column on far left */}
+					{player.badges && player.badges.length > 0 && (
+						<div className="flex pt-2 flex-col gap-1">
+							{player.badges.map((badge) => (
+								<Badge
+									key={`${player.id}-${badge.name}-${badge.imageUrl}`}
+									name={badge.name}
+									imageUrl={badge.imageUrl}
+									size="sm"
+									showTooltip={true}
+								/>
+							))}
 						</div>
 					)}
 				</div>
@@ -182,18 +182,20 @@ export default function PlayersPage() {
 			const params = new URLSearchParams();
 			if (searchQuery) params.append("search", searchQuery);
 			if (selectedRole) params.append("role", selectedRole);
-			
+
 			// Build games list, replacing "Other" with custom game name if provided
-			const gamesToSearch = selectedGames.map(game => {
-				if (game === "Other" && customGameName.trim()) {
-					return customGameName.trim();
-				}
-				return game;
-			}).filter(game => game !== "Other" || !customGameName.trim());
-			
+			const gamesToSearch = selectedGames
+				.map((game) => {
+					if (game === "Other" && customGameName.trim()) {
+						return customGameName.trim();
+					}
+					return game;
+				})
+				.filter((game) => game !== "Other" || !customGameName.trim());
+
 			if (gamesToSearch.length > 0)
 				params.append("games", gamesToSearch.join(","));
-			
+
 			if (locationSearch) {
 				params.append("location", locationSearch);
 				params.append("radius", radiusMiles);
