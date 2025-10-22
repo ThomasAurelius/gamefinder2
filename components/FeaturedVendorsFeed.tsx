@@ -106,6 +106,11 @@ function VendorCard({
 	return (
 		<Link href={`/vendor/${vendor.id}`} className="block">
 			<div className={cardClasses}>
+				{isFeatured && (
+					<span className="inline-block rounded-full bg-amber-500/80 px-3 py-1 text-xs font-semibold text-amber-900 mb-3">
+						Featured Venue
+					</span>
+				)}
 				{vendor.primaryImage && (
 					<div className={imageWrapperClasses}>
 						<img
