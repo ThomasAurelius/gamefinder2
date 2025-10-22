@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import SkipConfirmationModal from "@/components/SkipConfirmationModal";
 import AvatarCropper from "@/components/AvatarCropper";
 import { AuthGuard } from "@/components/auth-guard";
@@ -11,6 +12,8 @@ export default function OnboardingStep3() {
 	const router = useRouter();
 	const [bio, setBio] = useState("");
 	const [avatarUrl, setAvatarUrl] = useState("");
+	const [location, setLocation] = useState("");
+	const [zipCode, setZipCode] = useState("");
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 	const [imageToCrop, setImageToCrop] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -27,6 +30,8 @@ export default function OnboardingStep3() {
 					const profile = await response.json();
 					setBio(profile.bio || "");
 					setAvatarUrl(profile.avatarUrl || "");
+					setLocation(profile.location || "");
+					setZipCode(profile.zipCode || "");
 				}
 			} catch (error) {
 				console.error("Failed to load profile:", error);
@@ -94,18 +99,22 @@ export default function OnboardingStep3() {
 				body: JSON.stringify({
 					bio: bio.trim(),
 					avatarUrl,
+					location: location.trim(),
+					zipCode: zipCode.trim(),
 				}),
 			});
 
 			if (!response.ok) {
-				throw new Error("Failed to save profile");
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to save profile");
 			}
 
 			// Move to step 4
 			router.push("/auth/onboarding/step4");
 		} catch (submitError) {
+			const errorMessage = submitError instanceof Error ? submitError.message : "Failed to save profile. Please try again.";
 			console.error("Failed to save profile", submitError);
-			setError("Failed to save profile. Please try again.");
+			setError(errorMessage);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -200,6 +209,34 @@ export default function OnboardingStep3() {
 								</div>
 							</div>
 
+							{/* Location */}
+							<div className="space-y-2">
+								<label className="block text-sm text-slate-200">
+									Location
+								</label>
+								<input
+									type="text"
+									value={location}
+									onChange={(e) => setLocation(e.target.value)}
+									placeholder="City, State or Country"
+									className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+								/>
+							</div>
+
+							{/* Zip Code */}
+							<div className="space-y-2">
+								<label className="block text-sm text-slate-200">
+									Zip Code
+								</label>
+								<input
+									type="text"
+									value={zipCode}
+									onChange={(e) => setZipCode(e.target.value)}
+									placeholder="Enter your zip code"
+									className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+								/>
+							</div>
+
 							{/* Bio */}
 							<div className="space-y-2">
 								<label className="block text-sm text-slate-200">
@@ -215,6 +252,16 @@ export default function OnboardingStep3() {
 								/>
 								<p className="text-xs text-slate-400">
 									{remainingBioCharacters} characters remaining
+								</p>
+							</div>
+
+							{/* Profile Note */}
+							<div className="rounded-md border border-sky-500/20 bg-sky-900/20 p-3">
+								<p className="text-xs text-sky-300">
+									💡 You can add more details to your profile later, including games, availability, and preferences at{" "}
+									<Link href="/profile" className="font-medium underline hover:text-sky-200">
+										/profile
+									</Link>
 								</p>
 							</div>
 
