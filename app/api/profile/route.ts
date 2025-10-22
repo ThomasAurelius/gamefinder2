@@ -117,7 +117,8 @@ const validateProfile = (payload: unknown): ProfileRecord => {
   }
 
   // Validate bggUsername if provided (optional field)
-  if (bggUsername !== undefined && bggUsername !== "" && !isString(bggUsername)) {
+  // Only validate if it's explicitly a non-empty value that's not a string
+  if (bggUsername && !isString(bggUsername)) {
     throw new Error("BGG username must be a string");
   }
 
