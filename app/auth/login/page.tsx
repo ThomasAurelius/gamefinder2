@@ -126,12 +126,22 @@ export default function LoginPage() {
 					return;
 				}
 
-				setSuccess("Welcome back! Redirecting to your dashboard...");
-				setFormData({ email: "", password: "" });
+				// Check if user has completed onboarding
+				if (body.onboardingCompleted === false) {
+					// First-time login - redirect to onboarding step 2
+					setSuccess("Welcome! Let's complete your profile setup...");
+					window.setTimeout(() => {
+						router.push("/auth/onboarding/step2");
+					}, 800);
+				} else {
+					// Returning user - redirect to dashboard
+					setSuccess("Welcome back! Redirecting to your dashboard...");
+					setFormData({ email: "", password: "" });
 
-				window.setTimeout(() => {
-					router.push("/dashboard");
-				}, 800);
+					window.setTimeout(() => {
+						router.push("/dashboard");
+					}, 800);
+				}
 			} catch (submitError: unknown) {
 				console.error("Failed to sign in", submitError);
 

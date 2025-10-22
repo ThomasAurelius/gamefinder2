@@ -76,7 +76,6 @@ export default function OnboardingStep2() {
 			<div className="mx-auto max-w-5xl space-y-8 py-8">
 				{/* Progress Indicator */}
 				<div className="flex items-center justify-center gap-2">
-					<div className="h-2 w-2 rounded-full bg-emerald-500" />
 					<div className="h-2 w-2 rounded-full bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500" />
 					<div className="h-2 w-2 rounded-full bg-slate-700" />
 					<div className="h-2 w-2 rounded-full bg-slate-700" />
