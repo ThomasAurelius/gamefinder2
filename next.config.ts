@@ -50,7 +50,7 @@ const nextConfig: NextConfig = {
 							// Allow fonts from self, data URIs (required for Stripe), and Google Fonts
 							"font-src 'self' data: https://fonts.gstatic.com",
 							// Allow connections to self, Stripe domains, Firebase services, and Google APIs
-							"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseapp.com",
+							"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com https://*.firebaseapp.com",
 							// Allow iframes from Stripe (for embedded payment forms)
 							"frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
 							// Disallow object, embed, and applet elements
