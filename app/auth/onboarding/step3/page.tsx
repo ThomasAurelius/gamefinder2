@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import SkipConfirmationModal from "@/components/SkipConfirmationModal";
 import AvatarCropper from "@/components/AvatarCropper";
 import { AuthGuard } from "@/components/auth-guard";
@@ -256,9 +257,9 @@ export default function OnboardingStep3() {
 							<div className="rounded-md border border-sky-500/20 bg-sky-900/20 p-3">
 								<p className="text-xs text-sky-300">
 									💡 You can add more details to your profile later, including games, availability, and preferences at{" "}
-									<a href="/profile" className="font-medium underline hover:text-sky-200">
+									<Link href="/profile" className="font-medium underline hover:text-sky-200">
 										/profile
-									</a>
+									</Link>
 								</p>
 							</div>
 
