@@ -49,7 +49,7 @@ The onboarding flow guides new users through account setup in 3 easy steps after
 4. If `onboardingCompleted === false`, redirects to `/auth/onboarding/step2`
 5. If `onboardingCompleted === true`, redirects to `/dashboard`
 
-### Step 2: Timezone Selection (formerly Step 2 - now Step 1 of 3)
+### Step 2: Timezone Selection
 
 **Location**: `/auth/onboarding/step2`
 
@@ -63,7 +63,7 @@ The onboarding flow guides new users through account setup in 3 easy steps after
 
 **Progress Indicator**: Step 1 of 3 (active)
 
-### Step 3: Avatar & Bio (formerly Step 3 - now Step 2 of 3)
+### Step 3: Avatar & Bio
 
 **Location**: `/auth/onboarding/step3`
 
@@ -80,7 +80,7 @@ The onboarding flow guides new users through account setup in 3 easy steps after
 
 **Progress Indicator**: Step 2 of 3 (active)
 
-### Step 4: Feature Introduction (formerly Step 4 - now Step 3 of 3)
+### Step 4: Feature Introduction
 
 **Location**: `/auth/onboarding/step4`
 
