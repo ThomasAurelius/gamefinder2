@@ -207,11 +207,17 @@ export async function POST(request: Request) {
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
-      return new NextResponse(error.message, { status: 400 });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
     }
 
     console.error(error);
-    return new NextResponse("Unable to save profile", { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to save profile" },
+      { status: 500 }
+    );
   }
 }
 
@@ -264,10 +270,16 @@ export async function PUT(request: Request) {
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
-      return new NextResponse(error.message, { status: 400 });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
     }
 
     console.error(error);
-    return new NextResponse("Unable to update profile", { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to update profile" },
+      { status: 500 }
+    );
   }
 }
