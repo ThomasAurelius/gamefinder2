@@ -42,11 +42,10 @@ if (!value || value === "undefined" || value.trim() === "") {
 
 **Problem**: When environment variables were missing, the function would return empty strings to avoid build failures. These empty strings would then be passed to Firebase, causing the `auth/invalid-api-key` error when Firebase tried to use them.
 
-### 3. Missing Firebase Auth Domains in CSP Headers (Previously Fixed)
+### 3. Missing Firebase Auth Domains in CSP Headers (Previously Fixed, Now Updated)
 
-The Content Security Policy (CSP) headers in `next.config.ts` did not include the required Firebase Authentication API endpoints:
-- `identitytoolkit.googleapis.com` - Firebase Auth API
-- `securetoken.googleapis.com` - Token verification
+The Content Security Policy (CSP) headers in `next.config.ts` did not include the required Firebase Authentication API endpoints. Initially we added specific domains, but Firebase Auth may need to connect to various Google API services:
+- `*.googleapis.com` - All Google API services including Firebase Auth API, token verification, etc.
 - `*.firebaseapp.com` - Auth domain
 
 This would have caused network requests to be blocked even if the configuration was correct.
@@ -175,12 +174,12 @@ export function getFirebaseAuth(): Auth {
 }
 ```
 
-### 4. Updated CSP Headers (Previously Implemented)
+### 4. Updated CSP Headers (Previously Implemented, Now Enhanced)
 
-Modified `next.config.ts` to include Firebase Auth domains in the `connect-src` directive:
+Modified `next.config.ts` to include Firebase Auth domains in the `connect-src` directive. Updated to use wildcard pattern for better coverage:
 
 ```typescript
-"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://*.firebaseapp.com"
+"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://*.googleapis.com https://*.firebaseapp.com"
 ```
 ### 5. Enhanced Documentation
 

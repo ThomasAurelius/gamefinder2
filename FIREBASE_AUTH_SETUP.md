@@ -153,7 +153,6 @@ To test the authentication system:
 ### Network or CSP errors in browser console
 - Firebase Auth requires network access to several Google APIs
 - The CSP headers in `next.config.ts` have been configured to allow:
-  - `identitytoolkit.googleapis.com` (Firebase Auth API)
-  - `securetoken.googleapis.com` (Token verification)
+  - `*.googleapis.com` (All Google API services including Firebase Auth, token verification, etc.)
   - `*.firebaseapp.com` (Auth domain)
-- If you see CSP violations, ensure these domains are in the `connect-src` directive
+- If you see CSP violations, ensure these wildcard patterns are in the `connect-src` directive
