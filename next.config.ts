@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	serverExternalPackages: ["mongodb", "firebase-admin", "@google-cloud/storage"],
+	serverExternalPackages: [
+		"mongodb",
+		"firebase-admin",
+		"@google-cloud/storage",
+	],
 	images: {
 		remotePatterns: [
 			{
@@ -46,7 +50,7 @@ const nextConfig: NextConfig = {
 							// Allow fonts from self, data URIs (required for Stripe), and Google Fonts
 							"font-src 'self' data: https://fonts.gstatic.com",
 							// Allow connections to self and all Stripe domains (simplified with wildcard)
-							"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com",
+							"connect-src 'self' https://*.stripe.com https://firebasestorage.googleapis.com https://storage.googleapis.com https://identitytoolkit.googleapis.com",
 							// Allow iframes from Stripe (for embedded payment forms)
 							"frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
 							// Disallow object, embed, and applet elements
