@@ -105,14 +105,16 @@ export default function OnboardingStep3() {
 			});
 
 			if (!response.ok) {
-				throw new Error("Failed to save profile");
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Failed to save profile");
 			}
 
 			// Move to step 4
 			router.push("/auth/onboarding/step4");
 		} catch (submitError) {
+			const errorMessage = submitError instanceof Error ? submitError.message : "Failed to save profile. Please try again.";
 			console.error("Failed to save profile", submitError);
-			setError("Failed to save profile. Please try again.");
+			setError(errorMessage);
 		} finally {
 			setIsSubmitting(false);
 		}
