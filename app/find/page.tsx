@@ -8,6 +8,7 @@ import {
 	TIME_SLOTS,
 	TIME_SLOT_GROUPS,
 	mapGameToSystemKey,
+	sortTimesByChronology,
 } from "@/lib/constants";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import CityAutocomplete from "@/components/CityAutocomplete";
@@ -121,7 +122,7 @@ function GameSessionCard({
 					</p>
 					<p>
 						<span className="text-slate-500">Times:</span>{" "}
-						{session.times.join(", ")}
+						{sortTimesByChronology(session.times).join(", ")}
 					</p>
 					{session.vendorId && session.vendorName && (
 						<p>

@@ -106,3 +106,19 @@ export function formatTimeSlotsByGroup(times: string[]): string {
 
 	return groups.join("\n");
 }
+
+/**
+ * Sort time slots in chronological order
+ * @param times - Array of time slot strings
+ * @returns Array of time slots sorted chronologically
+ */
+export function sortTimesByChronology(times: string[]): string[] {
+	if (!times || times.length === 0) return [];
+
+	// Sort by the index in TIME_SLOTS array to maintain chronological order
+	return [...times].sort((a, b) => {
+		const indexA = TIME_SLOTS.indexOf(a);
+		const indexB = TIME_SLOTS.indexOf(b);
+		return indexA - indexB;
+	});
+}

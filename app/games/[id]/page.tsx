@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getGameSession } from "@/lib/games/db";
 import { getUsersBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import { sortTimesByChronology } from "@/lib/constants";
 import { getCharactersPublicStatus } from "@/lib/characters/db";
 import { getVendorById } from "@/lib/vendors";
 import GameDetailClient from "@/components/GameDetailClient";
@@ -30,7 +31,7 @@ export async function generateMetadata({
 		: `Join us for ${session.game}. ${session.maxPlayers - session.signedUpPlayers.length} spots available!`;
 	
 	// Format times for display
-	const timesStr = session.times.length > 0 ? ` | Times: ${session.times.join(", ")}` : "";
+	const timesStr = session.times.length > 0 ? ` | Times: ${sortTimesByChronology(session.times).join(", ")}` : "";
 	const description = `${baseDescription} | Date: ${formattedDate}${timesStr}`;
 
 	const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/games/${id}`;
