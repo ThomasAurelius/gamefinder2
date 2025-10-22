@@ -207,10 +207,79 @@ export async function POST(request: Request) {
     return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
-      return new NextResponse(error.message, { status: 400 });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
     }
 
     console.error(error);
-    return new NextResponse("Unable to save profile", { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to save profile" },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT method for partial profile updates (used by onboarding)
+export async function PUT(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const cookieStore = await cookies();
+    const userId = searchParams.get("userId") || cookieStore.get("userId")?.value;
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required. Please log in." },
+        { status: 401 }
+      );
+    }
+    
+    // Get current profile first
+    const currentProfile = await readProfile(userId);
+    
+    // Get the partial update from request
+    const partialUpdate = await request.json();
+    
+    // Merge the updates with current profile
+    const updatedProfile = {
+      ...currentProfile,
+      ...partialUpdate,
+    };
+    
+    // Validate the merged profile
+    const profile = validateProfile(updatedProfile);
+    
+    // Geocode the location if it was updated
+    if (partialUpdate.zipCode || partialUpdate.location) {
+      const locationToGeocode = profile.zipCode || profile.location;
+      if (locationToGeocode) {
+        try {
+          const coords = await geocodeLocation(locationToGeocode);
+          if (coords) {
+            profile.latitude = coords.latitude;
+            profile.longitude = coords.longitude;
+          }
+        } catch (error) {
+          console.error("Failed to geocode location:", error);
+        }
+      }
+    }
+    
+    await writeProfile(userId, profile);
+    return NextResponse.json(profile, { status: 200 });
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 400 }
+      );
+    }
+
+    console.error(error);
+    return NextResponse.json(
+      { error: "Unable to update profile" },
+      { status: 500 }
+    );
   }
 }

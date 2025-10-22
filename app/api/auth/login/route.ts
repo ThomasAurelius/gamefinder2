@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
         email: normalizedEmail,
         name: user.name ?? normalizedEmail.split("@")[0],
       },
+      onboardingCompleted: user.onboardingCompleted ?? false,
     });
 
     // Set userId cookie for authenticated requests

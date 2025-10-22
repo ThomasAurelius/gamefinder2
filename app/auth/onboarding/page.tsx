@@ -7,7 +7,7 @@ export default function OnboardingPage() {
 	const router = useRouter();
 
 	useEffect(() => {
-		router.replace("/auth/onboarding/step1");
+		router.replace("/auth/onboarding/step2");
 	}, [router]);
 
 	return (

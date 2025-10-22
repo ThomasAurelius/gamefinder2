@@ -18,4 +18,5 @@ export type UserDocument = {
   stripeConnectOnboardingComplete?: boolean; // Whether host has completed Connect onboarding
   isAmbassador?: boolean; // Whether user is an ambassador (no platform fee)
   ambassadorUntil?: Date; // Date until which ambassador status is valid
+  onboardingCompleted?: boolean; // Whether user has completed the onboarding flow
 };

@@ -6,8 +6,20 @@ import { AuthGuard } from "@/components/auth-guard";
 export default function OnboardingStep4() {
 	const router = useRouter();
 
-	const handleComplete = () => {
-		router.push("/dashboard");
+	const handleComplete = async () => {
+		try {
+			// Mark onboarding as completed
+			await fetch("/api/auth/complete-onboarding", {
+				method: "POST",
+			});
+			
+			// Redirect to dashboard
+			router.push("/dashboard");
+		} catch (error) {
+			console.error("Failed to complete onboarding", error);
+			// Still redirect even if the API call fails
+			router.push("/dashboard");
+		}
 	};
 
 	return (
@@ -15,7 +27,6 @@ export default function OnboardingStep4() {
 			<div className="mx-auto max-w-5xl space-y-8 py-8">
 				{/* Progress Indicator */}
 				<div className="flex items-center justify-center gap-2">
-					<div className="h-2 w-2 rounded-full bg-emerald-500" />
 					<div className="h-2 w-2 rounded-full bg-emerald-500" />
 					<div className="h-2 w-2 rounded-full bg-emerald-500" />
 					<div className="h-2 w-2 rounded-full bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500" />
