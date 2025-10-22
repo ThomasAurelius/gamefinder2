@@ -5,6 +5,7 @@ import type {
 	VendorPayload,
 	VendorResponse,
 } from "@/lib/vendor-types";
+import { geocodeLocation } from "@/lib/geolocation";
 
 export type { VendorHours };
 
@@ -226,6 +227,20 @@ export async function createVendor(
 		updatedAt: now,
 	};
 
+	// Geocode the zip code if provided
+	if (payload.zip && payload.zip.trim()) {
+		try {
+			const coords = await geocodeLocation(payload.zip.trim());
+			if (coords) {
+				document.latitude = coords.latitude;
+				document.longitude = coords.longitude;
+			}
+		} catch (error) {
+			console.error("Failed to geocode vendor zip code:", error);
+			// Continue without coordinates - vendor will not show in nearby results
+		}
+	}
+
 	const { insertedId } = await collection.insertOne(document);
 
 	return getVendorById(insertedId.toString());
@@ -255,6 +270,20 @@ export async function updateVendor(
 	} else {
 		update.isApproved = payload.isApproved ?? false;
 		update.isFeatured = payload.isFeatured ?? false;
+	}
+
+	// Geocode the zip code if provided
+	if (payload.zip && payload.zip.trim()) {
+		try {
+			const coords = await geocodeLocation(payload.zip.trim());
+			if (coords) {
+				update.latitude = coords.latitude;
+				update.longitude = coords.longitude;
+			}
+		} catch (error) {
+			console.error("Failed to geocode vendor zip code:", error);
+			// Continue without coordinates - vendor will not show in nearby results
+		}
 	}
 
 	const result = await collection.updateOne(

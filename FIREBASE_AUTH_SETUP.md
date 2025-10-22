@@ -128,9 +128,13 @@ To test the authentication system:
 
 ## Troubleshooting
 
-### "Firebase Auth configuration not found"
-- Ensure all `NEXT_PUBLIC_FIREBASE_*` environment variables are set
-- Restart the development server after adding environment variables
+### "Firebase: Error (auth/invalid-api-key)" or "Firebase Auth configuration not found"
+- Ensure all `NEXT_PUBLIC_FIREBASE_*` environment variables are set in your `.env.local` file
+- **Important**: The environment variables must be set exactly as shown in `.env.example` with the `NEXT_PUBLIC_` prefix
+- Verify that your API key is correct (no extra spaces or quotes)
+- Restart the development server after adding or modifying environment variables
+- Check browser console for any CSP (Content Security Policy) errors
+- If you see "Authentication service is not properly configured", double-check your Firebase API key in the Firebase Console
 
 ### "Failed to verify ID token"
 - Ensure Firebase Admin credentials are properly configured
@@ -145,3 +149,11 @@ To test the authentication system:
 - Check spam/junk folder
 - Verify email configuration in Firebase Console > Authentication > Templates
 - Ensure the auth domain is properly configured
+
+### Network or CSP errors in browser console
+- Firebase Auth requires network access to several Google APIs
+- The CSP headers in `next.config.ts` have been configured to allow:
+  - `identitytoolkit.googleapis.com` (Firebase Auth API)
+  - `securetoken.googleapis.com` (Token verification)
+  - `*.firebaseapp.com` (Auth domain)
+- If you see CSP violations, ensure these domains are in the `connect-src` directive

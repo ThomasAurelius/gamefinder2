@@ -12,13 +12,47 @@ import {
 	type UserCredential,
 } from "firebase/auth";
 import { getFirebaseApp } from "./firebase";
+import { getFirebaseConfig } from "./firebase-config";
 
 let auth: Auth | null = null;
 
 export function getFirebaseAuth(): Auth {
 	if (auth) return auth;
-	auth = getAuth(getFirebaseApp());
-	return auth;
+	try {
+		// Validate that Firebase is properly configured before initializing
+		const config = getFirebaseConfig();
+		
+		// Check if any required config is missing or empty
+		if (!config.apiKey || !config.authDomain || !config.projectId || 
+		    config.apiKey.trim() === "" || config.authDomain.trim() === "" || config.projectId.trim() === "") {
+			throw new Error(
+				"Firebase configuration is incomplete. Please ensure all NEXT_PUBLIC_FIREBASE_* environment variables are set in your .env.local file. " +
+				"Required variables: NEXT_PUBLIC_FIREBASE_API_KEY, NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN, NEXT_PUBLIC_FIREBASE_PROJECT_ID, " +
+				"NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET, NEXT_PUBLIC_FIREBASE_APP_ID"
+			);
+		}
+		
+		const app = getFirebaseApp();
+		auth = getAuth(app);
+		return auth;
+	} catch (error) {
+		const errorMsg = error instanceof Error ? error.message : String(error);
+		console.error("Failed to initialize Firebase Auth:", errorMsg);
+		
+		// Provide a more helpful error message
+		if (errorMsg.includes("Missing required Firebase configuration") || 
+		    errorMsg.includes("Firebase configuration is incomplete")) {
+			throw new Error(
+				"Firebase Authentication cannot be initialized because configuration is missing. " +
+				"Please create a .env.local file with all required NEXT_PUBLIC_FIREBASE_* variables. " +
+				"See .env.example and FIREBASE_AUTH_SETUP.md for details."
+			);
+		}
+		
+		throw new Error(
+			`Firebase Authentication is not properly configured. ${errorMsg}`
+		);
+	}
 }
 
 export async function signInWithEmail(

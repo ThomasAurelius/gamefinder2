@@ -32,19 +32,31 @@ export default function ResetPasswordPage() {
         await sendPasswordReset(trimmedEmail);
         setSuccess("Password reset email sent! Check your inbox.");
         setEmail("");
-      } catch (submitError: any) {
+      } catch (submitError: unknown) {
         console.error("Failed to send reset email", submitError);
         
         // Handle Firebase Auth errors
         let errorMessage = "Something went wrong. Please try again.";
-        if (submitError?.code === "auth/user-not-found") {
+        const error = submitError as { code?: string; message?: string };
+        
+        // Check for configuration errors first
+        if (error?.message?.includes("Firebase") && error?.message?.includes("configuration")) {
+          errorMessage = "Authentication service is not properly configured. Please contact support.";
+        } else if (error?.code === "auth/user-not-found") {
           errorMessage = "No account found with this email.";
-        } else if (submitError?.code === "auth/invalid-email") {
+        } else if (error?.code === "auth/invalid-email") {
           errorMessage = "Invalid email address.";
-        } else if (submitError?.code === "auth/too-many-requests") {
+        } else if (error?.code === "auth/too-many-requests") {
           errorMessage = "Too many requests. Please try again later.";
-        } else if (submitError?.code === "auth/network-request-failed") {
+        } else if (error?.code === "auth/network-request-failed") {
           errorMessage = "Network error. Please check your connection.";
+        } else if (error?.code === "auth/invalid-api-key") {
+          errorMessage = "Authentication service configuration error. Please contact support.";
+        } else if (error?.message) {
+          // Include the actual error message for debugging in development
+          if (process.env.NODE_ENV === "development") {
+            errorMessage = `Error: ${error.message}`;
+          }
         }
         
         setError(errorMessage);

@@ -138,19 +138,31 @@ export default function RegisterPage() {
         window.setTimeout(() => {
           router.push("/auth/login");
         }, 1200);
-      } catch (submitError: any) {
+      } catch (submitError: unknown) {
         console.error("Failed to submit registration", submitError);
         
         // Handle Firebase Auth errors
         let errorMessage = "Something went wrong. Please try again.";
-        if (submitError?.code === "auth/email-already-in-use") {
+        const error = submitError as { code?: string; message?: string };
+        
+        // Check for configuration errors first
+        if (error?.message?.includes("Firebase") && error?.message?.includes("configuration")) {
+          errorMessage = "Authentication service is not properly configured. Please contact support.";
+        } else if (error?.code === "auth/email-already-in-use") {
           errorMessage = "An account with that email already exists.";
-        } else if (submitError?.code === "auth/invalid-email") {
+        } else if (error?.code === "auth/invalid-email") {
           errorMessage = "Invalid email address.";
-        } else if (submitError?.code === "auth/weak-password") {
+        } else if (error?.code === "auth/weak-password") {
           errorMessage = "Password is too weak. Please use at least 6 characters.";
-        } else if (submitError?.code === "auth/network-request-failed") {
+        } else if (error?.code === "auth/network-request-failed") {
           errorMessage = "Network error. Please check your connection.";
+        } else if (error?.code === "auth/invalid-api-key") {
+          errorMessage = "Authentication service configuration error. Please contact support.";
+        } else if (error?.message) {
+          // Include the actual error message for debugging in development
+          if (process.env.NODE_ENV === "development") {
+            errorMessage = `Error: ${error.message}`;
+          }
         }
         
         setError(errorMessage);

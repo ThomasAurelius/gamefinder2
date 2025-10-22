@@ -6,6 +6,7 @@ import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import HostFeedbackDialog from "@/components/HostFeedbackDialog";
 import HostFeedbackSection from "@/components/HostFeedbackSection";
 import PlayerFeedbackSection from "@/components/PlayerFeedbackSection";
+import { AuthGuard } from "@/components/auth-guard";
 
 type GameSession = {
 	id: string;
@@ -343,6 +344,7 @@ export default function DashboardPage() {
 	}, []);
 
 	return (
+		<AuthGuard>
 		<section className="space-y-6">
 			<div>
 				<h1 className="text-2xl font-semibold text-slate-100">Dashboard</h1>
@@ -455,5 +457,6 @@ export default function DashboardPage() {
 				</div>
 			)}
 		</section>
+		</AuthGuard>
 	);
 }

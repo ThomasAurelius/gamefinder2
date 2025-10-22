@@ -151,6 +151,37 @@ export default async function PlayerDetailPage({
                 {profile.primaryRole}
               </p>
             )}
+            {profile.bggUsername && (
+              <div className="flex items-center gap-3 pt-2">
+                <div className="flex items-center gap-2 text-sm text-slate-400">
+                  <a
+                    href={`https://boardgamegeek.com/user/${encodeURIComponent(profile.bggUsername)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-400 hover:text-sky-300 underline"
+                  >
+                    BGG Profile
+                  </a>
+                  <span>•</span>
+                  <a
+                    href={`https://boardgamegeek.com/collection/user/${encodeURIComponent(profile.bggUsername)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sky-400 hover:text-sky-300 underline"
+                  >
+                    BGG Collection
+                  </a>
+                </div>
+                <div className="bg-white/50 p-0.5 rounded-md">
+                  <img
+                    src="/powered_by_BGG_02_MED.png"
+                    alt="Powered by BoardGameGeek"
+                    className="h-[24px] w-[80px]"
+                    title="Powered by BoardGameGeek"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
