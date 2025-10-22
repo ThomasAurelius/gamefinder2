@@ -6,7 +6,12 @@ let initializationError: Error | null = null;
 
 // Lazy initialization of Firebase Admin
 function ensureFirebaseInitialized(): void {
-  if (firebaseApp || initializationError) {
+  // If initialization previously failed, throw the error instead of silently returning
+  if (initializationError) {
+    throw initializationError;
+  }
+  
+  if (firebaseApp) {
     return;
   }
 
