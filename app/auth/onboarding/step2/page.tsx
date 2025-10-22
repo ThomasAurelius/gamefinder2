@@ -106,8 +106,8 @@ export default function OnboardingStep2() {
 									className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
 								>
 									{TIMEZONE_OPTIONS.map((tz) => (
-										<option key={tz} value={tz}>
-											{tz}
+										<option key={tz.value} value={tz.value}>
+											{tz.label}
 										</option>
 									))}
 								</select>
