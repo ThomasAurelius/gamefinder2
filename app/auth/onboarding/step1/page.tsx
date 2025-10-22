@@ -51,7 +51,7 @@ function EyeOffIcon({ className }: { className?: string }) {
 	);
 }
 
-export default function RegisterPage() {
+export default function OnboardingStep1() {
 	const router = useRouter();
 	const [formData, setFormData] = useState<FormData>({
 		name: "",
@@ -136,7 +136,7 @@ export default function RegisterPage() {
 					return;
 				}
 
-				// Redirect to onboarding flow
+				// Move to step 2
 				router.push("/auth/onboarding/step2");
 			} catch (submitError: unknown) {
 				console.error("Failed to submit registration", submitError);
@@ -179,122 +179,135 @@ export default function RegisterPage() {
 	};
 
 	return (
-		<div className="mx-auto max-w-md space-y-6 rounded-2xl border border-white/10 bg-slate-900/60 p-8">
-			<div>
-				<h1 className="text-2xl font-semibold">Create an account</h1>
-				<p className="mt-2 text-sm text-slate-300">
-					Join The Gathering Call to track campaigns and share adventures
-					with friends.
+		<div className="mx-auto max-w-5xl space-y-8 py-8">
+			{/* Progress Indicator */}
+			<div className="flex items-center justify-center gap-2">
+				<div className="h-2 w-2 rounded-full bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500" />
+				<div className="h-2 w-2 rounded-full bg-slate-700" />
+				<div className="h-2 w-2 rounded-full bg-slate-700" />
+				<div className="h-2 w-2 rounded-full bg-slate-700" />
+			</div>
+
+			<div className="mx-auto max-w-md space-y-6 rounded-2xl border border-white/10 bg-slate-900/60 p-8">
+				<div className="text-center">
+					<h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+						Welcome to The Gathering Call
+					</h1>
+					<p className="mt-4 text-sm text-slate-300">
+						Let&apos;s get started by creating your account
+					</p>
+				</div>
+
+				<form className="space-y-4" onSubmit={handleSubmit}>
+					<label className="block text-sm">
+						<span className="text-slate-200">Display name</span>
+						<input
+							type="text"
+							name="name"
+							value={formData.name}
+							onChange={handleChange("name")}
+							className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+							placeholder="Alex the Adventurer"
+							autoComplete="nickname"
+						/>
+					</label>
+					<label className="block text-sm">
+						<span className="text-slate-200">Email</span>
+						<input
+							type="email"
+							name="email"
+							value={formData.email}
+							onChange={handleChange("email")}
+							className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+							placeholder="you@example.com"
+							autoComplete="email"
+							required
+						/>
+					</label>
+					<label className="block text-sm">
+						<span className="text-slate-200">Password</span>
+						<div className="relative mt-1">
+							<input
+								type={showPassword ? "text" : "password"}
+								name="password"
+								value={formData.password}
+								onChange={handleChange("password")}
+								className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 pr-10 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+								placeholder="••••••••"
+								autoComplete="new-password"
+								required
+							/>
+							<button
+								type="button"
+								onClick={() => setShowPassword((prev) => !prev)}
+								className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-300 transition hover:text-white"
+								aria-label={
+									showPassword ? "Hide password" : "Show password"
+								}
+								aria-pressed={showPassword}
+							>
+								{showPassword ? (
+									<EyeOffIcon className="h-4 w-4" />
+								) : (
+									<EyeIcon className="h-4 w-4" />
+								)}
+							</button>
+						</div>
+					</label>
+					<label className="block text-sm">
+						<span className="text-slate-200">Verify password</span>
+						<div className="relative mt-1">
+							<input
+								type={showConfirmPassword ? "text" : "password"}
+								name="confirmPassword"
+								value={formData.confirmPassword}
+								onChange={handleChange("confirmPassword")}
+								className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 pr-10 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+								placeholder="••••••••"
+								autoComplete="new-password"
+								required
+							/>
+							<button
+								type="button"
+								onClick={() => setShowConfirmPassword((prev) => !prev)}
+								className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-300 transition hover:text-white"
+								aria-label={
+									showConfirmPassword ? "Hide password" : "Show password"
+								}
+								aria-pressed={showConfirmPassword}
+							>
+								{showConfirmPassword ? (
+									<EyeOffIcon className="h-4 w-4" />
+								) : (
+									<EyeIcon className="h-4 w-4" />
+								)}
+							</button>
+						</div>
+					</label>
+					{error ? (
+						<p className="text-sm text-rose-400" role="alert">
+							{error}
+						</p>
+					) : null}
+					<button
+						type="submit"
+						disabled={isSubmitting}
+						className="w-full rounded-md bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400 disabled:cursor-not-allowed disabled:opacity-70"
+					>
+						{isSubmitting ? "Creating account..." : "Continue"}
+					</button>
+				</form>
+
+				<p className="text-center text-sm text-slate-300">
+					Already have an account?{" "}
+					<a
+						className="text-indigo-300 hover:text-indigo-200"
+						href="/auth/login"
+					>
+						Log in
+					</a>
 				</p>
 			</div>
-			<form className="space-y-4" onSubmit={handleSubmit}>
-				<label className="block text-sm">
-					<span className="text-slate-200">Display name</span>
-					<input
-						type="text"
-						name="name"
-						value={formData.name}
-						onChange={handleChange("name")}
-						className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-						placeholder="Alex the Adventurer"
-						autoComplete="nickname"
-					/>
-				</label>
-				<label className="block text-sm">
-					<span className="text-slate-200">Email</span>
-					<input
-						type="email"
-						name="email"
-						value={formData.email}
-						onChange={handleChange("email")}
-						className="mt-1 w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-						placeholder="you@example.com"
-						autoComplete="email"
-						required
-					/>
-				</label>
-				<label className="block text-sm">
-					<span className="text-slate-200">Password</span>
-					<div className="relative mt-1">
-						<input
-							type={showPassword ? "text" : "password"}
-							name="password"
-							value={formData.password}
-							onChange={handleChange("password")}
-							className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 pr-10 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-							placeholder="••••••••"
-							autoComplete="new-password"
-							required
-						/>
-						<button
-							type="button"
-							onClick={() => setShowPassword((prev) => !prev)}
-							className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-300 transition hover:text-white"
-							aria-label={
-								showPassword ? "Hide password" : "Show password"
-							}
-							aria-pressed={showPassword}
-						>
-							{showPassword ? (
-								<EyeOffIcon className="h-4 w-4" />
-							) : (
-								<EyeIcon className="h-4 w-4" />
-							)}
-						</button>
-					</div>
-				</label>
-				<label className="block text-sm">
-					<span className="text-slate-200">Verify password</span>
-					<div className="relative mt-1">
-						<input
-							type={showConfirmPassword ? "text" : "password"}
-							name="confirmPassword"
-							value={formData.confirmPassword}
-							onChange={handleChange("confirmPassword")}
-							className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 pr-10 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-							placeholder="••••••••"
-							autoComplete="new-password"
-							required
-						/>
-						<button
-							type="button"
-							onClick={() => setShowConfirmPassword((prev) => !prev)}
-							className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-300 transition hover:text-white"
-							aria-label={
-								showConfirmPassword ? "Hide password" : "Show password"
-							}
-							aria-pressed={showConfirmPassword}
-						>
-							{showConfirmPassword ? (
-								<EyeOffIcon className="h-4 w-4" />
-							) : (
-								<EyeIcon className="h-4 w-4" />
-							)}
-						</button>
-					</div>
-				</label>
-				{error ? (
-					<p className="text-sm text-rose-400" role="alert">
-						{error}
-					</p>
-				) : null}
-				<button
-					type="submit"
-					disabled={isSubmitting}
-					className="w-full rounded-mdbg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
-				>
-					{isSubmitting ? "Creating account..." : "Register"}
-				</button>
-			</form>
-			<p className="text-sm text-slate-300">
-				Already have an account?{" "}
-				<a
-					className="text-indigo-300 hover:text-indigo-200"
-					href="/auth/login"
-				>
-					Log in
-				</a>
-			</p>
 		</div>
 	);
 }
