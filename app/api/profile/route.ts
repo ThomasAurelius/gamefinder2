@@ -160,9 +160,9 @@ export async function GET(request: Request) {
     }
     
     const profile = await readProfile(userId);
-    // Sanitize profile to remove phone number - it should never be visible to users
-    const sanitizedProfile = sanitizeProfile(profile);
-    return NextResponse.json({ ...sanitizedProfile, userId });
+    // Return the full profile including phone number for the user's own profile
+    // Phone number is only sanitized on public profile endpoints
+    return NextResponse.json({ ...profile, userId });
   } catch (error) {
     console.error(error);
     return new NextResponse("Unable to read profile", { status: 500 });
@@ -202,9 +202,9 @@ export async function POST(request: Request) {
     }
     
     await writeProfile(userId, profile);
-    // Sanitize profile before returning - phone number should never be visible
-    const sanitizedProfile = sanitizeProfile(profile);
-    return NextResponse.json(sanitizedProfile, { status: 200 });
+    // Return the full profile including phone number for the user's own profile
+    // Phone number is only sanitized on public profile endpoints
+    return NextResponse.json(profile, { status: 200 });
   } catch (error) {
     if (error instanceof Error) {
       return new NextResponse(error.message, { status: 400 });
