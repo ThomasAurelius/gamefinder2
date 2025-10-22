@@ -667,13 +667,13 @@ export default function CampaignDetail({
 							<div className="flex gap-2">
 								<Link
 									href={`/campaigns/${campaignId}/edit`}
-									className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+									className="rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 font-semibold text-white shadow-lg shadow-slate-900/30 transition hover:from-emerald-400 hover:to-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
 								>
 									Edit Campaign
 								</Link>
 								<button
 									onClick={() => setShowDeleteConfirm(true)}
-									className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+									className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 								>
 									Delete Campaign
 								</button>
@@ -975,7 +975,7 @@ export default function CampaignDetail({
 								<button
 									onClick={handleWithdraw}
 									disabled={isWithdrawing}
-									className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+									className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 								>
 									{isWithdrawing
 										? "Withdrawing..."
@@ -1111,7 +1111,7 @@ export default function CampaignDetail({
 									{isCreator && (
 										<button
 											onClick={() => handleRemovePlayerClick(player)}
-											className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+											className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 										>
 											Remove
 										</button>
@@ -1201,7 +1201,7 @@ export default function CampaignDetail({
 									{isCreator && (
 										<button
 											onClick={() => handleRemovePlayerClick(player)}
-											className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+											className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 										>
 											Remove
 										</button>
@@ -1455,7 +1455,7 @@ export default function CampaignDetail({
 								type="button"
 								onClick={handleDeleteCampaign}
 								disabled={isDeleting}
-								className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+								className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 							>
 								{isDeleting ? "Deleting..." : "Delete"}
 							</button>
@@ -1513,7 +1513,7 @@ export default function CampaignDetail({
 							<button
 								onClick={handleRemovePlayerConfirm}
 								disabled={isRemovingPlayer || !removeReason.trim()}
-								className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+								className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 							>
 								{isRemovingPlayer ? "Removing..." : "Remove Player"}
 							</button>
