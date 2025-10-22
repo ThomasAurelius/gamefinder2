@@ -110,12 +110,15 @@ const validateProfile = (payload: unknown): ProfileRecord => {
   }
 
   // Validate phoneNumber if provided (optional field, kept in backend only)
-  if (phoneNumber !== undefined && phoneNumber !== "" && !isString(phoneNumber)) {
+  // Only validate if it's explicitly a non-empty value that's not a string
+  // This allows undefined, null, or other falsy values from the database
+  if (phoneNumber && !isString(phoneNumber)) {
     throw new Error("Phone number must be a string");
   }
 
   // Validate bggUsername if provided (optional field)
-  if (bggUsername !== undefined && bggUsername !== "" && !isString(bggUsername)) {
+  // Only validate if it's explicitly a non-empty value that's not a string
+  if (bggUsername && !isString(bggUsername)) {
     throw new Error("BGG username must be a string");
   }
 
@@ -141,7 +144,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     primaryRole,
     timezone: timezone || DEFAULT_TIMEZONE,
     avatarUrl: avatarUrl || "",
-    phoneNumber: phoneNumber || undefined,
+    phoneNumber: isString(phoneNumber) && phoneNumber ? phoneNumber : undefined,
     bggUsername: bggUsername || undefined,
   };
 };
