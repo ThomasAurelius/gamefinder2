@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import { sortTimesByChronology } from "@/lib/constants";
 import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersManager";
 import { isPaidCampaign } from "@/lib/campaign-utils";
 import ShareButtons from "@/components/ShareButtons";
@@ -715,7 +716,7 @@ export default function CampaignDetail({
 							</p>
 							<p>
 								<span className="text-slate-500">Times:</span>{" "}
-								{campaign.times.join(", ")}
+								{sortTimesByChronology(campaign.times).join(", ")}
 							</p>
 							{(campaign.location || campaign.zipCode) && (
 								<p>
@@ -812,7 +813,7 @@ export default function CampaignDetail({
 								</p>
 								<p>
 									<span className="text-slate-500">Times:</span>{" "}
-									{campaign.times.join(", ")}
+									{sortTimesByChronology(campaign.times).join(", ")}
 								</p>
 								{(campaign.location || campaign.zipCode) && (
 									<p>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { formatDateInTimezone } from "@/lib/timezone";
+import { sortTimesByChronology } from "@/lib/constants";
 
 type Player = {
 	id: string;
@@ -150,7 +151,7 @@ export default function SessionCard({ session, userTimezone, onRefund }: Session
 							{formatDateInTimezone(session.date, userTimezone)}
 						</p>
 						<p>
-							<span className="text-slate-500">Times:</span> {session.times.join(", ")}
+							<span className="text-slate-500">Times:</span> {sortTimesByChronology(session.times).join(", ")}
 						</p>
 						<p>
 							<span className="text-slate-500">Players:</span>{" "}

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getCampaign } from "@/lib/campaigns/db";
 import { getUserBasicInfo } from "@/lib/users";
 import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
+import { sortTimesByChronology } from "@/lib/constants";
 import CampaignDetail from "@/components/CampaignDetail";
 import type { Metadata } from "next";
 
@@ -31,7 +32,7 @@ export async function generateMetadata({
     : `Join ${hostName}'s ${campaign.game} campaign. ${campaign.maxPlayers - campaign.signedUpPlayers.length} spots available!`;
   
   // Format times for display
-  const timesStr = campaign.times.length > 0 ? ` | Times: ${campaign.times.join(", ")}` : "";
+  const timesStr = campaign.times.length > 0 ? ` | Times: ${sortTimesByChronology(campaign.times).join(", ")}` : "";
   const description = `${baseDescription} | Date: ${formattedDate}${timesStr}`;
 
   const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://thegatheringcall.com"}/campaigns/${id}`;
