@@ -1024,7 +1024,7 @@ export default function CampaignDetail({
 					<div className="mt-6">
 						<button
 							onClick={() => setShowMessageModal(true)}
-							className="w-full rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700"
+							className="w-full rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/30 transition hover:from-blue-400 hover:to-purple-400"
 						>
 							Message All Players
 						</button>
