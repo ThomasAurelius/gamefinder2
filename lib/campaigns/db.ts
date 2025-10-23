@@ -2,6 +2,7 @@ import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { CampaignPayload, StoredCampaign } from "./types";
 import { getTodayDateString, isTodayOrFuture } from "@/lib/date-utils";
+import { sortTimesByChronology } from "@/lib/constants";
 
 type CampaignDocument = Omit<StoredCampaign, 'id'> & {
   _id: ObjectId;
@@ -79,7 +80,7 @@ export async function listCampaigns(filters?: {
     userId: campaign.userId,
     game: campaign.game,
     date: campaign.date,
-    times: [...campaign.times],
+    times: sortTimesByChronology([...campaign.times]),
     description: campaign.description,
     maxPlayers: campaign.maxPlayers || 4,
     signedUpPlayers: campaign.signedUpPlayers || [],
@@ -134,7 +135,7 @@ export async function getCampaign(id: string): Promise<StoredCampaign | null> {
     userId: campaign.userId,
     game: campaign.game,
     date: campaign.date,
-    times: [...campaign.times],
+    times: sortTimesByChronology([...campaign.times]),
     description: campaign.description,
     maxPlayers: campaign.maxPlayers || 4,
     signedUpPlayers: campaign.signedUpPlayers || [],
@@ -282,7 +283,7 @@ export async function updateCampaign(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
@@ -425,7 +426,7 @@ export async function joinCampaign(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
@@ -538,7 +539,7 @@ export async function leaveCampaign(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
@@ -692,7 +693,7 @@ export async function approvePlayer(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
@@ -798,7 +799,7 @@ export async function denyPlayer(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
@@ -919,7 +920,7 @@ export async function removePlayer(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
@@ -1074,7 +1075,7 @@ export async function updatePlayerCharacter(
     userId: result.userId,
     game: result.game,
     date: result.date,
-    times: [...result.times],
+    times: sortTimesByChronology([...result.times]),
     description: result.description,
     maxPlayers: result.maxPlayers || 4,
     signedUpPlayers: result.signedUpPlayers || [],
