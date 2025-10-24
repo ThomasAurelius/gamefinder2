@@ -646,6 +646,9 @@ export default function CampaignDetail({
 	const isPending =
 		currentUserId && campaign.pendingPlayers.includes(currentUserId);
 	const isParticipant = isSignedUp || isOnWaitlist || isPending;
+	
+	// Check if campaign has a cost
+	const hasCost = campaign.costPerSession && campaign.costPerSession > 0;
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-6 px-4 py-8">
@@ -768,14 +771,12 @@ export default function CampaignDetail({
 									{campaign.sessionsLeft}
 								</p>
 							)}
-							{campaign.costPerSession && (
-								<p>
-									<span className="text-slate-500">
-										Cost per Session:
-									</span>{" "}
-									${campaign.costPerSession}
-								</p>
-							)}
+							<p>
+								<span className="text-slate-500">
+									{hasCost ? "Cost per Session:" : "Cost:"}
+								</span>{" "}
+								{hasCost ? `$${campaign.costPerSession}` : "No Cost"}
+							</p>
 						</div>
 					</div>
 				) : (
@@ -865,14 +866,12 @@ export default function CampaignDetail({
 										{campaign.sessionsLeft}
 									</p>
 								)}
-								{campaign.costPerSession && (
-									<p>
-										<span className="text-slate-500">
-											Cost per Session:
-										</span>{" "}
-										${campaign.costPerSession}
-									</p>
-								)}
+								<p>
+									<span className="text-slate-500">
+										{hasCost ? "Cost per Session:" : "Cost:"}
+									</span>{" "}
+									{hasCost ? `$${campaign.costPerSession}` : "No Cost"}
+								</p>
 							</div>
 						</div>
 
