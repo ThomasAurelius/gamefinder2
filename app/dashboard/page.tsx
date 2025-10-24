@@ -269,12 +269,49 @@ function GameSessionCard({
 	);
 }
 
+function PaginationControls({
+	currentPage,
+	totalPages,
+	onPageChange,
+}: {
+	currentPage: number;
+	totalPages: number;
+	onPageChange: (page: number) => void;
+}) {
+	if (totalPages <= 1) return null;
+
+	return (
+		<div className="flex items-center justify-center gap-4 mt-4">
+			<button
+				onClick={() => onPageChange(currentPage - 1)}
+				disabled={currentPage === 1}
+				className="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+			>
+				Previous
+			</button>
+			<span className="text-sm text-slate-300">
+				Page {currentPage} of {totalPages}
+			</span>
+			<button
+				onClick={() => onPageChange(currentPage + 1)}
+				disabled={currentPage === totalPages}
+				className="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+			>
+				Next
+			</button>
+		</div>
+	);
+}
+
 export default function DashboardPage() {
 	const [gameSessions, setGameSessions] = useState<GameSession[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 	const [showPastSessions, setShowPastSessions] = useState(false);
+	const [upcomingPage, setUpcomingPage] = useState(1);
+	const [pastPage, setPastPage] = useState(1);
+	const itemsPerPage = 5;
 
 	const today = new Date();
 	const upcomingSessions = gameSessions.filter(
@@ -283,6 +320,18 @@ export default function DashboardPage() {
 	const pastSessions = gameSessions.filter(
 		(session) => new Date(session.date) < today
 	);
+
+	// Pagination for upcoming sessions
+	const totalUpcomingPages = Math.ceil(upcomingSessions.length / itemsPerPage);
+	const startUpcomingIndex = (upcomingPage - 1) * itemsPerPage;
+	const endUpcomingIndex = startUpcomingIndex + itemsPerPage;
+	const paginatedUpcomingSessions = upcomingSessions.slice(startUpcomingIndex, endUpcomingIndex);
+
+	// Pagination for past sessions
+	const totalPastPages = Math.ceil(pastSessions.length / itemsPerPage);
+	const startPastIndex = (pastPage - 1) * itemsPerPage;
+	const endPastIndex = startPastIndex + itemsPerPage;
+	const paginatedPastSessions = pastSessions.slice(startPastIndex, endPastIndex);
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -398,16 +447,23 @@ export default function DashboardPage() {
 						Loading your sessions...
 					</p>
 				) : upcomingSessions.length > 0 ? (
-					<div className="mt-4 space-y-3 max-w-3xl">
-						{upcomingSessions.map((session) => (
-							<GameSessionCard
-								key={session.id}
-								session={session}
-								userTimezone={userTimezone}
-								currentUserId={currentUserId}
-							/>
-						))}
-					</div>
+					<>
+						<div className="mt-4 space-y-3 max-w-3xl">
+							{paginatedUpcomingSessions.map((session) => (
+								<GameSessionCard
+									key={session.id}
+									session={session}
+									userTimezone={userTimezone}
+									currentUserId={currentUserId}
+								/>
+							))}
+						</div>
+						<PaginationControls
+							currentPage={upcomingPage}
+							totalPages={totalUpcomingPages}
+							onPageChange={setUpcomingPage}
+						/>
+					</>
 				) : (
 					<div className="mt-4 space-y-3">
 						<p className="text-sm text-slate-500">
@@ -444,16 +500,23 @@ export default function DashboardPage() {
 					</div>
 
 					{showPastSessions && (
-						<div className="mt-4 space-y-3 max-w-3xl">
-							{pastSessions.map((session) => (
-								<GameSessionCard
-									key={session.id}
-									session={session}
-									userTimezone={userTimezone}
-									currentUserId={currentUserId}
-								/>
-							))}
-						</div>
+						<>
+							<div className="mt-4 space-y-3 max-w-3xl">
+								{paginatedPastSessions.map((session) => (
+									<GameSessionCard
+										key={session.id}
+										session={session}
+										userTimezone={userTimezone}
+										currentUserId={currentUserId}
+									/>
+								))}
+							</div>
+							<PaginationControls
+								currentPage={pastPage}
+								totalPages={totalPastPages}
+								onPageChange={setPastPage}
+							/>
+						</>
 					)}
 				</div>
 			)}
