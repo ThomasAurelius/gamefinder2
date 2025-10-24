@@ -269,6 +269,16 @@ function GameSessionCard({
 	);
 }
 
+const ITEMS_PER_PAGE = 5;
+
+function getPaginatedItems<T>(items: T[], currentPage: number, itemsPerPage: number) {
+	const totalPages = Math.ceil(items.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const paginatedItems = items.slice(startIndex, endIndex);
+	return { paginatedItems, totalPages };
+}
+
 function PaginationControls({
 	currentPage,
 	totalPages,
@@ -311,7 +321,6 @@ export default function DashboardPage() {
 	const [showPastSessions, setShowPastSessions] = useState(false);
 	const [upcomingPage, setUpcomingPage] = useState(1);
 	const [pastPage, setPastPage] = useState(1);
-	const itemsPerPage = 5;
 
 	const today = new Date();
 	const upcomingSessions = gameSessions.filter(
@@ -322,16 +331,12 @@ export default function DashboardPage() {
 	);
 
 	// Pagination for upcoming sessions
-	const totalUpcomingPages = Math.ceil(upcomingSessions.length / itemsPerPage);
-	const startUpcomingIndex = (upcomingPage - 1) * itemsPerPage;
-	const endUpcomingIndex = startUpcomingIndex + itemsPerPage;
-	const paginatedUpcomingSessions = upcomingSessions.slice(startUpcomingIndex, endUpcomingIndex);
+	const { paginatedItems: paginatedUpcomingSessions, totalPages: totalUpcomingPages } = 
+		getPaginatedItems(upcomingSessions, upcomingPage, ITEMS_PER_PAGE);
 
 	// Pagination for past sessions
-	const totalPastPages = Math.ceil(pastSessions.length / itemsPerPage);
-	const startPastIndex = (pastPage - 1) * itemsPerPage;
-	const endPastIndex = startPastIndex + itemsPerPage;
-	const paginatedPastSessions = pastSessions.slice(startPastIndex, endPastIndex);
+	const { paginatedItems: paginatedPastSessions, totalPages: totalPastPages } = 
+		getPaginatedItems(pastSessions, pastPage, ITEMS_PER_PAGE);
 
 	useEffect(() => {
 		const fetchData = async () => {
