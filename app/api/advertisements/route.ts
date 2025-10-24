@@ -23,7 +23,7 @@ export async function GET() {
         const profile = await readProfile(userId);
         userLatitude = profile.latitude;
         userLongitude = profile.longitude;
-        console.log(`Advertisement request for user ${userId}: location=(${userLatitude}, ${userLongitude}), zipCode=${profile.zipCode}`);
+        console.log(`Advertisement request for user ${userId}: hasLocation=${!!(userLatitude && userLongitude)}`);
       } else {
         console.log("Advertisement request: no userId in cookies");
       }
@@ -42,7 +42,7 @@ export async function GET() {
       );
     }
     
-    console.log(`Returning advertisement: id=${advertisement._id}, hasLocation=${!!(advertisement.latitude && advertisement.longitude)}, zipCode=${advertisement.zipCode}`);
+    console.log(`Returning advertisement: id=${advertisement._id}, hasLocation=${!!(advertisement.latitude && advertisement.longitude)}`);
     
     // Track impression if we have a userId - fire and forget, don't block response
     if (userId && advertisement._id) {

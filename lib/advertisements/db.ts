@@ -66,7 +66,7 @@ export async function getActiveAdvertisementForUser(
     
     // If no user location provided, prefer global ads, then fall back to any ad
     if (userLatitude === undefined || userLongitude === undefined) {
-      console.log("No user location provided, returning global ad or first available");
+      console.log("No user location, returning global ad or first available");
       return globalAds[0] || advertisements[0] || null;
     }
     
@@ -85,7 +85,7 @@ export async function getActiveAdvertisementForUser(
       .filter(item => item.distance <= MAX_DISTANCE_MILES)
       .sort((a, b) => a.distance - b.distance);
     
-    console.log(`User location: (${userLatitude}, ${userLongitude}), found ${adsWithDistance.length} ads within ${MAX_DISTANCE_MILES} miles`);
+    console.log(`Found ${adsWithDistance.length} ads within ${MAX_DISTANCE_MILES} miles`);
     
     // Return the closest ad within range, or fall back to global ads
     if (adsWithDistance.length > 0) {
@@ -94,7 +94,7 @@ export async function getActiveAdvertisementForUser(
     }
     
     // If no ads within range, return global ad or any ad as fallback
-    console.log("No ads within range, returning global ad or first available");
+    console.log("No ads within range, returning global ad");
     return globalAds[0] || advertisements[0] || null;
   } catch (error) {
     console.error("Error fetching advertisement for user:", error);
