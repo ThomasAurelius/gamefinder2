@@ -280,7 +280,7 @@ export default function LibraryPage() {
 														handleAddToLibrary(game, "owned")
 													}
 													disabled={isInLibrary(game.id, "owned")}
-													className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+													className="rounded bg-gradient-to-r from-green-600 to-emerald-600 px-3 py-1 text-sm font-medium text-white hover:from-green-700 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 													title={
 														isInLibrary(game.id, "owned")
 															? "Already in owned"
@@ -299,7 +299,7 @@ export default function LibraryPage() {
 														game.id,
 														"wishlist"
 													)}
-													className="rounded bg-yellow-600 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-700 disabled:cursor-not-allowed disabled:opacity-50"
+													className="rounded bg-gradient-to-r from-yellow-600 to-amber-600 px-3 py-1 text-sm font-medium text-white hover:from-yellow-700 hover:to-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
 													title={
 														isInLibrary(game.id, "wishlist")
 															? "Already in wishlist"
@@ -407,7 +407,7 @@ export default function LibraryPage() {
 															"owned"
 														)
 													}
-													className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+													className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10"
 												>
 													Remove
 												</button>
@@ -500,7 +500,7 @@ export default function LibraryPage() {
 															"wishlist"
 														)
 													}
-													className="rounded bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700"
+													className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10"
 												>
 													Remove
 												</button>
