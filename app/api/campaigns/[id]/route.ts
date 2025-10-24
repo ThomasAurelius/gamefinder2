@@ -67,6 +67,7 @@ export async function PUT(
       zipCode: body.zipCode,
       latitude: body.latitude,
       longitude: body.longitude,
+      vendorId: body.vendorId,
       sessionsLeft: body.sessionsLeft,
       classesNeeded: body.classesNeeded,
       costPerSession: body.costPerSession,
