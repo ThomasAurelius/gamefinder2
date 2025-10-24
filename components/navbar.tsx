@@ -45,6 +45,7 @@ const getAccountLinks = (isAdmin: boolean): NavLink[] => {
 
 	if (isAdmin) {
 		links.push({ href: "/settings/vendors", label: "Vendors" });
+		links.push({ href: "/advertisements", label: "Advertisements" });
 	}
 
 	return links;
