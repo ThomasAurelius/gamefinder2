@@ -768,14 +768,16 @@ export default function CampaignDetail({
 									{campaign.sessionsLeft}
 								</p>
 							)}
-							{campaign.costPerSession && (
-								<p>
-									<span className="text-slate-500">
-										Cost per Session:
-									</span>{" "}
-									${campaign.costPerSession}
-								</p>
-							)}
+							<p>
+								<span className="text-slate-500">
+									{campaign.costPerSession && campaign.costPerSession > 0
+										? "Cost per Session:"
+										: "Cost:"}
+								</span>{" "}
+								{campaign.costPerSession && campaign.costPerSession > 0
+									? `$${campaign.costPerSession}`
+									: "No Cost"}
+							</p>
 						</div>
 					</div>
 				) : (
@@ -865,14 +867,16 @@ export default function CampaignDetail({
 										{campaign.sessionsLeft}
 									</p>
 								)}
-								{campaign.costPerSession && (
-									<p>
-										<span className="text-slate-500">
-											Cost per Session:
-										</span>{" "}
-										${campaign.costPerSession}
-									</p>
-								)}
+								<p>
+									<span className="text-slate-500">
+										{campaign.costPerSession && campaign.costPerSession > 0
+											? "Cost per Session:"
+											: "Cost:"}
+									</span>{" "}
+									{campaign.costPerSession && campaign.costPerSession > 0
+										? `$${campaign.costPerSession}`
+										: "No Cost"}
+								</p>
 							</div>
 						</div>
 

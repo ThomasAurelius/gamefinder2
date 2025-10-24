@@ -178,14 +178,18 @@ function CampaignCard({
 							</span>
 						</p>
 					)}
-					{campaign.costPerSession !== undefined && (
-						<p>
-							<span className="text-slate-500">Cost per Session:</span>{" "}
-							<span className="text-green-400">
-								${campaign.costPerSession}
-							</span>
-						</p>
-					)}
+					<p>
+						<span className="text-slate-500">
+							{campaign.costPerSession && campaign.costPerSession > 0
+								? "Cost per Session:"
+								: "Cost:"}
+						</span>{" "}
+						<span className="text-green-400">
+							{campaign.costPerSession && campaign.costPerSession > 0
+								? `$${campaign.costPerSession}`
+								: "No Cost"}
+						</span>
+					</p>
 					{(campaign.location || campaign.zipCode) && (
 						<p>
 							<span className="text-slate-500">Location:</span>{" "}
