@@ -23,8 +23,8 @@ export async function GET(request: Request) {
 		// Calculate pagination
 		const skip = (page - 1) * limit;
 
-		// Fetch all campaigns for the host
-		const campaigns = await listCampaigns({ userFilter: userId });
+		// Fetch all campaigns for the host (including past campaigns)
+		const campaigns = await listCampaigns({ userFilter: userId, includePast: true });
 
 		// Filter to only campaigns where user is the host
 		const hostedCampaigns = campaigns.filter(campaign => campaign.userId === userId);

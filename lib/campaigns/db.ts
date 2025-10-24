@@ -21,6 +21,7 @@ export async function listCampaigns(filters?: {
   userFilter?: string;
   hostId?: string;
   vendorId?: string;
+  includePast?: boolean;
 }): Promise<StoredCampaign[]> {
   const db = await getDb();
   const campaignsCollection = db.collection<CampaignDocument>("campaigns");
@@ -28,7 +29,7 @@ export async function listCampaigns(filters?: {
   // Build query based on filters
   const query: Record<string, unknown> = {};
   
-  // Filter out past events - only show events from today onwards
+  // Filter out past events - only show events from today onwards (unless includePast is true)
   const today = getTodayDateString();
   
   if (filters?.game) {
@@ -36,11 +37,15 @@ export async function listCampaigns(filters?: {
   }
   
   if (filters?.date) {
-    // Even when a specific date is provided, ensure it's not in the past
+    // Even when a specific date is provided, ensure it's not in the past (unless includePast is true)
     // Use the specific date if it's today or future, otherwise show all future events
-    query.date = isTodayOrFuture(filters.date) ? filters.date : { $gte: today };
-  } else {
-    // Default: show only future events
+    if (filters.includePast) {
+      query.date = filters.date;
+    } else {
+      query.date = isTodayOrFuture(filters.date) ? filters.date : { $gte: today };
+    }
+  } else if (!filters?.includePast) {
+    // Default: show only future events (unless includePast is true)
     query.date = { $gte: today };
   }
   
