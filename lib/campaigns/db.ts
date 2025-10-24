@@ -304,6 +304,7 @@ export async function updateCampaign(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
   };
 }
 

@@ -41,6 +41,8 @@ type Campaign = {
 	costPerSession?: number;
 	meetingFrequency?: string;
 	daysOfWeek?: string[];
+	vendorId?: string;
+	vendorName?: string;
 };
 
 const tagButtonClasses = (
@@ -180,6 +182,17 @@ function CampaignCard({
 						<span className="text-slate-500">Times:</span>{" "}
 						{sortTimesByChronology(campaign.times).join(", ")}
 					</p>
+					{campaign.vendorId && campaign.vendorName && (
+						<p>
+							<span className="text-slate-500">Venue:</span>{" "}
+							<Link
+								href={`/vendor/${campaign.vendorId}`}
+								className="text-slate-300 hover:text-sky-300 transition-colors"
+							>
+								{campaign.vendorName}
+							</Link>
+						</p>
+					)}
 					{campaign.sessionsLeft && (
 						<p>
 							<span className="text-slate-500">Sessions Left:</span>{" "}
@@ -324,6 +337,37 @@ export default function MyCampaignsPage() {
 	const [campaignToJoin, setCampaignToJoin] = useState<Campaign | null>(null);
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
+	const enrichEventsWithVendorInfo = async (events: Campaign[]) => {
+		const vendorIds = events
+			.map((e) => e.vendorId)
+			.filter((id): id is string => !!id);
+		const uniqueVendorIds = [...new Set(vendorIds)];
+
+		if (uniqueVendorIds.length > 0) {
+			try {
+				const vendorPromises = uniqueVendorIds.map((id) =>
+					fetch(`/api/vendors/${id}`).then((r) => (r.ok ? r.json() : null))
+				);
+				const vendorResponses = await Promise.all(vendorPromises);
+				const vendorMap = new Map<string, string>();
+
+				vendorResponses.forEach((data) => {
+					if (data?.vendor) {
+						vendorMap.set(data.vendor.id, data.vendor.vendorName);
+					}
+				});
+
+				events.forEach((event) => {
+					if (event.vendorId && vendorMap.has(event.vendorId)) {
+						event.vendorName = vendorMap.get(event.vendorId);
+					}
+				});
+			} catch (error) {
+				console.error("Failed to fetch vendor info:", error);
+			}
+		}
+	};
+
 	useEffect(() => {
 		const fetchTimezone = async () => {
 			try {
@@ -359,6 +403,7 @@ export default function MyCampaignsPage() {
 							);
 							if (campaignsResponse.ok) {
 								const events = await campaignsResponse.json();
+								await enrichEventsWithVendorInfo(events);
 								setAllEvents(events);
 							}
 						} catch (error) {
@@ -451,6 +496,7 @@ export default function MyCampaignsPage() {
 			}
 
 			const campaigns = await response.json();
+			await enrichEventsWithVendorInfo(campaigns);
 			setCampaigns(campaigns);
 		} catch (error) {
 			console.error("Failed to fetch campaigns", error);
