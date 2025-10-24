@@ -158,6 +158,7 @@ export default function HostDashboardPage() {
 
 	const handleRefund = async () => {
 		// Refetch sessions after a refund is issued
+		// This will update the current page view
 		await fetchSessions(upcomingPage, recentPage);
 	};
 
