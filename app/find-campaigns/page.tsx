@@ -722,7 +722,7 @@ function FindCampaignsPageContent() {
 				<div className="flex gap-2 flex-shrink-0">
 					<Link
 						href="/my-campaigns"
-						className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+						className="rounded-lg bg-gradient-to-r from-emerald-500 to-sky-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/30 transition hover:from-emerald-400 hover:to-sky-400"
 					>
 						My Campaigns
 					</Link>
