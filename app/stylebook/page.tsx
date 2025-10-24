@@ -1,5 +1,25 @@
 "use client";
 
+/**
+ * StyleBookPage - Comprehensive Design System Reference
+ * 
+ * This page serves as a living style guide for The Gathering Call application,
+ * documenting all gradient backgrounds, button styles, text treatments, and
+ * color patterns used throughout the site. It provides developers and designers
+ * with a quick reference for maintaining visual consistency.
+ * 
+ * The component showcases:
+ * - Text gradient styles (including the signature amber-purple-indigo gradient)
+ * - Background gradient patterns at various opacity levels
+ * - Button styles (primary, secondary, success, and bordered variants)
+ * - Alert and status boxes
+ * - Color palette reference
+ * - Usage guidelines for each style
+ * 
+ * Note: Variations in button styles (e.g., rounded-md vs rounded-lg, 
+ * amber-500 vs amber-600) are intentional and reflect the actual diversity
+ * of styles used throughout the application.
+ */
 export default function StyleBookPage() {
 	return (
 		<div className="mx-auto max-w-6xl space-y-12 px-4 py-12">
@@ -152,6 +172,11 @@ export default function StyleBookPage() {
 						<h3 className="text-lg font-semibold text-slate-200">
 							Primary Gradient Button
 						</h3>
+						<p className="text-sm text-slate-400">
+							Note: Both rounded-md and rounded-lg variants are used in the
+							app. The amber-500 vs amber-600 starting colors provide subtle
+							variation for different contexts.
+						</p>
 						<div className="flex gap-4 flex-wrap">
 							<button
 								type="button"
