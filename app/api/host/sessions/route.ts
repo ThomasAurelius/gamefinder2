@@ -3,18 +3,6 @@ import { cookies } from "next/headers";
 import { listCampaigns } from "@/lib/campaigns/db";
 import { getUsersBasicInfo } from "@/lib/users";
 
-// Helper function to get date 7 days ago or ahead
-function getDateOffset(daysOffset: number): string {
-	const date = new Date();
-	date.setDate(date.getDate() + daysOffset);
-	return date.toISOString().split('T')[0];
-}
-
-// Helper function to check if a date is in range
-function isDateInRange(dateStr: string, startDate: string, endDate: string): boolean {
-	return dateStr >= startDate && dateStr <= endDate;
-}
-
 export async function GET(request: Request) {
 	try {
 		const cookieStore = await cookies();
@@ -29,13 +17,11 @@ export async function GET(request: Request) {
 
 		const { searchParams } = new URL(request.url);
 		const type = searchParams.get("type"); // 'upcoming' or 'recent'
+		const page = parseInt(searchParams.get("page") || "1", 10);
+		const limit = parseInt(searchParams.get("limit") || "5", 10);
 
-		// Calculate date ranges
-		const today = new Date().toISOString().split('T')[0];
-		const upcomingStart = today;
-		const upcomingEnd = getDateOffset(7);
-		const recentStart = getDateOffset(-7);
-		const recentEnd = today;
+		// Calculate pagination
+		const skip = (page - 1) * limit;
 
 		// Fetch all campaigns for the host
 		const campaigns = await listCampaigns({ userFilter: userId });
@@ -43,16 +29,15 @@ export async function GET(request: Request) {
 		// Filter to only campaigns where user is the host
 		const hostedCampaigns = campaigns.filter(campaign => campaign.userId === userId);
 
-		// Filter by date range based on type
+		// Get today's date for comparison
+		const today = new Date().toISOString().split('T')[0];
+
+		// Filter by type
 		let filteredCampaigns = hostedCampaigns;
 		if (type === 'upcoming') {
-			filteredCampaigns = hostedCampaigns.filter(campaign =>
-				isDateInRange(campaign.date, upcomingStart, upcomingEnd)
-			);
+			filteredCampaigns = hostedCampaigns.filter(campaign => campaign.date >= today);
 		} else if (type === 'recent') {
-			filteredCampaigns = hostedCampaigns.filter(campaign =>
-				isDateInRange(campaign.date, recentStart, recentEnd) && campaign.date < today
-			);
+			filteredCampaigns = hostedCampaigns.filter(campaign => campaign.date < today);
 		}
 
 		// Sort by date
@@ -63,9 +48,13 @@ export async function GET(request: Request) {
 			return b.date.localeCompare(a.date); // Descending for recent
 		});
 
-		// Fetch all unique player IDs from all filtered campaigns
+		// Calculate total and paginated results
+		const total = filteredCampaigns.length;
+		const paginatedCampaigns = filteredCampaigns.slice(skip, skip + limit);
+
+		// Fetch all unique player IDs from paginated campaigns
 		const allPlayerIds = new Set<string>();
-		filteredCampaigns.forEach(campaign => {
+		paginatedCampaigns.forEach(campaign => {
 			campaign.signedUpPlayers.forEach(playerId => allPlayerIds.add(playerId));
 			campaign.waitlist.forEach(playerId => allPlayerIds.add(playerId));
 			campaign.pendingPlayers.forEach(playerId => allPlayerIds.add(playerId));
@@ -77,7 +66,7 @@ export async function GET(request: Request) {
 			: new Map();
 
 		// Enrich campaigns with player details
-		const enrichedCampaigns = filteredCampaigns.map(campaign => ({
+		const enrichedCampaigns = paginatedCampaigns.map(campaign => ({
 			...campaign,
 			signedUpPlayersDetails: campaign.signedUpPlayers.map(playerId => ({
 				id: playerId,
@@ -98,9 +87,12 @@ export async function GET(request: Request) {
 
 		return NextResponse.json({
 			sessions: enrichedCampaigns,
-			dateRange: type === 'upcoming' 
-				? { start: upcomingStart, end: upcomingEnd }
-				: { start: recentStart, end: recentEnd }
+			pagination: {
+				page,
+				limit,
+				total,
+				totalPages: Math.ceil(total / limit),
+			}
 		});
 	} catch (error) {
 		console.error("Error fetching host sessions:", error);
