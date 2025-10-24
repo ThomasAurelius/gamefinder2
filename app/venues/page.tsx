@@ -7,31 +7,15 @@ import type { VendorResponse } from "@/lib/vendor-types";
 export default function VenuesPage() {
 	const [vendors, setVendors] = useState<VendorResponse[]>([]);
 	const [loading, setLoading] = useState(true);
-	const [isNearbyVendors, setIsNearbyVendors] = useState(false);
 
 	useEffect(() => {
 		const fetchVendors = async () => {
 			try {
-				// First try to get nearby vendors
-				const nearbyResponse = await fetch("/api/vendors?nearMe=true");
-				if (nearbyResponse.ok) {
-					const nearbyData = await nearbyResponse.json();
-					const nearbyVendors = nearbyData.vendors || [];
-
-					// If we have nearby vendors, use them
-					if (nearbyVendors.length > 0) {
-						setVendors(nearbyVendors);
-						setIsNearbyVendors(true);
-						return;
-					}
-				}
-
-				// Fall back to all approved vendors if no nearby vendors found
+				// Fetch all approved vendors
 				const allResponse = await fetch("/api/vendors");
 				if (allResponse.ok) {
 					const allData = await allResponse.json();
 					setVendors(allData.vendors || []);
-					setIsNearbyVendors(false);
 				}
 			} catch (error) {
 				console.error("Failed to fetch vendors", error);
@@ -63,9 +47,7 @@ export default function VenuesPage() {
 			<header className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-lg">
 				<h1 className="text-3xl font-semibold text-slate-100">Venues</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					{isNearbyVendors
-						? "Discover gaming venues near you within 50 miles"
-						: "Explore gaming venues"}
+					Explore gaming venues
 				</p>
 			</header>
 
@@ -95,7 +77,7 @@ export default function VenuesPage() {
 					{regularVendors.length > 0 && (
 						<section className="space-y-4">
 							<h2 className="text-2xl font-semibold text-slate-300">
-								{isNearbyVendors ? "Nearby Venues" : "All Venues"}
+								All Venues
 							</h2>
 							<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 								{regularVendors.map((vendor) => (
