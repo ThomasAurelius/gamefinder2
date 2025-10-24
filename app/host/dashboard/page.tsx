@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import SessionCard from "@/components/SessionCard";
 import { DEFAULT_TIMEZONE } from "@/lib/timezone";
@@ -37,9 +37,11 @@ type Session = {
 
 type SessionsResponse = {
 	sessions: Session[];
-	dateRange: {
-		start: string;
-		end: string;
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
 	};
 };
 
@@ -53,6 +55,40 @@ export default function HostDashboardPage() {
 	const [sessionsLoading, setSessionsLoading] = useState(true);
 	const [userTimezone] = useState(DEFAULT_TIMEZONE);
 	const [userId, setUserId] = useState<string | null>(null);
+	const [upcomingPage, setUpcomingPage] = useState(1);
+	const [recentPage, setRecentPage] = useState(1);
+	const [upcomingPagination, setUpcomingPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+	const [recentPagination, setRecentPagination] = useState({ page: 1, limit: 5, total: 0, totalPages: 0 });
+
+	const fetchSessions = useCallback(async (upcomingPageNum = 1, recentPageNum = 1) => {
+		setSessionsLoading(true);
+		try {
+			// Fetch upcoming sessions with pagination
+			const upcomingResponse = await fetch(
+				`/api/host/sessions?type=upcoming&page=${upcomingPageNum}&limit=5`
+			);
+			if (upcomingResponse.ok) {
+				const upcomingData: SessionsResponse =
+					await upcomingResponse.json();
+				setUpcomingSessions(upcomingData.sessions);
+				setUpcomingPagination(upcomingData.pagination);
+			}
+
+			// Fetch recent sessions with pagination
+			const recentResponse = await fetch(
+				`/api/host/sessions?type=recent&page=${recentPageNum}&limit=5`
+			);
+			if (recentResponse.ok) {
+				const recentData: SessionsResponse = await recentResponse.json();
+				setRecentSessions(recentData.sessions);
+				setRecentPagination(recentData.pagination);
+			}
+		} catch (err) {
+			console.error("Error fetching sessions:", err);
+		} finally {
+			setSessionsLoading(false);
+		}
+	}, []);
 
 	useEffect(() => {
 		const fetchStatus = async () => {
@@ -91,33 +127,7 @@ export default function HostDashboardPage() {
 		fetchStatus();
 		fetchUserId();
 		fetchSessions();
-	}, []);
-
-	const fetchSessions = async () => {
-		setSessionsLoading(true);
-		try {
-			// Fetch upcoming sessions
-			const upcomingResponse = await fetch(
-				"/api/host/sessions?type=upcoming"
-			);
-			if (upcomingResponse.ok) {
-				const upcomingData: SessionsResponse =
-					await upcomingResponse.json();
-				setUpcomingSessions(upcomingData.sessions);
-			}
-
-			// Fetch recent sessions
-			const recentResponse = await fetch("/api/host/sessions?type=recent");
-			if (recentResponse.ok) {
-				const recentData: SessionsResponse = await recentResponse.json();
-				setRecentSessions(recentData.sessions);
-			}
-		} catch (err) {
-			console.error("Error fetching sessions:", err);
-		} finally {
-			setSessionsLoading(false);
-		}
-	};
+	}, [fetchSessions]);
 
 	const handleOpenDashboard = async () => {
 		setIsDashboardLoading(true);
@@ -148,7 +158,18 @@ export default function HostDashboardPage() {
 
 	const handleRefund = async () => {
 		// Refetch sessions after a refund is issued
-		await fetchSessions();
+		// This will update the current page view
+		await fetchSessions(upcomingPage, recentPage);
+	};
+
+	const handleUpcomingPageChange = (newPage: number) => {
+		setUpcomingPage(newPage);
+		fetchSessions(newPage, recentPage);
+	};
+
+	const handleRecentPageChange = (newPage: number) => {
+		setRecentPage(newPage);
+		fetchSessions(upcomingPage, newPage);
 	};
 
 	if (isLoading) {
@@ -395,25 +416,54 @@ export default function HostDashboardPage() {
 						Upcoming Sessions
 					</h2>
 					<p className="mt-1 text-sm text-slate-400">
-						Sessions scheduled for the next 7 days
+						All upcoming sessions
 					</p>
 
 					{sessionsLoading ? (
 						<div className="mt-4 text-slate-400">Loading sessions...</div>
 					) : upcomingSessions.length > 0 ? (
-						<div className="mt-4 space-y-4">
-							{upcomingSessions.map((session) => (
-								<SessionCard
-									key={session.id}
-									session={session}
-									userTimezone={userTimezone}
-									onRefund={handleRefund}
-								/>
-							))}
-						</div>
+						<>
+							<div className="mt-4 space-y-4">
+								{upcomingSessions.map((session) => (
+									<SessionCard
+										key={session.id}
+										session={session}
+										userTimezone={userTimezone}
+										onRefund={handleRefund}
+									/>
+								))}
+							</div>
+							
+							{/* Pagination Controls */}
+							{upcomingPagination.totalPages > 1 && (
+								<div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
+									<div className="text-sm text-slate-400">
+										Showing {upcomingSessions.length} of {upcomingPagination.total} sessions
+										<span className="mx-2">•</span>
+										Page {upcomingPagination.page} of {upcomingPagination.totalPages}
+									</div>
+									<div className="flex gap-2">
+										<button
+											onClick={() => handleUpcomingPageChange(upcomingPage - 1)}
+											disabled={upcomingPage === 1}
+											className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											Previous
+										</button>
+										<button
+											onClick={() => handleUpcomingPageChange(upcomingPage + 1)}
+											disabled={upcomingPage >= upcomingPagination.totalPages}
+											className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											Next
+										</button>
+									</div>
+								</div>
+							)}
+						</>
 					) : (
 						<div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-6 text-center text-slate-400">
-							No upcoming sessions in the next 7 days
+							No upcoming sessions
 						</div>
 					)}
 				</div>
@@ -424,25 +474,54 @@ export default function HostDashboardPage() {
 						Recent Sessions
 					</h2>
 					<p className="mt-1 text-sm text-slate-400">
-						Sessions from the past 7 days
+						Past sessions
 					</p>
 
 					{sessionsLoading ? (
 						<div className="mt-4 text-slate-400">Loading sessions...</div>
 					) : recentSessions.length > 0 ? (
-						<div className="mt-4 space-y-4">
-							{recentSessions.map((session) => (
-								<SessionCard
-									key={session.id}
-									session={session}
-									userTimezone={userTimezone}
-									onRefund={handleRefund}
-								/>
-							))}
-						</div>
+						<>
+							<div className="mt-4 space-y-4">
+								{recentSessions.map((session) => (
+									<SessionCard
+										key={session.id}
+										session={session}
+										userTimezone={userTimezone}
+										onRefund={handleRefund}
+									/>
+								))}
+							</div>
+							
+							{/* Pagination Controls */}
+							{recentPagination.totalPages > 1 && (
+								<div className="mt-6 flex items-center justify-between border-t border-slate-800 pt-4">
+									<div className="text-sm text-slate-400">
+										Showing {recentSessions.length} of {recentPagination.total} sessions
+										<span className="mx-2">•</span>
+										Page {recentPagination.page} of {recentPagination.totalPages}
+									</div>
+									<div className="flex gap-2">
+										<button
+											onClick={() => handleRecentPageChange(recentPage - 1)}
+											disabled={recentPage === 1}
+											className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											Previous
+										</button>
+										<button
+											onClick={() => handleRecentPageChange(recentPage + 1)}
+											disabled={recentPage >= recentPagination.totalPages}
+											className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											Next
+										</button>
+									</div>
+								</div>
+							)}
+						</>
 					) : (
 						<div className="mt-4 rounded-lg border border-slate-800 bg-slate-950/40 p-6 text-center text-slate-400">
-							No sessions in the past 7 days
+							No past sessions
 						</div>
 					)}
 				</div>
