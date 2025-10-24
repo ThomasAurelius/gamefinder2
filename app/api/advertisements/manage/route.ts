@@ -47,7 +47,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    if (isActive && (!imageUrl || typeof imageUrl !== "string")) {
+    if (isActive && (!imageUrl || typeof imageUrl !== "string" || !imageUrl.trim())) {
       return NextResponse.json(
         { error: "imageUrl is required when advertisement is active" },
         { status: 400 }
@@ -58,12 +58,16 @@ export async function PUT(request: Request) {
     const advertisementsCollection = db.collection<AdvertisementDocument>("advertisements");
     
     const updateData: Partial<AdvertisementDocument> = {
-      imageUrl: imageUrl || "",
       isActive,
       zipCode: zipCode?.trim() || undefined,
       url: url?.trim() || undefined,
       updatedAt: new Date(),
     };
+
+    // Only update imageUrl if it's provided
+    if (imageUrl && typeof imageUrl === "string") {
+      updateData.imageUrl = imageUrl.trim();
+    }
 
     // Geocode the zip code if provided
     if (zipCode && zipCode.trim()) {

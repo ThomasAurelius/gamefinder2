@@ -113,13 +113,21 @@ export default function AdvertisementsPage() {
 	const handleSaveAdvertisement = async () => {
 		if (!editingAd) return;
 
+		// Validate that active ads must have an image
+		if (editingAd.isActive && !editingAd.imageUrl) {
+			setMessage("Active advertisements must have an image.");
+			return;
+		}
+
 		setSavingAd(true);
 		setMessage("");
 
 		try {
 			let response;
 			
-			if (editingAd.id === "new") {
+			const isNewAd = !editingAd.id || editingAd.id === "new";
+			
+			if (isNewAd) {
 				// Create new advertisement
 				response = await fetch("/api/advertisements", {
 					method: "POST",
@@ -368,7 +376,7 @@ export default function AdvertisementsPage() {
 						<div className="flex gap-2 pt-4">
 							<button
 								onClick={handleSaveAdvertisement}
-								disabled={savingAd || !editingAd.imageUrl}
+								disabled={savingAd || (editingAd.isActive && !editingAd.imageUrl)}
 								className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
 							>
 								{savingAd ? "Saving..." : "Save Advertisement"}
@@ -390,7 +398,7 @@ export default function AdvertisementsPage() {
 
 				{advertisements.length === 0 ? (
 					<p className="text-sm text-slate-400">
-						No advertisements yet. Click "Create New Ad" to get started.
+						No advertisements yet. Click &quot;Create New Ad&quot; to get started.
 					</p>
 				) : (
 					<div className="space-y-3">
