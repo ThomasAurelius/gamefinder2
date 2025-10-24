@@ -87,6 +87,9 @@ function CampaignCard({
 			campaign.waitlist.includes(currentUserId) ||
 			campaign.pendingPlayers.includes(currentUserId));
 
+	// Check if campaign has a cost
+	const hasCost = campaign.costPerSession && campaign.costPerSession > 0;
+
 	return (
 		<div
 			key={campaign.id}
@@ -180,14 +183,10 @@ function CampaignCard({
 					)}
 					<p>
 						<span className="text-slate-500">
-							{campaign.costPerSession && campaign.costPerSession > 0
-								? "Cost per Session:"
-								: "Cost:"}
+							{hasCost ? "Cost per Session:" : "Cost:"}
 						</span>{" "}
 						<span className="text-green-400">
-							{campaign.costPerSession && campaign.costPerSession > 0
-								? `$${campaign.costPerSession}`
-								: "No Cost"}
+							{hasCost ? `$${campaign.costPerSession}` : "No Cost"}
 						</span>
 					</p>
 					{(campaign.location || campaign.zipCode) && (
