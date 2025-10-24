@@ -8,6 +8,7 @@ import HostFeedbackDialog from "@/components/HostFeedbackDialog";
 import HostFeedbackSection from "@/components/HostFeedbackSection";
 import PlayerFeedbackSection from "@/components/PlayerFeedbackSection";
 import { AuthGuard } from "@/components/auth-guard";
+import Advertisement from "@/components/Advertisement";
 
 type GameSession = {
 	id: string;
@@ -412,6 +413,8 @@ export default function DashboardPage() {
 					you&apos;re hosting, playing, or waitlisted for.
 				</p>
 			</div>
+
+			<Advertisement />
 
 			{/* Quick Actions */}
 			<div className="flex flex-wrap gap-3">
