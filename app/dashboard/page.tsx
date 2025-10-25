@@ -99,14 +99,14 @@ function GameSessionCard({
 	return (
 		<>
 			<div
-				className={`rounded-lg border overflow-hidden ${
+				className={`rounded-lg border overflow-hidden md:flex md:flex-wrap ${
 					isHost
 						? "border-purple-500/50 bg-purple-950/20"
 						: "border-slate-800 bg-slate-950/40"
 				}`}
 			>
 				{session.imageUrl && (
-					<Link href={detailsLink}>
+					<Link href={detailsLink} className="md:w-1/2">
 						<img
 							src={session.imageUrl}
 							alt={session.game}
@@ -114,7 +114,7 @@ function GameSessionCard({
 						/>
 					</Link>
 				)}
-				<div className="p-4">
+				<div className="p-4 md:w-1/2 md:flex-grow">
 					<div className="flex items-center gap-2 flex-wrap">
 						<Link
 							href={detailsLink}
