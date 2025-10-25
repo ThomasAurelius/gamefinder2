@@ -280,7 +280,7 @@ export default function LibraryPage() {
 														handleAddToLibrary(game, "owned")
 													}
 													disabled={isInLibrary(game.id, "owned")}
-													className="rounded bg-gradient-to-r from-green-600 to-emerald-600 px-3 py-1 text-sm font-medium text-white hover:from-green-700 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+													className="rounded bg-gradient-to-r from-green-400 to-emerald-700 px-3 py-1 text-sm font-medium text-white hover:from-green-800 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 													title={
 														isInLibrary(game.id, "owned")
 															? "Already in owned"
@@ -299,7 +299,7 @@ export default function LibraryPage() {
 														game.id,
 														"wishlist"
 													)}
-													className="rounded bg-gradient-to-r from-yellow-600 to-amber-600 px-3 py-1 text-sm font-medium text-white hover:from-yellow-700 hover:to-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+													className="rounded bg-gradient-to-r from-yellow-400 to-amber-700 px-3 py-1 text-sm font-medium text-white hover:from-yellow-700 hover:to-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
 													title={
 														isInLibrary(game.id, "wishlist")
 															? "Already in wishlist"
@@ -395,7 +395,7 @@ export default function LibraryPage() {
 															"wishlist"
 														)
 													}
-													className="rounded bg-yellow-600 px-3 py-1 text-sm font-medium text-white hover:bg-yellow-700"
+													className="rounded bg-gradient-to-r from-yellow-400 to-amber-700 px-3 py-1 text-sm font-medium text-white hover:from-yellow-700 hover:to-amber-800 disabled:cursor-not-allowed disabled:opacity-50"
 													title="Move to wishlist"
 												>
 													→ Wish
@@ -488,7 +488,7 @@ export default function LibraryPage() {
 															"owned"
 														)
 													}
-													className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white hover:bg-green-700"
+													className="rounded bg-gradient-to-r from-green-300 to-emerald-700 px-3 py-1 text-sm font-medium text-white hover:from-green-800 hover:to-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 													title="Move to owned"
 												>
 													→ Own
