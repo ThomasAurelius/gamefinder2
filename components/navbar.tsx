@@ -172,7 +172,7 @@ export function Navbar() {
 						alt="The Gathering Call Logo"
 						className="h-9 w-9"
 					/>
-					<span className="hidden sm:inline">The Gathering Call</span>
+					{/* <span className="hidden sm:inline">The Gathering Call</span> */}
 				</Link>
 				<div className="flex items-center gap-3">
 					{/* Mobile avatar - shown only on mobile when authenticated */}
