@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import AnnouncementPopup from "@/components/AnnouncementPopup";
+import Advertisement from "@/components/Advertisement";
 
 export default function HomePage() {
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -52,6 +53,8 @@ export default function HomePage() {
 					</div>
 				</div>
 			</section> */}
+
+			<Advertisement />
 
 			{/* Main Content Section */}
 			<div className="space-y-10 flex flex-col items-center py-16 text-center">

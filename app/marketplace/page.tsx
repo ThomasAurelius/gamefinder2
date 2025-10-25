@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Advertisement from "@/components/Advertisement";
 
 type MarketplaceListing = {
 	id: string;
@@ -122,6 +123,8 @@ export default function MarketplacePage() {
 					</div>
 				</div>
 			</div>
+
+			<Advertisement />
 
 			<div className="rounded-xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20">
 				<button

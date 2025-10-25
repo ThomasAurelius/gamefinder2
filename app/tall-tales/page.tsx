@@ -7,6 +7,7 @@ import { Tale, TaleFromAPI } from "@/lib/tall-tales/client-types";
 import { GAME_OPTIONS } from "@/lib/constants";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Advertisement from "@/components/Advertisement";
 
 export default function TallTalesPage() {
 	const [title, setTitle] = useState("");
@@ -297,6 +298,8 @@ export default function TallTalesPage() {
 					boardgame-related content with the community.
 				</p>
 			</div>
+
+			<Advertisement />
 
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
 				<button
