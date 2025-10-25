@@ -10,6 +10,7 @@ import {
 } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import Badge from "@/components/Badge";
+import Advertisement from "@/components/Advertisement";
 
 type Player = {
 	id: string;
@@ -240,6 +241,8 @@ export default function PlayersPage() {
 					specific radius.
 				</p>
 			</div>
+
+			<Advertisement />
 
 			<div className="rounded-lg border border-slate-800 bg-slate-950/60">
 				<button
