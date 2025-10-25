@@ -23,6 +23,9 @@ export async function GET() {
         const profile = await readProfile(userId);
         userLatitude = profile.latitude;
         userLongitude = profile.longitude;
+        console.log(`Advertisement request for user ${userId}: hasLocation=${!!(userLatitude && userLongitude)}`);
+      } else {
+        console.log("Advertisement request: no userId in cookies");
       }
     } catch (error) {
       // If we can't get user profile, continue without location filtering
@@ -32,11 +35,14 @@ export async function GET() {
     const advertisement = await getActiveAdvertisementForUser(userLatitude, userLongitude);
     
     if (!advertisement || !advertisement.isActive) {
+      console.log("No active advertisement to display");
       return NextResponse.json(
         { imageUrl: "", isActive: false },
         { status: 200 }
       );
     }
+    
+    console.log(`Returning advertisement: id=${advertisement._id}, hasLocation=${!!(advertisement.latitude && advertisement.longitude)}`);
     
     // Track impression if we have a userId - fire and forget, don't block response
     if (userId && advertisement._id) {
