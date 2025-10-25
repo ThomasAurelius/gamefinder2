@@ -56,7 +56,7 @@ export default function Advertisement() {
 	}
 
 	const content = (
-		<div className="relative w-full max-w-[90%] lg:max-w-[800px]" style={{ paddingBottom: "50%" }}>
+		<div className="relative mx-auto w-full max-w-[90%] lg:max-w-[800px] aspect-[16/9]">
 			<Image
 				src={advertisement.imageUrl}
 				alt="Advertisement"
@@ -73,7 +73,7 @@ export default function Advertisement() {
 			{advertisement.url ? (
 				<button
 					onClick={handleClick}
-					className="cursor-pointer transition-opacity hover:opacity-90"
+					className="w-full cursor-pointer transition-opacity hover:opacity-90"
 					aria-label="View advertisement"
 				>
 					{content}
