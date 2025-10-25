@@ -184,19 +184,13 @@ export async function trackImpression(
     const { ObjectId } = await import("mongodb");
     
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const now = new Date();
     
-    // First, clean up old impressions to keep the array from growing indefinitely
-    await advertisementsCollection.updateOne(
-      { _id: new ObjectId(advertisementId) },
-      {
-        $pull: {
-          impressions: { timestamp: { $lt: oneHourAgo } }
-        }
-      }
-    );
-    
-    // Then, use an atomic operation to check and add new impression
-    // This prevents race conditions by using MongoDB's atomic operations
+    // Use a single atomic operation with aggregation pipeline to:
+    // 1. Check if user has seen ad in last hour
+    // 2. Filter out old impressions
+    // 3. Add new impression if user hasn't seen it recently
+    // This prevents race conditions and MongoDB conflicts
     const result = await advertisementsCollection.updateOne(
       {
         _id: new ObjectId(advertisementId),
@@ -212,11 +206,26 @@ export async function trackImpression(
           }
         ]
       },
-      {
-        $push: {
-          impressions: { userId, timestamp: new Date() }
+      [
+        {
+          $set: {
+            impressions: {
+              $concatArrays: [
+                // Filter out impressions older than 1 hour
+                {
+                  $filter: {
+                    input: { $ifNull: ["$impressions", []] },
+                    as: "imp",
+                    cond: { $gte: ["$$imp.timestamp", oneHourAgo] }
+                  }
+                },
+                // Add the new impression
+                [{ userId, timestamp: now }]
+              ]
+            }
+          }
         }
-      }
+      ]
     );
     
     // If modifiedCount is 0, the user has already seen this ad in the last hour
