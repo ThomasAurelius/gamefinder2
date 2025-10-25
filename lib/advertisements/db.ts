@@ -185,7 +185,17 @@ export async function trackImpression(
     
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     
-    // Use a single atomic operation to check and update in one go
+    // First, clean up old impressions to keep the array from growing indefinitely
+    await advertisementsCollection.updateOne(
+      { _id: new ObjectId(advertisementId) },
+      {
+        $pull: {
+          impressions: { timestamp: { $lt: oneHourAgo } }
+        }
+      }
+    );
+    
+    // Then, use an atomic operation to check and add new impression
     // This prevents race conditions by using MongoDB's atomic operations
     const result = await advertisementsCollection.updateOne(
       {
@@ -205,9 +215,6 @@ export async function trackImpression(
       {
         $push: {
           impressions: { userId, timestamp: new Date() }
-        },
-        $pull: {
-          impressions: { timestamp: { $lt: oneHourAgo } }
         }
       }
     );
