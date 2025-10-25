@@ -56,7 +56,7 @@ export default function Advertisement() {
 	}
 
 	const content = (
-		<div className="relative w-[90%] lg:w-full lg:max-w-[800px]" style={{ aspectRatio: "2/1" }}>
+		<div className="relative w-[90%] lg:w-full lg:max-w-[800px]" style={{ paddingBottom: "50%" }}>
 			<Image
 				src={advertisement.imageUrl}
 				alt="Advertisement"
