@@ -274,8 +274,9 @@ export default function HomePage() {
 									<strong className="text-slate-100">
 										Free Games and Campaigns will always be an option.
 									</strong>{" "}
-									Paid games are hosted at the discretion of the host,
-									and not required.
+									We anticipate 90% of the listed games to be free. We
+									just also want to allow hosts the option to run paid
+									campaigns if they choose.
 								</p>
 							</li>
 						</ul>
