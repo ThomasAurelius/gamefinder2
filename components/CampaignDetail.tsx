@@ -9,6 +9,7 @@ import PendingCampaignPlayersManager from "@/components/PendingCampaignPlayersMa
 import { isPaidCampaign } from "@/lib/campaign-utils";
 import ShareButtons from "@/components/ShareButtons";
 import CharacterSelectionDialog from "@/components/CharacterSelectionDialog";
+import CalendarExportButtons from "@/components/CalendarExportButtons";
 
 type PlayerSignup = {
 	userId: string;
@@ -692,6 +693,22 @@ export default function CampaignDetail({
 							/>
 						</div>
 
+						{/* Calendar export buttons */}
+						<div className="mt-4">
+							<CalendarExportButtons
+								type="campaign"
+								id={campaign.id}
+								game={campaign.game}
+								date={campaign.date}
+								times={campaign.times}
+								description={campaign.description}
+								location={campaign.location}
+								hostName={campaign.hostName}
+								meetingFrequency={campaign.meetingFrequency}
+								daysOfWeek={campaign.daysOfWeek}
+							/>
+						</div>
+
 						{campaign.imageUrl && (
 							<img
 								src={campaign.imageUrl}
@@ -804,6 +821,22 @@ export default function CampaignDetail({
 									url={campaignUrl}
 									title={`${campaign.game} - Campaign`}
 									description={shareDescription}
+								/>
+							</div>
+
+							{/* Calendar export buttons */}
+							<div className="mt-4">
+								<CalendarExportButtons
+									type="campaign"
+									id={campaign.id}
+									game={campaign.game}
+									date={campaign.date}
+									times={campaign.times}
+									description={campaign.description}
+									location={campaign.location}
+									hostName={campaign.hostName}
+									meetingFrequency={campaign.meetingFrequency}
+									daysOfWeek={campaign.daysOfWeek}
 								/>
 							</div>
 

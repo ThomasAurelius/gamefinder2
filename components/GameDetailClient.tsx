@@ -11,6 +11,7 @@ import GameDetailActions from "@/components/GameDetailActions";
 import { isPaidGame } from "@/lib/game-utils";
 import SignedUpPlayersList from "@/components/SignedUpPlayersList";
 import WaitlistPlayersList from "@/components/WaitlistPlayersList";
+import CalendarExportButtons from "@/components/CalendarExportButtons";
 
 type Player = {
   id: string;
@@ -43,6 +44,7 @@ type GameSession = {
   pendingPlayers: string[];
   costPerSession?: number;
   imageUrl?: string;
+  location?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -125,6 +127,16 @@ export default function GameDetailClient({
             url={gameUrl} 
             title={`${session.game} - Game Session`}
             description={shareDescription}
+          />
+          <CalendarExportButtons
+            type="game"
+            id={session.id}
+            game={session.game}
+            date={session.date}
+            times={session.times}
+            description={session.description}
+            location={session.location}
+            hostName={host?.name}
           />
           <GameDetailActions
             sessionId={session.id}
