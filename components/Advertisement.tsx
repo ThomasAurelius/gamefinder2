@@ -39,7 +39,7 @@ export default function Advertisement() {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({ advertisementId: advertisement.id }),
-			}).catch(error => {
+			}).catch((error) => {
 				// Log but don't show to user - tracking failure shouldn't impact UX
 				console.error("Failed to track click:", error);
 			});
@@ -67,8 +67,8 @@ export default function Advertisement() {
 				priority
 			/>
 			<Link
-				href="/advertisements"
-				className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors z-10"
+				href="/advertising"
+				className="absolute top-8 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors z-10"
 				aria-label="View advertisement information"
 				onClick={(e) => e.stopPropagation()}
 			>
