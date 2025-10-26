@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Advertisement() {
 	const [advertisement, setAdvertisement] = useState<{
@@ -65,6 +66,14 @@ export default function Advertisement() {
 				sizes="(max-width: 900px) 90vw, 800px"
 				priority
 			/>
+			<Link
+				href="/advertisements"
+				className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors z-10"
+				aria-label="View advertisement information"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<span className="text-sm font-bold">!</span>
+			</Link>
 		</div>
 	);
 
