@@ -43,6 +43,7 @@ type Campaign = {
 	daysOfWeek?: string[];
 	vendorId?: string;
 	vendorName?: string;
+	isPrivate?: boolean;
 };
 
 const tagButtonClasses = (
