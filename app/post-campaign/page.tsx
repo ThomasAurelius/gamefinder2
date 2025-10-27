@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import VenueSelector from "@/components/VenueSelector";
 import ShareButtons from "@/components/ShareButtons";
 import StripePaymentForm from "@/components/StripePaymentForm";
 import Link from "next/link";
@@ -36,6 +37,7 @@ export default function PostCampaignPage() {
 	const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
+	const [vendorId, setVendorId] = useState("");
 	const [postedCampaignId, setPostedCampaignId] = useState<string | null>(null);
 	
 	// Campaign-specific state
@@ -199,6 +201,7 @@ export default function PostCampaignPage() {
 					imageUrl: imageUrl,
 					location: location,
 					zipCode: zipCode,
+					vendorId: vendorId || undefined,
 				sessionsLeft: typeof sessionsLeft === 'number' ? sessionsLeft : (sessionsLeft ? parseInt(String(sessionsLeft)) : undefined),
 				classesNeeded: classesNeeded.length > 0 ? classesNeeded : undefined,
 				costPerSession: typeof costPerSession === 'number' ? costPerSession : (costPerSession ? parseFloat(String(costPerSession)) : undefined),
@@ -227,6 +230,7 @@ export default function PostCampaignPage() {
 			setImageUrl("");
 			setLocation("");
 			setZipCode("");
+			setVendorId("");
 			setPostedCampaignId(null);
 			setSessionsLeft('');
 			setClassesNeeded([]);
@@ -363,6 +367,24 @@ export default function PostCampaignPage() {
 					/>
 					<p className="text-xs text-slate-500">
 						Optional. Provides more accurate location than city/state.
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="venue"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Venue
+					</label>
+					<VenueSelector
+						zipCode={zipCode}
+						value={vendorId}
+						onChange={setVendorId}
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						Optional. Select an approved venue for this campaign.
 					</p>
 				</div>
 
