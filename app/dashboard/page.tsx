@@ -37,6 +37,7 @@ type GameSession = {
 	isCampaign?: boolean;
 	vendorId?: string;
 	vendorName?: string;
+	isPrivate?: boolean;
 };
 
 function GameSessionCard({

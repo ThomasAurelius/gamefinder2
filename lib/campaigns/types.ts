@@ -21,6 +21,7 @@ export type CampaignPayload = {
   daysOfWeek?: string[];
   stripeConnectAccountId?: string; // Host's Stripe Connect account ID for payment splitting
   vendorId?: string; // Vendor ID for the venue
+  isPrivate?: boolean; // Whether the campaign is private (invite-only)
 };
 
 export type PlayerSignup = {
