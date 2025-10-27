@@ -764,7 +764,7 @@ export default function PostCampaignPage() {
 						</span>
 					</label>
 					<p className="text-xs text-slate-500 ml-6">
-						Private campaigns won't appear in the public campaign feed. Only you and invited players will be able to see and join it.
+						Private campaigns won&apos;t appear in the public campaign feed. Only you and invited players will be able to see and join it.
 					</p>
 				</div>
 
