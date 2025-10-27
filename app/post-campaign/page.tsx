@@ -44,6 +44,7 @@ export default function PostCampaignPage() {
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
 	const [meetingFrequency, setMeetingFrequency] = useState("");
 	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
+	const [isPrivate, setIsPrivate] = useState(false);
 	
 	// Stripe payment state
 	const [clientSecret, setClientSecret] = useState<string>("");
@@ -204,6 +205,7 @@ export default function PostCampaignPage() {
 				requiresPayment: (typeof costPerSession === 'number' && costPerSession > 0) || false,
 				meetingFrequency: meetingFrequency || undefined,
 				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
+				isPrivate: isPrivate,
 				}),
 			});
 
@@ -231,6 +233,7 @@ export default function PostCampaignPage() {
 			setCostPerSession('');
 			setMeetingFrequency('');
 			setDaysOfWeek([]);
+			setIsPrivate(false);
 			setClientSecret('');
 			setShowPaymentForm(false);
 			setPaymentCompleted(false);
@@ -746,6 +749,23 @@ export default function PostCampaignPage() {
 						placeholder="Describe your campaign, experience level requirements, or any additional details..."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
+				</div>
+
+				<div className="space-y-2">
+					<label className="flex items-center gap-2 cursor-pointer">
+						<input
+							type="checkbox"
+							checked={isPrivate}
+							onChange={(e) => setIsPrivate(e.target.checked)}
+							className="w-4 h-4 rounded border-slate-700 bg-slate-950/80 text-sky-500 focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-slate-900"
+						/>
+						<span className="text-sm font-medium text-slate-200">
+							Make this campaign private (invite-only)
+						</span>
+					</label>
+					<p className="text-xs text-slate-500 ml-6">
+						Private campaigns won't appear in the public campaign feed. Only you and invited players will be able to see and join it.
+					</p>
 				</div>
 
 				<button

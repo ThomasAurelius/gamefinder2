@@ -73,6 +73,9 @@ export async function listCampaigns(filters?: {
       { waitlist: filters.userFilter }, // Campaigns user is on waitlist for
       { pendingPlayers: filters.userFilter }, // Campaigns user has requested to join
     ];
+  } else {
+    // If no userFilter is provided (public feed), exclude private campaigns
+    query.isPrivate = { $ne: true };
   }
 
   const campaigns = await campaignsCollection
@@ -107,6 +110,7 @@ export async function listCampaigns(filters?: {
     meetingFrequency: campaign.meetingFrequency,
     daysOfWeek: campaign.daysOfWeek,
     vendorId: campaign.vendorId,
+    isPrivate: campaign.isPrivate,
   }));
 }
 
@@ -162,6 +166,7 @@ export async function getCampaign(id: string): Promise<StoredCampaign | null> {
     meetingFrequency: campaign.meetingFrequency,
     daysOfWeek: campaign.daysOfWeek,
     vendorId: campaign.vendorId,
+    isPrivate: campaign.isPrivate,
   };
 }
 
@@ -200,6 +205,7 @@ export async function createCampaign(
     meetingFrequency: payload.meetingFrequency,
     daysOfWeek: payload.daysOfWeek,
     vendorId: payload.vendorId,
+    isPrivate: payload.isPrivate,
   };
 
   const result = await campaignsCollection.insertOne(newCampaign as CampaignDocument);
@@ -231,6 +237,7 @@ export async function createCampaign(
     meetingFrequency: newCampaign.meetingFrequency,
     daysOfWeek: newCampaign.daysOfWeek,
     vendorId: newCampaign.vendorId,
+    isPrivate: newCampaign.isPrivate,
   };
 }
 
@@ -310,6 +317,7 @@ export async function updateCampaign(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     vendorId: result.vendorId,
+    isPrivate: result.isPrivate,
   };
 }
 
@@ -453,6 +461,7 @@ export async function joinCampaign(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    isPrivate: result.isPrivate,
   };
 }
 
@@ -566,6 +575,7 @@ export async function leaveCampaign(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    isPrivate: result.isPrivate,
   };
 }
 
@@ -720,6 +730,7 @@ export async function approvePlayer(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    isPrivate: result.isPrivate,
   };
 }
 
@@ -826,6 +837,7 @@ export async function denyPlayer(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    isPrivate: result.isPrivate,
   };
 }
 
@@ -947,6 +959,7 @@ export async function removePlayer(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    isPrivate: result.isPrivate,
   };
 }
 
@@ -1102,5 +1115,6 @@ export async function updatePlayerCharacter(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    isPrivate: result.isPrivate,
   };
 }

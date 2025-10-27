@@ -55,6 +55,7 @@ function parseCampaignPayload(data: unknown): CampaignPayload | null {
     meetingFrequency: typeof payload.meetingFrequency === "string" ? payload.meetingFrequency : undefined,
     daysOfWeek: Array.isArray(payload.daysOfWeek) ? payload.daysOfWeek as string[] : undefined,
     vendorId: typeof payload.vendorId === "string" ? payload.vendorId : undefined,
+    isPrivate: typeof payload.isPrivate === "boolean" ? payload.isPrivate : undefined,
   };
 }
 
