@@ -176,44 +176,23 @@ export default function PostGamePage() {
 					? customGameName.trim()
 					: selectedGame;
 
-			const requestBody: {
-				game: string;
-				date: string;
-				times: string[];
-				description: string;
-				maxPlayers: number;
-				imageUrl: string;
-				location: string;
-				zipCode: string;
-				vendorId?: string;
-				costPerSession?: number;
-			} = {
-				game: gameName,
-				date: selectedDate,
-				times: selectedTimes,
-				description: description,
-				maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
-				imageUrl: imageUrl,
-				location: location,
-				zipCode: zipCode,
-			};
-
-			// Add vendorId if it's set
-			if (vendorId) {
-				requestBody.vendorId = vendorId;
-			}
-
-			// Add costPerSession if it's set and greater than 0
-			if (typeof costPerSession === 'number' && costPerSession > 0) {
-				requestBody.costPerSession = costPerSession;
-			}
-
 			const response = await fetch("/api/games", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify(requestBody),
+				body: JSON.stringify({
+					game: gameName,
+					date: selectedDate,
+					times: selectedTimes,
+					description: description,
+					maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
+					imageUrl: imageUrl,
+					location: location,
+					zipCode: zipCode,
+					vendorId: vendorId || undefined,
+					costPerSession: typeof costPerSession === 'number' && costPerSession > 0 ? costPerSession : undefined,
+				}),
 			});
 
 			if (!response.ok) {
