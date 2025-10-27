@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
+import VenueSelector from "@/components/VenueSelector";
 import ShareButtons from "@/components/ShareButtons";
 import Link from "next/link";
 
@@ -35,6 +36,7 @@ export default function PostGamePage() {
 	const [lastClickedSlot, setLastClickedSlot] = useState<string>("");
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
+	const [vendorId, setVendorId] = useState("");
 	const [postedGameId, setPostedGameId] = useState<string | null>(null);
 	
 	// Payment-related state
@@ -174,38 +176,23 @@ export default function PostGamePage() {
 					? customGameName.trim()
 					: selectedGame;
 
-			const requestBody: {
-				game: string;
-				date: string;
-				times: string[];
-				description: string;
-				maxPlayers: number;
-				imageUrl: string;
-				location: string;
-				zipCode: string;
-				costPerSession?: number;
-			} = {
-				game: gameName,
-				date: selectedDate,
-				times: selectedTimes,
-				description: description,
-				maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
-				imageUrl: imageUrl,
-				location: location,
-				zipCode: zipCode,
-			};
-
-			// Add costPerSession if it's set and greater than 0
-			if (typeof costPerSession === 'number' && costPerSession > 0) {
-				requestBody.costPerSession = costPerSession;
-			}
-
 			const response = await fetch("/api/games", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify(requestBody),
+				body: JSON.stringify({
+					game: gameName,
+					date: selectedDate,
+					times: selectedTimes,
+					description: description,
+					maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
+					imageUrl: imageUrl,
+					location: location,
+					zipCode: zipCode,
+					vendorId: vendorId || undefined,
+					costPerSession: typeof costPerSession === 'number' && costPerSession > 0 ? costPerSession : undefined,
+				}),
 			});
 
 			if (!response.ok) {
@@ -226,6 +213,7 @@ export default function PostGamePage() {
 			setImageUrl("");
 			setLocation("");
 			setZipCode("");
+			setVendorId("");
 			setCostPerSession('');
 			setPostedGameId(null);
 
@@ -354,6 +342,24 @@ export default function PostGamePage() {
 					/>
 					<p className="text-xs text-slate-500">
 						Optional. Provides more accurate location than city/state.
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="venue"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Venue
+					</label>
+					<VenueSelector
+						zipCode={zipCode}
+						value={vendorId}
+						onChange={setVendorId}
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						Optional. Select an approved venue for this game.
 					</p>
 				</div>
 
