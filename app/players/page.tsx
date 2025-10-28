@@ -22,6 +22,7 @@ type Player = {
 	avatarUrl?: string;
 	distance?: number;
 	availability?: Record<string, string[]>;
+	isGM?: boolean;
 	badges?: Array<{
 		name: string;
 		imageUrl: string;
@@ -104,6 +105,11 @@ function PlayerCard({ player }: { player: Player }) {
 						<p className="mt-1 text-sm text-sky-400">
 							<span className="text-slate-500">Role:</span>{" "}
 							{player.primaryRole}
+							{player.isGM && (
+								<span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300 border border-amber-500/30">
+									GM
+								</span>
+							)}
 						</p>
 					)}
 					{player.bio && (
@@ -148,6 +154,7 @@ export default function PlayersPage() {
 	const [radiusMiles, setRadiusMiles] = useState("50");
 	const [selectedDayOfWeek, setSelectedDayOfWeek] = useState("");
 	const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
+	const [selectedIsGM, setSelectedIsGM] = useState<string>("");
 
 	useEffect(() => {
 		// Load all players on initial mount
@@ -202,6 +209,7 @@ export default function PlayersPage() {
 			}
 			if (selectedDayOfWeek) params.append("dayOfWeek", selectedDayOfWeek);
 			if (selectedTimeSlot) params.append("timeSlot", selectedTimeSlot);
+			if (selectedIsGM) params.append("isGM", selectedIsGM);
 
 			const response = await fetch(`/api/players?${params.toString()}`);
 			if (!response.ok) {
@@ -345,6 +353,26 @@ export default function PlayersPage() {
 										{role}
 									</option>
 								))}
+							</select>
+						</div>
+
+						{/* GM Status Filter */}
+						<div>
+							<label
+								htmlFor="isGM"
+								className="mb-2 block text-sm font-medium text-slate-300"
+							>
+								Game Master Status
+							</label>
+							<select
+								id="isGM"
+								value={selectedIsGM}
+								onChange={(e) => setSelectedIsGM(e.target.value)}
+								className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+							>
+								<option value="">All Players</option>
+								<option value="true">Game Masters Only</option>
+								<option value="false">Players Only (Not GMs)</option>
 							</select>
 						</div>
 
@@ -499,6 +527,7 @@ export default function PlayersPage() {
 									selectedGames.length > 0 ||
 									selectedDayOfWeek ||
 									selectedTimeSlot ||
+									selectedIsGM ||
 									locationSearch) &&
 									" matching your criteria"}
 							</>
