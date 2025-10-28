@@ -27,8 +27,8 @@ const primaryLinks: NavItem[] = [
 	{ href: "/library", label: "Library" },
 	{ href: "/players", label: "Players" },
 	{ href: "/venues", label: "Venues" },
-	{ href: "/find", label: "Games" },
-	{ href: "/find-campaigns", label: "Campaigns" },
+	{ href: "/find", label: "Board Games" },
+	{ href: "/find-campaigns", label: "Tabletop Campaigns" },
 ];
 
 const getAccountLinks = (isAdmin: boolean): NavLink[] => {
