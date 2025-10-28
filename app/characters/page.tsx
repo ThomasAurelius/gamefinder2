@@ -1029,7 +1029,7 @@ export default function CharactersPage() {
 								<select
 									value={selectedSystem}
 									onChange={handleSystemChange}
-									className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+									className="rounded-md border  border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 								>
 									{Object.entries(GAME_SYSTEMS).map(
 										([key, config]) => (
@@ -1304,7 +1304,7 @@ export default function CharactersPage() {
 													</li>
 													<li>Paste it in the field below</li>
 												</ol>
-												<p className="mt-2 text-purple-300">
+												<p className="mt-2 word-wrap text-purple-300">
 													Example:
 													https://app.demiplane.com/nexus/starfinder2e/character/abc123
 												</p>
