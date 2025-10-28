@@ -142,7 +142,7 @@ export default function PendingCampaignPlayersManager({
 						key={player.id}
 						className="rounded-lg border border-yellow-800 bg-yellow-900/20 px-4 py-3"
 					>
-						<div className="flex items-center justify-between gap-3">
+						<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
 							<div className="flex items-center gap-3">
 								{player.avatarUrl ? (
 									<img
@@ -180,7 +180,7 @@ export default function PendingCampaignPlayersManager({
 									)}
 								</div>
 							</div>
-							<div className="flex gap-2">
+							<div className="flex flex-wrap gap-2">
 								{player.characterIsPublic && player.characterId && (
 									<Link
 										href={`/players/${player.id}/characters/${player.characterId}`}
