@@ -69,6 +69,7 @@ type ProfilePayload = {
 	avatarUrl?: string;
 	phoneNumber?: string;
 	bggUsername?: string;
+	isGM?: boolean;
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -97,6 +98,7 @@ export default function ProfilePage() {
 	const [bggUsername, setBggUsername] = useState("");
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
+	const [isGM, setIsGM] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [saveError, setSaveError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
@@ -152,6 +154,7 @@ export default function ProfilePage() {
 					? (profile.primaryRole as RoleOption)
 					: "";
 				setPrimaryRole(normalizedRole);
+				setIsGM(profile.isGM ?? false);
 			} catch (error) {
 				console.error(error);
 				setSaveError("Unable to load profile data.");
@@ -268,6 +271,7 @@ export default function ProfilePage() {
 				avatarUrl: url,
 				phoneNumber,
 				bggUsername,
+				isGM,
 			};
 
 			const saveResponse = await fetch("/api/profile", {
@@ -390,6 +394,7 @@ export default function ProfilePage() {
 			avatarUrl,
 			phoneNumber,
 			bggUsername,
+			isGM,
 		};
 
 		try {
@@ -877,6 +882,30 @@ export default function ProfilePage() {
 							</button>
 						))}
 					</div>
+				</section>
+
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-amber-100">
+							Game Master Status
+						</h2>
+						<p className="text-sm text-slate-400">
+							Indicate if you are a Game Master, Dungeon Master, or host
+							games for others.
+						</p>
+					</div>
+
+					<label className="flex items-center gap-3 cursor-pointer">
+						<input
+							type="checkbox"
+							checked={isGM}
+							onChange={(e) => setIsGM(e.target.checked)}
+							className="h-5 w-5 rounded border-slate-700 bg-slate-950 text-sky-500 focus:ring-2 focus:ring-sky-500 focus:ring-offset-0 focus:ring-offset-slate-950"
+						/>
+						<span className="text-sm text-slate-200">
+							I am a Game Master / Dungeon Master
+						</span>
+					</label>
 				</section>
 
 				<div className="flex flex-col items-start gap-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">

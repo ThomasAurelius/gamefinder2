@@ -66,6 +66,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     avatarUrl,
     phoneNumber,
     bggUsername,
+    isGM,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -122,6 +123,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     throw new Error("BGG username must be a string");
   }
 
+  // Validate isGM if provided (optional boolean field)
+  if (isGM !== undefined && typeof isGM !== "boolean") {
+    throw new Error("isGM must be a boolean");
+  }
+
   const normalizedGames = dedupe(games);
   const normalizedFavorites = dedupe(favoriteGames);
 
@@ -146,6 +152,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     avatarUrl: avatarUrl || "",
     phoneNumber: isString(phoneNumber) && phoneNumber ? phoneNumber : undefined,
     bggUsername: bggUsername || undefined,
+    isGM: isGM ?? false,
   };
 };
 
