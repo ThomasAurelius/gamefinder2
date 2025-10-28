@@ -25,7 +25,7 @@ const primaryLinks: NavItem[] = [
 	{ href: "/dashboard", label: "Dashboard" },
 	{ href: "/tall-tales", label: "Tall Tales" },
 	{ href: "/library", label: "Library" },
-	{ href: "/players", label: "Players" },
+	{ href: "/players", label: "Players & DMs" },
 	{ href: "/venues", label: "Venues" },
 	{ href: "/find", label: "Board Games" },
 	{ href: "/find-campaigns", label: "Tabletop Campaigns" },
