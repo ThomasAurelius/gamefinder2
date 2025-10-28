@@ -1029,7 +1029,7 @@ export default function CharactersPage() {
 								<select
 									value={selectedSystem}
 									onChange={handleSystemChange}
-									className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+									className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 								>
 									{Object.entries(GAME_SYSTEMS).map(
 										([key, config]) => (
@@ -1050,8 +1050,8 @@ export default function CharactersPage() {
 								selectedSystem === "other" ||
 								selectedSystem === "dnd" ||
 								selectedSystem === "starfinder") && (
-								<div className="md:col-span-2">
-									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4">
+								<div className="md:col-span-2 min-w-0">
+									<div className="rounded-lg border border-sky-500/30 bg-sky-950/20 p-4 min-w-0">
 										<div>
 											<h3 className="text-sm font-semibold text-sky-200">
 												Upload Character Sheets
@@ -1181,8 +1181,8 @@ export default function CharactersPage() {
 
 							{/* JSON Import Section - Only show for Pathfinder */}
 							{selectedSystem === "pathfinder" && (
-								<div className="md:col-span-2">
-									<div className="rounded-lg border border-indigo-500/30 bg-indigo-950/20 p-4">
+								<div className="md:col-span-2 min-w-0">
+									<div className="rounded-lg border border-indigo-500/30 bg-indigo-950/20 p-4 min-w-0">
 										<button
 											type="button"
 											onClick={() =>
@@ -1242,7 +1242,7 @@ export default function CharactersPage() {
 														}
 														placeholder='{"success":true,"build":{...}}'
 														rows={6}
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs font-mono text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-xs font-mono text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 													/>
 												</label>
 
@@ -1280,8 +1280,8 @@ export default function CharactersPage() {
 
 							{/* Demiplane URL Section - Show for Starfinder only */}
 							{selectedSystem === "starfinder" && (
-								<div className="md:col-span-2">
-									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4">
+								<div className="md:col-span-2 min-w-0">
+									<div className="rounded-lg border border-purple-500/30 bg-purple-950/20 p-4 min-w-0">
 										<div>
 											<h3 className="text-sm font-semibold text-purple-200">
 												Demiplane Character Link
@@ -1326,7 +1326,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="https://app.demiplane.com/nexus/starfinder2e/character/..."
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-purple-500 focus:ring-2 focus:ring-purple-500/40"
 												/>
 											</label>
 										</div>
@@ -1336,7 +1336,7 @@ export default function CharactersPage() {
 
 							{/* Basic Fields Section - Collapsible when PDFs are uploaded */}
 							{character.pdfUrls && character.pdfUrls.length > 0 ? (
-								<div className="md:col-span-2 space-y-4">
+								<div className="md:col-span-2 space-y-4 min-w-0">
 									<button
 										type="button"
 										onClick={() =>
@@ -1415,7 +1415,7 @@ export default function CharactersPage() {
 															}))
 														}
 														placeholder="Eldrin the Bold"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 													/>
 												</label>
 												<label className="flex flex-col gap-2">
@@ -1432,7 +1432,7 @@ export default function CharactersPage() {
 															}))
 														}
 														placeholder="Shadows of Neverwinter"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 													/>
 												</label>
 											</div>
@@ -1507,7 +1507,7 @@ export default function CharactersPage() {
 													}))
 												}
 												placeholder="Eldrin the Bold"
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 											/>
 										</label>
 										<label className="flex flex-col gap-2">
@@ -1524,7 +1524,7 @@ export default function CharactersPage() {
 													}))
 												}
 												placeholder="Shadows of Neverwinter"
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 											/>
 										</label>
 									</div>
@@ -1533,7 +1533,7 @@ export default function CharactersPage() {
 
 							{/* Character Details Section - Collapsible when PDFs are uploaded */}
 							{character.pdfUrls && character.pdfUrls.length > 0 ? (
-								<div className="md:col-span-2 space-y-4">
+								<div className="md:col-span-2 space-y-4 min-w-0">
 									<button
 										type="button"
 										onClick={() =>
@@ -1565,7 +1565,7 @@ export default function CharactersPage() {
 																		event.target.value,
 																}))
 															}
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														>
 															<option value="">
 																Select alignment
@@ -1593,7 +1593,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="Chaotic Good"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													)}
 												</label>
@@ -1610,7 +1610,7 @@ export default function CharactersPage() {
 																	race: event.target.value,
 																}))
 															}
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														>
 															<option value="">
 																Select race
@@ -1637,7 +1637,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="High Elf"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													)}
 												</label>
@@ -1655,7 +1655,7 @@ export default function CharactersPage() {
 																		event.target.value,
 																}))
 															}
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														>
 															<option value="">
 																Select background
@@ -1683,7 +1683,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="Sage"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													)}
 												</label>
@@ -1708,7 +1708,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="25"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													</label>
 													<label className="flex flex-col gap-2">
@@ -1725,7 +1725,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="6 ft"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													</label>
 													<label className="flex flex-col gap-2">
@@ -1742,7 +1742,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="180 lbs"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													</label>
 													<label className="flex flex-col gap-2">
@@ -1759,7 +1759,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="Blue"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													</label>
 													<label className="flex flex-col gap-2">
@@ -1776,7 +1776,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="Fair"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													</label>
 													<label className="flex flex-col gap-2">
@@ -1793,7 +1793,7 @@ export default function CharactersPage() {
 																}))
 															}
 															placeholder="Black"
-															className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+															className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 														/>
 													</label>
 												</div>
@@ -1813,7 +1813,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="5"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 
@@ -1831,7 +1831,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="100"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 
@@ -1849,7 +1849,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="2500"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 
@@ -1866,7 +1866,7 @@ export default function CharactersPage() {
 																class: event.target.value,
 															}))
 														}
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 													>
 														<option value="">Select class</option>
 														{systemOptions.classes.map(
@@ -1891,7 +1891,7 @@ export default function CharactersPage() {
 															}))
 														}
 														placeholder="Wizard"
-														className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+														className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 													/>
 												)}
 											</label>
@@ -1908,7 +1908,7 @@ export default function CharactersPage() {
 															role: event.target.value,
 														}))
 													}
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												>
 													<option value="">Select a role</option>
 													{ROLE_OPTIONS.map((role) => (
@@ -2112,7 +2112,7 @@ export default function CharactersPage() {
 																				)
 																			}
 																			placeholder="0"
-																			className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																			className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 																		/>
 																	</label>
 																</div>
@@ -2204,7 +2204,7 @@ export default function CharactersPage() {
 																					? "Rank / Modifier"
 																					: "+0"
 																			}
-																			className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																			className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 																		/>
 																	</label>
 																</div>
@@ -2228,7 +2228,7 @@ export default function CharactersPage() {
 													}
 													placeholder="Personality traits, ideals, bonds, flaws, and other custom details."
 													rows={4}
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 										</div>
@@ -2250,7 +2250,7 @@ export default function CharactersPage() {
 															alignment: event.target.value,
 														}))
 													}
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												>
 													<option value="">
 														Select alignment
@@ -2277,7 +2277,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="Chaotic Good"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											)}
 										</label>
@@ -2294,7 +2294,7 @@ export default function CharactersPage() {
 															race: event.target.value,
 														}))
 													}
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												>
 													<option value="">Select race</option>
 													{systemOptions.races.map((race) => (
@@ -2314,7 +2314,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="High Elf"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											)}
 										</label>
@@ -2331,7 +2331,7 @@ export default function CharactersPage() {
 															background: event.target.value,
 														}))
 													}
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												>
 													<option value="">
 														Select background
@@ -2358,7 +2358,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="Sage"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											)}
 										</label>
@@ -2383,7 +2383,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="25"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 											<label className="flex flex-col gap-2">
@@ -2400,7 +2400,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="6 ft"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 											<label className="flex flex-col gap-2">
@@ -2417,7 +2417,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="180 lbs"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 											<label className="flex flex-col gap-2">
@@ -2434,7 +2434,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="Blue"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 											<label className="flex flex-col gap-2">
@@ -2451,7 +2451,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="Fair"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 											<label className="flex flex-col gap-2">
@@ -2468,7 +2468,7 @@ export default function CharactersPage() {
 														}))
 													}
 													placeholder="Black"
-													className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+													className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 												/>
 											</label>
 										</div>
@@ -2488,7 +2488,7 @@ export default function CharactersPage() {
 												}))
 											}
 											placeholder="5"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 										/>
 									</label>
 
@@ -2506,7 +2506,7 @@ export default function CharactersPage() {
 												}))
 											}
 											placeholder="100"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 										/>
 									</label>
 
@@ -2524,7 +2524,7 @@ export default function CharactersPage() {
 												}))
 											}
 											placeholder="2500"
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 										/>
 									</label>
 
@@ -2541,7 +2541,7 @@ export default function CharactersPage() {
 														class: event.target.value,
 													}))
 												}
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 											>
 												<option value="">Select class</option>
 												{systemOptions.classes.map((className) => (
@@ -2564,7 +2564,7 @@ export default function CharactersPage() {
 													}))
 												}
 												placeholder="Wizard"
-												className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+												className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 											/>
 										)}
 									</label>
@@ -2581,7 +2581,7 @@ export default function CharactersPage() {
 													role: event.target.value,
 												}))
 											}
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 										>
 											<option value="">Select a role</option>
 											{ROLE_OPTIONS.map((role) => (
@@ -2769,7 +2769,7 @@ export default function CharactersPage() {
 																	)
 																}
 																placeholder="0"
-																className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 															/>
 														</label>
 													</div>
@@ -2850,7 +2850,7 @@ export default function CharactersPage() {
 																		? "Rank / Modifier"
 																		: "+0"
 																}
-																className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+																className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 															/>
 														</label>
 													</div>
@@ -2873,7 +2873,7 @@ export default function CharactersPage() {
 											}
 											placeholder="Personality traits, ideals, bonds, flaws, and other custom details."
 											rows={4}
-											className="rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
+											className="w-full min-w-0 rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/40"
 										/>
 									</label>
 								</>
