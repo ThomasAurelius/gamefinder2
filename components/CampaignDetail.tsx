@@ -110,7 +110,7 @@ export default function CampaignDetail({
 		PlayerWithInfo[]
 	>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [activeTab, setActiveTab] = useState<"details" | "notes">("details");
+	const [activeTab, setActiveTab] = useState<"details" | "notes">("notes");
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 	const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
 	const [newNoteContent, setNewNoteContent] = useState("");
