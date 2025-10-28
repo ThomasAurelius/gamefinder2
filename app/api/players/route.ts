@@ -14,6 +14,7 @@ export type PlayerSearchResult = {
   avatarUrl?: string;
   distance?: number; // Distance in miles
   availability?: Record<string, string[]>; // Day of week to time slots
+  isGM?: boolean; // Whether user is a Game Master / Dungeon Master
   badges?: Array<{
     name: string;
     imageUrl: string;
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
     const dayOfWeek = searchParams.get("dayOfWeek") || "";
     const timeSlot = searchParams.get("timeSlot") || "";
     const games = searchParams.get("games") || ""; // Multiple games comma-separated
+    const isGM = searchParams.get("isGM"); // Filter by GM status
 
     const db = await getDb();
     const usersCollection = db.collection("users");
@@ -78,6 +80,13 @@ export async function GET(request: Request) {
       filter[`profile.availability.${dayOfWeek}`] = { $exists: true, $ne: [] };
     }
 
+    // Add isGM filter
+    if (isGM === "true") {
+      filter["profile.isGM"] = true;
+    } else if (isGM === "false") {
+      filter["profile.isGM"] = { $ne: true };
+    }
+
     const users = await usersCollection
       .find(filter, {
         projection: {
@@ -92,6 +101,7 @@ export async function GET(request: Request) {
           "profile.latitude": 1,
           "profile.longitude": 1,
           "profile.availability": 1,
+          "profile.isGM": 1,
         },
       })
       .toArray();
@@ -107,6 +117,7 @@ export async function GET(request: Request) {
       avatarUrl: user.profile?.avatarUrl || undefined,
       distance: undefined,
       availability: user.profile?.availability || {},
+      isGM: user.profile?.isGM || false,
       badges: [], // Will be populated in the parallel badge fetching section below
     }));
 
