@@ -143,6 +143,7 @@ export default function GameDetailClient({
             currentUserId={currentUserId}
             isUserSignedUp={isUserSignedUp}
             isHost={isHost}
+            gameSystem={session.game}
           />
         </div>
 

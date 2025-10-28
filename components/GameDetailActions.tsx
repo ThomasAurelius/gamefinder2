@@ -8,6 +8,7 @@ interface GameDetailActionsProps {
   currentUserId: string | null;
   isUserSignedUp: boolean;
   isHost: boolean;
+  gameSystem?: string | null;
 }
 
 export default function GameDetailActions({
@@ -15,6 +16,7 @@ export default function GameDetailActions({
   currentUserId,
   isUserSignedUp,
   isHost,
+  gameSystem = null,
 }: GameDetailActionsProps) {
   const router = useRouter();
 
@@ -30,6 +32,7 @@ export default function GameDetailActions({
       isUserSignedUp={isUserSignedUp}
       isHost={isHost}
       onSessionUpdate={handleSessionUpdate}
+      gameSystem={gameSystem}
     />
   );
 }

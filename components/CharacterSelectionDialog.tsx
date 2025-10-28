@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { StoredCharacter } from "@/lib/characters/types";
+import { mapGameToSystemKey } from "@/lib/constants";
 
 interface CharacterSelectionDialogProps {
   onSelect: (characterId?: string, characterName?: string) => void;
@@ -28,8 +29,10 @@ export default function CharacterSelectionDialog({
         if (response.ok) {
           const data = await response.json();
           // Filter characters by game system if specified
-          const filteredData = gameSystem
-            ? data.filter((char: StoredCharacter) => char.system === gameSystem)
+          // Map the game name to a system key for proper matching
+          const systemKey = gameSystem ? mapGameToSystemKey(gameSystem) : null;
+          const filteredData = systemKey
+            ? data.filter((char: StoredCharacter) => char.system === systemKey)
             : data;
           setCharacters(filteredData);
         } else {
