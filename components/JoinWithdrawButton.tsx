@@ -9,6 +9,7 @@ interface JoinWithdrawButtonProps {
   isUserSignedUp: boolean;
   isHost: boolean;
   onSessionUpdate: () => void;
+  gameSystem?: string | null;
 }
 
 export default function JoinWithdrawButton({
@@ -17,6 +18,7 @@ export default function JoinWithdrawButton({
   isUserSignedUp,
   isHost,
   onSessionUpdate,
+  gameSystem = null,
 }: JoinWithdrawButtonProps) {
   const [isJoining, setIsJoining] = useState(false);
   const [showCharacterDialog, setShowCharacterDialog] = useState(false);
@@ -192,6 +194,7 @@ export default function JoinWithdrawButton({
           onSelect={handleCharacterSelect}
           onCancel={handleCharacterCancel}
           isLoading={isJoining}
+          gameSystem={gameSystem}
         />
       )}
 
@@ -200,6 +203,7 @@ export default function JoinWithdrawButton({
           onSelect={handleCharacterSwitch}
           onCancel={handleCharacterSwitchCancel}
           isLoading={isUpdatingCharacter}
+          gameSystem={gameSystem}
         />
       )}
     </>
