@@ -1304,7 +1304,7 @@ export default function CharactersPage() {
 													</li>
 													<li>Paste it in the field below</li>
 												</ol>
-												<p className="mt-2 word-wrap text-purple-300">
+												<p className="mt-2 wrap-anywhere text-purple-300">
 													Example:
 													https://app.demiplane.com/nexus/starfinder2e/character/abc123
 												</p>
