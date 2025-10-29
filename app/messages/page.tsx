@@ -37,7 +37,7 @@ function MessagesContent() {
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [isSending, setIsSending] = useState(false);
 	const [isReplyingSending, setIsReplyingSending] = useState(false);
-	const markedConversationsRef = useRef<Set<string>>(new Set());
+	const markedMessageIdsRef = useRef<Set<string>>(new Set());
 
 	// Fetch current user from authentication API
 	useEffect(() => {
@@ -294,29 +294,24 @@ function MessagesContent() {
 
 	// Auto-mark unread messages as read when viewing a conversation
 	useEffect(() => {
-		const markConversationAsRead = async () => {
-			if (!selectedConversation || !currentUserId) return;
+		if (!selectedConversation || !currentUserId) return;
 
-			// Check if we've already marked this conversation as read
-			const conversationKey = `${selectedConversation}-${messages.length}`;
-			if (markedConversationsRef.current.has(conversationKey)) {
-				return;
-			}
+		// Find all unread messages in this conversation where current user is recipient
+		const unreadMessages = messages.filter(
+			(msg) =>
+				msg.recipientId === currentUserId &&
+				!msg.isRead &&
+				msg.senderId === selectedConversation &&
+				!markedMessageIdsRef.current.has(msg.id)
+		);
 
-			// Find all unread messages in this conversation where current user is recipient
-			const unreadMessages = messages.filter(
-				(msg) =>
-					msg.recipientId === currentUserId &&
-					!msg.isRead &&
-					msg.senderId === selectedConversation
-			);
+		if (unreadMessages.length === 0) return;
 
-			if (unreadMessages.length === 0) return;
+		// Mark these message IDs as being processed to prevent duplicates
+		unreadMessages.forEach((msg) => markedMessageIdsRef.current.add(msg.id));
 
-			// Mark this conversation as being processed
-			markedConversationsRef.current.add(conversationKey);
-
-			// Mark all unread messages as read
+		// Mark all unread messages as read
+		const markMessages = async () => {
 			try {
 				await Promise.all(
 					unreadMessages.map((msg) =>
@@ -335,13 +330,14 @@ function MessagesContent() {
 			} catch (err) {
 				console.error("Failed to mark messages as read", err);
 				// Remove from set on error so we can retry
-				markedConversationsRef.current.delete(conversationKey);
+				unreadMessages.forEach((msg) =>
+					markedMessageIdsRef.current.delete(msg.id)
+				);
 			}
 		};
 
-		markConversationAsRead();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedConversation, currentUserId, messages.length]);
+		markMessages();
+	}, [selectedConversation, currentUserId, messages, fetchMessages]);
 
 	if (isLoading) {
 		return (

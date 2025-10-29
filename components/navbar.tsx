@@ -170,8 +170,8 @@ export function Navbar() {
 			}
 		};
 
-		// Poll every 2 seconds while on messages page
-		const intervalId = setInterval(fetchNotifications, 2000);
+		// Poll every 5 seconds while on messages page to keep notification count updated
+		const intervalId = setInterval(fetchNotifications, 5000);
 
 		return () => clearInterval(intervalId);
 	}, [isAuthenticated, authLoading, pathname]);
