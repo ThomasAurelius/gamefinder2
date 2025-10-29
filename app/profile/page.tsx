@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, PREFERENCE_OPTIONS, GAME_STYLE_OPTIONS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import AvatarCropper from "@/components/AvatarCropper";
 import CityAutocomplete from "@/components/CityAutocomplete";
@@ -70,6 +70,10 @@ type ProfilePayload = {
 	phoneNumber?: string;
 	bggUsername?: string;
 	isGM?: boolean;
+	style?: string;
+	idealTable?: string;
+	preferences?: string[];
+	gameStyle?: string[];
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -99,6 +103,10 @@ export default function ProfilePage() {
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isGM, setIsGM] = useState(false);
+	const [style, setStyle] = useState("");
+	const [idealTable, setIdealTable] = useState("");
+	const [preferences, setPreferences] = useState<string[]>([]);
+	const [gameStyle, setGameStyle] = useState<string[]>([]);
 	const [isSaving, setIsSaving] = useState(false);
 	const [saveError, setSaveError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
@@ -155,6 +163,10 @@ export default function ProfilePage() {
 					: "";
 				setPrimaryRole(normalizedRole);
 				setIsGM(profile.isGM ?? false);
+				setStyle(profile.style ?? "");
+				setIdealTable(profile.idealTable ?? "");
+				setPreferences(profile.preferences ?? []);
+				setGameStyle(profile.gameStyle ?? []);
 			} catch (error) {
 				console.error(error);
 				setSaveError("Unable to load profile data.");
@@ -272,6 +284,10 @@ export default function ProfilePage() {
 				phoneNumber,
 				bggUsername,
 				isGM,
+				style,
+				idealTable,
+				preferences,
+				gameStyle,
 			};
 
 			const saveResponse = await fetch("/api/profile", {
@@ -395,6 +411,10 @@ export default function ProfilePage() {
 			phoneNumber,
 			bggUsername,
 			isGM,
+			style,
+			idealTable,
+			preferences,
+			gameStyle,
 		};
 
 		try {
@@ -666,6 +686,124 @@ export default function ProfilePage() {
 						placeholder="Share your story, experience level, and what you're looking for at the table."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
+				</section>
+
+				<section className="space-y-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="flex items-center justify-between gap-4">
+						<div>
+							<h2 className="text-lg font-semibold text-amber-100">
+								Style
+							</h2>
+							<p className="text-sm text-slate-400">
+								Describe your play style and what you enjoy most at the gaming table.
+							</p>
+						</div>
+						<span className="text-xs text-slate-500">
+							{2000 - style.length} characters remaining
+						</span>
+					</div>
+
+					<textarea
+						id="style"
+						maxLength={2000}
+						value={style}
+						onChange={(event) => setStyle(event.target.value)}
+						rows={6}
+						placeholder="Do you prefer tactical combat or narrative storytelling? Are you a power gamer or a casual player? Share what makes gaming fun for you."
+						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+				</section>
+
+				<section className="space-y-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="flex items-center justify-between gap-4">
+						<div>
+							<h2 className="text-lg font-semibold text-amber-100">
+								Ideal Table
+							</h2>
+							<p className="text-sm text-slate-400">
+								Describe your ideal gaming environment and what you look for in a table.
+							</p>
+						</div>
+						<span className="text-xs text-slate-500">
+							{2000 - idealTable.length} characters remaining
+						</span>
+					</div>
+
+					<textarea
+						id="idealTable"
+						maxLength={2000}
+						value={idealTable}
+						onChange={(event) => setIdealTable(event.target.value)}
+						rows={6}
+						placeholder="What does your perfect gaming group look like? Do you prefer small intimate groups or larger parties? Serious or lighthearted? Share your vision of the ideal table."
+						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+				</section>
+
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-amber-100">
+							Preferences
+						</h2>
+						<p className="text-sm text-slate-400">
+							Select your gaming preferences to help others find compatible players.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{PREFERENCE_OPTIONS.map((pref) => {
+							const active = preferences.includes(pref);
+							return (
+								<button
+									key={pref}
+									type="button"
+									onClick={() =>
+										setPreferences((prev) =>
+											prev.includes(pref)
+												? prev.filter((p) => p !== pref)
+												: [...prev, pref]
+										)
+									}
+									className={tagButtonClasses(active)}
+								>
+									{pref}
+								</button>
+							);
+						})}
+					</div>
+				</section>
+
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-amber-100">
+							Game Style
+						</h2>
+						<p className="text-sm text-slate-400">
+							Select the game styles and formats you prefer or are comfortable with.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{GAME_STYLE_OPTIONS.map((style) => {
+							const active = gameStyle.includes(style);
+							return (
+								<button
+									key={style}
+									type="button"
+									onClick={() =>
+										setGameStyle((prev) =>
+											prev.includes(style)
+												? prev.filter((s) => s !== style)
+												: [...prev, style]
+										)
+									}
+									className={tagButtonClasses(active)}
+								>
+									{style}
+								</button>
+							);
+						})}
+					</div>
 				</section>
 
 				<section className="space-y-6 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
