@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ConversationMessage } from "@/lib/messages";
 import UserAutocomplete from "@/components/UserAutocomplete";
@@ -37,6 +37,7 @@ function MessagesContent() {
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [isSending, setIsSending] = useState(false);
 	const [isReplyingSending, setIsReplyingSending] = useState(false);
+	const markedConversationsRef = useRef<Set<string>>(new Set());
 
 	// Fetch current user from authentication API
 	useEffect(() => {
@@ -290,6 +291,57 @@ function MessagesContent() {
 						msg.recipientId === currentUserId)
 			)
 		: [];
+
+	// Auto-mark unread messages as read when viewing a conversation
+	useEffect(() => {
+		const markConversationAsRead = async () => {
+			if (!selectedConversation || !currentUserId) return;
+
+			// Check if we've already marked this conversation as read
+			const conversationKey = `${selectedConversation}-${messages.length}`;
+			if (markedConversationsRef.current.has(conversationKey)) {
+				return;
+			}
+
+			// Find all unread messages in this conversation where current user is recipient
+			const unreadMessages = messages.filter(
+				(msg) =>
+					msg.recipientId === currentUserId &&
+					!msg.isRead &&
+					msg.senderId === selectedConversation
+			);
+
+			if (unreadMessages.length === 0) return;
+
+			// Mark this conversation as being processed
+			markedConversationsRef.current.add(conversationKey);
+
+			// Mark all unread messages as read
+			try {
+				await Promise.all(
+					unreadMessages.map((msg) =>
+						fetch("/api/messages/mark-read", {
+							method: "PATCH",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ messageId: msg.id }),
+						})
+					)
+				);
+
+				// Refresh messages to update UI
+				await fetchMessages();
+			} catch (err) {
+				console.error("Failed to mark messages as read", err);
+				// Remove from set on error so we can retry
+				markedConversationsRef.current.delete(conversationKey);
+			}
+		};
+
+		markConversationAsRead();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selectedConversation, currentUserId, messages.length]);
 
 	if (isLoading) {
 		return (
