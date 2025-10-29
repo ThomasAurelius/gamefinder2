@@ -7,6 +7,7 @@ import {
 	DAYS_OF_WEEK,
 	TIME_SLOTS,
 	TIME_SLOT_GROUPS,
+	PREFERENCE_OPTIONS,
 } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import Badge from "@/components/Badge";
@@ -155,6 +156,7 @@ export default function PlayersPage() {
 	const [selectedDayOfWeek, setSelectedDayOfWeek] = useState("");
 	const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
 	const [selectedIsGM, setSelectedIsGM] = useState<string>("");
+	const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
 
 	useEffect(() => {
 		// Load all players on initial mount
@@ -210,6 +212,8 @@ export default function PlayersPage() {
 			if (selectedDayOfWeek) params.append("dayOfWeek", selectedDayOfWeek);
 			if (selectedTimeSlot) params.append("timeSlot", selectedTimeSlot);
 			if (selectedIsGM) params.append("isGM", selectedIsGM);
+			if (selectedPreferences.length > 0)
+				params.append("preferences", selectedPreferences.join(","));
 
 			const response = await fetch(`/api/players?${params.toString()}`);
 			if (!response.ok) {
@@ -232,6 +236,16 @@ export default function PlayersPage() {
 				return prev.filter((g) => g !== game);
 			} else {
 				return [...prev, game];
+			}
+		});
+	};
+
+	const togglePreference = (preference: string) => {
+		setSelectedPreferences((prev) => {
+			if (prev.includes(preference)) {
+				return prev.filter((p) => p !== preference);
+			} else {
+				return [...prev, preference];
 			}
 		});
 	};
@@ -499,6 +513,31 @@ export default function PlayersPage() {
 							</div>
 						)}
 
+						{/* Preferences Filter */}
+						<div>
+							<label className="mb-2 block text-sm font-medium text-slate-300">
+								Preferences (Select Multiple)
+							</label>
+							<p className="mb-3 text-xs text-slate-400">
+								Filter players by their gaming preferences
+							</p>
+							<div className="flex flex-wrap gap-2">
+								{PREFERENCE_OPTIONS.map((pref) => (
+									<button
+										key={pref}
+										type="button"
+										onClick={() => togglePreference(pref)}
+										className={tagButtonClasses(
+											selectedPreferences.includes(pref),
+											{ size: "sm" }
+										)}
+									>
+										{pref}
+									</button>
+								))}
+							</div>
+						</div>
+
 						<button
 							type="button"
 							onClick={handleSearch}
@@ -528,6 +567,7 @@ export default function PlayersPage() {
 									selectedDayOfWeek ||
 									selectedTimeSlot ||
 									selectedIsGM ||
+									selectedPreferences.length > 0 ||
 									locationSearch) &&
 									" matching your criteria"}
 							</>

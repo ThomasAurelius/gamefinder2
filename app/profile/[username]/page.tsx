@@ -74,6 +74,20 @@ export default async function PublicProfilePage({
         <p className="max-w-3xl text-base text-slate-200">{details.bio}</p>
       </div>
 
+      {details.style && (
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-100">Style</h2>
+          <p className="max-w-3xl text-base text-slate-200 whitespace-pre-wrap">{details.style}</p>
+        </div>
+      )}
+
+      {details.idealTable && (
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-100">Ideal Table</h2>
+          <p className="max-w-3xl text-base text-slate-200 whitespace-pre-wrap">{details.idealTable}</p>
+        </div>
+      )}
+
       {details.favoriteGames.length > 0 ? (
         <div className="space-y-2">
           <h2 className="text-lg font-semibold text-slate-100">Favorite Games</h2>
@@ -91,6 +105,38 @@ export default async function PublicProfilePage({
       ) : null}
 
       <AvailabilityGrid availability={details.availability} />
+
+      {details.preferences && details.preferences.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-100">Preferences</h2>
+          <div className="flex flex-wrap gap-2">
+            {details.preferences.map((pref) => (
+              <span
+                key={pref}
+                className="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-sm text-sky-100"
+              >
+                {pref}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {details.gameStyle && details.gameStyle.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold text-slate-100">Game Style</h2>
+          <div className="flex flex-wrap gap-2">
+            {details.gameStyle.map((style) => (
+              <span
+                key={style}
+                className="rounded-full border border-sky-500/40 bg-sky-500/10 px-3 py-1 text-sm text-sky-100"
+              >
+                {style}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         <div>
