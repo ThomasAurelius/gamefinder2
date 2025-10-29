@@ -293,6 +293,8 @@ function MessagesContent() {
 		: [];
 
 	// Auto-mark unread messages as read when viewing a conversation
+	// Note: messages is included in dependencies to handle new unread messages arriving,
+	// but markedMessageIdsRef prevents duplicate processing of the same message
 	useEffect(() => {
 		if (!selectedConversation || !currentUserId) return;
 
