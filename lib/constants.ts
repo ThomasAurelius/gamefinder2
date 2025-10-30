@@ -43,6 +43,13 @@ export const GAME_STYLE_OPTIONS = [
 	"Collaborative storytelling",
 ];
 
+export const SYSTEM_OPTIONS = [
+	"Foundry",
+	"Roll20",
+	"Discord",
+	"Other",
+];
+
 export const DAYS_OF_WEEK = [
 	"Monday",
 	"Tuesday",

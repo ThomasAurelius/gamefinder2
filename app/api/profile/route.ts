@@ -72,6 +72,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     idealTable,
     preferences,
     gameStyle,
+    systems,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -153,6 +154,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     throw new Error("Game Style must be a string array");
   }
 
+  // Validate systems if provided (optional string array)
+  if (systems !== undefined && !isStringArray(systems)) {
+    throw new Error("Systems must be a string array");
+  }
+
   const normalizedGames = dedupe(games);
   const normalizedFavorites = dedupe(favoriteGames);
 
@@ -182,6 +188,7 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     idealTable: idealTable || "",
     preferences: preferences ? dedupe(preferences) : [],
     gameStyle: gameStyle ? dedupe(gameStyle) : [],
+    systems: systems ? dedupe(systems) : [],
   };
 };
 
