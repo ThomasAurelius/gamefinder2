@@ -37,8 +37,13 @@ export function DashboardSidebar() {
 
 	useEffect(() => {
 		const fetchUpcomingSessions = async () => {
-			// Only fetch if authenticated
-			if (!isAuthenticated || authLoading) {
+			// Wait for auth check to complete
+			if (authLoading) {
+				return;
+			}
+
+			// Don't fetch if not authenticated
+			if (!isAuthenticated) {
 				setIsLoading(false);
 				return;
 			}
@@ -105,8 +110,8 @@ export function DashboardSidebar() {
 		});
 	};
 
-	// Don't render sidebar if not authenticated
-	if (!isAuthenticated) {
+	// Don't render sidebar if not authenticated (but wait for auth check)
+	if (authLoading || !isAuthenticated) {
 		return null;
 	}
 
