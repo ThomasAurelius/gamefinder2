@@ -6,6 +6,7 @@ import { formatDateInTimezone, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import { sortTimesByChronology } from "@/lib/constants";
 import HostFeedbackDialog from "@/components/HostFeedbackDialog";
 import PlayerFeedbackDialog from "@/components/PlayerFeedbackDialog";
+import { AuthGuard } from "@/components/auth-guard";
 
 type GameSession = {
   id: string;
@@ -469,6 +470,7 @@ export default function GamesHistoryPage() {
   }, []);
 
   return (
+    <AuthGuard>
     <section className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-slate-100">Games History</h1>
@@ -511,5 +513,6 @@ export default function GamesHistoryPage() {
         )}
       </div>
     </section>
+    </AuthGuard>
   );
 }

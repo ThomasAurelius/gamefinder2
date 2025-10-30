@@ -15,9 +15,34 @@ export function DashboardSidebar() {
 		[]
 	);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [authLoading, setAuthLoading] = useState(true);
+
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const response = await fetch("/api/auth/status");
+				const data = await response.json();
+				setIsAuthenticated(data.isAuthenticated);
+			} catch (error) {
+				console.error("Failed to check auth status:", error);
+				setIsAuthenticated(false);
+			} finally {
+				setAuthLoading(false);
+			}
+		};
+
+		checkAuth();
+	}, []);
 
 	useEffect(() => {
 		const fetchUpcomingSessions = async () => {
+			// Only fetch if authenticated
+			if (!isAuthenticated || authLoading) {
+				setIsLoading(false);
+				return;
+			}
+
 			try {
 				// Fetch user's game sessions
 				const gamesResponse = await fetch("/api/games/my-games");
@@ -60,7 +85,7 @@ export function DashboardSidebar() {
 		};
 
 		fetchUpcomingSessions();
-	}, []);
+	}, [isAuthenticated, authLoading]);
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
@@ -79,6 +104,11 @@ export function DashboardSidebar() {
 			day: "numeric",
 		});
 	};
+
+	// Don't render sidebar if not authenticated
+	if (!isAuthenticated) {
+		return null;
+	}
 
 	return (
 		<aside className="hidden m-4 3xl:block w-64 flex-shrink-0">
