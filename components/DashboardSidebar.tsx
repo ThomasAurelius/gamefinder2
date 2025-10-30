@@ -22,10 +22,15 @@ export function DashboardSidebar() {
 		const checkAuth = async () => {
 			try {
 				const response = await fetch("/api/auth/status");
+				if (!response.ok) {
+					console.error("Failed to check auth status: HTTP", response.status);
+					setIsAuthenticated(false);
+					return;
+				}
 				const data = await response.json();
 				setIsAuthenticated(data.isAuthenticated);
 			} catch (error) {
-				console.error("Failed to check auth status:", error);
+				console.error("Failed to check auth status:", error instanceof Error ? error.message : error);
 				setIsAuthenticated(false);
 			} finally {
 				setAuthLoading(false);
