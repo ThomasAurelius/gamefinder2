@@ -25,6 +25,7 @@ export type ProfileRecord = {
 	idealTable?: string; // Long text field describing ideal gaming table/environment
 	preferences?: string[]; // Tag-style array of preferences
 	gameStyle?: string[]; // Tag-style array of game style preferences
+	systems?: string[]; // Tag-style array of systems (Foundry, Roll20, Discord, etc.)
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -53,6 +54,7 @@ const DEFAULT_PROFILE: ProfileRecord = {
 	idealTable: "",
 	preferences: [],
 	gameStyle: [],
+	systems: [],
 };
 
 export async function readProfile(userId: string): Promise<ProfileRecord> {
@@ -105,6 +107,7 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
 		idealTable: profile.idealTable ?? "",
 		preferences: profile.preferences ?? [],
 		gameStyle: profile.gameStyle ?? [],
+		systems: profile.systems ?? [],
 	};
 }
 

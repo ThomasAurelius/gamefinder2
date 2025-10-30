@@ -14,6 +14,7 @@ export type PublicProfileDetails = {
   idealTable?: string;
   preferences?: string[];
   gameStyle?: string[];
+  systems?: string[];
 };
 
 export type PublicCharacterRecord = StoredCharacter & {
@@ -118,6 +119,9 @@ function cloneProfiles(source: PublicProfileRecord[]): PublicProfileRecord[] {
         : undefined,
       gameStyle: Array.isArray(entry.profile.gameStyle)
         ? [...entry.profile.gameStyle]
+        : undefined,
+      systems: Array.isArray(entry.profile.systems)
+        ? [...entry.profile.systems]
         : undefined,
     },
     characters: Array.isArray(entry.characters)

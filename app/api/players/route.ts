@@ -35,6 +35,7 @@ export async function GET(request: Request) {
     const games = searchParams.get("games") || ""; // Multiple games comma-separated
     const isGM = searchParams.get("isGM"); // Filter by GM status
     const preferences = searchParams.get("preferences") || ""; // Multiple preferences comma-separated
+    const systems = searchParams.get("systems") || ""; // Multiple systems comma-separated
 
     const db = await getDb();
     const usersCollection = db.collection("users");
@@ -93,6 +94,14 @@ export async function GET(request: Request) {
       const preferencesList = preferences.split(",").map((p) => p.trim()).filter(Boolean);
       if (preferencesList.length > 0) {
         filter["profile.preferences"] = { $in: preferencesList };
+      }
+    }
+
+    // Add systems filter
+    if (systems) {
+      const systemsList = systems.split(",").map((s) => s.trim()).filter(Boolean);
+      if (systemsList.length > 0) {
+        filter["profile.systems"] = { $in: systemsList };
       }
     }
 
