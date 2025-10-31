@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, PREFERENCE_OPTIONS, GAME_STYLE_OPTIONS, SYSTEM_OPTIONS } from "@/lib/constants";
 import { TIMEZONE_OPTIONS, DEFAULT_TIMEZONE } from "@/lib/timezone";
 import AvatarCropper from "@/components/AvatarCropper";
 import CityAutocomplete from "@/components/CityAutocomplete";
@@ -70,6 +70,11 @@ type ProfilePayload = {
 	phoneNumber?: string;
 	bggUsername?: string;
 	isGM?: boolean;
+	style?: string;
+	idealTable?: string;
+	preferences?: string[];
+	gameStyle?: string[];
+	systems?: string[];
 };
 
 const sortAvailabilitySlots = (slots: string[]) =>
@@ -99,6 +104,13 @@ export default function ProfilePage() {
 
 	const [primaryRole, setPrimaryRole] = useState<RoleOption | "">("");
 	const [isGM, setIsGM] = useState(false);
+	const [style, setStyle] = useState("");
+	const [idealTable, setIdealTable] = useState("");
+	const [preferences, setPreferences] = useState<string[]>([]);
+	const [gameStyle, setGameStyle] = useState<string[]>([]);
+	const [systems, setSystems] = useState<string[]>([]);
+	const [customSystems, setCustomSystems] = useState<string[]>([]);
+	const [customSystemInput, setCustomSystemInput] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 	const [saveError, setSaveError] = useState<string | null>(null);
 	const [saveSuccess, setSaveSuccess] = useState(false);
@@ -155,6 +167,20 @@ export default function ProfilePage() {
 					: "";
 				setPrimaryRole(normalizedRole);
 				setIsGM(profile.isGM ?? false);
+				setStyle(profile.style ?? "");
+				setIdealTable(profile.idealTable ?? "");
+				setPreferences(profile.preferences ?? []);
+				setGameStyle(profile.gameStyle ?? []);
+				// Separate preset systems from custom systems
+				const normalizedSystems = profile.systems ?? [];
+				const presetSystems = normalizedSystems.filter((system) =>
+					SYSTEM_OPTIONS.includes(system)
+				);
+				const customSystemsFromProfile = normalizedSystems.filter(
+					(system) => !SYSTEM_OPTIONS.includes(system)
+				);
+				setSystems(presetSystems);
+				setCustomSystems(customSystemsFromProfile);
 			} catch (error) {
 				console.error(error);
 				setSaveError("Unable to load profile data.");
@@ -216,6 +242,31 @@ export default function ProfilePage() {
 		);
 	};
 
+	const toggleSystem = (system: string) => {
+		setSystems((prev) => {
+			const exists = prev.includes(system);
+			return exists
+				? prev.filter((item) => item !== system)
+				: [...prev, system];
+		});
+	};
+
+	const addCustomSystem = () => {
+		const trimmedSystem = customSystemInput.trim();
+		if (
+			trimmedSystem &&
+			!customSystems.includes(trimmedSystem) &&
+			!SYSTEM_OPTIONS.includes(trimmedSystem)
+		) {
+			setCustomSystems((prev) => [...prev, trimmedSystem]);
+			setCustomSystemInput("");
+		}
+	};
+
+	const removeCustomSystem = (system: string) => {
+		setCustomSystems((prev) => prev.filter((item) => item !== system));
+	};
+
 	const handleAvatarUpload = async (
 		event: React.ChangeEvent<HTMLInputElement>
 	) => {
@@ -257,6 +308,7 @@ export default function ProfilePage() {
 
 			// Save the avatar URL to the user's profile in the database
 			const allGames = [...selectedGames, ...customGames];
+			const allSystems = [...systems, ...customSystems];
 			const profilePayload: ProfilePayload = {
 				name,
 				commonName,
@@ -272,6 +324,11 @@ export default function ProfilePage() {
 				phoneNumber,
 				bggUsername,
 				isGM,
+				style,
+				idealTable,
+				preferences,
+				gameStyle,
+				systems: allSystems,
 			};
 
 			const saveResponse = await fetch("/api/profile", {
@@ -379,6 +436,8 @@ export default function ProfilePage() {
 
 		// Combine preset and custom games
 		const allGames = [...selectedGames, ...customGames];
+		// Combine preset and custom systems
+		const allSystems = [...systems, ...customSystems];
 
 		const payload: ProfilePayload = {
 			name,
@@ -395,6 +454,11 @@ export default function ProfilePage() {
 			phoneNumber,
 			bggUsername,
 			isGM,
+			style,
+			idealTable,
+			preferences,
+			gameStyle,
+			systems: allSystems,
 		};
 
 		try {
@@ -666,6 +730,198 @@ export default function ProfilePage() {
 						placeholder="Share your story, experience level, and what you're looking for at the table."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
+				</section>
+
+				<section className="space-y-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="flex items-center justify-between gap-4">
+						<div>
+							<h2 className="text-lg font-semibold text-amber-100">
+								Style
+							</h2>
+							<p className="text-sm text-slate-400">
+								Describe your play style and what you enjoy most at the gaming table.
+							</p>
+						</div>
+						<span className="text-xs text-slate-500">
+							{2000 - style.length} characters remaining
+						</span>
+					</div>
+
+					<textarea
+						id="style"
+						maxLength={2000}
+						value={style}
+						onChange={(event) => setStyle(event.target.value)}
+						rows={6}
+						placeholder="Do you prefer tactical combat or narrative storytelling? Are you a power gamer or a casual player? Share what makes gaming fun for you."
+						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+				</section>
+
+				<section className="space-y-3 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="flex items-center justify-between gap-4">
+						<div>
+							<h2 className="text-lg font-semibold text-amber-100">
+								Ideal Table
+							</h2>
+							<p className="text-sm text-slate-400">
+								Describe your ideal gaming environment and what you look for in a table.
+							</p>
+						</div>
+						<span className="text-xs text-slate-500">
+							{2000 - idealTable.length} characters remaining
+						</span>
+					</div>
+
+					<textarea
+						id="idealTable"
+						maxLength={2000}
+						value={idealTable}
+						onChange={(event) => setIdealTable(event.target.value)}
+						rows={6}
+						placeholder="What does your perfect gaming group look like? Do you prefer small intimate groups or larger parties? Serious or lighthearted? Share your vision of the ideal table."
+						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+				</section>
+
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-amber-100">
+							Preferences
+						</h2>
+						<p className="text-sm text-slate-400">
+							Select your gaming preferences to help others find compatible players.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{PREFERENCE_OPTIONS.map((pref) => {
+							const active = preferences.includes(pref);
+							return (
+								<button
+									key={pref}
+									type="button"
+									onClick={() =>
+										setPreferences((prev) =>
+											prev.includes(pref)
+												? prev.filter((p) => p !== pref)
+												: [...prev, pref]
+										)
+									}
+									className={tagButtonClasses(active)}
+								>
+									{pref}
+								</button>
+							);
+						})}
+					</div>
+				</section>
+
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-amber-100">
+							Game Style
+						</h2>
+						<p className="text-sm text-slate-400">
+							Select the game styles and formats you prefer or are comfortable with.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{GAME_STYLE_OPTIONS.map((style) => {
+							const active = gameStyle.includes(style);
+							return (
+								<button
+									key={style}
+									type="button"
+									onClick={() =>
+										setGameStyle((prev) =>
+											prev.includes(style)
+												? prev.filter((s) => s !== style)
+												: [...prev, style]
+										)
+									}
+									className={tagButtonClasses(active)}
+								>
+									{style}
+								</button>
+							);
+						})}
+					</div>
+				</section>
+
+				<section className="space-y-4 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-amber-100">
+							System
+						</h2>
+						<p className="text-sm text-slate-400">
+							Select the platforms and tools you use for gaming sessions.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{SYSTEM_OPTIONS.map((system) => {
+							const active = systems.includes(system);
+							return (
+								<button
+									key={system}
+									type="button"
+									onClick={() => toggleSystem(system)}
+									className={tagButtonClasses(active)}
+								>
+									{system}
+								</button>
+							);
+						})}
+					</div>
+
+					{systems.includes("Other") && (
+						<div className="space-y-3">
+							<div className="flex gap-2">
+								<input
+									type="text"
+									value={customSystemInput}
+									onChange={(e) => setCustomSystemInput(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter") {
+											e.preventDefault();
+											addCustomSystem();
+										}
+									}}
+									placeholder="Enter custom system name"
+									className="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+								/>
+								<button
+									type="button"
+									onClick={addCustomSystem}
+									className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+								>
+									Add
+								</button>
+							</div>
+							{customSystems.length > 0 && (
+								<div className="flex flex-wrap gap-2">
+									{customSystems.map((system) => (
+										<div
+											key={system}
+											className="flex items-center gap-1 rounded-full border border-sky-400 bg-sky-500/20 px-3 py-1.5 text-sm text-sky-100"
+										>
+											<span>{system}</span>
+											<button
+												type="button"
+												onClick={() => removeCustomSystem(system)}
+												className="ml-1 text-sky-200 hover:text-sky-100"
+												aria-label={`Remove ${system}`}
+											>
+												×
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
+					)}
 				</section>
 
 				<section className="space-y-6 rounded-2xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6 shadow-lg shadow-slate-900/30">

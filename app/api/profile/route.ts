@@ -7,6 +7,7 @@ import { geocodeLocation } from "@/lib/geolocation";
 
 const ROLE_OPTIONS = new Set(["Healer", "Damage", "Caster", "Support", "DM", "Other", ""]);
 const MAX_BIO_LENGTH = 2000;
+const MAX_LONG_TEXT_LENGTH = 2000;
 
 const isString = (value: unknown): value is string => typeof value === "string";
 
@@ -67,6 +68,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     phoneNumber,
     bggUsername,
     isGM,
+    style,
+    idealTable,
+    preferences,
+    gameStyle,
+    systems,
   } = payload as Partial<ProfileRecord>;
 
   if (!isString(name)) {
@@ -128,6 +134,31 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     throw new Error("isGM must be a boolean");
   }
 
+  // Validate style if provided (optional long text field)
+  if (style !== undefined && (!isString(style) || style.length > MAX_LONG_TEXT_LENGTH)) {
+    throw new Error("Style must be a string under 2000 characters");
+  }
+
+  // Validate idealTable if provided (optional long text field)
+  if (idealTable !== undefined && (!isString(idealTable) || idealTable.length > MAX_LONG_TEXT_LENGTH)) {
+    throw new Error("Ideal Table must be a string under 2000 characters");
+  }
+
+  // Validate preferences if provided (optional string array)
+  if (preferences !== undefined && !isStringArray(preferences)) {
+    throw new Error("Preferences must be a string array");
+  }
+
+  // Validate gameStyle if provided (optional string array)
+  if (gameStyle !== undefined && !isStringArray(gameStyle)) {
+    throw new Error("Game Style must be a string array");
+  }
+
+  // Validate systems if provided (optional string array)
+  if (systems !== undefined && !isStringArray(systems)) {
+    throw new Error("Systems must be a string array");
+  }
+
   const normalizedGames = dedupe(games);
   const normalizedFavorites = dedupe(favoriteGames);
 
@@ -153,6 +184,11 @@ const validateProfile = (payload: unknown): ProfileRecord => {
     phoneNumber: isString(phoneNumber) && phoneNumber ? phoneNumber : undefined,
     bggUsername: bggUsername || undefined,
     isGM: isGM ?? false,
+    style: style || "",
+    idealTable: idealTable || "",
+    preferences: preferences ? dedupe(preferences) : [],
+    gameStyle: gameStyle ? dedupe(gameStyle) : [],
+    systems: systems ? dedupe(systems) : [],
   };
 };
 

@@ -6,6 +6,50 @@ export const GAME_OPTIONS = [
 	"Other",
 ];
 
+export const PREFERENCE_OPTIONS = [
+	"Rules-light",
+	"Rules-heavy",
+	"Story-focused",
+	"Combat-focused",
+	"Exploration",
+	"Role-playing",
+	"Puzzles",
+	"Politics",
+	"Horror",
+	"Mystery",
+	"Sandbox",
+	"Linear narrative",
+	"Casual",
+	"Serious",
+	"Beginner-friendly",
+	"Experienced players",
+];
+
+export const GAME_STYLE_OPTIONS = [
+	"Theater of the mind",
+	"Grid-based combat",
+	"Miniatures",
+	"Digital tools",
+	"In-person only",
+	"Online only",
+	"Hybrid",
+	"Voice chat",
+	"Video chat",
+	"Text-based",
+	"Homebrew content",
+	"Official content only",
+	"Session zero",
+	"Character-driven",
+	"Collaborative storytelling",
+];
+
+export const SYSTEM_OPTIONS = [
+	"Foundry",
+	"Roll20",
+	"Discord",
+	"Other",
+];
+
 export const DAYS_OF_WEEK = [
 	"Monday",
 	"Tuesday",

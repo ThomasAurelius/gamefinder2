@@ -7,6 +7,8 @@ import {
 	DAYS_OF_WEEK,
 	TIME_SLOTS,
 	TIME_SLOT_GROUPS,
+	PREFERENCE_OPTIONS,
+	SYSTEM_OPTIONS,
 } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import Badge from "@/components/Badge";
@@ -155,6 +157,9 @@ export default function PlayersPage() {
 	const [selectedDayOfWeek, setSelectedDayOfWeek] = useState("");
 	const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
 	const [selectedIsGM, setSelectedIsGM] = useState<string>("");
+	const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+	const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
+	const [customSystemName, setCustomSystemName] = useState("");
 
 	useEffect(() => {
 		// Load all players on initial mount
@@ -210,6 +215,21 @@ export default function PlayersPage() {
 			if (selectedDayOfWeek) params.append("dayOfWeek", selectedDayOfWeek);
 			if (selectedTimeSlot) params.append("timeSlot", selectedTimeSlot);
 			if (selectedIsGM) params.append("isGM", selectedIsGM);
+			if (selectedPreferences.length > 0)
+				params.append("preferences", selectedPreferences.join(","));
+
+			// Build systems list, replacing "Other" with custom system name if provided
+			const systemsToSearch = selectedSystems
+				.map((system) => {
+					if (system === "Other" && customSystemName.trim()) {
+						return customSystemName.trim();
+					}
+					return system;
+				})
+				.filter((system) => system !== "Other" || !customSystemName.trim());
+
+			if (systemsToSearch.length > 0)
+				params.append("systems", systemsToSearch.join(","));
 
 			const response = await fetch(`/api/players?${params.toString()}`);
 			if (!response.ok) {
@@ -232,6 +252,26 @@ export default function PlayersPage() {
 				return prev.filter((g) => g !== game);
 			} else {
 				return [...prev, game];
+			}
+		});
+	};
+
+	const togglePreference = (preference: string) => {
+		setSelectedPreferences((prev) => {
+			if (prev.includes(preference)) {
+				return prev.filter((p) => p !== preference);
+			} else {
+				return [...prev, preference];
+			}
+		});
+	};
+
+	const toggleSystem = (system: string) => {
+		setSelectedSystems((prev) => {
+			if (prev.includes(system)) {
+				return prev.filter((s) => s !== system);
+			} else {
+				return [...prev, system];
 			}
 		});
 	};
@@ -499,6 +539,79 @@ export default function PlayersPage() {
 							</div>
 						)}
 
+						{/* Preferences Filter */}
+						<div>
+							<label className="mb-2 block text-sm font-medium text-slate-300">
+								Preferences (Select Multiple)
+							</label>
+							<p className="mb-3 text-xs text-slate-400">
+								Filter players by their gaming preferences
+							</p>
+							<div className="flex flex-wrap gap-2">
+								{PREFERENCE_OPTIONS.map((pref) => (
+									<button
+										key={pref}
+										type="button"
+										onClick={() => togglePreference(pref)}
+										className={tagButtonClasses(
+											selectedPreferences.includes(pref),
+											{ size: "sm" }
+										)}
+									>
+										{pref}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Systems Filter */}
+						<div>
+							<label className="mb-2 block text-sm font-medium text-slate-300">
+								Systems (Select Multiple)
+							</label>
+							<p className="mb-3 text-xs text-slate-400">
+								Filter players by the platforms and tools they use
+							</p>
+							<div className="flex flex-wrap gap-2">
+								{SYSTEM_OPTIONS.map((system) => (
+									<button
+										key={system}
+										type="button"
+										onClick={() => toggleSystem(system)}
+										className={tagButtonClasses(
+											selectedSystems.includes(system),
+											{ size: "sm" }
+										)}
+									>
+										{system}
+									</button>
+								))}
+							</div>
+						</div>
+
+						{/* Custom System Name Input - shown when "Other" is selected */}
+						{selectedSystems.includes("Other") && (
+							<div>
+								<label
+									htmlFor="custom-system-name"
+									className="mb-2 block text-sm font-medium text-slate-300"
+								>
+									Other System Name
+								</label>
+								<input
+									type="text"
+									id="custom-system-name"
+									value={customSystemName}
+									onChange={(e) => setCustomSystemName(e.target.value)}
+									placeholder="Enter the name of the system..."
+									className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
+								/>
+								<p className="mt-1 text-xs text-slate-500">
+									Specify the system you want to find players for
+								</p>
+							</div>
+						)}
+
 						<button
 							type="button"
 							onClick={handleSearch}
@@ -528,6 +641,8 @@ export default function PlayersPage() {
 									selectedDayOfWeek ||
 									selectedTimeSlot ||
 									selectedIsGM ||
+									selectedPreferences.length > 0 ||
+									selectedSystems.length > 0 ||
 									locationSearch) &&
 									" matching your criteria"}
 							</>

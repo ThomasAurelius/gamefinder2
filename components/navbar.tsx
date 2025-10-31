@@ -154,6 +154,28 @@ export function Navbar() {
 		fetchAdminStatus();
 	}, [isAuthenticated, authLoading, pathname]);
 
+	// Poll for notification updates when on messages page
+	useEffect(() => {
+		if (!isAuthenticated || authLoading || pathname !== "/messages") return;
+
+		const fetchNotifications = async () => {
+			try {
+				const response = await fetch("/api/notifications");
+				if (response.ok) {
+					const data = await response.json();
+					setUnreadMessageCount(data.unreadMessageCount);
+				}
+			} catch (error) {
+				console.error("Failed to fetch notifications:", error);
+			}
+		};
+
+		// Poll every 5 seconds while on messages page to keep notification count updated
+		const intervalId = setInterval(fetchNotifications, 5000);
+
+		return () => clearInterval(intervalId);
+	}, [isAuthenticated, authLoading, pathname]);
+
 	const toggleMenu = () => setMenuOpen((open) => !open);
 	const closeMenu = () => setMenuOpen(false);
 	const toggleAccount = () => setAccountOpen((open) => !open);

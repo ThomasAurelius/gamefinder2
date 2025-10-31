@@ -10,6 +10,11 @@ export type PublicProfileDetails = {
   location?: string;
   favoriteGames: string[];
   availability?: Record<string, string[]>;
+  style?: string;
+  idealTable?: string;
+  preferences?: string[];
+  gameStyle?: string[];
+  systems?: string[];
 };
 
 export type PublicCharacterRecord = StoredCharacter & {
@@ -106,6 +111,17 @@ function cloneProfiles(source: PublicProfileRecord[]): PublicProfileRecord[] {
         : [],
       availability: entry.profile.availability
         ? { ...entry.profile.availability }
+        : undefined,
+      style: entry.profile.style,
+      idealTable: entry.profile.idealTable,
+      preferences: Array.isArray(entry.profile.preferences)
+        ? [...entry.profile.preferences]
+        : undefined,
+      gameStyle: Array.isArray(entry.profile.gameStyle)
+        ? [...entry.profile.gameStyle]
+        : undefined,
+      systems: Array.isArray(entry.profile.systems)
+        ? [...entry.profile.systems]
         : undefined,
     },
     characters: Array.isArray(entry.characters)

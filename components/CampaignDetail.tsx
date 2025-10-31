@@ -110,7 +110,7 @@ export default function CampaignDetail({
 		PlayerWithInfo[]
 	>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [activeTab, setActiveTab] = useState<"details" | "notes">("details");
+	const [activeTab, setActiveTab] = useState<"details" | "notes">("notes");
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 	const [userTimezone, setUserTimezone] = useState<string>(DEFAULT_TIMEZONE);
 	const [newNoteContent, setNewNoteContent] = useState("");
@@ -1075,80 +1075,84 @@ export default function CampaignDetail({
 						{signedUpPlayersList.map((player) => (
 							<div
 								key={player.userId}
-								className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-3"
+								className="rounded-lg border border-slate-800 bg-slate-900/50 p-3"
 							>
-								<div className="flex items-center gap-3">
-									{player.avatarUrl && (
-										<img
-											src={player.avatarUrl}
-											alt={player.name}
-											className="h-10 w-10 rounded-full border border-slate-700"
-										/>
-									)}
-									<div>
-										<Link
-											href={`/user/${player.userId}`}
-											className="text-sm font-medium text-slate-200 hover:text-sky-300"
-										>
-											{player.name}
-										</Link>
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-3">
+										{player.avatarUrl && (
+											<img
+												src={player.avatarUrl}
+												alt={player.name}
+												className="h-10 w-10 rounded-full border border-slate-700"
+											/>
+										)}
+										<div>
+											<Link
+												href={`/user/${player.userId}`}
+												className="text-sm font-medium text-slate-200 hover:text-sky-300"
+											>
+												{player.name}
+											</Link>
+											{player.characterName && (
+												<p className="text-xs text-slate-400">
+													Playing:{" "}
+													{player.characterIsPublic &&
+													player.characterId ? (
+														<Link
+															href={`/players/${player.userId}/characters/${player.characterId}`}
+															className="hover:text-sky-300 transition-colors"
+														>
+															{player.characterName}
+														</Link>
+													) : (
+														player.characterName
+													)}
+												</p>
+											)}
+										</div>
+									</div>
+									<div className="flex items-center gap-3">
 										{player.characterName && (
-											<p className="text-xs text-slate-400">
-												Playing:{" "}
+											<div className="flex flex-col items-end">
 												{player.characterIsPublic &&
 												player.characterId ? (
 													<Link
 														href={`/players/${player.userId}/characters/${player.characterId}`}
-														className="hover:text-sky-300 transition-colors"
+														className="text-sm font-medium text-slate-200 hover:text-sky-300"
 													>
 														{player.characterName}
 													</Link>
 												) : (
-													player.characterName
+													<span className="text-sm font-medium text-slate-200">
+														{player.characterName}
+													</span>
 												)}
-											</p>
+											</div>
+										)}
+										{player.characterAvatarUrl && (
+											<img
+												src={player.characterAvatarUrl}
+												alt={player.characterName || "Character"}
+												className="h-10 w-10 rounded-full border border-slate-700"
+											/>
+										)}
+										{player.hasActiveSubscription && (
+											<span className="text-xs text-green-400">
+												Subscriber
+											</span>
 										)}
 									</div>
 								</div>
-								<div className="flex items-center gap-3">
-									{player.characterName && (
-										<div className="flex flex-col items-end">
-											{player.characterIsPublic &&
-											player.characterId ? (
-												<Link
-													href={`/players/${player.userId}/characters/${player.characterId}`}
-													className="text-sm font-medium text-slate-200 hover:text-sky-300"
-												>
-													{player.characterName}
-												</Link>
-											) : (
-												<span className="text-sm font-medium text-slate-200">
-													{player.characterName}
-												</span>
-											)}
-										</div>
-									)}
-									{player.characterAvatarUrl && (
-										<img
-											src={player.characterAvatarUrl}
-											alt={player.characterName || "Character"}
-											className="h-10 w-10 rounded-full border border-slate-700"
-										/>
-									)}
-									{player.hasActiveSubscription && (
-										<span className="text-xs text-green-400">
-											Subscriber
-										</span>
-									)}
-									{isCreator && (
+								{isCreator && (
+									<div className="mt-3">
 										<button
 											onClick={() => handleRemovePlayerClick(player)}
 											className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 										>
 											Remove
 										</button>
-									)}
-								</div>
+									</div>
+								)}
 							</div>
 						))}
 					</div>
@@ -1165,80 +1169,84 @@ export default function CampaignDetail({
 						{waitlistPlayersList.map((player) => (
 							<div
 								key={player.userId}
-								className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/50 p-3"
+								className="rounded-lg border border-slate-800 bg-slate-900/50 p-3"
 							>
-								<div className="flex items-center gap-3">
-									{player.avatarUrl && (
-										<img
-											src={player.avatarUrl}
-											alt={player.name}
-											className="h-10 w-10 rounded-full border border-slate-700"
-										/>
-									)}
-									<div>
-										<Link
-											href={`/user/${player.userId}`}
-											className="text-sm font-medium text-slate-200 hover:text-sky-300"
-										>
-											{player.name}
-										</Link>
+								<div className="flex items-center justify-between">
+									<div className="flex items-center gap-3">
+										{player.avatarUrl && (
+											<img
+												src={player.avatarUrl}
+												alt={player.name}
+												className="h-10 w-10 rounded-full border border-slate-700"
+											/>
+										)}
+										<div>
+											<Link
+												href={`/user/${player.userId}`}
+												className="text-sm font-medium text-slate-200 hover:text-sky-300"
+											>
+												{player.name}
+											</Link>
+											{player.characterName && (
+												<p className="text-xs text-slate-400">
+													Playing:{" "}
+													{player.characterIsPublic &&
+													player.characterId ? (
+														<Link
+															href={`/players/${player.userId}/characters/${player.characterId}`}
+															className="hover:text-sky-300 transition-colors"
+														>
+															{player.characterName}
+														</Link>
+													) : (
+														player.characterName
+													)}
+												</p>
+											)}
+										</div>
+									</div>
+									<div className="flex items-center gap-3">
 										{player.characterName && (
-											<p className="text-xs text-slate-400">
-												Playing:{" "}
+											<div className="flex flex-col items-end">
 												{player.characterIsPublic &&
 												player.characterId ? (
 													<Link
 														href={`/players/${player.userId}/characters/${player.characterId}`}
-														className="hover:text-sky-300 transition-colors"
+														className="text-sm font-medium text-slate-200 hover:text-sky-300"
 													>
 														{player.characterName}
 													</Link>
 												) : (
-													player.characterName
+													<span className="text-sm font-medium text-slate-200">
+														{player.characterName}
+													</span>
 												)}
-											</p>
+											</div>
+										)}
+										{player.characterAvatarUrl && (
+											<img
+												src={player.characterAvatarUrl}
+												alt={player.characterName || "Character"}
+												className="h-10 w-10 rounded-full border border-slate-700"
+											/>
+										)}
+										{player.hasActiveSubscription && (
+											<span className="text-xs text-green-400">
+												Subscriber
+											</span>
 										)}
 									</div>
 								</div>
-								<div className="flex items-center gap-3">
-									{player.characterName && (
-										<div className="flex flex-col items-end">
-											{player.characterIsPublic &&
-											player.characterId ? (
-												<Link
-													href={`/players/${player.userId}/characters/${player.characterId}`}
-													className="text-sm font-medium text-slate-200 hover:text-sky-300"
-												>
-													{player.characterName}
-												</Link>
-											) : (
-												<span className="text-sm font-medium text-slate-200">
-													{player.characterName}
-												</span>
-											)}
-										</div>
-									)}
-									{player.characterAvatarUrl && (
-										<img
-											src={player.characterAvatarUrl}
-											alt={player.characterName || "Character"}
-											className="h-10 w-10 rounded-full border border-slate-700"
-										/>
-									)}
-									{player.hasActiveSubscription && (
-										<span className="text-xs text-green-400">
-											Subscriber
-										</span>
-									)}
-									{isCreator && (
+								{isCreator && (
+									<div className="mt-3">
 										<button
 											onClick={() => handleRemovePlayerClick(player)}
 											className="inline-flex items-center rounded-lg border border-rose-500 px-4 py-2 font-medium text-rose-300 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
 										>
 											Remove
 										</button>
-									)}
-								</div>
+									</div>
+								)}
 							</div>
 						))}
 					</div>

@@ -21,6 +21,11 @@ export type ProfileRecord = {
 	phoneNumber?: string; // Phone number for SMS notifications
 	bggUsername?: string; // BoardGameGeek username for profile linking
 	isGM?: boolean; // Whether user is a Game Master / Dungeon Master
+	style?: string; // Long text field describing play style
+	idealTable?: string; // Long text field describing ideal gaming table/environment
+	preferences?: string[]; // Tag-style array of preferences
+	gameStyle?: string[]; // Tag-style array of game style preferences
+	systems?: string[]; // Tag-style array of systems (Foundry, Roll20, Discord, etc.)
 };
 
 const DEFAULT_PROFILE: ProfileRecord = {
@@ -45,6 +50,11 @@ const DEFAULT_PROFILE: ProfileRecord = {
 	avatarUrl: "",
 	canPostPaidGames: false,
 	isGM: false,
+	style: "",
+	idealTable: "",
+	preferences: [],
+	gameStyle: [],
+	systems: [],
 };
 
 export async function readProfile(userId: string): Promise<ProfileRecord> {
@@ -93,6 +103,11 @@ export async function readProfile(userId: string): Promise<ProfileRecord> {
 		phoneNumber: profile.phoneNumber,
 		bggUsername: profile.bggUsername,
 		isGM: profile.isGM ?? false,
+		style: profile.style ?? "",
+		idealTable: profile.idealTable ?? "",
+		preferences: profile.preferences ?? [],
+		gameStyle: profile.gameStyle ?? [],
+		systems: profile.systems ?? [],
 	};
 }
 
