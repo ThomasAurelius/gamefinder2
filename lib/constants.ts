@@ -76,6 +76,15 @@ export const MEETING_FREQUENCY_OPTIONS = [
 	"Variable",
 ];
 
+export const SAFETY_TOOLS_OPTIONS = [
+	"X-Card",
+	"Lines and Veils",
+	"Stars and Wishes",
+	"Script Change",
+	"Open Door Policy",
+	"Other",
+];
+
 /**
  * Map game names to game system keys for character filtering
  */

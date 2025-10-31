@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS, SAFETY_TOOLS_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import VenueSelector from "@/components/VenueSelector";
 import ShareButtons from "@/components/ShareButtons";
@@ -47,6 +47,9 @@ export default function PostCampaignPage() {
 	const [meetingFrequency, setMeetingFrequency] = useState("");
 	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
 	const [isPrivate, setIsPrivate] = useState(false);
+	const [selectedSafetyTools, setSelectedSafetyTools] = useState<string[]>([]);
+	const [customSafetyTools, setCustomSafetyTools] = useState<string[]>([]);
+	const [customSafetyToolInput, setCustomSafetyToolInput] = useState("");
 	
 	// Stripe payment state
 	const [clientSecret, setClientSecret] = useState<string>("");
@@ -175,6 +178,38 @@ export default function PostCampaignPage() {
 		}
 	};
 
+	const toggleSafetyTool = (tool: string) => {
+		setSelectedSafetyTools((prev) => {
+			const newSelection = prev.includes(tool)
+				? prev.filter((item) => item !== tool)
+				: [...prev, tool];
+			
+			// Clear custom safety tools when "Other" is deselected
+			if (tool === "Other" && !newSelection.includes("Other")) {
+				setCustomSafetyTools([]);
+				setCustomSafetyToolInput("");
+			}
+			
+			return newSelection;
+		});
+	};
+
+	const addCustomSafetyTool = () => {
+		const trimmedTool = customSafetyToolInput.trim();
+		if (
+			trimmedTool &&
+			!customSafetyTools.includes(trimmedTool) &&
+			!SAFETY_TOOLS_OPTIONS.includes(trimmedTool)
+		) {
+			setCustomSafetyTools((prev) => [...prev, trimmedTool]);
+			setCustomSafetyToolInput("");
+		}
+	};
+
+	const removeCustomSafetyTool = (tool: string) => {
+		setCustomSafetyTools((prev) => prev.filter((item) => item !== tool));
+	};
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError("");
@@ -186,6 +221,11 @@ export default function PostCampaignPage() {
 				selectedGame === "Other" && customGameName.trim()
 					? customGameName.trim()
 					: selectedGame;
+
+			// Combine preset and custom safety tools, filtering out "Other" since it's just a UI trigger
+			const allSafetyTools = [...selectedSafetyTools, ...customSafetyTools].filter(
+				(tool) => tool !== "Other"
+			);
 
 			const response = await fetch("/api/campaigns", {
 				method: "POST",
@@ -209,6 +249,7 @@ export default function PostCampaignPage() {
 				meetingFrequency: meetingFrequency || undefined,
 				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
 				isPrivate: isPrivate,
+				safetyTools: allSafetyTools.length > 0 ? allSafetyTools : undefined,
 				}),
 			});
 
@@ -241,6 +282,9 @@ export default function PostCampaignPage() {
 			setClientSecret('');
 			setShowPaymentForm(false);
 			setPaymentCompleted(false);
+			setSelectedSafetyTools([]);
+			setCustomSafetyTools([]);
+			setCustomSafetyToolInput("");
 
 			setTimeout(() => setSubmitted(false), 5000);
 		} catch (err) {
@@ -771,6 +815,80 @@ export default function PostCampaignPage() {
 						placeholder="Describe your campaign, experience level requirements, or any additional details..."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
+				</div>
+
+				<div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/20 p-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-slate-200">
+							Safety Tools
+						</h3>
+						<p className="text-sm text-slate-400">
+							Select the safety tools that will be used in this campaign to ensure a comfortable experience for all players.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{SAFETY_TOOLS_OPTIONS.map((tool) => {
+							const active = selectedSafetyTools.includes(tool);
+							return (
+								<button
+									key={tool}
+									type="button"
+									onClick={() => toggleSafetyTool(tool)}
+									className={tagButtonClasses(active)}
+								>
+									{tool}
+								</button>
+							);
+						})}
+					</div>
+
+					{selectedSafetyTools.includes("Other") && (
+						<div className="space-y-3">
+							<div className="flex gap-2">
+								<input
+									type="text"
+									value={customSafetyToolInput}
+									onChange={(e) => setCustomSafetyToolInput(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter") {
+											e.preventDefault();
+											addCustomSafetyTool();
+										}
+									}}
+									placeholder="Enter custom safety tool name"
+									className="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+								/>
+								<button
+									type="button"
+									onClick={addCustomSafetyTool}
+									className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+								>
+									Add
+								</button>
+							</div>
+							{customSafetyTools.length > 0 && (
+								<div className="flex flex-wrap gap-2">
+									{customSafetyTools.map((tool) => (
+										<div
+											key={tool}
+											className="flex items-center gap-1 rounded-full border border-sky-400 bg-sky-500/20 px-3 py-1.5 text-sm text-sky-100"
+										>
+											<span>{tool}</span>
+											<button
+												type="button"
+												onClick={() => removeCustomSafetyTool(tool)}
+												className="ml-1 text-sky-200 hover:text-sky-100"
+												aria-label={`Remove ${tool}`}
+											>
+												×
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 
 				<div className="space-y-2">
