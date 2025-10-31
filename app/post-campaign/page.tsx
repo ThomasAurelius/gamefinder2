@@ -179,11 +179,19 @@ export default function PostCampaignPage() {
 	};
 
 	const toggleSafetyTool = (tool: string) => {
-		setSelectedSafetyTools((prev) =>
-			prev.includes(tool)
+		setSelectedSafetyTools((prev) => {
+			const newSelection = prev.includes(tool)
 				? prev.filter((item) => item !== tool)
-				: [...prev, tool]
-		);
+				: [...prev, tool];
+			
+			// Clear custom safety tools when "Other" is deselected
+			if (tool === "Other" && !newSelection.includes("Other")) {
+				setCustomSafetyTools([]);
+				setCustomSafetyToolInput("");
+			}
+			
+			return newSelection;
+		});
 	};
 
 	const addCustomSafetyTool = () => {
@@ -214,8 +222,10 @@ export default function PostCampaignPage() {
 					? customGameName.trim()
 					: selectedGame;
 
-			// Combine preset and custom safety tools
-			const allSafetyTools = [...selectedSafetyTools, ...customSafetyTools];
+			// Combine preset and custom safety tools, filtering out "Other" since it's just a UI trigger
+			const allSafetyTools = [...selectedSafetyTools, ...customSafetyTools].filter(
+				(tool) => tool !== "Other"
+			);
 
 			const response = await fetch("/api/campaigns", {
 				method: "POST",
