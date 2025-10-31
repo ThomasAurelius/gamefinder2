@@ -97,11 +97,11 @@ export default function EditCampaignPage() {
 				setDaysOfWeek(campaign.daysOfWeek || []);
 				// Separate preset safety tools from custom safety tools
 				const normalizedSafetyTools = campaign.safetyTools ?? [];
-				const presetSafetyTools = normalizedSafetyTools.filter((tool) =>
+				const presetSafetyTools = normalizedSafetyTools.filter((tool: string) =>
 					SAFETY_TOOLS_OPTIONS.includes(tool)
 				);
 				const customSafetyToolsFromCampaign = normalizedSafetyTools.filter(
-					(tool) => !SAFETY_TOOLS_OPTIONS.includes(tool)
+					(tool: string) => !SAFETY_TOOLS_OPTIONS.includes(tool)
 				);
 				setSelectedSafetyTools(presetSafetyTools);
 				setCustomSafetyTools(customSafetyToolsFromCampaign);
