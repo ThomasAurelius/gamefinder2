@@ -80,9 +80,9 @@ export function DashboardSidebar() {
 
 				// Combine and filter for upcoming sessions only
 				const allSessions = [...gameSessions, ...campaignSessions];
-				const today = new Date();
+				const today = new Date().toISOString().split('T')[0]; // Get today in YYYY-MM-DD format
 				const upcoming = allSessions
-					.filter((session) => new Date(session.date) >= today)
+					.filter((session) => session.date >= today)
 					.sort((a, b) => a.date.localeCompare(b.date))
 					.slice(0, 5); // Show only the next 5 sessions
 
