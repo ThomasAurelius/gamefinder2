@@ -46,6 +46,7 @@ type Campaign = {
 	hostName?: string;
 	hostAvatarUrl?: string;
 	vendorId?: string;
+	safetyTools?: string[];
 };
 
 type PendingPlayer = {
@@ -959,6 +960,24 @@ export default function CampaignDetail({
 									className="rounded-full bg-slate-800 px-3 py-1 text-xs text-slate-300"
 								>
 									{day}
+								</span>
+							))}
+						</div>
+					</div>
+				)}
+
+				{campaign.safetyTools && campaign.safetyTools.length > 0 && (
+					<div className="mt-4">
+						<h3 className="text-sm font-medium text-slate-300 mb-2">
+							Safety Tools
+						</h3>
+						<div className="flex flex-wrap gap-2">
+							{campaign.safetyTools.map((tool) => (
+								<span
+									key={tool}
+									className="rounded-full bg-emerald-900/40 border border-emerald-700/50 px-3 py-1 text-xs text-emerald-200"
+								>
+									{tool}
 								</span>
 							))}
 						</div>

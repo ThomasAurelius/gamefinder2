@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS, SAFETY_TOOLS_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import VenueSelector from "@/components/VenueSelector";
 
@@ -48,6 +48,9 @@ export default function EditCampaignPage() {
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
 	const [meetingFrequency, setMeetingFrequency] = useState("");
 	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
+	const [selectedSafetyTools, setSelectedSafetyTools] = useState<string[]>([]);
+	const [customSafetyTools, setCustomSafetyTools] = useState<string[]>([]);
+	const [customSafetyToolInput, setCustomSafetyToolInput] = useState("");
 
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
@@ -92,6 +95,16 @@ export default function EditCampaignPage() {
 				setCostPerSession(campaign.costPerSession || '');
 				setMeetingFrequency(campaign.meetingFrequency || "");
 				setDaysOfWeek(campaign.daysOfWeek || []);
+				// Separate preset safety tools from custom safety tools
+				const normalizedSafetyTools = campaign.safetyTools ?? [];
+				const presetSafetyTools = normalizedSafetyTools.filter((tool) =>
+					SAFETY_TOOLS_OPTIONS.includes(tool)
+				);
+				const customSafetyToolsFromCampaign = normalizedSafetyTools.filter(
+					(tool) => !SAFETY_TOOLS_OPTIONS.includes(tool)
+				);
+				setSelectedSafetyTools(presetSafetyTools);
+				setCustomSafetyTools(customSafetyToolsFromCampaign);
 			} catch (err) {
 				setError(
 					err instanceof Error ? err.message : "Failed to load campaign"
@@ -180,6 +193,30 @@ export default function EditCampaignPage() {
 		}
 	};
 
+	const toggleSafetyTool = (tool: string) => {
+		setSelectedSafetyTools((prev) =>
+			prev.includes(tool)
+				? prev.filter((item) => item !== tool)
+				: [...prev, tool]
+		);
+	};
+
+	const addCustomSafetyTool = () => {
+		const trimmedTool = customSafetyToolInput.trim();
+		if (
+			trimmedTool &&
+			!customSafetyTools.includes(trimmedTool) &&
+			!SAFETY_TOOLS_OPTIONS.includes(trimmedTool)
+		) {
+			setCustomSafetyTools((prev) => [...prev, trimmedTool]);
+			setCustomSafetyToolInput("");
+		}
+	};
+
+	const removeCustomSafetyTool = (tool: string) => {
+		setCustomSafetyTools((prev) => prev.filter((item) => item !== tool));
+	};
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError("");
@@ -191,6 +228,9 @@ export default function EditCampaignPage() {
 				selectedGame === "Other" && customGameName.trim()
 					? customGameName.trim()
 					: selectedGame;
+
+			// Combine preset and custom safety tools
+			const allSafetyTools = [...selectedSafetyTools, ...customSafetyTools];
 
 			const response = await fetch(`/api/campaigns/${campaignId}`, {
 				method: "PUT",
@@ -213,6 +253,7 @@ export default function EditCampaignPage() {
 					requiresPayment: (typeof costPerSession === 'number' && costPerSession > 0) || false,
 					meetingFrequency: meetingFrequency || undefined,
 					daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
+					safetyTools: allSafetyTools.length > 0 ? allSafetyTools : undefined,
 				}),
 			});
 
@@ -670,6 +711,80 @@ export default function EditCampaignPage() {
 						placeholder="Describe your campaign, experience level requirements, or any additional details..."
 						className="w-full resize-y rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm leading-relaxed text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 					/>
+				</div>
+
+				<div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/20 p-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-slate-200">
+							Safety Tools
+						</h3>
+						<p className="text-sm text-slate-400">
+							Select the safety tools that will be used in this campaign to ensure a comfortable experience for all players.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{SAFETY_TOOLS_OPTIONS.map((tool) => {
+							const active = selectedSafetyTools.includes(tool);
+							return (
+								<button
+									key={tool}
+									type="button"
+									onClick={() => toggleSafetyTool(tool)}
+									className={tagButtonClasses(active)}
+								>
+									{tool}
+								</button>
+							);
+						})}
+					</div>
+
+					{selectedSafetyTools.includes("Other") && (
+						<div className="space-y-3">
+							<div className="flex gap-2">
+								<input
+									type="text"
+									value={customSafetyToolInput}
+									onChange={(e) => setCustomSafetyToolInput(e.target.value)}
+									onKeyDown={(e) => {
+										if (e.key === "Enter") {
+											e.preventDefault();
+											addCustomSafetyTool();
+										}
+									}}
+									placeholder="Enter custom safety tool name"
+									className="flex-1 rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+								/>
+								<button
+									type="button"
+									onClick={addCustomSafetyTool}
+									className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
+								>
+									Add
+								</button>
+							</div>
+							{customSafetyTools.length > 0 && (
+								<div className="flex flex-wrap gap-2">
+									{customSafetyTools.map((tool) => (
+										<div
+											key={tool}
+											className="flex items-center gap-1 rounded-full border border-sky-400 bg-sky-500/20 px-3 py-1.5 text-sm text-sky-100"
+										>
+											<span>{tool}</span>
+											<button
+												type="button"
+												onClick={() => removeCustomSafetyTool(tool)}
+												className="ml-1 text-sky-200 hover:text-sky-100"
+												aria-label={`Remove ${tool}`}
+											>
+												×
+											</button>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
+					)}
 				</div>
 
 				<div className="flex gap-3">
