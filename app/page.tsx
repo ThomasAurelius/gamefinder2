@@ -279,6 +279,16 @@ export default function HomePage() {
 									campaigns if they choose.
 								</p>
 							</li>
+							<li className="flex items-start gap-3">
+								<span className="text-amber-400 mt-1 text-xl">✓</span>
+								<p className="text-slate-300">
+									<strong className="text-slate-100">
+										Secure Payment Processing Through Stripe
+									</strong>{" "}
+									Payment processing is securely handled via Stripe, a
+									leader in online payments.
+								</p>
+							</li>
 						</ul>
 
 						<Link
