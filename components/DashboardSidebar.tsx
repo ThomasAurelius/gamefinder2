@@ -15,9 +15,44 @@ export function DashboardSidebar() {
 		[]
 	);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [authLoading, setAuthLoading] = useState(true);
+
+	useEffect(() => {
+		const checkAuth = async () => {
+			try {
+				const response = await fetch("/api/auth/status");
+				if (!response.ok) {
+					console.error("Failed to check auth status: HTTP", response.status);
+					setIsAuthenticated(false);
+					return;
+				}
+				const data = await response.json();
+				setIsAuthenticated(data.isAuthenticated);
+			} catch (error) {
+				console.error("Failed to check auth status:", error instanceof Error ? error.message : error);
+				setIsAuthenticated(false);
+			} finally {
+				setAuthLoading(false);
+			}
+		};
+
+		checkAuth();
+	}, []);
 
 	useEffect(() => {
 		const fetchUpcomingSessions = async () => {
+			// Wait for auth check to complete
+			if (authLoading) {
+				return;
+			}
+
+			// Don't fetch if not authenticated
+			if (!isAuthenticated) {
+				setIsLoading(false);
+				return;
+			}
+
 			try {
 				// Fetch user's game sessions
 				const gamesResponse = await fetch("/api/games/my-games");
@@ -60,7 +95,7 @@ export function DashboardSidebar() {
 		};
 
 		fetchUpcomingSessions();
-	}, []);
+	}, [isAuthenticated, authLoading]);
 
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
@@ -79,6 +114,11 @@ export function DashboardSidebar() {
 			day: "numeric",
 		});
 	};
+
+	// Don't render sidebar if not authenticated (but wait for auth check)
+	if (authLoading || !isAuthenticated) {
+		return null;
+	}
 
 	return (
 		<aside className="hidden m-4 3xl:block w-64 flex-shrink-0">
