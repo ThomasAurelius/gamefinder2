@@ -111,6 +111,7 @@ export async function listCampaigns(filters?: {
     daysOfWeek: campaign.daysOfWeek,
     vendorId: campaign.vendorId,
     isPrivate: campaign.isPrivate,
+    safetyTools: campaign.safetyTools,
   }));
 }
 
@@ -167,6 +168,7 @@ export async function getCampaign(id: string): Promise<StoredCampaign | null> {
     daysOfWeek: campaign.daysOfWeek,
     vendorId: campaign.vendorId,
     isPrivate: campaign.isPrivate,
+    safetyTools: campaign.safetyTools,
   };
 }
 
@@ -206,6 +208,7 @@ export async function createCampaign(
     daysOfWeek: payload.daysOfWeek,
     vendorId: payload.vendorId,
     isPrivate: payload.isPrivate,
+    safetyTools: payload.safetyTools,
   };
 
   const result = await campaignsCollection.insertOne(newCampaign as CampaignDocument);
@@ -238,6 +241,7 @@ export async function createCampaign(
     daysOfWeek: newCampaign.daysOfWeek,
     vendorId: newCampaign.vendorId,
     isPrivate: newCampaign.isPrivate,
+    safetyTools: newCampaign.safetyTools,
   };
 }
 
@@ -318,6 +322,7 @@ export async function updateCampaign(
     daysOfWeek: result.daysOfWeek,
     vendorId: result.vendorId,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
 
@@ -462,6 +467,7 @@ export async function joinCampaign(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
 
@@ -576,6 +582,7 @@ export async function leaveCampaign(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
 
@@ -731,6 +738,7 @@ export async function approvePlayer(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
 
@@ -838,6 +846,7 @@ export async function denyPlayer(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
 
@@ -960,6 +969,7 @@ export async function removePlayer(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
 
@@ -1116,5 +1126,6 @@ export async function updatePlayerCharacter(
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
     isPrivate: result.isPrivate,
+    safetyTools: result.safetyTools,
   };
 }
