@@ -14,7 +14,7 @@ function parseHostFeedbackPayload(data: unknown): HostFeedbackPayload | null {
     typeof obj.hostId !== "string" ||
     typeof obj.sessionId !== "string" ||
     typeof obj.sessionType !== "string" ||
-    typeof obj.recommend !== "string"
+    typeof obj.rating !== "number"
   ) {
     return null;
   }
@@ -27,9 +27,11 @@ function parseHostFeedbackPayload(data: unknown): HostFeedbackPayload | null {
   }
 
   if (
-    obj.recommend !== "yes" &&
-    obj.recommend !== "no" &&
-    obj.recommend !== "skip"
+    obj.rating !== 1 &&
+    obj.rating !== 2 &&
+    obj.rating !== 3 &&
+    obj.rating !== 4 &&
+    obj.rating !== 5
   ) {
     return null;
   }
@@ -38,7 +40,7 @@ function parseHostFeedbackPayload(data: unknown): HostFeedbackPayload | null {
     hostId: obj.hostId,
     sessionId: obj.sessionId,
     sessionType: obj.sessionType as "game" | "campaign",
-    recommend: obj.recommend as "yes" | "no" | "skip",
+    rating: obj.rating as 1 | 2 | 3 | 4 | 5,
     comment: typeof obj.comment === "string" ? obj.comment : undefined,
   };
 }

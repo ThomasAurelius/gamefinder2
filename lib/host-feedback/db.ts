@@ -31,7 +31,7 @@ export async function submitHostFeedback(
       { id: existingFeedback.id },
       {
         $set: {
-          recommend: payload.recommend,
+          rating: payload.rating,
           comment: payload.comment,
           createdAt: timestamp,
         },
@@ -49,7 +49,7 @@ export async function submitHostFeedback(
       hostId: result.hostId,
       sessionId: result.sessionId,
       sessionType: result.sessionType,
-      recommend: result.recommend,
+      rating: result.rating,
       comment: result.comment,
       createdAt: result.createdAt,
     };
@@ -64,7 +64,7 @@ export async function submitHostFeedback(
     hostId: payload.hostId,
     sessionId: payload.sessionId,
     sessionType: payload.sessionType,
-    recommend: payload.recommend,
+    rating: payload.rating,
     comment: payload.comment,
     createdAt: timestamp,
   };
@@ -77,7 +77,7 @@ export async function submitHostFeedback(
     hostId: newFeedback.hostId,
     sessionId: newFeedback.sessionId,
     sessionType: newFeedback.sessionType,
-    recommend: newFeedback.recommend,
+    rating: newFeedback.rating,
     comment: newFeedback.comment,
     createdAt: newFeedback.createdAt,
   };
@@ -92,17 +92,23 @@ export async function getHostFeedbackStats(hostId: string): Promise<HostFeedback
 
   const feedback = await feedbackCollection.find({ hostId }).toArray();
 
-  const yesCount = feedback.filter((f) => f.recommend === "yes").length;
-  const noCount = feedback.filter((f) => f.recommend === "no").length;
-  const skipCount = feedback.filter((f) => f.recommend === "skip").length;
+  const ratings = {
+    1: feedback.filter((f) => f.rating === 1).length,
+    2: feedback.filter((f) => f.rating === 2).length,
+    3: feedback.filter((f) => f.rating === 3).length,
+    4: feedback.filter((f) => f.rating === 4).length,
+    5: feedback.filter((f) => f.rating === 5).length,
+  };
+
+  const totalRatings = feedback.length;
+  const sumOfRatings = feedback.reduce((sum, f) => sum + f.rating, 0);
+  const averageRating = totalRatings > 0 ? sumOfRatings / totalRatings : 0;
 
   return {
     hostId,
-    totalRatings: feedback.length,
-    yesCount,
-    noCount,
-    skipCount,
-    score: yesCount - noCount,
+    totalRatings,
+    averageRating,
+    ratings,
   };
 }
 
@@ -126,7 +132,7 @@ export async function getHostFeedbackWithComments(
     hostId: f.hostId,
     sessionId: f.sessionId,
     sessionType: f.sessionType,
-    recommend: f.recommend,
+    rating: f.rating,
     comment: f.comment,
     createdAt: f.createdAt,
   }));
@@ -174,17 +180,23 @@ export async function getMultipleHostsStats(
   // Group by hostId
   for (const hostId of hostIds) {
     const hostFeedback = feedback.filter((f) => f.hostId === hostId);
-    const yesCount = hostFeedback.filter((f) => f.recommend === "yes").length;
-    const noCount = hostFeedback.filter((f) => f.recommend === "no").length;
-    const skipCount = hostFeedback.filter((f) => f.recommend === "skip").length;
+    const ratings = {
+      1: hostFeedback.filter((f) => f.rating === 1).length,
+      2: hostFeedback.filter((f) => f.rating === 2).length,
+      3: hostFeedback.filter((f) => f.rating === 3).length,
+      4: hostFeedback.filter((f) => f.rating === 4).length,
+      5: hostFeedback.filter((f) => f.rating === 5).length,
+    };
+
+    const totalRatings = hostFeedback.length;
+    const sumOfRatings = hostFeedback.reduce((sum, f) => sum + f.rating, 0);
+    const averageRating = totalRatings > 0 ? sumOfRatings / totalRatings : 0;
 
     result.set(hostId, {
       hostId,
-      totalRatings: hostFeedback.length,
-      yesCount,
-      noCount,
-      skipCount,
-      score: yesCount - noCount,
+      totalRatings,
+      averageRating,
+      ratings,
     });
   }
 

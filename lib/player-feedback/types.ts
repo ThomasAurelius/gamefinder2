@@ -2,7 +2,7 @@ export type PlayerFeedbackPayload = {
   playerId: string; // User ID of the player being rated
   sessionId: string; // Game or campaign session ID
   sessionType: "game" | "campaign"; // Type of session
-  recommend: "yes" | "no" | "skip"; // Rating choice
+  rating: 1 | 2 | 3 | 4 | 5; // 1-5 star rating (5 = perfectly amazing, 1 = horrible bad)
   comment?: string; // Optional comment (visible only to player and admin)
 };
 
@@ -15,8 +15,12 @@ export type StoredPlayerFeedback = PlayerFeedbackPayload & {
 export type PlayerFeedbackStats = {
   playerId: string;
   totalRatings: number;
-  yesCount: number;
-  noCount: number;
-  skipCount: number;
-  score: number; // yesCount - noCount
+  averageRating: number; // Average of all ratings (1-5 scale)
+  ratings: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
 };
