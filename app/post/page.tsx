@@ -461,7 +461,7 @@ export default function PostGamePage() {
 							Enable paid games to charge players for sessions. The platform will keep 15% of fees.
 						</p>
 						<Link
-							href="/terms-paid-games"
+							href="/terms-paid-games?from=post"
 							className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
 						>
 							Enable Paid Games

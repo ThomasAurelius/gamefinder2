@@ -76,6 +76,8 @@ function PaidGamesTermsContent() {
         const [isSubmitting, setIsSubmitting] = useState(false);
         const [error, setError] = useState("");
         const fromSettings = searchParams.get("from") === "settings";
+        const fromPostCampaign = searchParams.get("from") === "post-campaign";
+        const fromPost = searchParams.get("from") === "post";
 
         const handleAccept = async () => {
                 if (!accepted) {
@@ -99,7 +101,14 @@ function PaidGamesTermsContent() {
                                 throw new Error(errorData.error || "Failed to enable paid games");
                         }
 
-                        router.push(fromSettings ? "/settings" : "/profile");
+                        // Redirect based on where the user came from
+                        if (fromPostCampaign || fromPost) {
+                                router.push("/host/dashboard");
+                        } else if (fromSettings) {
+                                router.push("/settings");
+                        } else {
+                                router.push("/profile");
+                        }
                 } catch (err) {
                         setError(
                                 err instanceof Error ? err.message : "Failed to enable paid games"
@@ -216,7 +225,7 @@ function PaidGamesTermsContent() {
                                                                 {isSubmitting ? "Processing..." : "Accept and Enable Paid Games"}
                                                         </button>
                                                         <Link
-                                                                href={fromSettings ? "/settings" : "/profile"}
+                                                                href={fromPostCampaign ? "/post-campaign" : fromPost ? "/post" : fromSettings ? "/settings" : "/profile"}
                                                                 className="rounded-lg border border-white/10 px-4 py-3 text-center text-sm font-medium text-slate-200 transition hover:border-white/30"
                                                         >
                                                                 Cancel
