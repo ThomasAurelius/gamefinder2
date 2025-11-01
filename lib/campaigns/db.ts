@@ -466,6 +466,7 @@ export async function joinCampaign(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
     isPrivate: result.isPrivate,
     safetyTools: result.safetyTools,
   };
@@ -581,6 +582,7 @@ export async function leaveCampaign(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
     isPrivate: result.isPrivate,
     safetyTools: result.safetyTools,
   };
@@ -737,6 +739,7 @@ export async function approvePlayer(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
     isPrivate: result.isPrivate,
     safetyTools: result.safetyTools,
   };
@@ -845,6 +848,7 @@ export async function denyPlayer(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
     isPrivate: result.isPrivate,
     safetyTools: result.safetyTools,
   };
@@ -968,6 +972,7 @@ export async function removePlayer(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
     isPrivate: result.isPrivate,
     safetyTools: result.safetyTools,
   };
@@ -1125,6 +1130,7 @@ export async function updatePlayerCharacter(
     costPerSession: result.costPerSession,
     meetingFrequency: result.meetingFrequency,
     daysOfWeek: result.daysOfWeek,
+    vendorId: result.vendorId,
     isPrivate: result.isPrivate,
     safetyTools: result.safetyTools,
   };
