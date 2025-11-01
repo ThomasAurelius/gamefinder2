@@ -24,7 +24,7 @@ export async function GET(
 
     // Include comments only if requester is the player or an admin
     if (userId && (userId === playerId || isAdmin)) {
-      const feedbackWithComments = await getPlayerFeedbackWithComments(playerId);
+      const feedbackWithComments = await getPlayerFeedbackWithComments(playerId, isAdmin);
       return NextResponse.json({
         ...stats,
         feedback: feedbackWithComments,

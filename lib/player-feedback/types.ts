@@ -10,6 +10,13 @@ export type StoredPlayerFeedback = PlayerFeedbackPayload & {
   id: string;
   hostId: string; // User ID of the host who gave the feedback
   createdAt: string;
+  isFlagged?: boolean; // Whether feedback has been flagged for review
+  flagReason?: string; // Reason for flagging
+  flaggedBy?: string; // User ID who flagged the feedback
+  flaggedAt?: string; // When it was flagged
+  adminResolvedBy?: string; // Admin who resolved the flag
+  adminResolvedAt?: string; // When admin resolved the flag
+  adminAction?: "accepted" | "deleted"; // What action admin took
 };
 
 export type PlayerFeedbackStats = {
