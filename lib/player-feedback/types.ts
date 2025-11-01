@@ -2,7 +2,7 @@ export type PlayerFeedbackPayload = {
   playerId: string; // User ID of the player being rated
   sessionId: string; // Game or campaign session ID
   sessionType: "game" | "campaign"; // Type of session
-  rating: 1 | 2 | 3 | 4 | 5; // 1-5 star rating (5 = perfectly amazing, 1 = horrible bad)
+  rating: 1 | 2 | 3 | 4 | 5; // 1-5 star rating (5 = perfectly amazing, 1 = horribly bad)
   comment?: string; // Optional comment (visible only to player and admin)
 };
 
