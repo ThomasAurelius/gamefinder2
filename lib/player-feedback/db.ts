@@ -115,15 +115,27 @@ export async function getPlayerFeedbackStats(playerId: string): Promise<PlayerFe
 
 /**
  * Get all feedback for a player (admin and player only)
+ * Optionally filter out flagged feedback if not admin
  */
 export async function getPlayerFeedbackWithComments(
-  playerId: string
+  playerId: string,
+  includeAllFlagged = false
 ): Promise<StoredPlayerFeedback[]> {
   const db = await getDb();
   const feedbackCollection = db.collection<PlayerFeedbackDocument>("playerFeedback");
 
+  const query: Record<string, unknown> = { playerId };
+  
+  // If not admin, exclude flagged feedback
+  if (!includeAllFlagged) {
+    query.$or = [
+      { isFlagged: { $exists: false } },
+      { isFlagged: false }
+    ];
+  }
+
   const feedback = await feedbackCollection
-    .find({ playerId })
+    .find(query)
     .sort({ createdAt: -1 })
     .toArray();
 
@@ -136,6 +148,13 @@ export async function getPlayerFeedbackWithComments(
     rating: f.rating,
     comment: f.comment,
     createdAt: f.createdAt,
+    isFlagged: f.isFlagged,
+    flagReason: f.flagReason,
+    flaggedBy: f.flaggedBy,
+    flaggedAt: f.flaggedAt,
+    adminResolvedBy: f.adminResolvedBy,
+    adminResolvedAt: f.adminResolvedAt,
+    adminAction: f.adminAction,
   }));
 }
 
@@ -204,4 +223,141 @@ export async function getMultiplePlayersStats(
   }
 
   return result;
+}
+
+/**
+ * Flag feedback for admin review
+ */
+export async function flagFeedback(
+  feedbackId: string,
+  flaggedBy: string,
+  flagReason: string
+): Promise<StoredPlayerFeedback> {
+  const db = await getDb();
+  const feedbackCollection = db.collection<PlayerFeedbackDocument>("playerFeedback");
+
+  const timestamp = new Date().toISOString();
+  const result = await feedbackCollection.findOneAndUpdate(
+    { id: feedbackId },
+    {
+      $set: {
+        isFlagged: true,
+        flagReason,
+        flaggedBy,
+        flaggedAt: timestamp,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  if (!result) {
+    throw new Error("Feedback not found");
+  }
+
+  return {
+    id: result.id,
+    hostId: result.hostId,
+    playerId: result.playerId,
+    sessionId: result.sessionId,
+    sessionType: result.sessionType,
+    rating: result.rating,
+    comment: result.comment,
+    createdAt: result.createdAt,
+    isFlagged: result.isFlagged,
+    flagReason: result.flagReason,
+    flaggedBy: result.flaggedBy,
+    flaggedAt: result.flaggedAt,
+  };
+}
+
+/**
+ * Resolve flagged feedback (admin action)
+ */
+export async function resolveFlaggedFeedback(
+  feedbackId: string,
+  adminId: string,
+  action: "accepted" | "deleted"
+): Promise<StoredPlayerFeedback | null> {
+  const db = await getDb();
+  const feedbackCollection = db.collection<PlayerFeedbackDocument>("playerFeedback");
+
+  const timestamp = new Date().toISOString();
+
+  if (action === "deleted") {
+    // Delete the feedback
+    const result = await feedbackCollection.findOneAndDelete({ id: feedbackId });
+    return result
+      ? {
+          id: result.id,
+          hostId: result.hostId,
+          playerId: result.playerId,
+          sessionId: result.sessionId,
+          sessionType: result.sessionType,
+          rating: result.rating,
+          comment: result.comment,
+          createdAt: result.createdAt,
+        }
+      : null;
+  }
+
+  // Accept the feedback (unflag it)
+  const result = await feedbackCollection.findOneAndUpdate(
+    { id: feedbackId },
+    {
+      $set: {
+        isFlagged: false,
+        adminResolvedBy: adminId,
+        adminResolvedAt: timestamp,
+        adminAction: action,
+      },
+    },
+    { returnDocument: "after" }
+  );
+
+  if (!result) {
+    throw new Error("Feedback not found");
+  }
+
+  return {
+    id: result.id,
+    hostId: result.hostId,
+    playerId: result.playerId,
+    sessionId: result.sessionId,
+    sessionType: result.sessionType,
+    rating: result.rating,
+    comment: result.comment,
+    createdAt: result.createdAt,
+    isFlagged: result.isFlagged,
+    adminResolvedBy: result.adminResolvedBy,
+    adminResolvedAt: result.adminResolvedAt,
+    adminAction: result.adminAction,
+  };
+}
+
+/**
+ * Get all flagged feedback (admin only)
+ */
+export async function getFlaggedFeedback(): Promise<StoredPlayerFeedback[]> {
+  const db = await getDb();
+  const feedbackCollection = db.collection<PlayerFeedbackDocument>("playerFeedback");
+
+  const feedback = await feedbackCollection
+    .find({ isFlagged: true })
+    .sort({ flaggedAt: -1 })
+    .toArray();
+
+  return feedback.map((f) => ({
+    id: f.id,
+    hostId: f.hostId,
+    playerId: f.playerId,
+    sessionId: f.sessionId,
+    sessionType: f.sessionType,
+    rating: f.rating,
+    comment: f.comment,
+    createdAt: f.createdAt,
+    isFlagged: f.isFlagged,
+    flagReason: f.flagReason,
+    flaggedBy: f.flaggedBy,
+    flaggedAt: f.flaggedAt,
+  }));
 }

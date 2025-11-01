@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 type StoredPlayerFeedback = {
 	id: string;
@@ -11,6 +12,7 @@ type StoredPlayerFeedback = {
 	rating: 1 | 2 | 3 | 4 | 5;
 	comment?: string;
 	createdAt: string;
+	isFlagged?: boolean;
 };
 
 type PlayerFeedbackStats = {
@@ -91,7 +93,17 @@ export default function PlayerFeedbackSection({
 
 	return (
 		<div className="rounded-xl border border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6">
-			<h2 className="text-xl font-semibold text-slate-100">Player Rating</h2>
+			<div className="flex items-center justify-between mb-4">
+				<h2 className="text-xl font-semibold text-slate-100">Player Rating</h2>
+				{feedbackWithComments.length > 0 && (
+					<Link
+						href={`/feedback/${playerId}`}
+						className="text-sm text-sky-400 hover:text-sky-300 transition-colors"
+					>
+						View All Feedback →
+					</Link>
+				)}
+			</div>
 
 			<div className="mt-4 flex items-center gap-4">
 				<div className="flex items-center gap-2">
@@ -121,16 +133,20 @@ export default function PlayerFeedbackSection({
 						onClick={() => setShowComments(!showComments)}
 						className="text-sm text-sky-400 hover:text-sky-300 transition-colors"
 					>
-						{showComments ? "Hide" : "View"} feedback comments (
+						{showComments ? "Hide" : "Show preview of"} feedback comments (
 						{feedbackWithComments.length})
 					</button>
 
 					{showComments && (
 						<div className="mt-4 space-y-3">
-							{feedbackWithComments.map((feedback) => (
+							{feedbackWithComments.slice(0, 3).map((feedback) => (
 								<div
 									key={feedback.id}
-									className="rounded-lg border border-slate-700 bg-slate-800/50 p-4"
+									className={`rounded-lg border p-4 ${
+										feedback.isFlagged
+											? "border-orange-500/30 bg-orange-500/10"
+											: "border-slate-700 bg-slate-800/50"
+									}`}
 								>
 									<div className="flex items-center justify-between mb-2">
 										<div className="flex items-center gap-2">
@@ -143,12 +159,25 @@ export default function PlayerFeedbackSection({
 												).toLocaleDateString()}
 											</span>
 										</div>
+										{feedback.isFlagged && (
+											<span className="text-xs text-orange-400">
+												⏳ Under Review
+											</span>
+										)}
 									</div>
 									<p className="text-sm text-slate-300">
 										{feedback.comment}
 									</p>
 								</div>
 							))}
+							{feedbackWithComments.length > 3 && (
+								<Link
+									href={`/feedback/${playerId}`}
+									className="block text-center text-sm text-sky-400 hover:text-sky-300 transition-colors mt-2"
+								>
+									View all {feedbackWithComments.length} comments →
+								</Link>
+							)}
 						</div>
 					)}
 				</div>
