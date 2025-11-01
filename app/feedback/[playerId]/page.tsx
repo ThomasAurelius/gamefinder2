@@ -41,6 +41,7 @@ export default function PlayerFeedbackPage({
   const [flaggingId, setFlaggingId] = useState<string | null>(null);
   const [flagReason, setFlagReason] = useState("");
   const [showFlagDialog, setShowFlagDialog] = useState<string | null>(null);
+  const [flagError, setFlagError] = useState("");
 
   const fetchFeedback = useCallback(async () => {
     try {
@@ -64,11 +65,12 @@ export default function PlayerFeedbackPage({
 
   const handleFlag = async (feedbackId: string) => {
     if (!flagReason.trim()) {
-      alert("Please provide a reason for flagging this feedback");
+      setFlagError("Please provide a reason for flagging this feedback");
       return;
     }
 
     setFlaggingId(feedbackId);
+    setFlagError("");
     try {
       const response = await fetch("/api/player-feedback/flag", {
         method: "POST",
@@ -88,7 +90,7 @@ export default function PlayerFeedbackPage({
       setFlagReason("");
     } catch (err) {
       console.error("Failed to flag feedback:", err);
-      alert("Failed to flag feedback");
+      setFlagError("Failed to flag feedback. Please try again.");
     } finally {
       setFlaggingId(null);
     }
@@ -220,11 +222,17 @@ export default function PlayerFeedbackPage({
                   </label>
                   <textarea
                     value={flagReason}
-                    onChange={(e) => setFlagReason(e.target.value)}
+                    onChange={(e) => {
+                      setFlagReason(e.target.value);
+                      setFlagError("");
+                    }}
                     placeholder="Please explain why this feedback is inappropriate..."
                     rows={3}
                     className="w-full rounded-lg border border-red-500/30 bg-slate-800/40 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                   />
+                  {flagError && (
+                    <p className="mt-2 text-sm text-red-400">{flagError}</p>
+                  )}
                   <div className="mt-3 flex gap-2">
                     <button
                       onClick={() => handleFlag(feedback.id)}
@@ -237,6 +245,7 @@ export default function PlayerFeedbackPage({
                       onClick={() => {
                         setShowFlagDialog(null);
                         setFlagReason("");
+                        setFlagError("");
                       }}
                       disabled={flaggingId === feedback.id}
                       className="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-50"

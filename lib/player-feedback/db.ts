@@ -128,10 +128,7 @@ export async function getPlayerFeedbackWithComments(
   
   // If not admin, exclude flagged feedback
   if (!includeAllFlagged) {
-    query.$or = [
-      { isFlagged: { $exists: false } },
-      { isFlagged: false }
-    ];
+    query.isFlagged = { $ne: true };
   }
 
   const feedback = await feedbackCollection
@@ -272,6 +269,7 @@ export async function flagFeedback(
 
 /**
  * Resolve flagged feedback (admin action)
+ * Returns the feedback that was acted upon (null if deleted and not found)
  */
 export async function resolveFlaggedFeedback(
   feedbackId: string,
@@ -284,7 +282,7 @@ export async function resolveFlaggedFeedback(
   const timestamp = new Date().toISOString();
 
   if (action === "deleted") {
-    // Delete the feedback
+    // Delete the feedback, returning all fields including flagging metadata
     const result = await feedbackCollection.findOneAndDelete({ id: feedbackId });
     return result
       ? {
@@ -296,6 +294,10 @@ export async function resolveFlaggedFeedback(
           rating: result.rating,
           comment: result.comment,
           createdAt: result.createdAt,
+          isFlagged: result.isFlagged,
+          flagReason: result.flagReason,
+          flaggedBy: result.flaggedBy,
+          flaggedAt: result.flaggedAt,
         }
       : null;
   }
