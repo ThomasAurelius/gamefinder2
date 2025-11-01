@@ -21,14 +21,14 @@ export default function HostFeedbackDialog({
   onClose,
   onSubmit,
 }: HostFeedbackDialogProps) {
-  const [recommend, setRecommend] = useState<"yes" | "no" | "skip" | null>(null);
+  const [rating, setRating] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    if (!recommend) {
-      setError("Please select an option");
+    if (!rating) {
+      setError("Please select a rating");
       return;
     }
 
@@ -43,7 +43,7 @@ export default function HostFeedbackDialog({
           hostId,
           sessionId,
           sessionType,
-          recommend,
+          rating,
           comment: comment.trim() || undefined,
         }),
       });
@@ -65,6 +65,14 @@ export default function HostFeedbackDialog({
 
   if (!isOpen) return null;
 
+  const ratingOptions = [
+    { value: 5, label: "5 Stars", description: "Perfectly amazing!", emoji: "⭐⭐⭐⭐⭐" },
+    { value: 4, label: "4 Stars", description: "Great host", emoji: "⭐⭐⭐⭐" },
+    { value: 3, label: "3 Stars", description: "Good host", emoji: "⭐⭐⭐" },
+    { value: 2, label: "2 Stars", description: "Could improve", emoji: "⭐⭐" },
+    { value: 1, label: "1 Star", description: "Horribly bad", emoji: "⭐" },
+  ] as const;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
@@ -72,60 +80,29 @@ export default function HostFeedbackDialog({
           Rate Your Host
         </h2>
         <p className="mt-2 text-sm text-slate-400">
-          Would you recommend <span className="font-medium text-slate-200">{hostName}</span> to other players?
+          How would you rate <span className="font-medium text-slate-200">{hostName}</span>?
         </p>
 
-        <div className="mt-6 space-y-3">
-          <button
-            onClick={() => setRecommend("yes")}
-            className={`w-full rounded-lg border px-4 py-3 text-left transition ${
-              recommend === "yes"
-                ? "border-green-500 bg-green-500/20 text-green-100"
-                : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">👍</span>
-              <div>
-                <div className="font-medium">Yes</div>
-                <div className="text-xs text-slate-400">I&apos;d recommend this host</div>
+        <div className="mt-6 space-y-2">
+          {ratingOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setRating(option.value)}
+              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+                rating === option.value
+                  ? "border-sky-500 bg-sky-500/20 text-sky-100"
+                  : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{option.emoji}</span>
+                <div>
+                  <div className="font-medium">{option.label}</div>
+                  <div className="text-xs text-slate-400">{option.description}</div>
+                </div>
               </div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setRecommend("no")}
-            className={`w-full rounded-lg border px-4 py-3 text-left transition ${
-              recommend === "no"
-                ? "border-red-500 bg-red-500/20 text-red-100"
-                : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">👎</span>
-              <div>
-                <div className="font-medium">No</div>
-                <div className="text-xs text-slate-400">I wouldn&apos;t recommend this host</div>
-              </div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setRecommend("skip")}
-            className={`w-full rounded-lg border px-4 py-3 text-left transition ${
-              recommend === "skip"
-                ? "border-slate-500 bg-slate-500/20 text-slate-100"
-                : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">⏭️</span>
-              <div>
-                <div className="font-medium">Skip</div>
-                <div className="text-xs text-slate-400">I prefer not to answer</div>
-              </div>
-            </div>
-          </button>
+            </button>
+          ))}
         </div>
 
         <div className="mt-6">
@@ -160,7 +137,7 @@ export default function HostFeedbackDialog({
           </button>
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !recommend}
+            disabled={isSubmitting || !rating}
             className="flex-1 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Submitting..." : "Submit Feedback"}

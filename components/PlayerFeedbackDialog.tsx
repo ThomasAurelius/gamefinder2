@@ -21,13 +21,13 @@ export default function PlayerFeedbackDialog({
   onClose,
   onSubmit,
 }: PlayerFeedbackDialogProps) {
-  const [recommend, setRecommend] = useState<"yes" | "no" | "skip" | null>(null);
+  const [rating, setRating] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    if (!recommend) {
+    if (!rating) {
       setError("Please select a rating");
       return;
     }
@@ -45,7 +45,7 @@ export default function PlayerFeedbackDialog({
           playerId,
           sessionId,
           sessionType,
-          recommend,
+          rating,
           comment: comment.trim() || undefined,
         }),
       });
@@ -66,6 +66,14 @@ export default function PlayerFeedbackDialog({
 
   if (!isOpen) return null;
 
+  const ratingOptions = [
+    { value: 5, label: "5 Stars", description: "Perfectly amazing!", emoji: "⭐⭐⭐⭐⭐" },
+    { value: 4, label: "4 Stars", description: "Great player", emoji: "⭐⭐⭐⭐" },
+    { value: 3, label: "3 Stars", description: "Good player", emoji: "⭐⭐⭐" },
+    { value: 2, label: "2 Stars", description: "Could improve", emoji: "⭐⭐" },
+    { value: 1, label: "1 Star", description: "Horribly bad", emoji: "⭐" },
+  ] as const;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-900 p-6 shadow-xl">
@@ -73,43 +81,31 @@ export default function PlayerFeedbackDialog({
           Rate Player: {playerName}
         </h2>
         <p className="mt-2 text-sm text-slate-400">
-          Would you recommend this player to other hosts?
+          How would you rate this player?
         </p>
 
-        <div className="mt-4 flex gap-3">
-          <button
-            onClick={() => setRecommend("yes")}
-            className={`flex-1 rounded-lg border px-4 py-3 text-center transition ${
-              recommend === "yes"
-                ? "border-green-500 bg-green-500/20 text-green-300"
-                : "border-slate-700 bg-slate-800/40 text-slate-300 hover:border-green-500/50"
-            }`}
-          >
-            <div className="text-2xl">👍</div>
-            <div className="mt-1 text-xs">Yes</div>
-          </button>
-          <button
-            onClick={() => setRecommend("no")}
-            className={`flex-1 rounded-lg border px-4 py-3 text-center transition ${
-              recommend === "no"
-                ? "border-red-500 bg-red-500/20 text-red-300"
-                : "border-slate-700 bg-slate-800/40 text-slate-300 hover:border-red-500/50"
-            }`}
-          >
-            <div className="text-2xl">👎</div>
-            <div className="mt-1 text-xs">No</div>
-          </button>
-          <button
-            onClick={() => setRecommend("skip")}
-            className={`flex-1 rounded-lg border px-4 py-3 text-center transition ${
-              recommend === "skip"
-                ? "border-slate-500 bg-slate-500/20 text-slate-300"
-                : "border-slate-700 bg-slate-800/40 text-slate-300 hover:border-slate-500/50"
-            }`}
-          >
-            <div className="text-2xl">⏭️</div>
-            <div className="mt-1 text-xs">Skip</div>
-          </button>
+        <div className="mt-4 space-y-2">
+          {ratingOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => setRating(option.value)}
+              className={`w-full rounded-lg border px-4 py-3 text-left transition ${
+                rating === option.value
+                  ? "border-sky-500 bg-sky-500/20 text-sky-100"
+                  : "border-slate-700 bg-slate-800/40 text-slate-300 hover:border-slate-600"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{option.emoji}</span>
+                  <div>
+                    <div className="font-medium">{option.label}</div>
+                    <div className="text-xs text-slate-400">{option.description}</div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
         </div>
 
         <div className="mt-4">
@@ -135,7 +131,7 @@ export default function PlayerFeedbackDialog({
         <div className="mt-6 flex gap-3">
           <button
             onClick={handleSubmit}
-            disabled={isSubmitting || !recommend}
+            disabled={isSubmitting || !rating}
             className="flex-1 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Submitting..." : "Submit"}

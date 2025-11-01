@@ -32,7 +32,7 @@ export async function submitPlayerFeedback(
       { id: existingFeedback.id },
       {
         $set: {
-          recommend: payload.recommend,
+          rating: payload.rating,
           comment: payload.comment,
           createdAt: timestamp,
         },
@@ -50,7 +50,7 @@ export async function submitPlayerFeedback(
       playerId: result.playerId,
       sessionId: result.sessionId,
       sessionType: result.sessionType,
-      recommend: result.recommend,
+      rating: result.rating,
       comment: result.comment,
       createdAt: result.createdAt,
     };
@@ -65,7 +65,7 @@ export async function submitPlayerFeedback(
     playerId: payload.playerId,
     sessionId: payload.sessionId,
     sessionType: payload.sessionType,
-    recommend: payload.recommend,
+    rating: payload.rating,
     comment: payload.comment,
     createdAt: timestamp,
   };
@@ -78,7 +78,7 @@ export async function submitPlayerFeedback(
     playerId: newFeedback.playerId,
     sessionId: newFeedback.sessionId,
     sessionType: newFeedback.sessionType,
-    recommend: newFeedback.recommend,
+    rating: newFeedback.rating,
     comment: newFeedback.comment,
     createdAt: newFeedback.createdAt,
   };
@@ -93,17 +93,23 @@ export async function getPlayerFeedbackStats(playerId: string): Promise<PlayerFe
 
   const feedback = await feedbackCollection.find({ playerId }).toArray();
 
-  const yesCount = feedback.filter((f) => f.recommend === "yes").length;
-  const noCount = feedback.filter((f) => f.recommend === "no").length;
-  const skipCount = feedback.filter((f) => f.recommend === "skip").length;
+  const ratings = {
+    1: feedback.filter((f) => f.rating === 1).length,
+    2: feedback.filter((f) => f.rating === 2).length,
+    3: feedback.filter((f) => f.rating === 3).length,
+    4: feedback.filter((f) => f.rating === 4).length,
+    5: feedback.filter((f) => f.rating === 5).length,
+  };
+
+  const totalRatings = feedback.length;
+  const sumOfRatings = feedback.reduce((sum, f) => sum + f.rating, 0);
+  const averageRating = totalRatings > 0 ? sumOfRatings / totalRatings : 0;
 
   return {
     playerId,
-    totalRatings: feedback.length,
-    yesCount,
-    noCount,
-    skipCount,
-    score: yesCount - noCount,
+    totalRatings,
+    averageRating,
+    ratings,
   };
 }
 
@@ -127,7 +133,7 @@ export async function getPlayerFeedbackWithComments(
     playerId: f.playerId,
     sessionId: f.sessionId,
     sessionType: f.sessionType,
-    recommend: f.recommend,
+    rating: f.rating,
     comment: f.comment,
     createdAt: f.createdAt,
   }));
@@ -177,17 +183,23 @@ export async function getMultiplePlayersStats(
   // Group by playerId
   for (const playerId of playerIds) {
     const playerFeedback = feedback.filter((f) => f.playerId === playerId);
-    const yesCount = playerFeedback.filter((f) => f.recommend === "yes").length;
-    const noCount = playerFeedback.filter((f) => f.recommend === "no").length;
-    const skipCount = playerFeedback.filter((f) => f.recommend === "skip").length;
+    const ratings = {
+      1: playerFeedback.filter((f) => f.rating === 1).length,
+      2: playerFeedback.filter((f) => f.rating === 2).length,
+      3: playerFeedback.filter((f) => f.rating === 3).length,
+      4: playerFeedback.filter((f) => f.rating === 4).length,
+      5: playerFeedback.filter((f) => f.rating === 5).length,
+    };
+
+    const totalRatings = playerFeedback.length;
+    const sumOfRatings = playerFeedback.reduce((sum, f) => sum + f.rating, 0);
+    const averageRating = totalRatings > 0 ? sumOfRatings / totalRatings : 0;
 
     result.set(playerId, {
       playerId,
-      totalRatings: playerFeedback.length,
-      yesCount,
-      noCount,
-      skipCount,
-      score: yesCount - noCount,
+      totalRatings,
+      averageRating,
+      ratings,
     });
   }
 

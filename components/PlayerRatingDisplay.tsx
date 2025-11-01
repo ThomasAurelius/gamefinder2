@@ -10,10 +10,14 @@ type PlayerRatingDisplayProps = {
 type PlayerFeedbackStats = {
   playerId: string;
   totalRatings: number;
-  yesCount: number;
-  noCount: number;
-  skipCount: number;
-  score: number;
+  averageRating: number;
+  ratings: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
 };
 
 export default function PlayerRatingDisplay({ playerId, showDetails = false }: PlayerRatingDisplayProps) {
@@ -56,19 +60,34 @@ export default function PlayerRatingDisplay({ playerId, showDetails = false }: P
     );
   }
 
+  const displayStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <>
+        {"⭐".repeat(fullStars)}
+        {hasHalfStar && "½"}
+        {"☆".repeat(emptyStars)}
+      </>
+    );
+  };
+
   return (
     <div className="flex items-center gap-2">
       <div className="flex items-center gap-1.5">
         <span className="text-xl">🎮</span>
-        <span className={`text-lg font-semibold ${
-          stats.score > 0 ? "text-green-400" : stats.score < 0 ? "text-red-400" : "text-slate-300"
-        }`}>
-          {stats.score > 0 ? "+" : ""}{stats.score}
+        <span className="text-lg font-semibold text-amber-400">
+          {stats.averageRating.toFixed(1)}
+        </span>
+        <span className="text-sm text-amber-400/80">
+          {displayStars(stats.averageRating)}
         </span>
       </div>
       {showDetails && (
         <div className="text-xs text-slate-400">
-          ({stats.yesCount} 👍 / {stats.noCount} 👎 / {stats.skipCount} ⏭️)
+          ({stats.totalRatings} rating{stats.totalRatings !== 1 ? "s" : ""})
         </div>
       )}
     </div>
