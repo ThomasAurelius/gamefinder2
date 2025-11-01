@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { use } from "react";
-import Link from "next/link";
 
 type StoredPlayerFeedback = {
   id: string;
@@ -43,11 +42,7 @@ export default function PlayerFeedbackPage({
   const [flagReason, setFlagReason] = useState("");
   const [showFlagDialog, setShowFlagDialog] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchFeedback();
-  }, [playerId]);
-
-  const fetchFeedback = async () => {
+  const fetchFeedback = useCallback(async () => {
     try {
       const response = await fetch(`/api/player-feedback/stats/${playerId}`);
       if (!response.ok) {
@@ -61,7 +56,11 @@ export default function PlayerFeedbackPage({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [playerId]);
+
+  useEffect(() => {
+    fetchFeedback();
+  }, [fetchFeedback]);
 
   const handleFlag = async (feedbackId: string) => {
     if (!flagReason.trim()) {
