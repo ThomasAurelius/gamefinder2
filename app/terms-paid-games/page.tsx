@@ -79,6 +79,14 @@ function PaidGamesTermsContent() {
         const fromPostCampaign = searchParams.get("from") === "post-campaign";
         const fromPost = searchParams.get("from") === "post";
 
+        // Determine the cancel URL based on where the user came from
+        const getCancelUrl = () => {
+                if (fromPostCampaign) return "/post-campaign";
+                if (fromPost) return "/post";
+                if (fromSettings) return "/settings";
+                return "/profile";
+        };
+
         const handleAccept = async () => {
                 if (!accepted) {
                         setError("You must accept the terms and conditions to continue");
@@ -225,7 +233,7 @@ function PaidGamesTermsContent() {
                                                                 {isSubmitting ? "Processing..." : "Accept and Enable Paid Games"}
                                                         </button>
                                                         <Link
-                                                                href={fromPostCampaign ? "/post-campaign" : fromPost ? "/post" : fromSettings ? "/settings" : "/profile"}
+                                                                href={getCancelUrl()}
                                                                 className="rounded-lg border border-white/10 px-4 py-3 text-center text-sm font-medium text-slate-200 transition hover:border-white/30"
                                                         >
                                                                 Cancel
