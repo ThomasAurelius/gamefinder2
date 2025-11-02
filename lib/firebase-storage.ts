@@ -43,20 +43,57 @@ function ensureFirebaseInitialized(): void {
     // Handle different private key formats
     let privateKey = process.env.FIREBASE_PRIVATE_KEY!;
     
-    // Remove any quotes that might wrap the key
-    privateKey = privateKey.replace(/^["']|["']$/g, '');
+    // Step 1: Trim leading/trailing whitespace
+    privateKey = privateKey.trim();
     
-    // Normalize private key to have actual newline characters
+    // Step 2: Remove wrapping quotes (single or double) - must be both at start and end
+    if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || 
+        (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
+      privateKey = privateKey.slice(1, -1);
+    }
+    
+    // Step 3: Normalize private key to have actual newline characters
     // This handles various formats that may occur depending on environment:
-    // - Literal \n characters (common in .env files)
-    // - Literal \r\n characters (Windows-style)
-    // - Already normalized keys (idempotent operation)
-    // Use the same robust approach as firebaseAdmin.ts
-    privateKey = privateKey.replace(/\\r\\n|\\n|\\r/g, '\n');
+    // - Literal \n characters (common in .env files): \\n -> \n
+    // - Literal \r\n characters (Windows-style): \\r\\n -> \n
+    // - Already normalized keys with \r\n or \r: normalize to \n
+    // Process in order to handle double-escaped cases correctly
+    privateKey = privateKey.replace(/\\r\\n/g, '\n')
+                           .replace(/\\n/g, '\n')
+                           .replace(/\\r/g, '\n')
+                           .replace(/\r\n/g, '\n')
+                           .replace(/\r/g, '\n');
     
-    // Validate that the private key has the expected format
+    // Step 4: Final trim after normalization
+    privateKey = privateKey.trim();
+    
+    // Step 5: Validate that the private key has the expected format
     if (!privateKey.includes('BEGIN PRIVATE KEY') || !privateKey.includes('END PRIVATE KEY')) {
       throw new Error('FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers.');
+    }
+    
+    // Step 6: Validate proper PEM structure (markers on their own lines)
+    const lines = privateKey.split('\n');
+    if (lines.length < 3) {
+      throw new Error(
+        'FIREBASE_PRIVATE_KEY is malformed. The private key must have at least 3 lines: ' +
+        'BEGIN marker, key content, and END marker. ' +
+        'Ensure newlines are properly encoded in your environment variable.'
+      );
+    }
+    
+    if (!lines[0].trim().startsWith('-----BEGIN PRIVATE KEY-----')) {
+      throw new Error(
+        'FIREBASE_PRIVATE_KEY is malformed. The BEGIN PRIVATE KEY marker must be on its own line. ' +
+        'Check that your private key has proper newline characters between the BEGIN marker and the key content.'
+      );
+    }
+    
+    if (!lines[lines.length - 1].trim().startsWith('-----END PRIVATE KEY-----')) {
+      throw new Error(
+        'FIREBASE_PRIVATE_KEY is malformed. The END PRIVATE KEY marker must be on its own line. ' +
+        'Check that your private key has proper newline characters between the key content and the END marker.'
+      );
     }
     
     // Validate client email format
