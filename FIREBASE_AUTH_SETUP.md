@@ -30,6 +30,13 @@ Or:
 FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
 ```
 
+**Important Note About Private Keys:**
+When using `FIREBASE_SERVICE_ACCOUNT_JSON` or `FIREBASE_SERVICE_ACCOUNT_BASE64`, the private key field may contain literal `\n` strings instead of actual newlines. The system automatically normalizes these to proper PEM format, so you can use either:
+- Literal `\n`: `"-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"`
+- Actual newlines (when possible in your environment)
+
+This prevents the "Failed to parse private key: Error: Invalid PEM formatted message" error.
+
 ### Getting Your Firebase Credentials
 
 1. Go to the [Firebase Console](https://console.firebase.google.com/)
@@ -156,3 +163,19 @@ To test the authentication system:
   - `*.googleapis.com` (All Google API services including Firebase Auth, token verification, etc.)
   - `*.firebaseapp.com` (Auth domain)
 - If you see CSP violations, ensure these wildcard patterns are in the `connect-src` directive
+
+### "Failed to parse private key: Error: Invalid PEM formatted message"
+This error occurs when the Firebase Admin SDK cannot parse the private key in the service account credentials. This typically happens when:
+- The private key contains literal `\n` strings instead of actual newline characters
+- The private key is not in proper PEM format
+
+**Solution:**
+The system now automatically normalizes private keys, converting literal `\n` strings to actual newlines. You can use either format:
+- Literal `\n`: `"-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"`
+- Actual newlines (multiline string)
+
+If you still encounter this error after the fix:
+1. Verify that your private key starts with `-----BEGIN PRIVATE KEY-----` and ends with `-----END PRIVATE KEY-----`
+2. Ensure there are no extra spaces or characters in the key
+3. If using `FIREBASE_SERVICE_ACCOUNT_JSON`, make sure the JSON is properly formatted
+4. Consider using `FIREBASE_SERVICE_ACCOUNT_PATH` to load from a file instead, which typically avoids formatting issues

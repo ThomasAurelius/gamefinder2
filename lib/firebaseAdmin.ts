@@ -28,12 +28,29 @@ function tryParseJson(value: string, source: string): ServiceAccount {
 	}
 }
 
+// Normalize private key to have actual newline characters
+// When stored in environment variables, \n is often stored as literal string instead of newline
+function normalizePrivateKey(privateKey: string): string {
+	// If the key contains literal \n strings, replace them with actual newlines
+	// This handles cases like: "-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"
+	if (privateKey.includes("\\n")) {
+		return privateKey.replace(/\\n/g, "\n");
+	}
+	return privateKey;
+}
+
 function loadServiceAccount() {
 	// Check for inline JSON first
 	const inline = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 	if (inline) {
 		console.log("Using FIREBASE_SERVICE_ACCOUNT_JSON for Firebase Admin");
-		return tryParseJson(inline, "FIREBASE_SERVICE_ACCOUNT_JSON");
+		const account = tryParseJson(inline, "FIREBASE_SERVICE_ACCOUNT_JSON");
+		// Normalize private key if present
+		const rawAccount = account as RawServiceAccount;
+		if (rawAccount.private_key) {
+			rawAccount.private_key = normalizePrivateKey(rawAccount.private_key);
+		}
+		return account;
 	}
 
 	// Check for base64 encoded JSON
@@ -41,7 +58,13 @@ function loadServiceAccount() {
 	if (base64) {
 		console.log("Using FIREBASE_SERVICE_ACCOUNT_BASE64 for Firebase Admin");
 		const decoded = Buffer.from(base64, "base64").toString("utf-8");
-		return tryParseJson(decoded, "FIREBASE_SERVICE_ACCOUNT_BASE64");
+		const account = tryParseJson(decoded, "FIREBASE_SERVICE_ACCOUNT_BASE64");
+		// Normalize private key if present
+		const rawAccount = account as RawServiceAccount;
+		if (rawAccount.private_key) {
+			rawAccount.private_key = normalizePrivateKey(rawAccount.private_key);
+		}
+		return account;
 	}
 
 	// Check for file path
@@ -53,7 +76,13 @@ function loadServiceAccount() {
 		const resolvedPath = resolve(pathEnv);
 		try {
 			const fileContents = readFileSync(resolvedPath, "utf-8");
-			return tryParseJson(fileContents, resolvedPath);
+			const account = tryParseJson(fileContents, resolvedPath);
+			// Normalize private key if present (though file-based keys are usually fine)
+			const rawAccount = account as RawServiceAccount;
+			if (rawAccount.private_key) {
+				rawAccount.private_key = normalizePrivateKey(rawAccount.private_key);
+			}
+			return account;
 		} catch (error) {
 			throw new Error(
 				`Unable to read Firebase service account file at ${resolvedPath}: ${error}`
@@ -106,6 +135,18 @@ export function getFirebaseAdminApp() {
 		if (!privateKey) {
 			throw new Error(
 				"Firebase service account is missing 'private_key'. Please check your service account JSON."
+			);
+		}
+
+		// Validate that the private key has proper PEM format
+		if (
+			!privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
+			!privateKey.includes("-----END PRIVATE KEY-----")
+		) {
+			throw new Error(
+				"Firebase service account 'private_key' is not in valid PEM format. " +
+					"It should start with '-----BEGIN PRIVATE KEY-----' and end with '-----END PRIVATE KEY-----'. " +
+					"If you're setting this via environment variable, ensure newlines are preserved correctly."
 			);
 		}
 		if (!clientEmail) {
