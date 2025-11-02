@@ -28,6 +28,16 @@ function tryParseJson(value: string, source: string): ServiceAccount {
 	}
 }
 
+// Type guard to check if an object has a private_key property
+function hasPrivateKey(obj: unknown): obj is { private_key: string } {
+	return (
+		typeof obj === "object" &&
+		obj !== null &&
+		"private_key" in obj &&
+		typeof (obj as { private_key: unknown }).private_key === "string"
+	);
+}
+
 // Normalize private key to have actual newline characters
 // When stored in environment variables, \n is often stored as literal string instead of newline
 function normalizePrivateKey(privateKey: string): string {
@@ -46,9 +56,8 @@ function loadServiceAccount() {
 		console.log("Using FIREBASE_SERVICE_ACCOUNT_JSON for Firebase Admin");
 		const account = tryParseJson(inline, "FIREBASE_SERVICE_ACCOUNT_JSON");
 		// Normalize private key if present
-		const rawAccount = account as RawServiceAccount;
-		if (rawAccount.private_key) {
-			rawAccount.private_key = normalizePrivateKey(rawAccount.private_key);
+		if (hasPrivateKey(account)) {
+			account.private_key = normalizePrivateKey(account.private_key);
 		}
 		return account;
 	}
@@ -60,9 +69,8 @@ function loadServiceAccount() {
 		const decoded = Buffer.from(base64, "base64").toString("utf-8");
 		const account = tryParseJson(decoded, "FIREBASE_SERVICE_ACCOUNT_BASE64");
 		// Normalize private key if present
-		const rawAccount = account as RawServiceAccount;
-		if (rawAccount.private_key) {
-			rawAccount.private_key = normalizePrivateKey(rawAccount.private_key);
+		if (hasPrivateKey(account)) {
+			account.private_key = normalizePrivateKey(account.private_key);
 		}
 		return account;
 	}
@@ -78,9 +86,8 @@ function loadServiceAccount() {
 			const fileContents = readFileSync(resolvedPath, "utf-8");
 			const account = tryParseJson(fileContents, resolvedPath);
 			// Normalize private key if present (though file-based keys are usually fine)
-			const rawAccount = account as RawServiceAccount;
-			if (rawAccount.private_key) {
-				rawAccount.private_key = normalizePrivateKey(rawAccount.private_key);
+			if (hasPrivateKey(account)) {
+				account.private_key = normalizePrivateKey(account.private_key);
 			}
 			return account;
 		} catch (error) {
