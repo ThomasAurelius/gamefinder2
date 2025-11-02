@@ -196,7 +196,7 @@ export function getFirebaseAdminApp() {
 			// Provide specific error messages for common issues
 			if (firstLine.includes("BEGIN PRIVATE KEY")) {
 				// The marker is present but malformed
-				const beginHyphensMatch = firstLine.match(/^(-+)BEGIN PRIVATE KEY(-+)$/);
+				const beginHyphensMatch = firstLine.match(/^(-{1,10})BEGIN PRIVATE KEY(-{1,10})$/);
 				if (beginHyphensMatch) {
 					const startHyphens = beginHyphensMatch[1].length;
 					const endHyphens = beginHyphensMatch[2].length;
@@ -225,7 +225,7 @@ export function getFirebaseAdminApp() {
 			// Provide specific error messages for common issues
 			if (lastLine.includes("END PRIVATE KEY")) {
 				// The marker is present but malformed
-				const endHyphensMatch = lastLine.match(/^(-+)END PRIVATE KEY(-+)$/);
+				const endHyphensMatch = lastLine.match(/^(-{1,10})END PRIVATE KEY(-{1,10})$/);
 				if (endHyphensMatch) {
 					const startHyphens = endHyphensMatch[1].length;
 					const endHyphens = endHyphensMatch[2].length;
