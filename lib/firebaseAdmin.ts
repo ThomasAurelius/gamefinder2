@@ -41,13 +41,29 @@ function hasPrivateKey(obj: unknown): obj is { private_key: string } {
 // Normalize private key to have actual newline characters
 // When stored in environment variables, \n is often stored as literal string instead of newline
 function normalizePrivateKey(privateKey: string): string {
-	// Replace various escaped newline patterns with actual newlines
+	// Step 1: Trim leading/trailing whitespace
+	let key = privateKey.trim();
+	
+	// Step 2: Remove wrapping quotes (single or double) - must be both at start and end
+	if ((key.startsWith('"') && key.endsWith('"')) || 
+		(key.startsWith("'") && key.endsWith("'"))) {
+		key = key.slice(1, -1);
+	}
+	
+	// Step 3: Replace various escaped newline patterns with actual newlines
 	// This handles cases like:
-	// - "-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"
-	// - "-----BEGIN PRIVATE KEY-----\r\nMIIE...\r\n-----END PRIVATE KEY-----"
-	// - Mixed patterns with both \n and \r\n
-	// Use a single regex to handle all patterns efficiently and avoid processing order issues
-	return privateKey.replace(/\\r\\n|\\n|\\r/g, "\n");
+	// - Literal \n (as two chars: backslash + n) from .env files
+	// - Literal \r\n (Windows-style line endings)
+	// - Already actual newlines with \r\n or \r
+	// Process in order to handle double-escaped cases correctly
+	key = key.replace(/\\r\\n/g, "\n")
+	         .replace(/\\n/g, "\n")
+	         .replace(/\\r/g, "\n")
+	         .replace(/\r\n/g, "\n")
+	         .replace(/\r/g, "\n");
+	
+	// Step 4: Final trim after normalization
+	return key.trim();
 }
 
 function loadServiceAccount() {
@@ -147,7 +163,7 @@ export function getFirebaseAdminApp() {
 		}
 
 		// Validate that the private key has proper PEM format
-		// Check if key starts with BEGIN marker and ends with END marker (trimming whitespace)
+		// Check if key starts with BEGIN marker and ends with END marker
 		const trimmedKey = privateKey.trim();
 		if (
 			!trimmedKey.startsWith("-----BEGIN PRIVATE KEY-----") ||
@@ -157,6 +173,31 @@ export function getFirebaseAdminApp() {
 				"Firebase service account 'private_key' is not in valid PEM format. " +
 					"It should start with '-----BEGIN PRIVATE KEY-----' and end with '-----END PRIVATE KEY-----'. " +
 					"If you're setting this via environment variable, ensure newlines are preserved correctly."
+			);
+		}
+		
+		// Validate proper PEM structure (markers on their own lines)
+		const lines = trimmedKey.split("\n");
+		if (lines.length < 3) {
+			throw new Error(
+				"Firebase service account 'private_key' is malformed. The private key must have at least 3 lines: " +
+					"BEGIN marker, key content, and END marker. " +
+					"Ensure newlines are properly encoded in your environment variable. " +
+					`Currently has ${lines.length} line(s).`
+			);
+		}
+		
+		if (!lines[0].trim().startsWith("-----BEGIN PRIVATE KEY-----")) {
+			throw new Error(
+				"Firebase service account 'private_key' is malformed. The BEGIN PRIVATE KEY marker must be on its own line. " +
+					"Current first line: " + lines[0].substring(0, 50) + "..."
+			);
+		}
+		
+		if (!lines[lines.length - 1].trim().startsWith("-----END PRIVATE KEY-----")) {
+			throw new Error(
+				"Firebase service account 'private_key' is malformed. The END PRIVATE KEY marker must be on its own line. " +
+					"Current last line: " + lines[lines.length - 1].substring(0, 50) + "..."
 			);
 		}
 		if (!clientEmail) {
