@@ -189,42 +189,41 @@ export function DashboardSidebar() {
 						<p className="text-xs text-slate-400">Loading...</p>
 					) : upcomingSessions.length > 0 ? (
 						<div className="space-y-2">
-							{upcomingSessions.map((session) => (
-								<Link
-									key={session.id}
-									href={
-										session.isCampaign
-											? `/campaigns/${session.id}`
-											: `/games/${session.id}`
-									}
-									onClick={(e) => {
-										e.preventDefault();
-										const href = session.isCampaign
-											? `/campaigns/${session.id}`
-											: `/games/${session.id}`;
-										setTimeout(() => {
-											router.push(href);
-										}, NAVIGATION_DELAY_MS);
-									}}
-									className="block rounded-md border border-slate-700/50 bg-slate-900/40 p-2 transition hover:border-sky-500/50 hover:bg-slate-800/60"
-								>
-									<div className="flex items-start justify-between gap-2">
-										<div className="flex-1 min-w-0">
-											<p className="truncate text-xs font-medium text-slate-200">
-												{session.game}
-											</p>
-											<p className="text-xs text-slate-400">
-												{formatDate(session.date)}
-											</p>
+							{upcomingSessions.map((session) => {
+								const sessionHref = session.isCampaign
+									? `/campaigns/${session.id}`
+									: `/games/${session.id}`;
+								
+								return (
+									<Link
+										key={session.id}
+										href={sessionHref}
+										onClick={(e) => {
+											e.preventDefault();
+											setTimeout(() => {
+												router.push(sessionHref);
+											}, NAVIGATION_DELAY_MS);
+										}}
+										className="block rounded-md border border-slate-700/50 bg-slate-900/40 p-2 transition hover:border-sky-500/50 hover:bg-slate-800/60"
+									>
+										<div className="flex items-start justify-between gap-2">
+											<div className="flex-1 min-w-0">
+												<p className="truncate text-xs font-medium text-slate-200">
+													{session.game}
+												</p>
+												<p className="text-xs text-slate-400">
+													{formatDate(session.date)}
+												</p>
+											</div>
+											{session.isCampaign && (
+												<span className="flex-shrink-0 text-xs rounded-full bg-indigo-500/20 px-2 py-0.5 text-indigo-300">
+													Campaign
+												</span>
+											)}
 										</div>
-										{session.isCampaign && (
-											<span className="flex-shrink-0 text-xs rounded-full bg-indigo-500/20 px-2 py-0.5 text-indigo-300">
-												Campaign
-											</span>
-										)}
-									</div>
-								</Link>
-							))}
+									</Link>
+								);
+							})}
 							<Link
 								href="/dashboard"
 								onClick={(e) => {
