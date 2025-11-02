@@ -190,14 +190,14 @@ export function getFirebaseAdminApp() {
 		if (!lines[0].trim().startsWith("-----BEGIN PRIVATE KEY-----")) {
 			throw new Error(
 				"Firebase service account 'private_key' is malformed. The BEGIN PRIVATE KEY marker must be on its own line. " +
-					"Current first line: " + lines[0].substring(0, 50) + "..."
+					"Check that your private key has proper newline characters between the BEGIN marker and the key content."
 			);
 		}
 		
 		if (!lines[lines.length - 1].trim().startsWith("-----END PRIVATE KEY-----")) {
 			throw new Error(
 				"Firebase service account 'private_key' is malformed. The END PRIVATE KEY marker must be on its own line. " +
-					"Current last line: " + lines[lines.length - 1].substring(0, 50) + "..."
+					"Check that your private key has proper newline characters between the key content and the END marker."
 			);
 		}
 		if (!clientEmail) {
