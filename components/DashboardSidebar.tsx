@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type UpcomingSession = {
 	id: string;
@@ -10,7 +11,18 @@ type UpcomingSession = {
 	isCampaign?: boolean;
 };
 
+/**
+ * Delay in milliseconds before navigation after a link is clicked.
+ * This delay ensures that Next.js Link component has time to initiate navigation before
+ * any state changes occur. Without this delay, navigation can fail, especially
+ * after the app has been running for an extended period.
+ *
+ * @constant {number}
+ */
+const NAVIGATION_DELAY_MS = 100;
+
 export function DashboardSidebar() {
+	const router = useRouter();
 	const [upcomingSessions, setUpcomingSessions] = useState<UpcomingSession[]>(
 		[]
 	);
@@ -131,18 +143,36 @@ export function DashboardSidebar() {
 					<div className="space-y-2">
 						<Link
 							href="/post"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/post");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-indigo-500/20 px-3 py-2 text-sm text-slate-200 transition hover:from-amber-500/30 hover:via-purple-500/30 hover:to-indigo-500/30"
 						>
 							Post Game
 						</Link>
 						<Link
 							href="/post-campaign"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/post-campaign");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-indigo-500/20 px-3 py-2 text-sm text-slate-200 transition hover:from-amber-500/30 hover:via-purple-500/30 hover:to-indigo-500/30"
 						>
 							Post Campaign
 						</Link>
 						<Link
 							href="/tall-tales"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/tall-tales");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-indigo-500/20 px-3 py-2 text-sm text-slate-200 transition hover:from-amber-500/30 hover:via-purple-500/30 hover:to-indigo-500/30"
 						>
 							Post Tall Tale
@@ -167,6 +197,15 @@ export function DashboardSidebar() {
 											? `/campaigns/${session.id}`
 											: `/games/${session.id}`
 									}
+									onClick={(e) => {
+										e.preventDefault();
+										const href = session.isCampaign
+											? `/campaigns/${session.id}`
+											: `/games/${session.id}`;
+										setTimeout(() => {
+											router.push(href);
+										}, NAVIGATION_DELAY_MS);
+									}}
 									className="block rounded-md border border-slate-700/50 bg-slate-900/40 p-2 transition hover:border-sky-500/50 hover:bg-slate-800/60"
 								>
 									<div className="flex items-start justify-between gap-2">
@@ -188,6 +227,12 @@ export function DashboardSidebar() {
 							))}
 							<Link
 								href="/dashboard"
+								onClick={(e) => {
+									e.preventDefault();
+									setTimeout(() => {
+										router.push("/dashboard");
+									}, NAVIGATION_DELAY_MS);
+								}}
 								className="block text-xs text-sky-400 hover:text-sky-300 transition-colors text-center pt-2"
 							>
 								View all →
@@ -200,6 +245,12 @@ export function DashboardSidebar() {
 							</p>
 							<Link
 								href="/find"
+								onClick={(e) => {
+									e.preventDefault();
+									setTimeout(() => {
+										router.push("/find");
+									}, NAVIGATION_DELAY_MS);
+								}}
 								className="block text-xs text-sky-400 hover:text-sky-300 transition-colors"
 							>
 								Find games →
@@ -216,24 +267,48 @@ export function DashboardSidebar() {
 					<div className="space-y-1">
 						<Link
 							href="/find"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/find");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
 						>
 							Find Games
 						</Link>
 						<Link
 							href="/find-campaigns"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/find-campaigns");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
 						>
 							Find Campaigns
 						</Link>
 						<Link
 							href="/players"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/players");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
 						>
 							Players
 						</Link>
 						<Link
 							href="/marketplace"
+							onClick={(e) => {
+								e.preventDefault();
+								setTimeout(() => {
+									router.push("/marketplace");
+								}, NAVIGATION_DELAY_MS);
+							}}
 							className="block rounded-md px-3 py-2 text-sm text-slate-200 transition hover:bg-white/10"
 						>
 							Marketplace
