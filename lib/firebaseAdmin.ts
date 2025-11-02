@@ -46,17 +46,8 @@ function normalizePrivateKey(privateKey: string): string {
 	// - "-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"
 	// - "-----BEGIN PRIVATE KEY-----\r\nMIIE...\r\n-----END PRIVATE KEY-----"
 	// - Mixed patterns with both \n and \r\n
-	let normalized = privateKey;
-	if (normalized.includes("\\r\\n")) {
-		normalized = normalized.replace(/\\r\\n/g, "\n");
-	}
-	if (normalized.includes("\\n")) {
-		normalized = normalized.replace(/\\n/g, "\n");
-	}
-	if (normalized.includes("\\r")) {
-		normalized = normalized.replace(/\\r/g, "\n");
-	}
-	return normalized;
+	// Use a single regex to handle all patterns efficiently and avoid processing order issues
+	return privateKey.replace(/\\r\\n|\\n|\\r/g, "\n");
 }
 
 function loadServiceAccount() {
