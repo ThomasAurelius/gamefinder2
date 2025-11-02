@@ -46,10 +46,13 @@ function ensureFirebaseInitialized(): void {
     // Remove any quotes that might wrap the key
     privateKey = privateKey.replace(/^["']|["']$/g, '');
     
-    // Replace escaped newlines with actual newlines if present
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
+    // Normalize private key to have actual newline characters
+    // This handles various formats that may occur depending on environment:
+    // - Literal \n characters (common in .env files)
+    // - Literal \r\n characters (Windows-style)
+    // - Already normalized keys (idempotent operation)
+    // Use the same robust approach as firebaseAdmin.ts
+    privateKey = privateKey.replace(/\\r\\n|\\n|\\r/g, '\n');
     
     // Validate that the private key has the expected format
     if (!privateKey.includes('BEGIN PRIVATE KEY') || !privateKey.includes('END PRIVATE KEY')) {
