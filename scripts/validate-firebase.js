@@ -10,7 +10,7 @@
 require('dotenv').config({ path: '.env.local' });
 
 console.log('\n🔥 Firebase Configuration Validator\n');
-console.log('=' .repeat(50));
+console.log('='.repeat(50));
 
 // Check for each credential method
 const methods = [
@@ -167,7 +167,6 @@ if (!clientConfigComplete) {
   console.log('\n⚠️  Warning: Client-side Firebase configuration is incomplete.');
   console.log('   Authentication and client-side features may not work properly.');
 }
-
 // Final summary
 console.log('\n' + '='.repeat(50));
 console.log('\n📊 Summary:\n');
