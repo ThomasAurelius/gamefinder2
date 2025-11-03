@@ -106,21 +106,71 @@ function ensureFirebaseInitialized(): void {
       throw new Error(
         'FIREBASE_PRIVATE_KEY is malformed. The private key must have at least 3 lines: ' +
         'BEGIN marker, key content, and END marker. ' +
-        'Ensure newlines are properly encoded in your environment variable.'
+        'Ensure newlines are properly encoded in your environment variable. ' +
+        `Currently has ${lines.length} line(s).`
       );
     }
     
-    if (lines[0].trim() !== '-----BEGIN PRIVATE KEY-----') {
+    const firstLine = lines[0].trim();
+    const lastLine = lines[lines.length - 1].trim();
+    const expectedBeginMarker = '-----BEGIN PRIVATE KEY-----';
+    const expectedEndMarker = '-----END PRIVATE KEY-----';
+    
+    if (firstLine !== expectedBeginMarker) {
+      // Provide specific error messages for common issues
+      if (firstLine.includes('BEGIN PRIVATE KEY')) {
+        // The marker is present but malformed
+        const beginHyphensMatch = firstLine.match(/^(-{1,10})BEGIN PRIVATE KEY(-{1,10})$/);
+        if (beginHyphensMatch) {
+          const startHyphens = beginHyphensMatch[1].length;
+          const endHyphens = beginHyphensMatch[2].length;
+          throw new Error(
+            `FIREBASE_PRIVATE_KEY is malformed. The BEGIN marker has incorrect formatting. ` +
+            `Expected: "${expectedBeginMarker}" (5 hyphens on each side). ` +
+            `Found: "${firstLine}" (${startHyphens} hyphens at start, ${endHyphens} hyphens at end). ` +
+            `Please ensure your private key uses exactly 5 hyphens on each side of the markers.`
+          );
+        }
+        throw new Error(
+          `FIREBASE_PRIVATE_KEY is malformed. The BEGIN marker has incorrect formatting. ` +
+          `Expected: "${expectedBeginMarker}". ` +
+          `Found: "${firstLine}". ` +
+          `Check that the marker has exactly 5 hyphens on each side and no extra characters.`
+        );
+      }
       throw new Error(
         'FIREBASE_PRIVATE_KEY is malformed. The BEGIN PRIVATE KEY marker must be on its own line. ' +
-        'Check that your private key has proper newline characters between the BEGIN marker and the key content.'
+        'Check that your private key has proper newline characters between the BEGIN marker and the key content. ' +
+        `Expected first line: "${expectedBeginMarker}". Found: "${firstLine}".`
       );
     }
     
-    if (lines[lines.length - 1].trim() !== '-----END PRIVATE KEY-----') {
+    if (lastLine !== expectedEndMarker) {
+      // Provide specific error messages for common issues
+      if (lastLine.includes('END PRIVATE KEY')) {
+        // The marker is present but malformed
+        const endHyphensMatch = lastLine.match(/^(-{1,10})END PRIVATE KEY(-{1,10})$/);
+        if (endHyphensMatch) {
+          const startHyphens = endHyphensMatch[1].length;
+          const endHyphens = endHyphensMatch[2].length;
+          throw new Error(
+            `FIREBASE_PRIVATE_KEY is malformed. The END marker has incorrect formatting. ` +
+            `Expected: "${expectedEndMarker}" (5 hyphens on each side). ` +
+            `Found: "${lastLine}" (${startHyphens} hyphens at start, ${endHyphens} hyphens at end). ` +
+            `Please ensure your private key uses exactly 5 hyphens on each side of the markers.`
+          );
+        }
+        throw new Error(
+          `FIREBASE_PRIVATE_KEY is malformed. The END marker has incorrect formatting. ` +
+          `Expected: "${expectedEndMarker}". ` +
+          `Found: "${lastLine}". ` +
+          `Check that the marker has exactly 5 hyphens on each side and no extra characters.`
+        );
+      }
       throw new Error(
         'FIREBASE_PRIVATE_KEY is malformed. The END PRIVATE KEY marker must be on its own line. ' +
-        'Check that your private key has proper newline characters between the key content and the END marker.'
+        'Check that your private key has proper newline characters between the key content and the END marker. ' +
+        `Expected last line: "${expectedEndMarker}". Found: "${lastLine}".`
       );
     }
     
