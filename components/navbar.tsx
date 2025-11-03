@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useLogout } from "./logout-handler";
 
@@ -74,6 +74,7 @@ const NAVIGATION_DELAY_MS = 100;
 
 export function Navbar() {
 	const pathname = usePathname();
+	const router = useRouter();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -288,9 +289,12 @@ export function Navbar() {
 												<Link
 													key={link.href}
 													href={link.href}
-													onClick={() => {
-														// Delay closing dropdown to ensure navigation completes
+													onClick={(e) => {
+														// Prevent default navigation temporarily
+														e.preventDefault();
+														// Delay navigation to ensure proper routing after idle
 														setTimeout(() => {
+															router.push(link.href);
 															closeMenu();
 														}, NAVIGATION_DELAY_MS);
 													}}
@@ -318,6 +322,14 @@ export function Navbar() {
 								<Link
 									key={item.href}
 									href={item.href}
+									onClick={(e) => {
+										// Prevent default navigation temporarily
+										e.preventDefault();
+										// Delay navigation to ensure proper routing after idle
+										setTimeout(() => {
+											router.push(item.href);
+										}, NAVIGATION_DELAY_MS);
+									}}
 									className={`flex items-center rounded-md px-2 py-2 transition hover:bg-white/10 ${
 										isActive(pathname, item.href)
 											? "bg-white/10 text-white"
@@ -363,9 +375,12 @@ export function Navbar() {
 												<Link
 													key={link.href}
 													href={link.href}
-													onClick={() => {
-														// Delay closing dropdown to ensure navigation completes
+													onClick={(e) => {
+														// Prevent default navigation temporarily
+														e.preventDefault();
+														// Delay navigation to ensure proper routing after idle
 														setTimeout(() => {
+															router.push(link.href);
 															setAccountOpen(false);
 															closeMenu();
 														}, NAVIGATION_DELAY_MS);
@@ -446,12 +461,14 @@ export function Navbar() {
 											<Link
 												key={link.href}
 												href={link.href}
-												onClick={() => {
-													// Delay closing menu to ensure navigation completes
-													setTimeout(
-														closeMenu,
-														NAVIGATION_DELAY_MS
-													);
+												onClick={(e) => {
+													// Prevent default navigation temporarily
+													e.preventDefault();
+													// Delay navigation to ensure proper routing after idle
+													setTimeout(() => {
+														router.push(link.href);
+														closeMenu();
+													}, NAVIGATION_DELAY_MS);
 												}}
 												className={`flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 													isActive(pathname, link.href)
@@ -475,9 +492,14 @@ export function Navbar() {
 									<Link
 										key={item.href}
 										href={item.href}
-										onClick={() => {
-											// Delay closing menu to ensure navigation completes
-											setTimeout(closeMenu, NAVIGATION_DELAY_MS);
+										onClick={(e) => {
+											// Prevent default navigation temporarily
+											e.preventDefault();
+											// Delay navigation to ensure proper routing after idle
+											setTimeout(() => {
+												router.push(item.href);
+												closeMenu();
+											}, NAVIGATION_DELAY_MS);
 										}}
 										className={`flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, item.href)
@@ -521,9 +543,14 @@ export function Navbar() {
 										<Link
 											key={link.href}
 											href={link.href}
-											onClick={() => {
-												// Delay closing menu to ensure navigation completes
-												setTimeout(closeMenu, NAVIGATION_DELAY_MS);
+											onClick={(e) => {
+												// Prevent default navigation temporarily
+												e.preventDefault();
+												// Delay navigation to ensure proper routing after idle
+												setTimeout(() => {
+													router.push(link.href);
+													closeMenu();
+												}, NAVIGATION_DELAY_MS);
 											}}
 											className={`mt-1 flex items-center justify-between rounded-md px-3 py-2 transition hover:bg-white/10 ${
 												isActive(pathname, link.href)
@@ -558,9 +585,14 @@ export function Navbar() {
 								<div className="border-t border-white/5 pt-2">
 									<Link
 										href="/auth/login"
-										onClick={() => {
-											// Delay closing menu to ensure navigation completes
-											setTimeout(closeMenu, NAVIGATION_DELAY_MS);
+										onClick={(e) => {
+											// Prevent default navigation temporarily
+											e.preventDefault();
+											// Delay navigation to ensure proper routing after idle
+											setTimeout(() => {
+												router.push("/auth/login");
+												closeMenu();
+											}, NAVIGATION_DELAY_MS);
 										}}
 										className={`block rounded-md px-3 py-2 transition hover:bg-white/10 ${
 											isActive(pathname, "/auth/login")
