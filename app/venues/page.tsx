@@ -132,7 +132,7 @@ function VendorCard({
 					<span className="text-slate-500">
 						{vendor.city}, {vendor.state}
 					</span>
-					{vendor.distance !== undefined && (
+					{vendor.distance !== undefined && vendor.distance !== null && (
 						<span className="text-slate-500">
 							{vendor.distance.toFixed(1)} mi
 						</span>

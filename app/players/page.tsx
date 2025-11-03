@@ -96,7 +96,7 @@ function PlayerCard({ player }: { player: Player }) {
 					{player.location && (
 						<p className="mt-1 text-sm text-slate-400">
 							{player.location}
-							{player.distance !== undefined && (
+							{player.distance !== undefined && player.distance !== null && (
 								<span className="ml-2 text-sky-400">
 									({player.distance.toFixed(1)} mi away)
 								</span>

@@ -41,8 +41,8 @@ const nextConfig: NextConfig = {
 						value: [
 							// Allow resources from same origin
 							"default-src 'self'",
-							// Allow scripts from self, Stripe JS SDK, and inline scripts (required for Next.js hydration)
-							"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.com",
+							// Allow scripts from self, Stripe JS SDK, Google APIs (for Firebase Auth), and inline scripts (required for Next.js hydration)
+							"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.com https://apis.google.com",
 							// Allow styles from self and inline styles (required for styled components)
 							"style-src 'self' 'unsafe-inline'",
 							// Allow images from self, data URIs, Stripe CDN, and common image hosts

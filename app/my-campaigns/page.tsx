@@ -229,7 +229,7 @@ function CampaignCard({
 						<p>
 							<span className="text-slate-500">Location:</span>{" "}
 							{campaign.location || campaign.zipCode}
-							{campaign.distance !== undefined && (
+							{campaign.distance !== undefined && campaign.distance !== null && (
 								<span className="ml-2 text-sky-400">
 									({campaign.distance.toFixed(1)} mi away)
 								</span>
