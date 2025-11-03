@@ -114,6 +114,38 @@ function loadServiceAccount() {
 		}
 	}
 
+	// Check for individual environment variables
+	const projectId = process.env.FIREBASE_PROJECT_ID;
+	const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+	const privateKeyEnv = process.env.FIREBASE_PRIVATE_KEY;
+
+	if (projectId && clientEmail && privateKeyEnv) {
+		console.log("Using individual Firebase environment variables for Firebase Admin");
+		
+		// Validate client email format
+		if (!clientEmail.includes('@') || !clientEmail.endsWith('.iam.gserviceaccount.com')) {
+			throw new Error(
+				'FIREBASE_CLIENT_EMAIL is malformed. It should be in the format: your-service-account@your-project-id.iam.gserviceaccount.com'
+			);
+		}
+		
+		const normalizedPrivateKey = normalizePrivateKey(privateKeyEnv);
+		
+		// Validate that the private key has the expected PEM markers
+		if (!normalizedPrivateKey.includes('BEGIN PRIVATE KEY') || !normalizedPrivateKey.includes('END PRIVATE KEY')) {
+			throw new Error(
+				'FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers. ' +
+				'Please check your environment variable configuration.'
+			);
+		}
+		
+		return {
+			project_id: projectId,
+			client_email: clientEmail,
+			private_key: normalizedPrivateKey,
+		} as ServiceAccount;
+	}
+
 	// Provide detailed error message about what's missing
 	const envVarsStatus = {
 		FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON
@@ -129,6 +161,11 @@ function loadServiceAccount() {
 		GOOGLE_APPLICATION_CREDENTIALS: process.env.GOOGLE_APPLICATION_CREDENTIALS
 			? "SET"
 			: "NOT SET",
+		FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "SET" : "NOT SET",
+		FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL
+			? "SET"
+			: "NOT SET",
+		FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? "SET" : "NOT SET",
 	};
 
 	console.error(
@@ -136,7 +173,12 @@ function loadServiceAccount() {
 		envVarsStatus
 	);
 	throw new Error(
-		`Firebase Admin creds not found. Environment status: ${JSON.stringify(envVarsStatus)}. Set one of: FIREBASE_SERVICE_ACCOUNT_JSON, FIREBASE_SERVICE_ACCOUNT_BASE64, FIREBASE_SERVICE_ACCOUNT_PATH, or GOOGLE_APPLICATION_CREDENTIALS.`
+		`Firebase Admin creds not found. Environment status: ${JSON.stringify(envVarsStatus)}. ` +
+			`Set one of: ` +
+			`(1) FIREBASE_SERVICE_ACCOUNT_JSON, ` +
+			`(2) FIREBASE_SERVICE_ACCOUNT_BASE64, ` +
+			`(3) FIREBASE_SERVICE_ACCOUNT_PATH or GOOGLE_APPLICATION_CREDENTIALS, ` +
+			`(4) Individual variables: FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.`
 	);
 }
 
