@@ -105,7 +105,7 @@ export default function PlayerFeedbackSection({
 				)}
 			</div>
 
-			{stats.totalRatings > 0 ? (
+			{stats.totalRatings > 0 && stats.averageRating != null ? (
 				<div className="mt-4 flex items-center gap-4">
 					<div className="flex items-center gap-2">
 						<span className="text-3xl">🎮</span>

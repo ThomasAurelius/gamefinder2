@@ -51,7 +51,7 @@ export default function PlayerRatingDisplay({ playerId, showDetails = false }: P
     );
   }
 
-  if (!stats || stats.totalRatings === 0) {
+  if (!stats || stats.totalRatings === 0 || stats.averageRating == null) {
     return (
       <div className="flex items-center gap-2 text-sm text-slate-400">
         <span>🎮</span>

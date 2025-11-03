@@ -231,7 +231,7 @@ export default function CampaignRefundManager({
 										</div>
 										<div className="text-slate-400 text-sm">
 											{/* Amount is already converted from cents to dollars by the API */}
-											${payment.amount.toFixed(2)}{" "}
+											${payment.amount?.toFixed(2) ?? '0.00'}{" "}
 											{payment.currency.toUpperCase()} -{" "}
 											{payment.status}
 										</div>

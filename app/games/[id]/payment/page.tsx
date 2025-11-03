@@ -277,7 +277,7 @@ export default function GamePaymentPage() {
             Complete your one-time payment to confirm your spot.
           </p>
           <p className="text-sm text-slate-300">
-            Amount due: <span className="font-semibold text-slate-100">${game.costPerSession.toFixed(2)}</span>
+            Amount due: <span className="font-semibold text-slate-100">${game.costPerSession?.toFixed(2) ?? '0.00'}</span>
           </p>
         </div>
 

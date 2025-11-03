@@ -283,7 +283,7 @@ export default function MarketplacePage() {
 									{listing.price !== undefined &&
 										listing.price > 0 && (
 											<p className="mb-2 text-lg font-semibold text-sky-400">
-												${listing.price.toFixed(2)}
+												${listing.price?.toFixed(2) ?? '0.00'}
 											</p>
 										)}
 
@@ -294,7 +294,7 @@ export default function MarketplacePage() {
 									)}
 									{listing.price !== undefined && (
 										<p className="mb-2 text-lg font-semibold text-sky-400">
-											${listing.price.toFixed(2)}
+											${listing.price?.toFixed(2) ?? '0.00'}
 										</p>
 									)}
 

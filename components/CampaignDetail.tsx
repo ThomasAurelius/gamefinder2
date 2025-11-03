@@ -793,7 +793,7 @@ export default function CampaignDetail({
 								<span className="text-slate-500">
 									{hasCost ? "Cost per Session:" : "Cost:"}
 								</span>{" "}
-								{hasCost ? `$${campaign.costPerSession}` : "No Cost"}
+								{hasCost ? `$${campaign.costPerSession?.toFixed(2)}` : "No Cost"}
 							</p>
 						</div>
 					</div>
@@ -904,7 +904,7 @@ export default function CampaignDetail({
 									<span className="text-slate-500">
 										{hasCost ? "Cost per Session:" : "Cost:"}
 									</span>{" "}
-									{hasCost ? `$${campaign.costPerSession}` : "No Cost"}
+									{hasCost ? `$${campaign.costPerSession?.toFixed(2)}` : "No Cost"}
 								</p>
 							</div>
 						</div>

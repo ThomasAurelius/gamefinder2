@@ -263,7 +263,7 @@ export default function LibraryPage() {
 													)}
 													{game.average > 0 && (
 														<span>
-															Rating: {game.average.toFixed(2)}
+															Rating: {game.average?.toFixed(2) ?? '0.00'}
 														</span>
 													)}
 													{game.usersrated > 0 && (

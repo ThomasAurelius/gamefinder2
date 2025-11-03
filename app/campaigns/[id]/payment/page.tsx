@@ -363,7 +363,7 @@ export default function CampaignPaymentPage() {
               : "This campaign only runs for a single session. Complete your one-time payment to confirm your spot."}
           </p>
           <p className="text-sm text-slate-300">
-            Amount due: <span className="font-semibold text-slate-100">${campaign.costPerSession.toFixed(2)}</span>
+            Amount due: <span className="font-semibold text-slate-100">${campaign.costPerSession?.toFixed(2) ?? '0.00'}</span>
           </p>
           {typeof campaign.sessionsLeft === "number" && (
             <p className="text-xs text-slate-500">

@@ -91,7 +91,7 @@ export default function HostFeedbackSection({
 		<div className="rounded-xl border border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-6">
 			<h2 className="text-xl font-semibold text-slate-100">Host Rating</h2>
 
-			{stats.totalRatings > 0 ? (
+			{stats.totalRatings > 0 && stats.averageRating != null ? (
 				<div className="mt-4 flex items-center gap-4">
 					<div className="flex items-center gap-2">
 						<span className="text-3xl">⭐</span>
