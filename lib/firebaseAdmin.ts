@@ -44,19 +44,39 @@ function normalizePrivateKey(privateKey: string): string {
 	// Step 1: Trim leading/trailing whitespace
 	let key = privateKey.trim();
 	
-	// Step 2: Remove wrapping quotes (single or double) - must be both at start and end
-	if ((key.startsWith('"') && key.endsWith('"')) || 
-		(key.startsWith("'") && key.endsWith("'"))) {
-		key = key.slice(1, -1);
+	// Step 2: Iteratively remove wrapping quotes and handle escaped quotes
+	// This handles multiple layers of quotes and escaped quotes that can occur in Vercel
+	// We need to iterate because after replacing \" with ", we might have quotes again
+	let prevKey = "";
+	let iterations = 0;
+	const maxIterations = 5; // Safety limit to prevent infinite loops
+	
+	while (key !== prevKey && iterations < maxIterations) {
+		prevKey = key;
+		iterations++;
+		
+		// Remove wrapping quotes (single or double) - must be both at start and end
+		if ((key.startsWith('"') && key.endsWith('"')) || 
+		    (key.startsWith("'") && key.endsWith("'"))) {
+			key = key.slice(1, -1).trim();
+		}
+		
+		// Handle escaped quotes that may appear in Vercel environment variables
+		// Replace \" with " and \' with ' to handle cases where quotes are escaped
+		key = key.replace(/\\"/g, '"').replace(/\\'/g, "'");
 	}
 	
 	// Step 3: Replace various escaped newline patterns with actual newlines
 	// This handles cases like:
+	// - Double-escaped \n (as \\n - four chars) from some environments
 	// - Literal \n (as two chars: backslash + n) from .env files
 	// - Literal \r\n (Windows-style line endings)
 	// - Already actual newlines with \r\n or \r
 	// Process in order to handle double-escaped cases correctly
-	key = key.replace(/\\r\\n/g, "\n")
+	key = key.replace(/\\\\n/g, "\n")  // Handle double-escaped newlines first
+	         .replace(/\\\\r\\\\n/g, "\n")
+	         .replace(/\\\\r/g, "\n")
+	         .replace(/\\r\\n/g, "\n")
 	         .replace(/\\n/g, "\n")
 	         .replace(/\\r/g, "\n")
 	         .replace(/\r\n/g, "\n")
