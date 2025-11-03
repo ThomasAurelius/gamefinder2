@@ -46,19 +46,39 @@ function ensureFirebaseInitialized(): void {
     // Step 1: Trim leading/trailing whitespace
     privateKey = privateKey.trim();
     
-    // Step 2: Remove wrapping quotes (single or double) - must be both at start and end
-    if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || 
-        (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
-      privateKey = privateKey.slice(1, -1);
+    // Step 2: Iteratively remove wrapping quotes and handle escaped quotes
+    // This handles multiple layers of quotes and escaped quotes that can occur in Vercel
+    // We need to iterate because after replacing \" with ", we might have quotes again
+    let prevKey = "";
+    let iterations = 0;
+    const maxIterations = 5; // Safety limit to prevent infinite loops
+    
+    while (privateKey !== prevKey && iterations < maxIterations) {
+      iterations++;
+      prevKey = privateKey;
+      
+      // Remove wrapping quotes (single or double) - must be both at start and end
+      if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || 
+          (privateKey.startsWith("'") && privateKey.endsWith("'"))) {
+        privateKey = privateKey.slice(1, -1).trim();
+      }
+      
+      // Handle escaped quotes that may appear in Vercel environment variables
+      // Replace \" with " and \' with ' to handle cases where quotes are escaped
+      privateKey = privateKey.replace(/\\"/g, '"').replace(/\\'/g, "'");
     }
     
     // Step 3: Normalize private key to have actual newline characters
     // This handles various formats that may occur depending on environment:
+    // - Double-escaped \n (as \\n - four chars) from some environments
     // - Literal \n characters (common in .env files): \\n -> \n
     // - Literal \r\n characters (Windows-style): \\r\\n -> \n
     // - Already normalized keys with \r\n or \r: normalize to \n
     // Process in order to handle double-escaped cases correctly
-    privateKey = privateKey.replace(/\\r\\n/g, '\n')
+    privateKey = privateKey.replace(/\\\\n/g, '\n')  // Handle double-escaped newlines first
+                           .replace(/\\\\r\\\\n/g, '\n')
+                           .replace(/\\\\r/g, '\n')
+                           .replace(/\\r\\n/g, '\n')
                            .replace(/\\n/g, '\n')
                            .replace(/\\r/g, '\n')
                            .replace(/\r\n/g, '\n')
@@ -80,7 +100,7 @@ function ensureFirebaseInitialized(): void {
       throw new Error('FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers.');
     }
     
-    // Step 6: Validate proper PEM structure (markers on their own lines)
+    // Step 7: Validate proper PEM structure (markers on their own lines)
     const lines = privateKey.split('\n');
     if (lines.length < 3) {
       throw new Error(
