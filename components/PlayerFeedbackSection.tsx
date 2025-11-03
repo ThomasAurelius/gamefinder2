@@ -105,27 +105,33 @@ export default function PlayerFeedbackSection({
 				)}
 			</div>
 
-			<div className="mt-4 flex items-center gap-4">
-				<div className="flex items-center gap-2">
-					<span className="text-3xl">🎮</span>
-					<span className="text-3xl font-bold text-amber-400">
-						{stats.averageRating.toFixed(1)}
-					</span>
-				</div>
-				<div className="text-sm text-slate-400">
-					<div className="text-lg text-amber-400/80">
-						{displayStars(stats.averageRating)}
+			{stats.totalRatings > 0 ? (
+				<div className="mt-4 flex items-center gap-4">
+					<div className="flex items-center gap-2">
+						<span className="text-3xl">🎮</span>
+						<span className="text-3xl font-bold text-amber-400">
+							{stats.averageRating.toFixed(1)}
+						</span>
 					</div>
-					<div>{stats.totalRatings} total rating{stats.totalRatings !== 1 ? "s" : ""}</div>
-					<div className="flex gap-3 mt-1">
-						<span>5⭐: {stats.ratings[5]}</span>
-						<span>4⭐: {stats.ratings[4]}</span>
-						<span>3⭐: {stats.ratings[3]}</span>
-						<span>2⭐: {stats.ratings[2]}</span>
-						<span>1⭐: {stats.ratings[1]}</span>
+					<div className="text-sm text-slate-400">
+						<div className="text-lg text-amber-400/80">
+							{displayStars(stats.averageRating)}
+						</div>
+						<div>{stats.totalRatings} total rating{stats.totalRatings !== 1 ? "s" : ""}</div>
+						<div className="flex gap-3 mt-1">
+							<span>5⭐: {stats.ratings[5]}</span>
+							<span>4⭐: {stats.ratings[4]}</span>
+							<span>3⭐: {stats.ratings[3]}</span>
+							<span>2⭐: {stats.ratings[2]}</span>
+							<span>1⭐: {stats.ratings[1]}</span>
+						</div>
 					</div>
 				</div>
-			</div>
+			) : (
+				<div className="mt-4 text-sm text-slate-400">
+					No ratings yet. Play some games to receive feedback!
+				</div>
+			)}
 
 			{feedbackWithComments.length > 0 && (
 				<div className="mt-4">
