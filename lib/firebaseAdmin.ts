@@ -70,6 +70,7 @@ function normalizePrivateKey(privateKey: string): string {
 	// This handles cases like:
 	// - Double-escaped \n (as \\n - four chars) from some environments
 	// - Literal \n (as two chars: backslash + n) from .env files
+	// - Literal /n (forward slash + n) - a common typo or encoding error
 	// - Literal \r\n (Windows-style line endings)
 	// - Already actual newlines with \r\n or \r
 	// Process in order to handle double-escaped cases correctly
@@ -79,6 +80,9 @@ function normalizePrivateKey(privateKey: string): string {
 	         .replace(/\\r\\n/g, "\n")
 	         .replace(/\\n/g, "\n")
 	         .replace(/\\r/g, "\n")
+	         .replace(/\/n/g, "\n")  // Handle forward slash + n (common typo/encoding error)
+	         .replace(/\/r\/n/g, "\n")  // Handle forward slash versions of \r\n
+	         .replace(/\/r/g, "\n")  // Handle forward slash + r
 	         .replace(/\r\n/g, "\n")
 	         .replace(/\r/g, "\n");
 	
