@@ -54,8 +54,8 @@ function ensureFirebaseInitialized(): void {
     const maxIterations = 5; // Safety limit to prevent infinite loops
     
     while (privateKey !== prevKey && iterations < maxIterations) {
-      prevKey = privateKey;
       iterations++;
+      prevKey = privateKey;
       
       // Remove wrapping quotes (single or double) - must be both at start and end
       if ((privateKey.startsWith('"') && privateKey.endsWith('"')) || 

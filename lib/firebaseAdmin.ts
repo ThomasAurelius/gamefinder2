@@ -52,8 +52,8 @@ function normalizePrivateKey(privateKey: string): string {
 	const maxIterations = 5; // Safety limit to prevent infinite loops
 	
 	while (key !== prevKey && iterations < maxIterations) {
-		prevKey = key;
 		iterations++;
+		prevKey = key;
 		
 		// Remove wrapping quotes (single or double) - must be both at start and end
 		if ((key.startsWith('"') && key.endsWith('"')) || 
