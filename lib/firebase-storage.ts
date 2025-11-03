@@ -64,10 +64,18 @@ function ensureFirebaseInitialized(): void {
                            .replace(/\r\n/g, '\n')
                            .replace(/\r/g, '\n');
     
-    // Step 4: Final trim after normalization
+    // Step 4: Trim each individual line and remove empty lines
+    // This handles cases where PEM keys are pasted into Vercel with actual newlines,
+    // which may include blank lines that invalidate the PEM format
+    privateKey = privateKey.split('\n')
+                           .map(line => line.trim())
+                           .filter(line => line.length > 0)
+                           .join('\n');
+    
+    // Step 5: Final trim after normalization
     privateKey = privateKey.trim();
     
-    // Step 5: Validate that the private key has the expected format
+    // Step 6: Validate that the private key has the expected format
     if (!privateKey.includes('BEGIN PRIVATE KEY') || !privateKey.includes('END PRIVATE KEY')) {
       throw new Error('FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers.');
     }
