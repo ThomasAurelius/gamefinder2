@@ -156,7 +156,7 @@ export default function GameDetailClient({
                   <div>
                     <p className="text-sm font-medium text-sky-200">Payment Required</p>
                     <p className="text-xs text-slate-400 mt-1">
-                      Complete payment to confirm your spot (${session.costPerSession?.toFixed(2)})
+                      Complete payment to confirm your spot (${session.costPerSession?.toFixed(2) ?? '0.00'})
                     </p>
                   </div>
                   <Link
@@ -215,7 +215,7 @@ export default function GameDetailClient({
                 Cost
               </span>
               <span className="text-base font-medium text-sky-100">
-                ${session.costPerSession.toFixed(2)}
+                ${session.costPerSession?.toFixed(2) ?? '0.00'}
               </span>
             </div>
           )}

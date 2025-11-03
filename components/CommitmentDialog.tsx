@@ -126,7 +126,7 @@ export default function CommitmentDialog({
                       Payment Responsibility
                     </p>
                     <p className="text-sm text-slate-400 mt-1">
-                      You will pay the cost per session (${costPerSession.toFixed(2)}) <strong className="text-slate-300">prior to each session</strong>. Don&apos;t make us remind you each week.
+                      You will pay the cost per session (${costPerSession?.toFixed(2)}) <strong className="text-slate-300">prior to each session</strong>. Don&apos;t make us remind you each week.
                     </p>
                   </div>
                 </div>

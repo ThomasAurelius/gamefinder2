@@ -227,7 +227,7 @@ function GameSessionCard({
 								<p>
 									<span className="text-slate-500">Cost:</span>{" "}
 									<span className="text-slate-300">
-										${session.costPerSession.toFixed(2)}
+										${session.costPerSession?.toFixed(2) ?? '0.00'}
 										{isCampaign ? " per session" : ""}
 									</span>
 								</p>

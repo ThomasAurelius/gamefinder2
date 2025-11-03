@@ -315,7 +315,7 @@ export default function MarketplaceListingDetailPage() {
             <h1 className="text-3xl font-bold text-slate-100">{listing.title}</h1>
             {listing.price !== undefined && (
               <p className="mt-2 text-2xl font-semibold text-sky-400">
-                ${listing.price.toFixed(2)}
+                ${listing.price?.toFixed(2) ?? '0.00'}
               </p>
             )}
           </div>

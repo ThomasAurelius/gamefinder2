@@ -475,7 +475,7 @@ export default function PostGamePage() {
 							Payment Method
 						</h3>
 						<p className="text-xs text-slate-500">
-							Players will be required to pay ${costPerSession.toFixed(2)} for this single-session game using Stripe when they join.
+							Players will be required to pay ${costPerSession?.toFixed(2) ?? '0.00'} for this single-session game using Stripe when they join.
 						</p>
 						{!hasConnectAccount && (
 							<div className="mt-3 rounded-lg border border-amber-700/50 bg-amber-900/20 p-3">

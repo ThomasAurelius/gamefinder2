@@ -147,7 +147,7 @@ export default function PlayerFeedbackPage({
           <div className="flex items-center gap-2">
             <span className="text-3xl">🎮</span>
             <span className="text-3xl font-bold text-amber-400">
-              {stats.averageRating.toFixed(1)}
+              {stats.averageRating?.toFixed(1) ?? '0.0'}
             </span>
           </div>
           <div className="text-sm text-slate-400">

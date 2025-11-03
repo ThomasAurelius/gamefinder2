@@ -268,7 +268,7 @@ export default function SubscriptionsPage() {
 													Amount:
 												</span>{" "}
 												<span className="font-medium text-slate-300">
-													${subscription.amount.toFixed(2)}/
+													${subscription.amount?.toFixed(2) ?? '0.00'}/
 													{subscription.interval}
 												</span>
 											</div>
