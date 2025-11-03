@@ -121,7 +121,24 @@ function loadServiceAccount() {
 
 	if (projectId && clientEmail && privateKeyEnv) {
 		console.log("Using individual Firebase environment variables for Firebase Admin");
+		
+		// Validate client email format
+		if (!clientEmail.includes('@') || !clientEmail.includes('.iam.gserviceaccount.com')) {
+			throw new Error(
+				'FIREBASE_CLIENT_EMAIL is malformed. It should be in the format: your-service-account@your-project-id.iam.gserviceaccount.com'
+			);
+		}
+		
 		const normalizedPrivateKey = normalizePrivateKey(privateKeyEnv);
+		
+		// Validate that the private key has the expected PEM markers
+		if (!normalizedPrivateKey.includes('BEGIN PRIVATE KEY') || !normalizedPrivateKey.includes('END PRIVATE KEY')) {
+			throw new Error(
+				'FIREBASE_PRIVATE_KEY is malformed. It should contain "BEGIN PRIVATE KEY" and "END PRIVATE KEY" markers. ' +
+				'Please check your environment variable configuration.'
+			);
+		}
+		
 		return {
 			project_id: projectId,
 			client_email: clientEmail,
