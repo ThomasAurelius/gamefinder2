@@ -98,7 +98,7 @@ function ensureFirebaseInitialized(): void {
     
     // Validate client email format
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL!;
-    if (!clientEmail.includes('@') || !clientEmail.includes('.iam.gserviceaccount.com')) {
+    if (!clientEmail.includes('@') || !clientEmail.endsWith('.iam.gserviceaccount.com')) {
       throw new Error('FIREBASE_CLIENT_EMAIL is malformed. It should be in the format: your-service-account@your-project-id.iam.gserviceaccount.com');
     }
     

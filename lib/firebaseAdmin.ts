@@ -123,7 +123,7 @@ function loadServiceAccount() {
 		console.log("Using individual Firebase environment variables for Firebase Admin");
 		
 		// Validate client email format
-		if (!clientEmail.includes('@') || !clientEmail.includes('.iam.gserviceaccount.com')) {
+		if (!clientEmail.includes('@') || !clientEmail.endsWith('.iam.gserviceaccount.com')) {
 			throw new Error(
 				'FIREBASE_CLIENT_EMAIL is malformed. It should be in the format: your-service-account@your-project-id.iam.gserviceaccount.com'
 			);
