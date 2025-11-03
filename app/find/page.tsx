@@ -139,7 +139,7 @@ function GameSessionCard({
 						<p>
 							<span className="text-slate-500">Location:</span>{" "}
 							{session.location || session.zipCode}
-							{session.distance !== undefined && (
+							{session.distance !== undefined && session.distance !== null && (
 								<span className="ml-2 text-sky-400">
 									({session.distance.toFixed(1)} mi away)
 								</span>

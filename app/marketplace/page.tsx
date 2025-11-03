@@ -346,7 +346,7 @@ export default function MarketplacePage() {
 											</span>
 										</div>
 
-										{listing.distance !== undefined && (
+										{listing.distance !== undefined && listing.distance !== null && (
 											<span className="text-xs text-slate-500">
 												{listing.distance.toFixed(1)} mi
 											</span>
