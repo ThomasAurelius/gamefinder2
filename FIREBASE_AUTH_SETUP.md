@@ -2,6 +2,10 @@
 
 This application now uses Google Firebase Authentication for user login and registration with email/password.
 
+> **📚 For comprehensive Firebase configuration instructions, see [FIREBASE_CONFIGURATION_GUIDE.md](./FIREBASE_CONFIGURATION_GUIDE.md)**
+> 
+> This guide covers authentication setup. For detailed instructions on configuring Firebase Admin credentials (required for both authentication and file uploads), including troubleshooting and best practices, refer to the comprehensive configuration guide.
+
 ## Configuration
 
 ### Environment Variables

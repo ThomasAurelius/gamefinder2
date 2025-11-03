@@ -1,5 +1,7 @@
 # Firebase PEM Private Key Fix Summary
 
+> **📚 Note:** As of the latest update, Firebase Admin initialization has been unified across the entire application. For comprehensive configuration instructions, see [FIREBASE_CONFIGURATION_GUIDE.md](./FIREBASE_CONFIGURATION_GUIDE.md).
+
 ## Issue Description
 
 Users were experiencing the following error when uploading images via the `/api/upload` endpoint:

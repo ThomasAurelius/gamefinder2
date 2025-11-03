@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "validate:stripe": "node scripts/validate-stripe.js",
+    "validate:firebase": "node scripts/validate-firebase.js",
     "migrate:geocode-vendors": "tsx scripts/geocode-vendors.ts"
   },
   "dependencies": {

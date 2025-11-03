@@ -360,6 +360,8 @@ GCS_BUCKET_NAME=
 # (Optional) Twilio, Resend, etc.
 ```
 
+**Important:** For detailed Firebase configuration instructions (including multiple credential methods and troubleshooting), see [FIREBASE_CONFIGURATION_GUIDE.md](./FIREBASE_CONFIGURATION_GUIDE.md).
+
 ### Installation
 
 1. Clone the repository:
@@ -375,9 +377,13 @@ npm install
 
 3. Set up environment variables (see above)
 
-4. Validate Stripe configuration:
+4. Validate configurations:
 ```bash
+# Validate Stripe configuration
 npm run validate:stripe
+
+# Validate Firebase configuration
+npm run validate:firebase
 ```
 
 5. Run the development server:
