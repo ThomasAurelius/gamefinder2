@@ -18,20 +18,34 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your-firebase-app-id
 ```
 
 #### Server-Side Firebase Admin Configuration
+
+You have multiple options for providing Firebase Admin credentials:
+
+**Option 1: Individual Environment Variables (Recommended for Development)**
+```
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=your-service-account@your-project-id.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYour-Private-Key-Here\n-----END PRIVATE KEY-----"
+FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+```
+
+**Option 2: Inline JSON**
 ```
 FIREBASE_SERVICE_ACCOUNT_JSON='{"type":"service_account", "project_id": "...", ...}'
 ```
-Or alternatively use:
+
+**Option 3: Base64 Encoded JSON**
 ```
 FIREBASE_SERVICE_ACCOUNT_BASE64=<base64-encoded-service-account-json>
 ```
-Or:
+
+**Option 4: File Path**
 ```
 FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
 ```
 
 **Important Note About Private Keys:**
-When using `FIREBASE_SERVICE_ACCOUNT_JSON` or `FIREBASE_SERVICE_ACCOUNT_BASE64`, the private key field may contain literal `\n` strings instead of actual newlines. The system automatically normalizes these to proper PEM format, so you can use either:
+When using any of these methods, the private key field may contain literal `\n` strings instead of actual newlines. The system automatically normalizes these to proper PEM format, so you can use either:
 - Literal `\n`: `"-----BEGIN PRIVATE KEY-----\nMIIE...\n-----END PRIVATE KEY-----"`
 - Actual newlines (when possible in your environment)
 
@@ -50,7 +64,11 @@ For the service account (server-side):
 1. Go to Project Settings > Service Accounts
 2. Click "Generate new private key"
 3. Save the JSON file securely
-4. Use one of the three methods to provide the credentials (JSON string, Base64, or file path)
+4. Use one of the four methods to provide the credentials:
+   - **Individual variables**: Extract `project_id`, `client_email`, and `private_key` from the JSON and set as separate environment variables (recommended for development)
+   - **JSON string**: Set the entire JSON as `FIREBASE_SERVICE_ACCOUNT_JSON`
+   - **Base64**: Encode the JSON to base64 and set as `FIREBASE_SERVICE_ACCOUNT_BASE64`
+   - **File path**: Save the JSON file and set its path in `FIREBASE_SERVICE_ACCOUNT_PATH`
 
 ## How It Works
 
