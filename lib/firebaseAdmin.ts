@@ -62,7 +62,15 @@ function normalizePrivateKey(privateKey: string): string {
 	         .replace(/\r\n/g, "\n")
 	         .replace(/\r/g, "\n");
 	
-	// Step 4: Final trim after normalization
+	// Step 4: Trim each individual line and remove empty lines
+	// This handles cases where PEM keys are pasted into Vercel with actual newlines,
+	// which may include blank lines that invalidate the PEM format
+	key = key.split("\n")
+	         .map(line => line.trim())
+	         .filter(line => line.length > 0)
+	         .join("\n");
+	
+	// Step 5: Final trim after normalization
 	return key.trim();
 }
 
