@@ -262,7 +262,7 @@ export default function PlayerFeedbackPage({
 
       <div className="mt-8 rounded-lg border border-slate-700 bg-slate-800/50 p-4">
         <p className="text-sm text-slate-400">
-          💡 <strong>Note:</strong> Only you and admins can see feedback comments. 
+          💡 <strong>Note:</strong> Feedback comments are visible to everyone unless they have been flagged for review. 
           Flagged feedback is reviewed by admins who can accept or remove it.
         </p>
       </div>
