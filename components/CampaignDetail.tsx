@@ -789,6 +789,14 @@ export default function CampaignDetail({
 									{campaign.sessionsLeft}
 								</p>
 							)}
+							{campaign.partyLevel && (
+								<p>
+									<span className="text-slate-500">
+										Party Level:
+									</span>{" "}
+									{campaign.partyLevel}
+								</p>
+							)}
 							<p>
 								<span className="text-slate-500">
 									{hasCost ? "Cost per Session:" : "Cost:"}
@@ -898,6 +906,14 @@ export default function CampaignDetail({
 											Sessions Left:
 										</span>{" "}
 										{campaign.sessionsLeft}
+									</p>
+								)}
+								{campaign.partyLevel && (
+									<p>
+										<span className="text-slate-500">
+											Party Level:
+										</span>{" "}
+										{campaign.partyLevel}
 									</p>
 								)}
 								<p>
