@@ -22,16 +22,12 @@ export async function GET(
     // Get basic stats (public)
     const stats = await getPlayerFeedbackStats(playerId);
 
-    // Include comments only if requester is the player or an admin
-    if (userId && (userId === playerId || isAdmin)) {
-      const feedbackWithComments = await getPlayerFeedbackWithComments(playerId, isAdmin);
-      return NextResponse.json({
-        ...stats,
-        feedback: feedbackWithComments,
-      });
-    }
-
-    return NextResponse.json(stats);
+    // Include comments for everyone, but filter flagged comments for non-admins
+    const feedbackWithComments = await getPlayerFeedbackWithComments(playerId, isAdmin);
+    return NextResponse.json({
+      ...stats,
+      feedback: feedbackWithComments,
+    });
   } catch (error) {
     console.error("Failed to get player feedback stats", error);
     return NextResponse.json(
