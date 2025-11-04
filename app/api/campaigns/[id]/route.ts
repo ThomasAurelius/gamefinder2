@@ -76,6 +76,8 @@ export async function PUT(
       stripeClientSecret: body.stripeClientSecret,
       meetingFrequency: body.meetingFrequency,
       daysOfWeek: body.daysOfWeek,
+      safetyTools: body.safetyTools,
+      partyLevel: body.partyLevel,
     };
 
     const updatedCampaign = await updateCampaign(userId, id, payload);
