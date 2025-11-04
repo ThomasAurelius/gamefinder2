@@ -13,6 +13,7 @@ export type GameSessionPayload = {
   costPerSession?: number;
   stripeConnectAccountId?: string; // Host's Stripe Connect account ID for payment splitting
   vendorId?: string; // Vendor ID for the venue
+  partyLevel?: number; // Party level for the game
 };
 
 export type PlayerSignup = {
