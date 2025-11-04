@@ -47,6 +47,7 @@ type Campaign = {
 	hostAvatarUrl?: string;
 	vendorId?: string;
 	safetyTools?: string[];
+	partyLevel?: number;
 };
 
 type PendingPlayer = {

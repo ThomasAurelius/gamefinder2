@@ -47,6 +47,7 @@ type GameSession = {
   location?: string;
   createdAt: string;
   updatedAt: string;
+  partyLevel?: number;
 };
 
 type GameDetailClientProps = {
