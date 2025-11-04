@@ -50,6 +50,7 @@ export default function PostCampaignPage() {
 	const [selectedSafetyTools, setSelectedSafetyTools] = useState<string[]>([]);
 	const [customSafetyTools, setCustomSafetyTools] = useState<string[]>([]);
 	const [customSafetyToolInput, setCustomSafetyToolInput] = useState("");
+	const [partyLevel, setPartyLevel] = useState<number | ''>('');
 	
 	// Stripe payment state
 	const [clientSecret, setClientSecret] = useState<string>("");
@@ -250,6 +251,7 @@ export default function PostCampaignPage() {
 				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
 				isPrivate: isPrivate,
 				safetyTools: allSafetyTools.length > 0 ? allSafetyTools : undefined,
+				partyLevel: typeof partyLevel === 'number' ? partyLevel : (partyLevel ? parseInt(String(partyLevel)) : undefined),
 				}),
 			});
 
@@ -493,6 +495,31 @@ export default function PostCampaignPage() {
 						Maximum number of players that can join this campaign
 					</p>
 				</div>
+
+			<div className="space-y-2">
+				<label
+					htmlFor="partyLevel"
+					className="block text-sm font-medium text-slate-200"
+				>
+					Party Level
+				</label>
+				<input
+					id="partyLevel"
+					type="number"
+					min="1"
+					max="20"
+					value={partyLevel}
+					onChange={(e) => {
+						const value = e.target.value;
+						setPartyLevel(value === '' ? '' : parseInt(value));
+					}}
+					placeholder="e.g., 5"
+					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+				/>
+				<p className="text-xs text-slate-500">
+					Optional. The recommended party level for this campaign.
+				</p>
+			</div>
 
 			<div className="space-y-2">
 				<label

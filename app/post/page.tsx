@@ -41,6 +41,7 @@ export default function PostGamePage() {
 	
 	// Payment-related state
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
+	const [partyLevel, setPartyLevel] = useState<number | ''>('');
 	
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
@@ -192,6 +193,7 @@ export default function PostGamePage() {
 					zipCode: zipCode,
 					vendorId: vendorId || undefined,
 					costPerSession: typeof costPerSession === 'number' && costPerSession > 0 ? costPerSession : undefined,
+					partyLevel: typeof partyLevel === 'number' ? partyLevel : (partyLevel ? parseInt(String(partyLevel)) : undefined),
 				}),
 			});
 
@@ -422,6 +424,31 @@ export default function PostGamePage() {
 					/>
 					<p className="text-xs text-slate-500">
 						Maximum number of players that can join this session
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="partyLevel"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Party Level
+					</label>
+					<input
+						id="partyLevel"
+						type="number"
+						min="1"
+						max="20"
+						value={partyLevel}
+						onChange={(e) => {
+							const value = e.target.value;
+							setPartyLevel(value === '' ? '' : parseInt(value));
+						}}
+						placeholder="e.g., 5"
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						Optional. The recommended party level for this game.
 					</p>
 				</div>
 

@@ -23,6 +23,7 @@ export type CampaignPayload = {
   vendorId?: string; // Vendor ID for the venue
   isPrivate?: boolean; // Whether the campaign is private (invite-only)
   safetyTools?: string[]; // Safety tools for the campaign (e.g., X-Card, Lines and Veils, etc.)
+  partyLevel?: number; // Party level for the campaign
 };
 
 export type PlayerSignup = {

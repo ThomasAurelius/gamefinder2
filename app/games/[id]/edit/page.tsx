@@ -44,6 +44,7 @@ export default function EditGamePage() {
 	
 	// Payment-related state
 	const [costPerSession, setCostPerSession] = useState<number | ''>('');
+	const [partyLevel, setPartyLevel] = useState<number | ''>('');
 
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
@@ -86,6 +87,7 @@ export default function EditGamePage() {
 				setZipCode(game.zipCode || "");
 				setVendorId(game.vendorId || "");
 				setCostPerSession(game.costPerSession || '');
+				setPartyLevel(game.partyLevel || '');
 			} catch (err) {
 				setError(
 					err instanceof Error ? err.message : "Failed to load game"
@@ -219,6 +221,7 @@ export default function EditGamePage() {
 				zipCode: string;
 				costPerSession?: number;
 				vendorId?: string;
+				partyLevel?: number;
 			} = {
 				game: gameName,
 				date: selectedDate,
@@ -234,6 +237,16 @@ export default function EditGamePage() {
 			// Add costPerSession if it's set and greater than 0
 			if (typeof costPerSession === 'number' && costPerSession >= 0) {
 				requestBody.costPerSession = costPerSession;
+			}
+
+			// Add partyLevel if it's set
+			if (typeof partyLevel === 'number' && partyLevel > 0) {
+				requestBody.partyLevel = partyLevel;
+			} else if (partyLevel) {
+				const parsedPartyLevel = parseInt(String(partyLevel));
+				if (!isNaN(parsedPartyLevel) && parsedPartyLevel > 0) {
+					requestBody.partyLevel = parsedPartyLevel;
+				}
 			}
 
 			const response = await fetch(`/api/games/${gameId}`, {
@@ -468,6 +481,31 @@ export default function EditGamePage() {
 					/>
 					<p className="text-xs text-slate-500">
 						Maximum number of players that can join this session
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="partyLevel"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Party Level
+					</label>
+					<input
+						id="partyLevel"
+						type="number"
+						min="1"
+						max="20"
+						value={partyLevel}
+						onChange={(e) => {
+							const value = e.target.value;
+							setPartyLevel(value === '' ? '' : parseInt(value));
+						}}
+						placeholder="e.g., 5"
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						Optional. The recommended party level for this game.
 					</p>
 				</div>
 
