@@ -114,7 +114,7 @@ export async function getPlayerFeedbackStats(playerId: string): Promise<PlayerFe
 }
 
 /**
- * Get all feedback for a player (admin and player only)
+ * Get all feedback for a player (public)
  * Optionally filter out flagged feedback if not admin
  */
 export async function getPlayerFeedbackWithComments(
