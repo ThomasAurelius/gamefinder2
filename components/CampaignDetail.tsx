@@ -166,7 +166,7 @@ export default function CampaignDetail({
 						);
 						if (vendorResponse.ok) {
 							const vendorData = await vendorResponse.json();
-							setVendor(vendorData);
+							setVendor(vendorData.vendor);
 						}
 					} catch (vendorError) {
 						console.error("Error fetching vendor:", vendorError);
