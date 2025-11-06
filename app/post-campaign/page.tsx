@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS, SAFETY_TOOLS_OPTIONS } from "@/lib/constants";
+import {
+	GAME_OPTIONS,
+	TIME_SLOTS,
+	TIME_SLOT_GROUPS,
+	ROLE_OPTIONS,
+	DAYS_OF_WEEK,
+	MEETING_FREQUENCY_OPTIONS,
+	SAFETY_TOOLS_OPTIONS,
+} from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import VenueSelector from "@/components/VenueSelector";
 import ShareButtons from "@/components/ShareButtons";
@@ -28,7 +36,7 @@ export default function PostCampaignPage() {
 	const [selectedTimes, setSelectedTimes] = useState<string[]>([]);
 	const [selectedDate, setSelectedDate] = useState("");
 	const [description, setDescription] = useState("");
-	const [maxPlayers, setMaxPlayers] = useState<number | ''>(4);
+	const [maxPlayers, setMaxPlayers] = useState<number | "">(4);
 	const [submitted, setSubmitted] = useState(false);
 	const [error, setError] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,19 +46,21 @@ export default function PostCampaignPage() {
 	const [location, setLocation] = useState("");
 	const [zipCode, setZipCode] = useState("");
 	const [vendorId, setVendorId] = useState("");
-	const [postedCampaignId, setPostedCampaignId] = useState<string | null>(null);
-	
+	const [postedCampaignId, setPostedCampaignId] = useState<string | null>(
+		null
+	);
+
 	// Campaign-specific state
-	const [sessionsLeft, setSessionsLeft] = useState<number | ''>('');
+	const [sessionsLeft, setSessionsLeft] = useState<number | "">("");
 	const [classesNeeded, setClassesNeeded] = useState<string[]>([]);
-	const [costPerSession, setCostPerSession] = useState<number | ''>('');
+	const [costPerSession, setCostPerSession] = useState<number | "">("");
 	const [meetingFrequency, setMeetingFrequency] = useState("");
 	const [daysOfWeek, setDaysOfWeek] = useState<string[]>([]);
 	const [isPrivate, setIsPrivate] = useState(false);
 	const [selectedSafetyTools, setSelectedSafetyTools] = useState<string[]>([]);
 	const [customSafetyTools, setCustomSafetyTools] = useState<string[]>([]);
 	const [customSafetyToolInput, setCustomSafetyToolInput] = useState("");
-	
+
 	// Stripe payment state
 	const [clientSecret, setClientSecret] = useState<string>("");
 	const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -83,7 +93,11 @@ export default function PostCampaignPage() {
 	// Check Stripe Connect status when user sets a cost
 	useEffect(() => {
 		const checkConnectStatus = async () => {
-			if (typeof costPerSession === 'number' && costPerSession > 0 && !isCheckingConnect) {
+			if (
+				typeof costPerSession === "number" &&
+				costPerSession > 0 &&
+				!isCheckingConnect
+			) {
 				setIsCheckingConnect(true);
 				try {
 					const response = await fetch("/api/stripe/connect/status");
@@ -183,13 +197,13 @@ export default function PostCampaignPage() {
 			const newSelection = prev.includes(tool)
 				? prev.filter((item) => item !== tool)
 				: [...prev, tool];
-			
+
 			// Clear custom safety tools when "Other" is deselected
 			if (tool === "Other" && !newSelection.includes("Other")) {
 				setCustomSafetyTools([]);
 				setCustomSafetyToolInput("");
 			}
-			
+
 			return newSelection;
 		});
 	};
@@ -223,9 +237,10 @@ export default function PostCampaignPage() {
 					: selectedGame;
 
 			// Combine preset and custom safety tools, filtering out "Other" since it's just a UI trigger
-			const allSafetyTools = [...selectedSafetyTools, ...customSafetyTools].filter(
-				(tool) => tool !== "Other"
-			);
+			const allSafetyTools = [
+				...selectedSafetyTools,
+				...customSafetyTools,
+			].filter((tool) => tool !== "Other");
 
 			const response = await fetch("/api/campaigns", {
 				method: "POST",
@@ -237,19 +252,36 @@ export default function PostCampaignPage() {
 					date: selectedDate,
 					times: selectedTimes,
 					description: description,
-					maxPlayers: typeof maxPlayers === 'number' ? maxPlayers : parseInt(String(maxPlayers)) || 1,
+					maxPlayers:
+						typeof maxPlayers === "number"
+							? maxPlayers
+							: parseInt(String(maxPlayers)) || 1,
 					imageUrl: imageUrl,
 					location: location,
 					zipCode: zipCode,
 					vendorId: vendorId || undefined,
-				sessionsLeft: typeof sessionsLeft === 'number' ? sessionsLeft : (sessionsLeft ? parseInt(String(sessionsLeft)) : undefined),
-				classesNeeded: classesNeeded.length > 0 ? classesNeeded : undefined,
-				costPerSession: typeof costPerSession === 'number' ? costPerSession : (costPerSession ? parseFloat(String(costPerSession)) : undefined),
-				requiresPayment: (typeof costPerSession === 'number' && costPerSession > 0) || false,
-				meetingFrequency: meetingFrequency || undefined,
-				daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
-				isPrivate: isPrivate,
-				safetyTools: allSafetyTools.length > 0 ? allSafetyTools : undefined,
+					sessionsLeft:
+						typeof sessionsLeft === "number"
+							? sessionsLeft
+							: sessionsLeft
+								? parseInt(String(sessionsLeft))
+								: undefined,
+					classesNeeded:
+						classesNeeded.length > 0 ? classesNeeded : undefined,
+					costPerSession:
+						typeof costPerSession === "number"
+							? costPerSession
+							: costPerSession
+								? parseFloat(String(costPerSession))
+								: undefined,
+					requiresPayment:
+						(typeof costPerSession === "number" && costPerSession > 0) ||
+						false,
+					meetingFrequency: meetingFrequency || undefined,
+					daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
+					isPrivate: isPrivate,
+					safetyTools:
+						allSafetyTools.length > 0 ? allSafetyTools : undefined,
 				}),
 			});
 
@@ -273,13 +305,13 @@ export default function PostCampaignPage() {
 			setZipCode("");
 			setVendorId("");
 			setPostedCampaignId(null);
-			setSessionsLeft('');
+			setSessionsLeft("");
 			setClassesNeeded([]);
-			setCostPerSession('');
-			setMeetingFrequency('');
+			setCostPerSession("");
+			setMeetingFrequency("");
 			setDaysOfWeek([]);
 			setIsPrivate(false);
-			setClientSecret('');
+			setClientSecret("");
 			setShowPaymentForm(false);
 			setPaymentCompleted(false);
 			setSelectedSafetyTools([]);
@@ -303,7 +335,8 @@ export default function PostCampaignPage() {
 					Post a Campaign
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Create a multi-session campaign (1 or more sessions) and invite players to join.
+					Create a multi-session campaign (1 or more sessions) and invite
+					players to join.
 				</p>
 			</div>
 
@@ -434,6 +467,36 @@ export default function PostCampaignPage() {
 
 				<div className="space-y-2">
 					<label className="block text-sm font-medium text-slate-200">
+						Days of the Week
+					</label>
+					<p className="text-xs text-slate-400 mb-2">
+						Select which days the campaign typically meets
+					</p>
+					<div className="flex flex-wrap gap-2">
+						{DAYS_OF_WEEK.map((day) => (
+							<button
+								key={day}
+								type="button"
+								onClick={() => {
+									setDaysOfWeek((prev) =>
+										prev.includes(day)
+											? prev.filter((d) => d !== day)
+											: [...prev, day]
+									);
+								}}
+								className={tagButtonClasses(daysOfWeek.includes(day))}
+							>
+								{day}
+							</button>
+						))}
+					</div>
+					<p className="text-xs text-slate-500">
+						{daysOfWeek.length} day(s) selected
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label className="block text-sm font-medium text-slate-200">
 						Game Time <span className="text-red-400">*</span>
 					</label>
 					<p className="text-xs text-slate-400">
@@ -453,8 +516,12 @@ export default function PostCampaignPage() {
 											<button
 												key={slot}
 												type="button"
-												onClick={(e) => toggleTime(slot, e.shiftKey)}
-												className={tagButtonClasses(active, { size: "sm" })}
+												onClick={(e) =>
+													toggleTime(slot, e.shiftKey)
+												}
+												className={tagButtonClasses(active, {
+													size: "sm",
+												})}
 											>
 												{slot}
 											</button>
@@ -466,6 +533,31 @@ export default function PostCampaignPage() {
 					</div>
 					<p className="text-xs text-slate-500">
 						{selectedTimes.length} time slot(s) selected
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<label
+						htmlFor="meetingFrequency"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Meeting Frequency
+					</label>
+					<select
+						id="meetingFrequency"
+						value={meetingFrequency}
+						onChange={(e) => setMeetingFrequency(e.target.value)}
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					>
+						<option value="">Select frequency...</option>
+						{MEETING_FREQUENCY_OPTIONS.map((freq) => (
+							<option key={freq} value={freq}>
+								{freq}
+							</option>
+						))}
+					</select>
+					<p className="text-xs text-slate-500">
+						How often does this campaign meet?
 					</p>
 				</div>
 
@@ -484,7 +576,7 @@ export default function PostCampaignPage() {
 						value={maxPlayers}
 						onChange={(e) => {
 							const value = e.target.value;
-							setMaxPlayers(value === '' ? '' : parseInt(value));
+							setMaxPlayers(value === "" ? "" : parseInt(value));
 						}}
 						required
 						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
@@ -494,31 +586,33 @@ export default function PostCampaignPage() {
 					</p>
 				</div>
 
-			<div className="space-y-2">
-				<label
-					htmlFor="sessionsLeft"
-					className="block text-sm font-medium text-slate-200"
-				>
-					Number of Sessions
-				</label>
-				<input
-					id="sessionsLeft"
-					type="number"
-					min="1"
-					value={sessionsLeft}
-					onChange={(e) => {
-						const value = e.target.value;
-						setSessionsLeft(value === '' ? '' : parseInt(value));
-					}}
-					placeholder="e.g., 10"
-					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-				/>
-				<p className="text-xs text-slate-500">
-					How many sessions do you expect this campaign to run? Enter 1 for a single-session campaign, or a higher number for a multi-session campaign that requires a subscription.
-				</p>
-			</div>
+				<div className="space-y-2">
+					<label
+						htmlFor="sessionsLeft"
+						className="block text-sm font-medium text-slate-200"
+					>
+						Number of Sessions
+					</label>
+					<input
+						id="sessionsLeft"
+						type="number"
+						min="1"
+						value={sessionsLeft}
+						onChange={(e) => {
+							const value = e.target.value;
+							setSessionsLeft(value === "" ? "" : parseInt(value));
+						}}
+						placeholder="e.g., 10"
+						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+					/>
+					<p className="text-xs text-slate-500">
+						How many sessions do you expect this campaign to run? Enter 1
+						for a single-session campaign, or a higher number for a
+						multi-session campaign that requires a subscription.
+					</p>
+				</div>
 
-			<div className="space-y-2">
+				{/* <div className="space-y-2">
 				<label className="block text-sm font-medium text-slate-200">
 					Classes/Roles Needed
 				</label>
@@ -546,211 +640,185 @@ export default function PostCampaignPage() {
 				<p className="text-xs text-slate-500">
 					{classesNeeded.length} class(es) selected
 				</p>
-			</div>
+			</div> */}
 
-			{canPostPaidGames && (
-				<div className="space-y-2">
-					<label
-						htmlFor="costPerSession"
-						className="block text-sm font-medium text-slate-200"
-					>
-						Cost per Session
-					</label>
-					<input
-						id="costPerSession"
-						type="number"
-						min="0"
-						step="0.01"
-						value={costPerSession}
-						onChange={(e) => {
-							const value = e.target.value;
-							setCostPerSession(value === '' ? '' : parseFloat(value));
-						}}
-						placeholder="e.g., 0 for free, 5.00 for paid"
-						className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-					/>
-					<p className="text-xs text-slate-500">
-						The cost per session in dollars (0 for free campaigns)
-					</p>
-				</div>
-			)}
+				{canPostPaidGames && (
+					<div className="space-y-2">
+						<label
+							htmlFor="costPerSession"
+							className="block text-sm font-medium text-slate-200"
+						>
+							Cost per Session
+						</label>
+						<input
+							id="costPerSession"
+							type="number"
+							min="0"
+							step="0.01"
+							value={costPerSession}
+							onChange={(e) => {
+								const value = e.target.value;
+								setCostPerSession(
+									value === "" ? "" : parseFloat(value)
+								);
+							}}
+							placeholder="e.g., 0 for free, 5.00 for paid"
+							className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+						/>
+						<p className="text-xs text-slate-500">
+							The cost per session in dollars (0 for free campaigns)
+						</p>
+					</div>
+				)}
 
-			{!canPostPaidGames && !isLoadingProfile && (
-				<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
-					<h3 className="text-sm font-medium text-amber-200 mb-2">
-						Want to charge for game sessions?
-					</h3>
-					<p className="text-xs text-slate-400 mb-3">
-						Enable paid games to charge players for sessions. The platform will keep 15% of fees.
-					</p>
-					<Link
-						href="/terms-paid-games?from=post-campaign"
-						className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
-					>
-						Enable Paid Games
-					</Link>
-				</div>
-			)}
+				{!canPostPaidGames && !isLoadingProfile && (
+					<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
+						<h3 className="text-sm font-medium text-amber-200 mb-2">
+							Want to charge for game sessions?
+						</h3>
+						<p className="text-xs text-slate-400 mb-3">
+							Enable paid games to charge players for sessions. The
+							platform will keep 15% of fees.
+						</p>
+						<Link
+							href="/terms-paid-games?from=post-campaign"
+							className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+						>
+							Enable Paid Games
+						</Link>
+					</div>
+				)}
 
-			{costPerSession && typeof costPerSession === 'number' && costPerSession > 0 && (
-				<div className="space-y-4">
-					{!hasConnectAccount && (
-						<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
-							<div className="flex items-start gap-3">
-								<div className="rounded-full bg-amber-600/20 p-2 text-amber-400">
-									<svg
-										className="h-5 w-5"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-										/>
-									</svg>
+				{costPerSession &&
+					typeof costPerSession === "number" &&
+					costPerSession > 0 && (
+						<div className="space-y-4">
+							{!hasConnectAccount && (
+								<div className="rounded-xl border border-amber-700/50 bg-amber-900/20 p-4">
+									<div className="flex items-start gap-3">
+										<div className="rounded-full bg-amber-600/20 p-2 text-amber-400">
+											<svg
+												className="h-5 w-5"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+												/>
+											</svg>
+										</div>
+										<div className="flex-1">
+											<h3 className="text-sm font-medium text-amber-200 mb-1">
+												Complete Host Onboarding to Receive Payments
+											</h3>
+											<p className="text-xs text-slate-400 mb-3">
+												To receive payments for this campaign, you
+												need to set up your payout account.
+												You&apos;ll receive 85% of subscription
+												payments, with 15% going to platform fees.
+											</p>
+											<Link
+												href="/host/onboarding"
+												className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+											>
+												Set Up Payouts
+											</Link>
+										</div>
+									</div>
 								</div>
-								<div className="flex-1">
-									<h3 className="text-sm font-medium text-amber-200 mb-1">
-										Complete Host Onboarding to Receive Payments
-									</h3>
-									<p className="text-xs text-slate-400 mb-3">
-										To receive payments for this campaign, you need to set up your payout account.
-										You&apos;ll receive 85% of subscription payments, with 15% going to platform fees.
-									</p>
-									<Link
-										href="/host/onboarding"
-										className="inline-block rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+							)}
+
+							<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+								<h3 className="text-sm font-medium text-slate-200 mb-2">
+									Payment Setup
+								</h3>
+								<p className="text-xs text-slate-500 mb-4">
+									Players will be required to pay ${costPerSession}{" "}
+									{typeof sessionsLeft === "number" && sessionsLeft > 1
+										? "per session via subscription"
+										: "as a one-time payment"}{" "}
+									using Stripe when they join this campaign.
+								</p>
+								{!showPaymentForm && (
+									<button
+										type="button"
+										onClick={async () => {
+											try {
+												const isSubscription =
+													typeof sessionsLeft === "number" &&
+													sessionsLeft > 1;
+												// Create payment intent for the campaign owner to set up payment
+												const response = await fetch(
+													"/api/stripe/create-payment-intent",
+													{
+														method: "POST",
+														headers: {
+															"Content-Type": "application/json",
+														},
+														body: JSON.stringify({
+															amount: costPerSession,
+															campaignName:
+																selectedGame === "Other"
+																	? customGameName
+																	: selectedGame,
+															paymentType: isSubscription
+																? "subscription"
+																: "one_time",
+														}),
+													}
+												);
+
+												if (!response.ok) {
+													throw new Error(
+														"Failed to initialize payment"
+													);
+												}
+
+												const { clientSecret: secret } =
+													await response.json();
+												setClientSecret(secret);
+												setShowPaymentForm(true);
+											} catch (err) {
+												setError(
+													err instanceof Error
+														? err.message
+														: "Failed to initialize payment"
+												);
+											}
+										}}
+										className="w-full rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
 									>
-										Set Up Payouts
-									</Link>
-								</div>
+										Set Up Stripe Payment
+									</button>
+								)}
+								{showPaymentForm && clientSecret && (
+									<StripePaymentForm
+										clientSecret={clientSecret}
+										paymentMode={
+											typeof sessionsLeft === "number" &&
+											sessionsLeft > 1
+												? "subscription"
+												: "payment"
+										}
+										onSuccess={() => {
+											setPaymentCompleted(true);
+											setShowPaymentForm(false);
+										}}
+										onError={(error) => setError(error)}
+									/>
+								)}
+								{paymentCompleted && (
+									<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+										✓ Payment method verified and ready
+									</div>
+								)}
 							</div>
 						</div>
 					)}
-
-					<div className="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
-						<h3 className="text-sm font-medium text-slate-200 mb-2">
-							Payment Setup
-						</h3>
-						<p className="text-xs text-slate-500 mb-4">
-							Players will be required to pay ${costPerSession} {typeof sessionsLeft === 'number' && sessionsLeft > 1 ? 'per session via subscription' : 'as a one-time payment'} using Stripe when they join this campaign.
-						</p>
-                                                {!showPaymentForm && (
-                                                        <button
-                                                                type="button"
-                                                                onClick={async () => {
-                                                                        try {
-                                                                                const isSubscription =
-                                                                                        typeof sessionsLeft === "number" &&
-                                                                                        sessionsLeft > 1;
-                                                                                // Create payment intent for the campaign owner to set up payment
-                                                                                const response = await fetch("/api/stripe/create-payment-intent", {
-                                                                                        method: "POST",
-                                                                                        headers: { "Content-Type": "application/json" },
-                                                                                        body: JSON.stringify({
-                                                                                                amount: costPerSession,
-                                                                                                campaignName: selectedGame === "Other" ? customGameName : selectedGame,
-                                                                                                paymentType: isSubscription ? "subscription" : "one_time",
-                                                                                        }),
-                                                                                });
-
-                                                                                if (!response.ok) {
-                                                                                        throw new Error("Failed to initialize payment");
-										}
-										
-										const { clientSecret: secret } = await response.json();
-										setClientSecret(secret);
-										setShowPaymentForm(true);
-									} catch (err) {
-										setError(err instanceof Error ? err.message : "Failed to initialize payment");
-									}
-								}}
-								className="w-full rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-							>
-								Set Up Stripe Payment
-							</button>
-						)}
-                                                {showPaymentForm && clientSecret && (
-                                                        <StripePaymentForm
-                                                                clientSecret={clientSecret}
-                                                                paymentMode={
-                                                                        typeof sessionsLeft === "number" && sessionsLeft > 1
-                                                                                ? "subscription"
-                                                                                : "payment"
-                                                                }
-                                                                onSuccess={() => {
-                                                                        setPaymentCompleted(true);
-                                                                        setShowPaymentForm(false);
-                                                                }}
-								onError={(error) => setError(error)}
-							/>
-						)}
-						{paymentCompleted && (
-							<div className="rounded-xl border border-green-500/20 bg-green-500/10 px-4 py-3 text-sm text-green-400">
-								✓ Payment method verified and ready
-							</div>
-						)}
-					</div>
-				</div>
-			)}
-
-			<div className="space-y-2">
-				<label
-					htmlFor="meetingFrequency"
-					className="block text-sm font-medium text-slate-200"
-				>
-					Meeting Frequency
-				</label>
-				<select
-					id="meetingFrequency"
-					value={meetingFrequency}
-					onChange={(e) => setMeetingFrequency(e.target.value)}
-					className="w-full rounded-xl border border-slate-800 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-				>
-					<option value="">Select frequency...</option>
-					{MEETING_FREQUENCY_OPTIONS.map((freq) => (
-						<option key={freq} value={freq}>
-							{freq}
-						</option>
-					))}
-				</select>
-				<p className="text-xs text-slate-500">
-					How often does this campaign meet?
-				</p>
-			</div>
-
-			<div className="space-y-2">
-				<label className="block text-sm font-medium text-slate-200">
-					Days of the Week
-				</label>
-				<p className="text-xs text-slate-400 mb-2">
-					Select which days the campaign typically meets
-				</p>
-				<div className="flex flex-wrap gap-2">
-					{DAYS_OF_WEEK.map((day) => (
-						<button
-							key={day}
-							type="button"
-							onClick={() => {
-								setDaysOfWeek((prev) =>
-									prev.includes(day)
-										? prev.filter((d) => d !== day)
-										: [...prev, day]
-								);
-							}}
-							className={tagButtonClasses(daysOfWeek.includes(day))}
-						>
-							{day}
-						</button>
-					))}
-				</div>
-				<p className="text-xs text-slate-500">
-					{daysOfWeek.length} day(s) selected
-				</p>
-			</div>
 
 				<div className="space-y-2">
 					<label
@@ -823,7 +891,8 @@ export default function PostCampaignPage() {
 							Safety Tools
 						</h3>
 						<p className="text-sm text-slate-400">
-							Select the safety tools that will be used in this campaign to ensure a comfortable experience for all players.
+							Select the safety tools that will be used in this campaign
+							to ensure a comfortable experience for all players.
 						</p>
 					</div>
 
@@ -849,7 +918,9 @@ export default function PostCampaignPage() {
 								<input
 									type="text"
 									value={customSafetyToolInput}
-									onChange={(e) => setCustomSafetyToolInput(e.target.value)}
+									onChange={(e) =>
+										setCustomSafetyToolInput(e.target.value)
+									}
 									onKeyDown={(e) => {
 										if (e.key === "Enter") {
 											e.preventDefault();
@@ -904,7 +975,9 @@ export default function PostCampaignPage() {
 						</span>
 					</label>
 					<p className="text-xs text-slate-500 ml-6">
-						Private campaigns won&apos;t appear in the public campaign feed. Only you and invited players will be able to see and join it.
+						Private campaigns won&apos;t appear in the public campaign
+						feed. Only you and invited players will be able to see and
+						join it.
 					</p>
 				</div>
 
@@ -933,17 +1006,29 @@ export default function PostCampaignPage() {
 						<p className="text-sm text-green-400">
 							Campaign posted successfully!
 						</p>
-						{postedCampaignId && (() => {
-							const gameName = selectedGame === "Other" && customGameName ? customGameName : selectedGame;
-							const formattedDate = selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : 'TBD';
-							return (
-								<ShareButtons
-									url={`${typeof window !== 'undefined' ? window.location.origin : ''}/campaigns/${postedCampaignId}`}
-									title={`${gameName} - Campaign`}
-									description={`Join me for ${gameName} on ${formattedDate}!`}
-								/>
-							);
-						})()}
+						{postedCampaignId &&
+							(() => {
+								const gameName =
+									selectedGame === "Other" && customGameName
+										? customGameName
+										: selectedGame;
+								const formattedDate = selectedDate
+									? new Date(
+											selectedDate + "T00:00:00"
+										).toLocaleDateString("en-US", {
+											month: "numeric",
+											day: "numeric",
+											year: "numeric",
+										})
+									: "TBD";
+								return (
+									<ShareButtons
+										url={`${typeof window !== "undefined" ? window.location.origin : ""}/campaigns/${postedCampaignId}`}
+										title={`${gameName} - Campaign`}
+										description={`Join me for ${gameName} on ${formattedDate}!`}
+									/>
+								);
+							})()}
 					</div>
 				)}
 			</form>
