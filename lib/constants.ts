@@ -3,6 +3,15 @@ export const GAME_OPTIONS = [
 	"Pathfinder",
 	"Starfinder",
 	"Shadowdark",
+	"Blades in the Dark",
+	"Call of Cthulhu",
+	"Cyberpunk Red",
+	"Fate Core",
+	"Shadowrun",
+	"Vampire: The Masquerade",
+	"Warhammer Fantasy Roleplay",
+	"World of Darkness",
+	"Daggerheart",
 	"Other",
 ];
 
@@ -43,12 +52,7 @@ export const GAME_STYLE_OPTIONS = [
 	"Collaborative storytelling",
 ];
 
-export const SYSTEM_OPTIONS = [
-	"Foundry",
-	"Roll20",
-	"Discord",
-	"Other",
-];
+export const SYSTEM_OPTIONS = ["Foundry", "Roll20", "Discord", "Other"];
 
 export const DAYS_OF_WEEK = [
 	"Monday",
@@ -90,8 +94,11 @@ export const SAFETY_TOOLS_OPTIONS = [
  */
 export function mapGameToSystemKey(gameName: string): string | null {
 	const gameNameLower = gameName.toLowerCase().trim();
-	
-	if (gameNameLower.includes("dungeons") && gameNameLower.includes("dragons")) {
+
+	if (
+		gameNameLower.includes("dungeons") &&
+		gameNameLower.includes("dragons")
+	) {
 		return "dnd";
 	}
 	if (gameNameLower.includes("pathfinder")) {
@@ -103,7 +110,7 @@ export function mapGameToSystemKey(gameName: string): string | null {
 	if (gameNameLower.includes("shadowdark")) {
 		return "shadowdark";
 	}
-	
+
 	// For "Other" or unknown games, return null (show all characters)
 	return null;
 }
@@ -152,7 +159,9 @@ export function formatTimeSlotsByGroup(times: string[]): string {
 		const groupTimes = times.filter((time) => group.slots.includes(time));
 		if (groupTimes.length > 0) {
 			// Format times without AM/PM suffix for cleaner display
-			const formattedTimes = groupTimes.map((time) => time.replace(" AM", "").replace(" PM", ""));
+			const formattedTimes = groupTimes.map((time) =>
+				time.replace(" AM", "").replace(" PM", "")
+			);
 			groups.push(`${group.label}: ${formattedTimes.join(", ")}`);
 		}
 	}
