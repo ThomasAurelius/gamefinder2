@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getUserBasicInfo } from "@/lib/users";
 import { readProfile } from "@/lib/profile-db";
 import { getDisplayedUserBadges } from "@/lib/badges/db";
@@ -59,14 +60,20 @@ export default async function UserProfilePage({
               <p className="mt-1 text-sm text-slate-400">{profile.location}</p>
             )}
             <div className="mt-2 space-y-1">
-              <div className="flex items-center gap-1 text-xs text-slate-500">
+              <Link 
+                href={`/feedback/${userId}`}
+                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
                 <span>Host Rating:</span>
                 <HostRatingDisplay hostId={userId} showDetails={true} />
-              </div>
-              <div className="flex items-center gap-1 text-xs text-slate-500">
+              </Link>
+              <Link 
+                href={`/feedback/${userId}`}
+                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
                 <span>Player Rating:</span>
                 <PlayerRatingDisplay playerId={userId} showDetails={true} />
-              </div>
+              </Link>
             </div>
           </div>
         </div>

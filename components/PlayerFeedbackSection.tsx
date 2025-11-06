@@ -190,7 +190,7 @@ export default function PlayerFeedbackSection({
 			)}
 
 			<div className="mt-4 text-xs text-slate-500">
-				Only you and admins can see feedback comments
+				Feedback comments are visible to everyone unless flagged
 			</div>
 		</div>
 	);

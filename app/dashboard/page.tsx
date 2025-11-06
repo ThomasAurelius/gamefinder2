@@ -38,6 +38,7 @@ type GameSession = {
 	vendorId?: string;
 	vendorName?: string;
 	isPrivate?: boolean;
+	partyLevel?: number;
 };
 
 function GameSessionCard({
@@ -219,6 +220,14 @@ function GameSessionCard({
 								<span className="text-slate-500">Sessions:</span>{" "}
 								<span className="text-slate-300">
 									{session.sessionsLeft}
+								</span>
+							</p>
+						)}
+						{session.partyLevel !== undefined && (
+							<p>
+								<span className="text-slate-500">Party Level:</span>{" "}
+								<span className="text-slate-300">
+									{session.partyLevel}
 								</span>
 							</p>
 						)}
