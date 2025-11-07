@@ -3,7 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS, SAFETY_TOOLS_OPTIONS } from "@/lib/constants";
+import { GAME_OPTIONS, TIME_SLOTS, TIME_SLOT_GROUPS, ROLE_OPTIONS, DAYS_OF_WEEK, MEETING_FREQUENCY_OPTIONS, SAFETY_TOOLS_OPTIONS, PREFERENCE_OPTIONS, GAME_STYLE_OPTIONS } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import VenueSelector from "@/components/VenueSelector";
 
@@ -52,6 +52,8 @@ export default function EditCampaignPage() {
 	const [customSafetyTools, setCustomSafetyTools] = useState<string[]>([]);
 	const [customSafetyToolInput, setCustomSafetyToolInput] = useState("");
 	const [partyLevel, setPartyLevel] = useState<number | ''>('');
+	const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+	const [selectedGameStyle, setSelectedGameStyle] = useState<string[]>([]);
 
 	// User profile state
 	const [canPostPaidGames, setCanPostPaidGames] = useState(false);
@@ -107,6 +109,9 @@ export default function EditCampaignPage() {
 				);
 				setSelectedSafetyTools(presetSafetyTools);
 				setCustomSafetyTools(customSafetyToolsFromCampaign);
+				// Load preferences and game style
+				setSelectedPreferences(campaign.preferences || []);
+				setSelectedGameStyle(campaign.gameStyle || []);
 			} catch (err) {
 				setError(
 					err instanceof Error ? err.message : "Failed to load campaign"
@@ -227,6 +232,22 @@ export default function EditCampaignPage() {
 		setCustomSafetyTools((prev) => prev.filter((item) => item !== tool));
 	};
 
+	const togglePreference = (preference: string) => {
+		setSelectedPreferences((prev) =>
+			prev.includes(preference)
+				? prev.filter((item) => item !== preference)
+				: [...prev, preference]
+		);
+	};
+
+	const toggleGameStyle = (style: string) => {
+		setSelectedGameStyle((prev) =>
+			prev.includes(style)
+				? prev.filter((item) => item !== style)
+				: [...prev, style]
+		);
+	};
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError("");
@@ -267,6 +288,8 @@ export default function EditCampaignPage() {
 					daysOfWeek: daysOfWeek.length > 0 ? daysOfWeek : undefined,
 					safetyTools: allSafetyTools.length > 0 ? allSafetyTools : undefined,
 					partyLevel: typeof partyLevel === 'number' ? partyLevel : (partyLevel ? parseInt(String(partyLevel)) : undefined),
+					preferences: selectedPreferences.length > 0 ? selectedPreferences : undefined,
+					gameStyle: selectedGameStyle.length > 0 ? selectedGameStyle : undefined,
 				}),
 			});
 
@@ -823,6 +846,66 @@ export default function EditCampaignPage() {
 							)}
 						</div>
 					)}
+				</div>
+
+				<div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/20 p-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-slate-200">
+							Preferences
+						</h3>
+						<p className="text-sm text-slate-400">
+							Select gameplay preferences that describe your campaign style
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{PREFERENCE_OPTIONS.map((preference) => {
+							const active = selectedPreferences.includes(preference);
+							return (
+								<button
+									key={preference}
+									type="button"
+									onClick={() => togglePreference(preference)}
+									className={tagButtonClasses(active)}
+								>
+									{preference}
+								</button>
+							);
+						})}
+					</div>
+					<p className="text-xs text-slate-500">
+						{selectedPreferences.length} preference(s) selected
+					</p>
+				</div>
+
+				<div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/20 p-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-slate-200">
+							Game Style
+						</h3>
+						<p className="text-sm text-slate-400">
+							Select the play style and tools that will be used in this campaign
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{GAME_STYLE_OPTIONS.map((style) => {
+							const active = selectedGameStyle.includes(style);
+							return (
+								<button
+									key={style}
+									type="button"
+									onClick={() => toggleGameStyle(style)}
+									className={tagButtonClasses(active)}
+								>
+									{style}
+								</button>
+							);
+						})}
+					</div>
+					<p className="text-xs text-slate-500">
+						{selectedGameStyle.length} style(s) selected
+					</p>
 				</div>
 
 				<div className="flex gap-3">

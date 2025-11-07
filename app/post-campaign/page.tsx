@@ -9,6 +9,8 @@ import {
 	DAYS_OF_WEEK,
 	MEETING_FREQUENCY_OPTIONS,
 	SAFETY_TOOLS_OPTIONS,
+	PREFERENCE_OPTIONS,
+	GAME_STYLE_OPTIONS,
 } from "@/lib/constants";
 import CityAutocomplete from "@/components/CityAutocomplete";
 import VenueSelector from "@/components/VenueSelector";
@@ -61,6 +63,8 @@ export default function PostCampaignPage() {
 	const [customSafetyTools, setCustomSafetyTools] = useState<string[]>([]);
 	const [customSafetyToolInput, setCustomSafetyToolInput] = useState("");
 	const [partyLevel, setPartyLevel] = useState<number | "">("");
+	const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+	const [selectedGameStyle, setSelectedGameStyle] = useState<string[]>([]);
 
 	// Stripe payment state
 	const [clientSecret, setClientSecret] = useState<string>("");
@@ -225,6 +229,22 @@ export default function PostCampaignPage() {
 		setCustomSafetyTools((prev) => prev.filter((item) => item !== tool));
 	};
 
+	const togglePreference = (preference: string) => {
+		setSelectedPreferences((prev) =>
+			prev.includes(preference)
+				? prev.filter((item) => item !== preference)
+				: [...prev, preference]
+		);
+	};
+
+	const toggleGameStyle = (style: string) => {
+		setSelectedGameStyle((prev) =>
+			prev.includes(style)
+				? prev.filter((item) => item !== style)
+				: [...prev, style]
+		);
+	};
+
 	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		setError("");
@@ -283,6 +303,10 @@ export default function PostCampaignPage() {
 					isPrivate: isPrivate,
 					safetyTools:
 						allSafetyTools.length > 0 ? allSafetyTools : undefined,
+					preferences:
+						selectedPreferences.length > 0 ? selectedPreferences : undefined,
+					gameStyle:
+						selectedGameStyle.length > 0 ? selectedGameStyle : undefined,
 				}),
 			});
 
@@ -318,6 +342,8 @@ export default function PostCampaignPage() {
 			setSelectedSafetyTools([]);
 			setCustomSafetyTools([]);
 			setCustomSafetyToolInput("");
+			setSelectedPreferences([]);
+			setSelectedGameStyle([]);
 
 			setTimeout(() => setSubmitted(false), 5000);
 		} catch (err) {
@@ -986,6 +1012,66 @@ export default function PostCampaignPage() {
 							)}
 						</div>
 					)}
+				</div>
+
+				<div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/20 p-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-slate-200">
+							Preferences
+						</h3>
+						<p className="text-sm text-slate-400">
+							Select gameplay preferences that describe your campaign style
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{PREFERENCE_OPTIONS.map((preference) => {
+							const active = selectedPreferences.includes(preference);
+							return (
+								<button
+									key={preference}
+									type="button"
+									onClick={() => togglePreference(preference)}
+									className={tagButtonClasses(active)}
+								>
+									{preference}
+								</button>
+							);
+						})}
+					</div>
+					<p className="text-xs text-slate-500">
+						{selectedPreferences.length} preference(s) selected
+					</p>
+				</div>
+
+				<div className="space-y-4 rounded-2xl border border-slate-800/60 bg-slate-900/20 p-6">
+					<div className="space-y-1">
+						<h3 className="text-lg font-semibold text-slate-200">
+							Game Style
+						</h3>
+						<p className="text-sm text-slate-400">
+							Select the play style and tools that will be used in this campaign
+						</p>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{GAME_STYLE_OPTIONS.map((style) => {
+							const active = selectedGameStyle.includes(style);
+							return (
+								<button
+									key={style}
+									type="button"
+									onClick={() => toggleGameStyle(style)}
+									className={tagButtonClasses(active)}
+								>
+									{style}
+								</button>
+							);
+						})}
+					</div>
+					<p className="text-xs text-slate-500">
+						{selectedGameStyle.length} style(s) selected
+					</p>
 				</div>
 
 				<div className="space-y-2">

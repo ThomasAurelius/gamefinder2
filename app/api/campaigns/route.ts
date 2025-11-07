@@ -58,6 +58,8 @@ function parseCampaignPayload(data: unknown): CampaignPayload | null {
     isPrivate: typeof payload.isPrivate === "boolean" ? payload.isPrivate : undefined,
     safetyTools: Array.isArray(payload.safetyTools) ? payload.safetyTools as string[] : undefined,
     partyLevel: typeof payload.partyLevel === "number" ? payload.partyLevel : undefined,
+    preferences: Array.isArray(payload.preferences) ? payload.preferences as string[] : undefined,
+    gameStyle: Array.isArray(payload.gameStyle) ? payload.gameStyle as string[] : undefined,
   };
 }
 

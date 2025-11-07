@@ -48,6 +48,8 @@ type Campaign = {
 	vendorId?: string;
 	safetyTools?: string[];
 	partyLevel?: number;
+	preferences?: string[];
+	gameStyle?: string[];
 };
 
 type PendingPlayer = {
@@ -995,6 +997,42 @@ export default function CampaignDetail({
 									className="rounded-full bg-emerald-900/40 border border-emerald-700/50 px-3 py-1 text-xs text-emerald-200"
 								>
 									{tool}
+								</span>
+							))}
+						</div>
+					</div>
+				)}
+
+				{campaign.preferences && campaign.preferences.length > 0 && (
+					<div className="mt-4">
+						<h3 className="text-sm font-medium text-slate-300 mb-2">
+							Preferences
+						</h3>
+						<div className="flex flex-wrap gap-2">
+							{campaign.preferences.map((preference) => (
+								<span
+									key={preference}
+									className="rounded-full bg-purple-900/40 border border-purple-700/50 px-3 py-1 text-xs text-purple-200"
+								>
+									{preference}
+								</span>
+							))}
+						</div>
+					</div>
+				)}
+
+				{campaign.gameStyle && campaign.gameStyle.length > 0 && (
+					<div className="mt-4">
+						<h3 className="text-sm font-medium text-slate-300 mb-2">
+							Game Style
+						</h3>
+						<div className="flex flex-wrap gap-2">
+							{campaign.gameStyle.map((style) => (
+								<span
+									key={style}
+									className="rounded-full bg-indigo-900/40 border border-indigo-700/50 px-3 py-1 text-xs text-indigo-200"
+								>
+									{style}
 								</span>
 							))}
 						</div>

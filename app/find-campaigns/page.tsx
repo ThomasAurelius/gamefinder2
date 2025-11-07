@@ -46,6 +46,8 @@ type Campaign = {
 	vendorId?: string;
 	vendorName?: string;
 	isPrivate?: boolean;
+	preferences?: string[];
+	gameStyle?: string[];
 };
 
 const tagButtonClasses = (
@@ -221,6 +223,46 @@ function CampaignCard({
 								{campaign.waitlist.length}
 							</span>
 						</p>
+					)}
+					{campaign.preferences && campaign.preferences.length > 0 && (
+						<div className="mt-2">
+							<span className="text-slate-500 text-xs">Preferences:</span>{" "}
+							<div className="flex flex-wrap gap-1 mt-1">
+								{campaign.preferences.slice(0, 5).map((pref) => (
+									<span
+										key={pref}
+										className="inline-flex items-center rounded-full border border-purple-400/50 bg-purple-500/10 px-2 py-0.5 text-xs text-purple-200"
+									>
+										{pref}
+									</span>
+								))}
+								{campaign.preferences.length > 5 && (
+									<span className="text-xs text-slate-400">
+										+{campaign.preferences.length - 5} more
+									</span>
+								)}
+							</div>
+						</div>
+					)}
+					{campaign.gameStyle && campaign.gameStyle.length > 0 && (
+						<div className="mt-2">
+							<span className="text-slate-500 text-xs">Game Style:</span>{" "}
+							<div className="flex flex-wrap gap-1 mt-1">
+								{campaign.gameStyle.slice(0, 5).map((style) => (
+									<span
+										key={style}
+										className="inline-flex items-center rounded-full border border-indigo-400/50 bg-indigo-500/10 px-2 py-0.5 text-xs text-indigo-200"
+									>
+										{style}
+									</span>
+								))}
+								{campaign.gameStyle.length > 5 && (
+									<span className="text-xs text-slate-400">
+										+{campaign.gameStyle.length - 5} more
+									</span>
+								)}
+							</div>
+						</div>
 					)}
 					{campaign.description && (
 						<p className="mt-2 text-slate-300">{campaign.description}</p>

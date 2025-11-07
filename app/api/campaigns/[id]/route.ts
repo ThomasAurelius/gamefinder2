@@ -78,6 +78,8 @@ export async function PUT(
       daysOfWeek: body.daysOfWeek,
       safetyTools: body.safetyTools,
       partyLevel: body.partyLevel,
+      preferences: body.preferences,
+      gameStyle: body.gameStyle,
     };
 
     const updatedCampaign = await updateCampaign(userId, id, payload);
