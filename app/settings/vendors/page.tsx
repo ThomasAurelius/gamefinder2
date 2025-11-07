@@ -16,6 +16,7 @@ export default function VendorsAdminPage() {
 	);
 	const [updating, setUpdating] = useState(false);
 	const [message, setMessage] = useState<string | null>(null);
+	const [ownerUserId, setOwnerUserId] = useState<string>("");
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -153,6 +154,48 @@ export default function VendorsAdminPage() {
 			console.error(err);
 			setMessage(
 				err instanceof Error ? err.message : "Failed to update vendor"
+			);
+		} finally {
+			setUpdating(false);
+		}
+	};
+
+	const handleOwnershipChange = async (vendorId: string, newOwnerUserId: string) => {
+		setUpdating(true);
+		setMessage(null);
+
+		try {
+			const response = await fetch(`/api/vendors/${vendorId}`, {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					ownerUserId: newOwnerUserId || undefined,
+				}),
+			});
+
+			if (!response.ok) {
+				throw new Error("Failed to update vendor ownership");
+			}
+
+			const data = await response.json();
+			const updatedVendor = data.vendor;
+
+			// Update local state
+			setVendors((prev) =>
+				prev.map((v) => (v.id === vendorId ? updatedVendor : v))
+			);
+
+			if (selectedVendor?.id === vendorId) {
+				setSelectedVendor(updatedVendor);
+			}
+
+			setOwnerUserId("");
+			setMessage("Vendor ownership updated successfully");
+			setTimeout(() => setMessage(null), 3000);
+		} catch (err) {
+			console.error(err);
+			setMessage(
+				err instanceof Error ? err.message : "Failed to update vendor ownership"
 			);
 		} finally {
 			setUpdating(false);
@@ -360,13 +403,54 @@ export default function VendorsAdminPage() {
 								/vendor/{selectedVendor.id}
 							</Link>
 						</div>
+
+						{/* Ownership Information */}
+						<div>
+							<h3 className="text-sm font-medium text-slate-400">
+								Owner User ID
+							</h3>
+							<p className="mt-1 text-sm text-slate-200">
+								{selectedVendor.ownerUserId || (
+									<span className="text-amber-400">No owner assigned</span>
+								)}
+							</p>
+						</div>
 					</div>
 
 					{/* Admin Actions */}
-					<div className="space-y-3 border-t border-slate-700 pt-6">
+					<div className="space-y-4 border-t border-slate-700 pt-6">
 						<h3 className="text-sm font-medium text-amber-200">
 							Admin Actions
 						</h3>
+
+						{/* Ownership Assignment */}
+						<div className="space-y-2">
+							<h4 className="text-sm font-medium text-slate-300">
+								Assign Ownership
+							</h4>
+							<p className="text-xs text-slate-400">
+								Enter a user ID to assign this vendor to them. Leave empty and submit to remove ownership.
+							</p>
+							<div className="flex gap-2">
+								<input
+									type="text"
+									value={ownerUserId}
+									onChange={(e) => setOwnerUserId(e.target.value)}
+									placeholder="Enter user ID"
+									className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+									disabled={updating}
+								/>
+								<button
+									onClick={() => handleOwnershipChange(selectedVendor.id, ownerUserId)}
+									disabled={updating}
+									className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+								>
+									Update Owner
+								</button>
+							</div>
+						</div>
+
+						{/* Approval and Featured Actions */}
 						<div className="flex flex-wrap gap-3">
 							{!selectedVendor.isApproved && (
 								<button
@@ -484,6 +568,11 @@ export default function VendorsAdminPage() {
 										{vendor.isFeatured && (
 											<span className="rounded bg-sky-500/20 px-2 py-0.5 text-xs text-sky-400">
 												Featured
+											</span>
+										)}
+										{!vendor.ownerUserId && (
+											<span className="rounded bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400">
+												No Owner
 											</span>
 										)}
 									</div>

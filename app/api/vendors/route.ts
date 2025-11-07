@@ -73,7 +73,17 @@ export async function POST(request: Request) {
 
     const payload = await request.json();
     const vendorData = parseVendorPayload(payload);
-    const vendor = await createVendor(userId, vendorData);
+    
+    // Check if user is admin
+    const userIsAdmin = await isAdmin(userId);
+    
+    // If admin and ownerUserId is provided in payload, use it; otherwise use current user
+    let ownerUserId: string | undefined = userId;
+    if (userIsAdmin && payload.ownerUserId !== undefined) {
+      ownerUserId = payload.ownerUserId || undefined; // Allow empty string to mean no owner
+    }
+    
+    const vendor = await createVendor(ownerUserId, vendorData);
 
     return NextResponse.json({ vendor }, { status: 201 });
   } catch (error) {

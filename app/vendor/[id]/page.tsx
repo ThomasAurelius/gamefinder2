@@ -427,15 +427,22 @@ export default function VendorDetailsPage() {
 					</div>
 
 					<div className="space-y-2 text-sm text-slate-300">
-						<p>
-							Vendor Manager:{" "}
-							<Link
-								href={`/user/${vendor.ownerUserId}`}
-								className="text-sky-400 hover:underline"
-							>
-								{vendor.ownerUserId}
-							</Link>
-						</p>
+						{vendor.ownerUserId ? (
+							<p>
+								Vendor Manager:{" "}
+								<Link
+									href={`/user/${vendor.ownerUserId}`}
+									className="text-sky-400 hover:underline"
+								>
+									{vendor.ownerUserId}
+								</Link>
+							</p>
+						) : (
+							<p>
+								Vendor Manager:{" "}
+								<span className="text-slate-400 italic">Not assigned</span>
+							</p>
+						)}
 						{canEdit ? (
 							<button
 								type="button"

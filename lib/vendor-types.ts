@@ -13,7 +13,7 @@ export type VendorBase = {
   phone?: string;
   website?: string;
   hoursOfOperation: VendorHours;
-  ownerUserId: string;
+  ownerUserId?: string;
   isApproved: boolean;
   isFeatured: boolean;
   latitude?: number;

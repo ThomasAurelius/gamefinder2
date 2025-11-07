@@ -23,7 +23,7 @@ export type VendorDocument = {
 	phone?: string;
 	website?: string;
 	hoursOfOperation: VendorHours;
-	ownerUserId: string;
+	ownerUserId?: string;
 	isApproved: boolean;
 	isFeatured: boolean;
 	latitude?: number;
@@ -211,7 +211,7 @@ export async function getVendorById(
 }
 
 export async function createVendor(
-	ownerUserId: string,
+	ownerUserId: string | undefined,
 	payload: VendorPayload
 ): Promise<VendorResponse | null> {
 	const db = await getDb();
@@ -424,4 +424,36 @@ export async function getVendorsBasicInfo(
 	}
 
 	return result;
+}
+
+/**
+ * Update vendor ownership (admin only)
+ */
+export async function updateVendorOwnership(
+	vendorId: string,
+	newOwnerUserId: string | undefined
+): Promise<VendorResponse | null> {
+	if (!ObjectId.isValid(vendorId)) {
+		return null;
+	}
+
+	const db = await getDb();
+	const collection = db.collection<VendorDocument>("vendors");
+
+	const objectId = new ObjectId(vendorId);
+	const result = await collection.updateOne(
+		{ _id: objectId },
+		{ 
+			$set: { 
+				ownerUserId: newOwnerUserId,
+				updatedAt: new Date()
+			} 
+		}
+	);
+
+	if (result.matchedCount === 0) {
+		return null;
+	}
+
+	return getVendorById(vendorId);
 }

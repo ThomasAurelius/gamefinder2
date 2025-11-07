@@ -7,6 +7,7 @@ import {
   getVendorById,
   parseVendorPayload,
   updateVendor,
+  updateVendorOwnership,
 } from "@/lib/vendors";
 import { isAdmin } from "@/lib/admin";
 
@@ -123,5 +124,52 @@ export async function DELETE(_request: Request, context: RouteContext) {
   } catch (error) {
     console.error("Failed to delete vendor", error);
     return NextResponse.json({ error: "Unable to delete vendor" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request, context: RouteContext) {
+  try {
+    const { id } = await context.params;
+
+    if (!ObjectId.isValid(id)) {
+      return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+    }
+
+    const existingVendor = await getVendorById(id);
+    if (!existingVendor) {
+      return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+    }
+
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
+    if (!userId) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
+    const userIsAdmin = await isAdmin(userId);
+    if (!userIsAdmin) {
+      return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+    }
+
+    const payload = await request.json();
+
+    // Check if this is an ownership update
+    if (Object.prototype.hasOwnProperty.call(payload, "ownerUserId")) {
+      const newOwnerUserId = payload.ownerUserId || undefined;
+      const updatedVendor = await updateVendorOwnership(id, newOwnerUserId);
+
+      if (!updatedVendor) {
+        return NextResponse.json({ error: "Vendor not found" }, { status: 404 });
+      }
+
+      return NextResponse.json({ vendor: updatedVendor });
+    }
+
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  } catch (error) {
+    console.error("Failed to update vendor ownership", error);
+    const message = error instanceof Error ? error.message : "Unable to update vendor";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
