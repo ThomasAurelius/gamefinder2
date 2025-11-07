@@ -90,7 +90,7 @@ function LoadingState() {
 
 function VendorManagementContent() {
 	const searchParams = useSearchParams();
-	const editVendorId = searchParams?.get("edit");
+	const editVendorId = searchParams.get("edit");
 	
 	const [vendorId, setVendorId] = useState<string | null>(null);
 	const [primaryImage, setPrimaryImage] = useState("");
