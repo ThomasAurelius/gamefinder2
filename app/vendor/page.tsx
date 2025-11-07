@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -19,7 +19,76 @@ const tagButtonClasses = (active: boolean) => {
 	return `${base} border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500`;
 };
 
+// Helper function to populate form state with vendor data
+const populateVendorData = (
+	vendor: VendorResponse,
+	setters: {
+		setVendorId: (id: string) => void;
+		setPrimaryImage: (img: string) => void;
+		setImages: (imgs: string[]) => void;
+		setVendorName: (name: string) => void;
+		setDescription: (desc: string) => void;
+		setAddress1: (addr: string) => void;
+		setAddress2: (addr: string) => void;
+		setCity: (city: string) => void;
+		setState: (state: string) => void;
+		setZip: (zip: string) => void;
+		setPhone: (phone: string) => void;
+		setWebsite: (website: string) => void;
+		setHours: (hours: Record<string, string[]>) => void;
+		setIsApproved: (approved: boolean) => void;
+		setIsFeatured: (featured: boolean) => void;
+	}
+) => {
+	setters.setVendorId(vendor.id);
+	setters.setPrimaryImage(vendor.primaryImage || "");
+	setters.setImages(vendor.images ?? []);
+	setters.setVendorName(vendor.vendorName || "");
+	setters.setDescription(vendor.description || "");
+	setters.setAddress1(vendor.address1 || "");
+	setters.setAddress2(vendor.address2 || "");
+	setters.setCity(vendor.city || "");
+	setters.setState(vendor.state || "");
+	setters.setZip(vendor.zip || "");
+	setters.setPhone(vendor.phone || "");
+	setters.setWebsite(vendor.website || "");
+
+	const normalizedHours = createDefaultHours();
+	Object.entries(vendor.hoursOfOperation ?? {}).forEach(([day, slots]) => {
+		if (Array.isArray(slots)) {
+			normalizedHours[day] = sortTimeSlots(slots);
+		}
+	});
+	setters.setHours(normalizedHours);
+
+	setters.setIsApproved(vendor.isApproved);
+	setters.setIsFeatured(vendor.isFeatured);
+};
+
 export default function VendorManagementPage() {
+	return (
+		<Suspense fallback={<LoadingState />}>
+			<VendorManagementContent />
+		</Suspense>
+	);
+}
+
+function LoadingState() {
+	return (
+		<main className="space-y-8">
+			<header className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-lg shadow-slate-900/40">
+				<h1 className="text-2xl font-semibold text-slate-100">
+					Vendor Management
+				</h1>
+				<p className="mt-2 text-sm text-slate-400">
+					Loading...
+				</p>
+			</header>
+		</main>
+	);
+}
+
+function VendorManagementContent() {
 	const searchParams = useSearchParams();
 	const editVendorId = searchParams?.get("edit");
 	
@@ -58,23 +127,22 @@ export default function VendorManagementPage() {
 				// Check if user is admin
 				const authResponse = await fetch("/api/auth/me");
 				let userIsAdmin = false;
+				let currentUserId = "";
 				if (authResponse.ok) {
 					const authData = await authResponse.json();
 					userIsAdmin = authData.isAdmin;
+					currentUserId = authData.userId;
 					setIsAdmin(userIsAdmin);
 				}
 
-				// If editVendorId is provided in URL, fetch that specific vendor (admin only)
+				// If editVendorId is provided in URL, fetch that specific vendor
 				if (editVendorId) {
-					if (!userIsAdmin) {
-						setError("Admin access required to edit other vendors.");
-						return;
-					}
-					
 					const response = await fetch(`/api/vendors/${editVendorId}`);
 					if (!response.ok) {
 						if (response.status === 404) {
 							setError("Vendor not found.");
+						} else if (response.status === 403) {
+							setError("You don't have permission to edit this vendor.");
 						} else {
 							setError("Unable to load vendor information.");
 						}
@@ -85,31 +153,30 @@ export default function VendorManagementPage() {
 					const vendor: VendorResponse | undefined = data.vendor;
 
 					if (vendor) {
-						setVendorId(vendor.id);
-						setPrimaryImage(vendor.primaryImage || "");
-						setImages(vendor.images ?? []);
-						setVendorName(vendor.vendorName || "");
-						setDescription(vendor.description || "");
-						setAddress1(vendor.address1 || "");
-						setAddress2(vendor.address2 || "");
-						setCity(vendor.city || "");
-						setState(vendor.state || "");
-						setZip(vendor.zip || "");
-						setPhone(vendor.phone || "");
-						setWebsite(vendor.website || "");
-
-						const normalizedHours = createDefaultHours();
-						Object.entries(vendor.hoursOfOperation ?? {}).forEach(
-							([day, slots]) => {
-								if (Array.isArray(slots)) {
-									normalizedHours[day] = sortTimeSlots(slots);
-								}
-							}
-						);
-						setHours(normalizedHours);
-
-						setIsApproved(vendor.isApproved);
-						setIsFeatured(vendor.isFeatured);
+						// Check if user has permission to edit this vendor
+						const canEdit = userIsAdmin || vendor.ownerUserId === currentUserId;
+						if (!canEdit) {
+							setError("You don't have permission to edit this vendor.");
+							return;
+						}
+						
+						populateVendorData(vendor, {
+							setVendorId,
+							setPrimaryImage,
+							setImages,
+							setVendorName,
+							setDescription,
+							setAddress1,
+							setAddress2,
+							setCity,
+							setState,
+							setZip,
+							setPhone,
+							setWebsite,
+							setHours,
+							setIsApproved,
+							setIsFeatured,
+						});
 					}
 				} else {
 					// Otherwise, fetch the user's own vendor (if any)
@@ -127,31 +194,23 @@ export default function VendorManagementPage() {
 					const vendor: VendorResponse | undefined = data.vendors?.[0];
 
 					if (vendor) {
-						setVendorId(vendor.id);
-						setPrimaryImage(vendor.primaryImage || "");
-						setImages(vendor.images ?? []);
-						setVendorName(vendor.vendorName || "");
-						setDescription(vendor.description || "");
-						setAddress1(vendor.address1 || "");
-						setAddress2(vendor.address2 || "");
-						setCity(vendor.city || "");
-						setState(vendor.state || "");
-						setZip(vendor.zip || "");
-						setPhone(vendor.phone || "");
-						setWebsite(vendor.website || "");
-
-						const normalizedHours = createDefaultHours();
-						Object.entries(vendor.hoursOfOperation ?? {}).forEach(
-							([day, slots]) => {
-								if (Array.isArray(slots)) {
-									normalizedHours[day] = sortTimeSlots(slots);
-								}
-							}
-						);
-						setHours(normalizedHours);
-
-						setIsApproved(vendor.isApproved);
-						setIsFeatured(vendor.isFeatured);
+						populateVendorData(vendor, {
+							setVendorId,
+							setPrimaryImage,
+							setImages,
+							setVendorName,
+							setDescription,
+							setAddress1,
+							setAddress2,
+							setCity,
+							setState,
+							setZip,
+							setPhone,
+							setWebsite,
+							setHours,
+							setIsApproved,
+							setIsFeatured,
+						});
 					}
 				}
 			} catch (err) {

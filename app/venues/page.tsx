@@ -21,9 +21,12 @@ export default function VenuesPage() {
 				if (response.ok) {
 					const data = await response.json();
 					setAuth({ userId: data.userId, isAdmin: data.isAdmin });
+				} else {
+					setAuth(null);
 				}
 			} catch (error) {
 				console.error("Failed to fetch auth", error);
+				setAuth(null);
 			}
 		};
 
