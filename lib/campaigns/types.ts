@@ -24,6 +24,8 @@ export type CampaignPayload = {
   isPrivate?: boolean; // Whether the campaign is private (invite-only)
   safetyTools?: string[]; // Safety tools for the campaign (e.g., X-Card, Lines and Veils, etc.)
   partyLevel?: number; // Party level for the campaign
+  preferences?: string[]; // Game preferences (e.g., Rules-light, Story-focused, etc.)
+  gameStyle?: string[]; // Game style preferences (e.g., Theater of the mind, Grid-based combat, etc.)
 };
 
 export type PlayerSignup = {
