@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS } from "@/lib/constants";
 
@@ -19,6 +20,9 @@ const tagButtonClasses = (active: boolean) => {
 };
 
 export default function VendorManagementPage() {
+	const searchParams = useSearchParams();
+	const editVendorId = searchParams?.get("edit");
+	
 	const [vendorId, setVendorId] = useState<string | null>(null);
 	const [primaryImage, setPrimaryImage] = useState("");
 	const [images, setImages] = useState<string[]>([]);
@@ -44,51 +48,111 @@ export default function VendorManagementPage() {
 	const [saveSuccess, setSaveSuccess] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+	const [isAdmin, setIsAdmin] = useState(false);
 
 	useEffect(() => {
 		const fetchVendor = async () => {
 			setIsLoading(true);
 			setError(null);
 			try {
-				const response = await fetch("/api/vendors?owner=me");
-				if (!response.ok) {
-					if (response.status === 401) {
-						setError("You must be signed in to manage a vendor profile.");
-					} else {
-						setError("Unable to load vendor information.");
-					}
-					return;
+				// Check if user is admin
+				const authResponse = await fetch("/api/auth/me");
+				let userIsAdmin = false;
+				if (authResponse.ok) {
+					const authData = await authResponse.json();
+					userIsAdmin = authData.isAdmin;
+					setIsAdmin(userIsAdmin);
 				}
 
-				const data = await response.json();
-				const vendor: VendorResponse | undefined = data.vendors?.[0];
-
-				if (vendor) {
-					setVendorId(vendor.id);
-					setPrimaryImage(vendor.primaryImage || "");
-					setImages(vendor.images ?? []);
-					setVendorName(vendor.vendorName || "");
-					setDescription(vendor.description || "");
-					setAddress1(vendor.address1 || "");
-					setAddress2(vendor.address2 || "");
-					setCity(vendor.city || "");
-					setState(vendor.state || "");
-					setZip(vendor.zip || "");
-					setPhone(vendor.phone || "");
-					setWebsite(vendor.website || "");
-
-					const normalizedHours = createDefaultHours();
-					Object.entries(vendor.hoursOfOperation ?? {}).forEach(
-						([day, slots]) => {
-							if (Array.isArray(slots)) {
-								normalizedHours[day] = sortTimeSlots(slots);
-							}
+				// If editVendorId is provided in URL, fetch that specific vendor (admin only)
+				if (editVendorId) {
+					if (!userIsAdmin) {
+						setError("Admin access required to edit other vendors.");
+						return;
+					}
+					
+					const response = await fetch(`/api/vendors/${editVendorId}`);
+					if (!response.ok) {
+						if (response.status === 404) {
+							setError("Vendor not found.");
+						} else {
+							setError("Unable to load vendor information.");
 						}
-					);
-					setHours(normalizedHours);
+						return;
+					}
 
-					setIsApproved(vendor.isApproved);
-					setIsFeatured(vendor.isFeatured);
+					const data = await response.json();
+					const vendor: VendorResponse | undefined = data.vendor;
+
+					if (vendor) {
+						setVendorId(vendor.id);
+						setPrimaryImage(vendor.primaryImage || "");
+						setImages(vendor.images ?? []);
+						setVendorName(vendor.vendorName || "");
+						setDescription(vendor.description || "");
+						setAddress1(vendor.address1 || "");
+						setAddress2(vendor.address2 || "");
+						setCity(vendor.city || "");
+						setState(vendor.state || "");
+						setZip(vendor.zip || "");
+						setPhone(vendor.phone || "");
+						setWebsite(vendor.website || "");
+
+						const normalizedHours = createDefaultHours();
+						Object.entries(vendor.hoursOfOperation ?? {}).forEach(
+							([day, slots]) => {
+								if (Array.isArray(slots)) {
+									normalizedHours[day] = sortTimeSlots(slots);
+								}
+							}
+						);
+						setHours(normalizedHours);
+
+						setIsApproved(vendor.isApproved);
+						setIsFeatured(vendor.isFeatured);
+					}
+				} else {
+					// Otherwise, fetch the user's own vendor (if any)
+					const response = await fetch("/api/vendors?owner=me");
+					if (!response.ok) {
+						if (response.status === 401) {
+							setError("You must be signed in to manage a vendor profile.");
+						} else {
+							setError("Unable to load vendor information.");
+						}
+						return;
+					}
+
+					const data = await response.json();
+					const vendor: VendorResponse | undefined = data.vendors?.[0];
+
+					if (vendor) {
+						setVendorId(vendor.id);
+						setPrimaryImage(vendor.primaryImage || "");
+						setImages(vendor.images ?? []);
+						setVendorName(vendor.vendorName || "");
+						setDescription(vendor.description || "");
+						setAddress1(vendor.address1 || "");
+						setAddress2(vendor.address2 || "");
+						setCity(vendor.city || "");
+						setState(vendor.state || "");
+						setZip(vendor.zip || "");
+						setPhone(vendor.phone || "");
+						setWebsite(vendor.website || "");
+
+						const normalizedHours = createDefaultHours();
+						Object.entries(vendor.hoursOfOperation ?? {}).forEach(
+							([day, slots]) => {
+								if (Array.isArray(slots)) {
+									normalizedHours[day] = sortTimeSlots(slots);
+								}
+							}
+						);
+						setHours(normalizedHours);
+
+						setIsApproved(vendor.isApproved);
+						setIsFeatured(vendor.isFeatured);
+					}
 				}
 			} catch (err) {
 				console.error(err);
@@ -99,7 +163,7 @@ export default function VendorManagementPage() {
 		};
 
 		fetchVendor();
-	}, []);
+	}, [editVendorId]);
 
 	const totalSelectedHours = useMemo(
 		() =>
@@ -256,12 +320,12 @@ export default function VendorManagementPage() {
 		<main className="space-y-8">
 			<header className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-lg shadow-slate-900/40">
 				<h1 className="text-2xl font-semibold text-slate-100">
-					Vendor Application
+					{editVendorId ? "Edit Vendor" : "Vendor Application"}
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
-					Submit your vendor details for review. Once approved by an
-					administrator, your profile will appear in public listings. You
-					can update your information at any time.
+					{editVendorId
+						? "Update vendor details. Changes will be saved immediately."
+						: "Submit your vendor details for review. Once approved by an administrator, your profile will appear in public listings. You can update your information at any time."}
 				</p>
 				<div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
 					<span>
