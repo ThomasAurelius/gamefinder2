@@ -91,6 +91,7 @@ function LoadingState() {
 function VendorManagementContent() {
 	const searchParams = useSearchParams();
 	const editVendorId = searchParams.get("edit");
+	const isNewVenue = searchParams.get("new") === "true";
 	
 	const [vendorId, setVendorId] = useState<string | null>(null);
 	const [primaryImage, setPrimaryImage] = useState("");
@@ -178,8 +179,8 @@ function VendorManagementContent() {
 							setIsFeatured,
 						});
 					}
-				} else {
-					// Otherwise, fetch the user's own vendor (if any)
+				} else if (!isNewVenue) {
+					// Otherwise, fetch the user's own vendor (if any), unless this is a new venue creation
 					const response = await fetch("/api/vendors?owner=me");
 					if (!response.ok) {
 						if (response.status === 401) {
@@ -222,7 +223,7 @@ function VendorManagementContent() {
 		};
 
 		fetchVendor();
-	}, [editVendorId]);
+	}, [editVendorId, isNewVenue]);
 
 	const totalSelectedHours = useMemo(
 		() =>
@@ -379,12 +380,14 @@ function VendorManagementContent() {
 		<main className="space-y-8">
 			<header className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-lg shadow-slate-900/40">
 				<h1 className="text-2xl font-semibold text-slate-100">
-					{editVendorId ? "Edit Vendor" : "Vendor Application"}
+					{editVendorId ? "Edit Vendor" : isNewVenue ? "Add Venue" : "Vendor Application"}
 				</h1>
 				<p className="mt-2 text-sm text-slate-400">
 					{editVendorId
 						? "Update vendor details. Changes will be saved immediately."
-						: "Submit your vendor details for review. Once approved by an administrator, your profile will appear in public listings. You can update your information at any time."}
+						: isNewVenue
+							? "Add a new venue to the platform. Fill out the details below to create a new venue profile."
+							: "Submit your vendor details for review. Once approved by an administrator, your profile will appear in public listings. You can update your information at any time."}
 				</p>
 				<div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
 					<span>
