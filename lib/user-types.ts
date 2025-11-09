@@ -20,4 +20,5 @@ export type UserDocument = {
   ambassadorUntil?: Date; // Date until which ambassador status is valid
   onboardingCompleted?: boolean; // Whether user has completed the onboarding flow
   isGM?: boolean; // Whether user is a Game Master / Dungeon Master
+  referredBy?: string; // User ID of the person who referred this user
 };
