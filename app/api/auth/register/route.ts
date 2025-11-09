@@ -7,7 +7,7 @@ import { getAuth } from "firebase-admin/auth";
 
 export async function POST(request: NextRequest) {
   try {
-    const { idToken, email, name, isAmbassador } = await request.json();
+    const { idToken, email, name, isAmbassador, referredBy } = await request.json();
 
     if (!idToken || typeof idToken !== "string") {
       return NextResponse.json(
@@ -92,6 +92,11 @@ export async function POST(request: NextRequest) {
       userDocument.isAmbassador = true;
       // Set ambassador expiration to the configured date
       userDocument.ambassadorUntil = AMBASSADOR_EXPIRATION_DATE;
+    }
+
+    // Store referral information if provided
+    if (referredBy && typeof referredBy === "string" && referredBy.trim().length > 0) {
+      userDocument.referredBy = referredBy.trim();
     }
 
     const insertResult = await usersCollection.insertOne(userDocument);

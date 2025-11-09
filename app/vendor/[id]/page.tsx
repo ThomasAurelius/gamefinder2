@@ -428,15 +428,27 @@ export default function VendorDetailsPage() {
 
 					<div className="space-y-2 text-sm text-slate-300">
 						{vendor.ownerUserId ? (
-							<p>
-								Vendor Manager:{" "}
-								<Link
-									href={`/user/${vendor.ownerUserId}`}
-									className="text-sky-400 hover:underline"
-								>
-									{vendor.ownerUserId}
-								</Link>
-							</p>
+							auth?.userId === vendor.ownerUserId ? (
+								<p>
+									Is this your shop?{" "}
+									<Link
+										href="/support"
+										className="text-sky-400 hover:underline"
+									>
+										Contact Support to claim.
+									</Link>
+								</p>
+							) : (
+								<p>
+									Vendor Manager:{" "}
+									<Link
+										href={`/user/${vendor.ownerUserId}`}
+										className="text-sky-400 hover:underline"
+									>
+										{vendor.ownerUserId}
+									</Link>
+								</p>
+							)
 						) : (
 							<p>
 								Vendor Manager:{" "}
@@ -454,7 +466,7 @@ export default function VendorDetailsPage() {
 							</button>
 						) : null}
 						<Link
-							href="/vendor"
+							href={`/vendor?edit=${vendor.id}`}
 							className="inline-flex items-center rounded-lg border border-slate-700 px-4 py-2 text-slate-200 transition hover:border-slate-500"
 						>
 							Manage vendor

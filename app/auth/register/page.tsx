@@ -3,12 +3,14 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { registerWithEmail } from "@/lib/firebase-auth";
+import UserAutocomplete from "@/components/UserAutocomplete";
 
 type FormData = {
 	name: string;
 	email: string;
 	password: string;
 	confirmPassword: string;
+	referredBy: { id: string; name: string } | null;
 };
 
 function EyeIcon({ className }: { className?: string }) {
@@ -58,6 +60,7 @@ export default function RegisterPage() {
 		email: "",
 		password: "",
 		confirmPassword: "",
+		referredBy: null,
 	});
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -68,6 +71,13 @@ export default function RegisterPage() {
 		(field: keyof FormData) => (event: ChangeEvent<HTMLInputElement>) => {
 			setFormData((prev) => ({ ...prev, [field]: event.target.value }));
 		};
+
+	const handleReferralSelect = (user: { id: string; name: string }) => {
+		setFormData((prev) => ({ 
+			...prev, 
+			referredBy: user.id ? { id: user.id, name: user.name } : null 
+		}));
+	};
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -122,6 +132,7 @@ export default function RegisterPage() {
 						idToken,
 						name: trimmedName,
 						email: trimmedEmail,
+						referredBy: formData.referredBy?.id || undefined,
 					}),
 				});
 
@@ -271,6 +282,21 @@ export default function RegisterPage() {
 								<EyeIcon className="h-4 w-4" />
 							)}
 						</button>
+					</div>
+				</label>
+				<label className="block text-sm">
+					<span className="text-slate-200">Referred by (optional)</span>
+					<p className="mt-1 text-xs text-slate-400">
+						If someone referred you, search for their name here.
+					</p>
+					<div className="mt-2">
+						<UserAutocomplete
+							selectedUser={formData.referredBy}
+							onSelectUser={handleReferralSelect}
+							placeholder="Search for a user..."
+							className="w-full rounded-md border border-white/10 bg-slate-950 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+							id="referral-search"
+						/>
 					</div>
 				</label>
 				{error ? (
