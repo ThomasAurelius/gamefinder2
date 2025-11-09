@@ -72,7 +72,9 @@ export default function VenuesPage() {
 			<header className="rounded-2xl border border-slate-800 bg-slate-950/70 p-6 shadow-lg">
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<h1 className="text-3xl font-semibold text-slate-100">Venues</h1>
+						<h1 className="text-3xl font-semibold text-slate-100">
+							Venues
+						</h1>
 						<p className="mt-2 text-sm text-slate-400">
 							Explore gaming venues
 						</p>
@@ -163,7 +165,7 @@ function VendorCard({
 					<img
 						src={vendor.primaryImage}
 						alt={vendor.vendorName}
-						className="w-full h-48 object-cover rounded-lg mb-4"
+						className="w-full h-48 object-contain rounded-lg mb-4"
 					/>
 				)}
 				<h3 className="text-xl font-semibold text-slate-100 mb-2">
