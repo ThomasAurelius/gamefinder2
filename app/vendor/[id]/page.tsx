@@ -466,7 +466,7 @@ export default function VendorDetailsPage() {
 							</button>
 						) : null}
 						<Link
-							href="/vendor"
+							href={`/vendor?edit=${vendor.id}`}
 							className="inline-flex items-center rounded-lg border border-slate-700 px-4 py-2 text-slate-200 transition hover:border-slate-500"
 						>
 							Manage vendor
