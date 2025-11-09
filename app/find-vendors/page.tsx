@@ -439,7 +439,7 @@ function FindVendorsPageContent() {
 										{" "}
 										matching{" "}
 										<span className="text-sky-400">
-											"{vendorNameSearch}"
+											&quot;{vendorNameSearch}&quot;
 										</span>
 									</>
 								)}
