@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { AMBASSADOR_EXPIRATION_DISPLAY } from "@/lib/ambassador-config";
+import AmbassadorAcknowledgmentDialog from "@/components/AmbassadorAcknowledgmentDialog";
 
 type FormData = {
 	name: string;
@@ -78,6 +79,8 @@ export default function AmbassadorSignupPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [showAcknowledgmentDialog, setShowAcknowledgmentDialog] = useState(false);
+	const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
 
 	const handleChange =
 		(field: keyof FormData) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +112,20 @@ export default function AmbassadorSignupPage() {
 			return;
 		}
 
+		// Show acknowledgment dialog before proceeding
+		setPendingFormData({
+			name: trimmedName,
+			email: trimmedEmail,
+			password: trimmedPassword,
+			confirmPassword: trimmedConfirmPassword,
+		});
+		setShowAcknowledgmentDialog(true);
+	};
+
+	const handleAcknowledge = () => {
+		setShowAcknowledgmentDialog(false);
+		if (!pendingFormData) return;
+
 		setIsSubmitting(true);
 
 		(async () => {
@@ -119,9 +136,9 @@ export default function AmbassadorSignupPage() {
 						"Content-Type": "application/json",
 					},
 					body: JSON.stringify({
-						name: trimmedName,
-						email: trimmedEmail,
-						password: trimmedPassword,
+						name: pendingFormData.name,
+						email: pendingFormData.email,
+						password: pendingFormData.password,
 						isAmbassador: true,
 					}),
 				});
@@ -144,6 +161,7 @@ export default function AmbassadorSignupPage() {
 					password: "",
 					confirmPassword: "",
 				});
+				setPendingFormData(null);
 
 				window.setTimeout(() => {
 					router.push("/auth/login");
@@ -157,8 +175,19 @@ export default function AmbassadorSignupPage() {
 		})();
 	};
 
+	const handleCancelAcknowledgment = () => {
+		setShowAcknowledgmentDialog(false);
+		setPendingFormData(null);
+	};
+
 	return (
 		<div className="mx-auto max-w-5xl space-y-8 py-8">
+			{showAcknowledgmentDialog && (
+				<AmbassadorAcknowledgmentDialog
+					onAcknowledge={handleAcknowledge}
+					onCancel={handleCancelAcknowledgment}
+				/>
+			)}
 			{/* Hero Section */}
 			<div className="rounded-3xl border-2 border-amber-500/50 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 p-8 shadow-2xl">
 				<div className="text-center space-y-4">
@@ -210,7 +239,7 @@ export default function AmbassadorSignupPage() {
 									Locked in at today&apos;s rates until 2028!
 								</p>
 								<p className="text-sm text-slate-300">
-									Your fees will not go up until 2028! While we don't
+									Your fees will not go up until 2028! While we don&apos;t
 									currently plan to change the rates, you can rest easy
 									knowing your ambassador status protects you from any
 									future increases.
