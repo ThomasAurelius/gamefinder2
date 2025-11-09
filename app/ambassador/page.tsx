@@ -210,10 +210,10 @@ export default function AmbassadorSignupPage() {
 									Locked in at today&apos;s rates until 2028!
 								</p>
 								<p className="text-sm text-slate-300">
-									Your fees will not go up until 2028! While we don't
-									currently plan to change the rates, you can rest easy
-									knowing your ambassador status protects you from any
-									future increases.
+									Your fees will not go up until 2028! While we
+									don&apos;t currently plan to change the rates, you
+									can rest easy knowing your ambassador status protects
+									you from any future increases.
 								</p>
 							</div>
 						</li>
