@@ -410,7 +410,18 @@ export default function VendorsAdminPage() {
 								Owner User ID
 							</h3>
 							<p className="mt-1 text-sm text-slate-200">
-								{selectedVendor.ownerUserId || (
+								{selectedVendor.ownerUserId === "68de80375a907e2a8ad5bf36" ? (
+									<a
+										href="https://discord.gg/Nx9jPfn6Sb"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-sky-400 hover:underline"
+									>
+										Is this your shop? Contact Support to claim.
+									</a>
+								) : selectedVendor.ownerUserId ? (
+									selectedVendor.ownerUserId
+								) : (
 									<span className="text-amber-400">No owner assigned</span>
 								)}
 							</p>
