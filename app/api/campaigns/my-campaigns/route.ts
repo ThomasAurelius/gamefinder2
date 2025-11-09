@@ -16,8 +16,8 @@ export async function GET() {
       );
     }
     
-    // Fetch campaigns where user is hosting or participating
-    const campaigns = await listCampaigns({ userFilter: userId });
+    // Fetch campaigns where user is hosting or participating (including past campaigns)
+    const campaigns = await listCampaigns({ userFilter: userId, includePast: true });
     
     // Fetch host information for all campaigns
     const hostIds = [...new Set(campaigns.map(c => c.userId))];
