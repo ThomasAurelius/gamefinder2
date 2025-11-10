@@ -68,11 +68,12 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
 					<p>
 						<span className="text-slate-500">Location:</span>{" "}
 						{vendor.city}, {vendor.state} {vendor.zip}
-						{vendor.distance !== undefined && vendor.distance !== null && (
-							<span className="ml-2 text-sky-400">
-								({vendor.distance.toFixed(1)} mi away)
-							</span>
-						)}
+						{vendor.distance !== undefined &&
+							vendor.distance !== null && (
+								<span className="ml-2 text-sky-400">
+									({vendor.distance.toFixed(1)} mi away)
+								</span>
+							)}
 					</p>
 					{vendor.phone && (
 						<p>
@@ -144,7 +145,7 @@ function FindVendorsPageContent() {
 						const profileResponse = await fetch("/api/profile");
 						if (profileResponse.ok) {
 							const profile = await profileResponse.json();
-							
+
 							// If user has a zipcode and coordinates, calculate distances
 							if (profile.latitude && profile.longitude) {
 								vendorsList = vendorsList
@@ -166,7 +167,10 @@ function FindVendorsPageContent() {
 											return a.isFeatured ? -1 : 1;
 										}
 										// Then by distance (if available)
-										if (a.distance !== undefined && b.distance !== undefined) {
+										if (
+											a.distance !== undefined &&
+											b.distance !== undefined
+										) {
 											return a.distance - b.distance;
 										}
 										// Vendors with distance come before those without
@@ -186,7 +190,10 @@ function FindVendorsPageContent() {
 							}
 						}
 					} catch (error) {
-						console.error("Failed to fetch profile for distance calculation:", error);
+						console.error(
+							"Failed to fetch profile for distance calculation:",
+							error
+						);
 					}
 
 					setAllVendors(vendorsList);
@@ -238,14 +245,15 @@ function FindVendorsPageContent() {
 
 			// Filter by location/zipcode
 			if (locationSearch.trim() || zipCodeSearch.trim()) {
-				const searchLocation = locationSearch.trim() || zipCodeSearch.trim();
-				
+				const searchLocation =
+					locationSearch.trim() || zipCodeSearch.trim();
+
 				// Try to geocode the search location
 				try {
 					const response = await fetch(
 						`/api/geocode?location=${encodeURIComponent(searchLocation)}`
 					);
-					
+
 					if (response.ok) {
 						const data = await response.json();
 						if (data.latitude && data.longitude) {
@@ -269,7 +277,10 @@ function FindVendorsPageContent() {
 								})
 								.filter((vendor) => {
 									// Only include vendors with coordinates within radius
-									return vendor.distance !== undefined && vendor.distance <= radius;
+									return (
+										vendor.distance !== undefined &&
+										vendor.distance <= radius
+									);
 								});
 
 							// Sort by featured first, then distance
@@ -277,7 +288,10 @@ function FindVendorsPageContent() {
 								if (a.isFeatured !== b.isFeatured) {
 									return a.isFeatured ? -1 : 1;
 								}
-								if (a.distance !== undefined && b.distance !== undefined) {
+								if (
+									a.distance !== undefined &&
+									b.distance !== undefined
+								) {
 									return a.distance - b.distance;
 								}
 								return 0;
@@ -303,10 +317,11 @@ function FindVendorsPageContent() {
 			<div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<div>
 					<h1 className="text-2xl font-semibold text-slate-100">
-						Find Vendors
+						Find Venues
 					</h1>
 					<p className="mt-2 text-sm text-slate-400">
-						Search for gaming venues and stores by name, location, or zipcode
+						Search for gaming venues and stores by name, location, or
+						zipcode
 					</p>
 				</div>
 			</div>
@@ -339,7 +354,7 @@ function FindVendorsPageContent() {
 								htmlFor="vendor-name-search"
 								className="block text-sm font-medium text-slate-200"
 							>
-								Vendor Name
+								Venue Name
 							</label>
 							<input
 								id="vendor-name-search"
@@ -486,15 +501,16 @@ function FindVendorsPageContent() {
 			{!hasSearched && (
 				<div className="rounded-xl border border-slate-800/60 bg-slate-900/40 p-6">
 					<h2 className="text-lg font-semibold text-slate-100">
-						All Vendors
+						All Venues
 					</h2>
 					<p className="mt-2 text-sm text-slate-400">
-						Browse all approved vendors, ordered by distance from your location
+						Browse all approved venues, ordered by distance from your
+						location
 					</p>
 
 					{isLoadingVendors ? (
 						<p className="mt-4 text-sm text-slate-500">
-							Loading vendors...
+							Loading venues...
 						</p>
 					) : allVendors.length > 0 ? (
 						<div className="mt-4 space-y-3 max-w-3xl mx-auto">
@@ -504,7 +520,7 @@ function FindVendorsPageContent() {
 						</div>
 					) : (
 						<p className="mt-4 text-sm text-slate-500">
-							No vendors available.
+							No venues available.
 						</p>
 					)}
 				</div>
