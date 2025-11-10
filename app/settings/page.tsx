@@ -795,6 +795,21 @@ export default function SettingsPage() {
 
 					<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
 						<h2 className="text-sm font-medium text-slate-200">
+							Referrals
+						</h2>
+						<p className="mt-2 text-xs text-slate-400">
+							View users who signed up with you as their referrer.
+						</p>
+						<Link
+							href="/settings/referrals"
+							className="mt-3 inline-block rounded-lg bg-gradient-to-r from-amber-500 via-purple-500 to-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:from-amber-400 hover:via-purple-400 hover:to-indigo-400"
+						>
+							View Referrals
+						</Link>
+					</div>
+
+					<div className="rounded-lg border border-slate-700/50 bg-slate-800/30 p-4">
+						<h2 className="text-sm font-medium text-slate-200">
 							Paid Games
 						</h2>
 						<p className="mt-2 text-xs text-slate-400">
