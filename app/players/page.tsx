@@ -18,7 +18,6 @@ type Player = {
 	name: string;
 	commonName: string;
 	location: string;
-	primaryRole: string;
 	bio: string;
 	favoriteGames: string[];
 	avatarUrl?: string;
@@ -31,8 +30,6 @@ type Player = {
 		color?: string;
 	}>;
 };
-
-const ROLE_OPTIONS = ["Healer", "Damage", "Support", "DM", "Other"];
 
 const tagButtonClasses = (
 	active: boolean,
@@ -103,15 +100,11 @@ function PlayerCard({ player }: { player: Player }) {
 							)}
 						</p>
 					)}
-					{player.primaryRole && (
-						<p className="mt-1 text-sm text-sky-400">
-							<span className="text-slate-500">Role:</span>{" "}
-							{player.primaryRole}
-							{player.isGM && (
-								<span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300 border border-amber-500/30">
-									GM
-								</span>
-							)}
+					{player.isGM && (
+						<p className="mt-1 text-sm">
+							<span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300 border border-amber-500/30">
+								GM
+							</span>
 						</p>
 					)}
 					{player.bio && (
@@ -149,7 +142,6 @@ export default function PlayersPage() {
 	const [isSearchFormOpen, setIsSearchFormOpen] = useState(true);
 
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedRole, setSelectedRole] = useState("");
 	const [selectedGames, setSelectedGames] = useState<string[]>([]);
 	const [customGameName, setCustomGameName] = useState("");
 	const [locationSearch, setLocationSearch] = useState("");
@@ -193,7 +185,6 @@ export default function PlayersPage() {
 		try {
 			const params = new URLSearchParams();
 			if (searchQuery) params.append("search", searchQuery);
-			if (selectedRole) params.append("role", selectedRole);
 
 			// Build games list, replacing "Other" with custom game name if provided
 			const gamesToSearch = selectedGames
@@ -372,29 +363,6 @@ export default function PlayersPage() {
 								</select>
 							</div>
 						)}
-
-						{/* Role Filter */}
-						<div>
-							<label
-								htmlFor="role"
-								className="mb-2 block text-sm font-medium text-slate-300"
-							>
-								Primary Role
-							</label>
-							<select
-								id="role"
-								value={selectedRole}
-								onChange={(e) => setSelectedRole(e.target.value)}
-								className="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50"
-							>
-								<option value="">All Roles</option>
-								{ROLE_OPTIONS.map((role) => (
-									<option key={role} value={role}>
-										{role}
-									</option>
-								))}
-							</select>
-						</div>
 
 						{/* GM Status Filter */}
 						<div>
@@ -636,7 +604,6 @@ export default function PlayersPage() {
 								<span className="text-sky-400">{players.length}</span>{" "}
 								{players.length === 1 ? "player" : "players"}
 								{(searchQuery ||
-									selectedRole ||
 									selectedGames.length > 0 ||
 									selectedDayOfWeek ||
 									selectedTimeSlot ||

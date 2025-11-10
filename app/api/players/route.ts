@@ -8,7 +8,6 @@ export type PlayerSearchResult = {
   name: string;
   commonName: string;
   location: string;
-  primaryRole: string;
   bio: string;
   favoriteGames: string[];
   avatarUrl?: string;
@@ -26,7 +25,6 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("search") || "";
-    const role = searchParams.get("role") || "";
     const game = searchParams.get("game") || "";
     const locationSearch = searchParams.get("location") || "";
     const radiusMiles = parseFloat(searchParams.get("radius") || "50");
@@ -54,11 +52,6 @@ export async function GET(request: Request) {
         { "profile.commonName": { $regex: searchQuery, $options: "i" } },
         { "profile.location": { $regex: searchQuery, $options: "i" } },
       ];
-    }
-
-    // Add role filter
-    if (role) {
-      filter["profile.primaryRole"] = role;
     }
 
     // Add game filter (single game for backward compatibility or multiple games)
@@ -112,7 +105,6 @@ export async function GET(request: Request) {
           name: 1,
           "profile.commonName": 1,
           "profile.location": 1,
-          "profile.primaryRole": 1,
           "profile.bio": 1,
           "profile.favoriteGames": 1,
           "profile.avatarUrl": 1,
@@ -129,7 +121,6 @@ export async function GET(request: Request) {
       name: user.name || "Unknown Player",
       commonName: user.profile?.commonName || "",
       location: user.profile?.location || "",
-      primaryRole: user.profile?.primaryRole || "",
       bio: user.profile?.bio || "",
       favoriteGames: user.profile?.favoriteGames || [],
       avatarUrl: user.profile?.avatarUrl || undefined,
