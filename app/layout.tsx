@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import Link from "next/link";
 import StructuredData from "@/components/StructuredData";
 import FeaturedVendorsFeed from "@/components/FeaturedVendorsFeed";
+import { IdleRecoveryHandler } from "@/components/IdleRecoveryHandler";
 
 export const metadata: Metadata = {
 	title: "The Gathering Call - Find Board Games, D&D, Pathfinder & TTRPG Sessions",
@@ -65,9 +66,10 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en" className="bg-slate-950">
-			<body className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
-				<StructuredData />
-				<Navbar />
+                        <body className="min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden">
+                                <StructuredData />
+                                <IdleRecoveryHandler />
+                                <Navbar />
 				<div className="mx-auto max-w-[1800px] px-4 py-10 sm:px-6 flex">
 					<DashboardSidebar />
 					<main className="flex-1 justify-center mx-auto max-w-[900px] min-w-0">
