@@ -35,7 +35,9 @@ export async function GET() {
 		// Find all users who have a referrer
 		const referredUsers = await usersCollection
 			.find(
-				{ referredBy: { $exists: true, $ne: null, $ne: "" } },
+				{
+					referredBy: { $exists: true, $ne: "" },
+				},
 				{
 					projection: {
 						_id: 1,
@@ -55,7 +57,7 @@ export async function GET() {
 			...new Set(
 				referredUsers
 					.map((user) => user.referredBy)
-					.filter((id): id is string => Boolean(id) && ObjectId.isValid(id))
+					.filter((id): id is string => typeof id === 'string' && id !== '' && ObjectId.isValid(id))
 			),
 		];
 
