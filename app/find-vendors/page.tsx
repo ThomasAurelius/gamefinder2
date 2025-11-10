@@ -27,8 +27,13 @@ type Vendor = {
 };
 
 function VendorCard({ vendor }: { vendor: Vendor }) {
+	// Apply special styling for featured vendors
+	const cardClasses = vendor.isFeatured
+		? "rounded-lg border-2 border-amber-500 bg-gradient-to-br from-amber-600/20 via-purple-600/20 to-indigo-600/20 overflow-hidden md:flex md:flex-wrap shadow-lg"
+		: "rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden md:flex md:flex-wrap";
+
 	return (
-		<div className="rounded-lg border border-slate-800 bg-slate-950/40 overflow-hidden md:flex md:flex-wrap">
+		<div className={cardClasses}>
 			{vendor.primaryImage && (
 				<Link href={`/vendor/${vendor.id}`} className="md:w-1/2">
 					<img
@@ -80,7 +85,8 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
 							</a>
 						</p>
 					)}
-					{vendor.website && (
+					{/* Only show website for featured vendors */}
+					{vendor.isFeatured && vendor.website && (
 						<p>
 							<span className="text-slate-500">Website:</span>{" "}
 							<a
@@ -93,7 +99,8 @@ function VendorCard({ vendor }: { vendor: Vendor }) {
 							</a>
 						</p>
 					)}
-					{vendor.description && (
+					{/* Only show description for featured vendors */}
+					{vendor.isFeatured && vendor.description && (
 						<p className="mt-2 text-slate-300">{vendor.description}</p>
 					)}
 				</div>
