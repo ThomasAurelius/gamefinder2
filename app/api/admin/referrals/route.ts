@@ -3,9 +3,10 @@ import { cookies } from "next/headers";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import type { UserDocument } from "@/lib/user-types";
+import { isAdmin } from "@/lib/admin";
 
 /**
- * GET /api/admin/referrals - Get list of users referred by the current user
+ * GET /api/admin/referrals - Get list of all users with referrals (admin only)
  */
 export async function GET() {
 	try {
@@ -19,18 +20,27 @@ export async function GET() {
 			);
 		}
 
+		// Check if user is admin
+		const userIsAdmin = await isAdmin(userId);
+		if (!userIsAdmin) {
+			return NextResponse.json(
+				{ error: "Forbidden - Admin access required" },
+				{ status: 403 }
+			);
+		}
+
 		const db = await getDb();
 		const usersCollection = db.collection<UserDocument>("users");
 
-		// Find all users who have this user as their referrer
+		// Find all users who have a referrer
 		const referredUsers = await usersCollection
 			.find(
-				{ referredBy: userId },
+				{ referredBy: { $exists: true, $ne: null, $ne: "" } },
 				{
 					projection: {
 						_id: 1,
 						name: 1,
-						email: 1,
+						referredBy: 1,
 						createdAt: 1,
 						"profile.commonName": 1,
 						"profile.avatarUrl": 1,
@@ -40,18 +50,94 @@ export async function GET() {
 			.sort({ createdAt: -1 })
 			.toArray();
 
-		// Format the response
-		const formattedReferrals = referredUsers.map((user) => ({
-			id: user._id?.toString(),
-			name: user.name,
-			commonName: user.profile?.commonName || "",
-			avatarUrl: user.profile?.avatarUrl || "",
-			joinedAt: user.createdAt,
-		}));
+		// Get unique referrer IDs
+		const referrerIds = [
+			...new Set(
+				referredUsers
+					.map((user) => user.referredBy)
+					.filter((id): id is string => Boolean(id) && ObjectId.isValid(id))
+			),
+		];
+
+		// Fetch referrer information
+		const referrers = await usersCollection
+			.find(
+				{ _id: { $in: referrerIds.map((id) => new ObjectId(id)) } },
+				{
+					projection: {
+						_id: 1,
+						name: 1,
+						"profile.commonName": 1,
+					},
+				}
+			)
+			.toArray();
+
+		// Create a map of referrer ID to referrer info
+		const referrerMap = new Map(
+			referrers.map((ref) => [
+				ref._id?.toString(),
+				{
+					id: ref._id?.toString(),
+					name: ref.name,
+					commonName: ref.profile?.commonName || "",
+				},
+			])
+		);
+
+		// Group referred users by referrer
+		const referralsByReferrer: Record<
+			string,
+			{
+				referrer: {
+					id: string;
+					name: string;
+					commonName: string;
+				};
+				referrals: Array<{
+					id: string;
+					name: string;
+					commonName: string;
+					avatarUrl: string;
+					joinedAt: Date;
+				}>;
+			}
+		> = {};
+
+		for (const user of referredUsers) {
+			const referrerId = user.referredBy;
+			if (!referrerId) continue;
+
+			const referrerInfo = referrerMap.get(referrerId);
+			if (!referrerInfo) {
+				// Referrer not found in database, skip or use placeholder
+				continue;
+			}
+
+			if (!referralsByReferrer[referrerId]) {
+				referralsByReferrer[referrerId] = {
+					referrer: referrerInfo,
+					referrals: [],
+				};
+			}
+
+			referralsByReferrer[referrerId].referrals.push({
+				id: user._id?.toString() || "",
+				name: user.name || "",
+				commonName: user.profile?.commonName || "",
+				avatarUrl: user.profile?.avatarUrl || "",
+				joinedAt: user.createdAt || new Date(),
+			});
+		}
+
+		// Convert to array and sort by number of referrals
+		const sortedReferrals = Object.values(referralsByReferrer).sort(
+			(a, b) => b.referrals.length - a.referrals.length
+		);
 
 		return NextResponse.json({
-			referrals: formattedReferrals,
-			count: formattedReferrals.length,
+			referralsByReferrer: sortedReferrals,
+			totalReferrals: referredUsers.length,
 		});
 	} catch (error) {
 		console.error("Error fetching referrals:", error);
