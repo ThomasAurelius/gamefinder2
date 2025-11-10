@@ -529,12 +529,20 @@ export default function VendorsAdminPage() {
 		<section className="space-y-4">
 			<div className="flex items-center justify-between">
 				<h1 className="text-2xl font-semibold">Vendors Administration</h1>
-				<Link
-					href="/settings"
-					className="text-sm text-sky-400 hover:underline"
-				>
-					Back to Settings
-				</Link>
+				<div className="flex items-center gap-3">
+					<Link
+						href="/vendor?new=true"
+						className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+					>
+						Add Vendor
+					</Link>
+					<Link
+						href="/settings"
+						className="text-sm text-sky-400 hover:underline"
+					>
+						Back to Settings
+					</Link>
+				</div>
 			</div>
 
 			<div className="rounded-2xl border border-slate-800/60 bg-slate-900/40 p-6 shadow-lg shadow-slate-900/30">
