@@ -6,7 +6,11 @@ import { useState, useEffect } from "react";
 import Badge from "@/components/Badge";
 
 // Helper function to calculate luminance from hex color
-function getLuminance(hexColor: string): number {
+function getLuminance(hexColor: string | null | undefined): number {
+	// Return default luminance if hexColor is null or undefined
+	if (!hexColor) {
+		return 0.5;
+	}
 	const hex = hexColor.replace('#', '');
 	const r = parseInt(hex.substring(0, 2), 16);
 	const g = parseInt(hex.substring(2, 4), 16);
