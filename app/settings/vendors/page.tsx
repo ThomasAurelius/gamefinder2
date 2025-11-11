@@ -602,12 +602,20 @@ export default function VendorsAdminPage() {
 										{vendor.description}
 									</p>
 								</div>
-								<button
-									onClick={() => setSelectedVendor(vendor)}
-									className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-								>
-									View Details
-								</button>
+								<div className="flex gap-2">
+									<Link
+										href={`/vendor?edit=${vendor.id}`}
+										className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700"
+									>
+										Edit
+									</Link>
+									<button
+										onClick={() => setSelectedVendor(vendor)}
+										className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+									>
+										View Details
+									</button>
+								</div>
 							</div>
 						))}
 					</div>
