@@ -4,7 +4,7 @@ import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS } from "@/lib/constants";
+import { DAYS_OF_WEEK, TIME_SLOT_GROUPS, TIME_SLOTS, US_STATES } from "@/lib/constants";
 
 import type { VendorResponse } from "@/lib/vendor-types";
 import { createDefaultHours, sortTimeSlots } from "@/lib/vendor-utils";
@@ -534,13 +534,19 @@ function VendorManagementContent() {
 								<label className="block text-sm font-medium text-slate-200">
 									State / Province
 								</label>
-								<input
-									type="text"
+								<select
 									value={state}
 									onChange={(event) => setState(event.target.value)}
 									className="mt-1 w-full rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 									required
-								/>
+								>
+									<option value="">Select a state</option>
+									{US_STATES.map((state) => (
+										<option key={state.code} value={state.code}>
+											{state.name}
+										</option>
+									))}
+								</select>
 							</div>
 							<div>
 								<label className="block text-sm font-medium text-slate-200">
