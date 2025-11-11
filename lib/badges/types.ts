@@ -5,10 +5,11 @@ import { ObjectId } from "mongodb";
  */
 export type BadgeDocument = {
   _id?: ObjectId;
-  name: string; // Display name of the badge
+  name: string; // Display name of the badge (shown in tooltips)
   description: string; // Description of what the badge represents
-  imageUrl: string; // URL to badge icon/image
-  color?: string; // Optional color for the badge (hex code)
+  text: string; // Text shown on the badge tag
+  color: string; // Color for the badge (hex code)
+  imageUrl?: string; // Optional URL to badge icon/image (deprecated, for backward compatibility)
   createdAt: Date;
   updatedAt: Date;
   createdBy: string; // Admin user ID who created the badge

@@ -26,8 +26,8 @@ type Player = {
 	isGM?: boolean;
 	badges?: Array<{
 		name: string;
-		imageUrl: string;
-		color?: string;
+		text: string;
+		color: string;
 	}>;
 };
 
@@ -75,9 +75,10 @@ function PlayerCard({ player }: { player: Player }) {
 						<div className="flex pt-2 flex-col gap-1">
 							{player.badges.map((badge) => (
 								<Badge
-									key={`${player.id}-${badge.name}-${badge.imageUrl}`}
+									key={`${player.id}-${badge.name}-${badge.text}`}
 									name={badge.name}
-									imageUrl={badge.imageUrl}
+									text={badge.text}
+									color={badge.color}
 									size="sm"
 									showTooltip={true}
 								/>

@@ -48,7 +48,8 @@ export default async function UserProfilePage({
                     <Badge
                       key={badge._id?.toString()}
                       name={badge.name}
-                      imageUrl={badge.imageUrl}
+                      text={badge.text}
+                      color={badge.color}
                       size="lg"
                       showTooltip={true}
                     />

@@ -46,8 +46,8 @@ export async function createBadge(
   userId: string,
   name: string,
   description: string,
-  imageUrl: string,
-  color?: string,
+  text: string,
+  color: string,
   isSelfAssignable?: boolean
 ): Promise<BadgeDocument> {
   const db = await getDb();
@@ -57,8 +57,8 @@ export async function createBadge(
   const badge: BadgeDocument = {
     name: name.trim(),
     description: description.trim(),
-    imageUrl: imageUrl.trim(),
-    color: color?.trim() || undefined,
+    text: text.trim(),
+    color: color.trim(),
     createdAt: now,
     updatedAt: now,
     createdBy: userId,
@@ -78,8 +78,8 @@ export async function updateBadge(
   badgeId: string,
   name: string,
   description: string,
-  imageUrl: string,
-  color?: string,
+  text: string,
+  color: string,
   isSelfAssignable?: boolean
 ): Promise<boolean> {
   try {
@@ -92,8 +92,8 @@ export async function updateBadge(
         $set: {
           name: name.trim(),
           description: description.trim(),
-          imageUrl: imageUrl.trim(),
-          color: color?.trim() || undefined,
+          text: text.trim(),
+          color: color.trim(),
           isSelfAssignable: isSelfAssignable || false,
           updatedAt: new Date(),
         }

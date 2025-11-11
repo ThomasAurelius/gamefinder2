@@ -21,8 +21,9 @@ export async function GET() {
         id: b._id?.toString(),
         name: b.name,
         description: b.description,
-        imageUrl: b.imageUrl,
+        text: b.text,
         color: b.color,
+        imageUrl: b.imageUrl, // Keep for backward compatibility
         createdAt: b.createdAt,
         isSelfAssignable: b.isSelfAssignable,
       })),
@@ -62,7 +63,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description, imageUrl, color, isSelfAssignable } = body;
+    const { name, description, text, color, isSelfAssignable } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
@@ -78,16 +79,16 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!imageUrl || typeof imageUrl !== "string") {
+    if (!text || typeof text !== "string") {
       return NextResponse.json(
-        { error: "imageUrl is required and must be a string" },
+        { error: "text is required and must be a string" },
         { status: 400 }
       );
     }
 
-    if (color !== undefined && typeof color !== "string") {
+    if (!color || typeof color !== "string") {
       return NextResponse.json(
-        { error: "color must be a string" },
+        { error: "color is required and must be a string" },
         { status: 400 }
       );
     }
@@ -99,14 +100,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const badge = await createBadge(userId, name, description, imageUrl, color, isSelfAssignable);
+    const badge = await createBadge(userId, name, description, text, color, isSelfAssignable);
 
     return NextResponse.json(
       {
         id: badge._id?.toString(),
         name: badge.name,
         description: badge.description,
-        imageUrl: badge.imageUrl,
+        text: badge.text,
         color: badge.color,
         createdAt: badge.createdAt,
         isSelfAssignable: badge.isSelfAssignable,
@@ -147,7 +148,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, description, imageUrl, color, isSelfAssignable } = body;
+    const { id, name, description, text, color, isSelfAssignable } = body;
 
     if (!id || typeof id !== "string") {
       return NextResponse.json(
@@ -170,16 +171,16 @@ export async function PUT(request: Request) {
       );
     }
 
-    if (!imageUrl || typeof imageUrl !== "string") {
+    if (!text || typeof text !== "string") {
       return NextResponse.json(
-        { error: "imageUrl is required and must be a string" },
+        { error: "text is required and must be a string" },
         { status: 400 }
       );
     }
 
-    if (color !== undefined && typeof color !== "string") {
+    if (!color || typeof color !== "string") {
       return NextResponse.json(
-        { error: "color must be a string" },
+        { error: "color is required and must be a string" },
         { status: 400 }
       );
     }
@@ -191,7 +192,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    const success = await updateBadge(id, name, description, imageUrl, color, isSelfAssignable);
+    const success = await updateBadge(id, name, description, text, color, isSelfAssignable);
 
     if (!success) {
       return NextResponse.json(
