@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import Badge from "@/components/Badge";
 
 // Helper function to calculate luminance from hex color
 function getLuminance(hexColor: string): number {
@@ -1397,14 +1398,13 @@ export default function SettingsPage() {
 														className="flex items-center justify-between rounded border border-slate-700 bg-slate-900/40 p-2"
 													>
 														<div className="flex items-center gap-2">
-															<div className="relative h-8 w-8 overflow-hidden">
-																<Image
-																	src={badge.imageUrl}
-																	alt={badge.name}
-																	fill
-																	className="object-cover"
-																/>
-															</div>
+															<Badge
+																name={badge.name}
+																text={badge.text}
+																color={badge.color}
+																size="md"
+																showTooltip={true}
+															/>
 															<span className="text-sm text-slate-200">
 																{badge.name}
 															</span>
@@ -1606,14 +1606,13 @@ export default function SettingsPage() {
 										className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
 									>
 										<div className="flex items-center gap-3">
-											<div className="relative h-10 w-10 overflow-hidden">
-												<Image
-													src={badge.imageUrl}
-													alt={badge.name}
-													fill
-													className="object-cover"
-												/>
-											</div>
+											<Badge
+												name={badge.name}
+												text={badge.text}
+												color={badge.color}
+												size="lg"
+												showTooltip={true}
+											/>
 											<div>
 												<p className="text-sm font-medium text-slate-200">
 													{badge.name}
@@ -1675,14 +1674,13 @@ export default function SettingsPage() {
 											className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
 										>
 											<div className="flex items-center gap-3">
-												<div className="relative h-10 w-10 overflow-hidden">
-													<Image
-														src={badge.imageUrl}
-														alt={badge.name}
-														fill
-														className="object-cover"
-													/>
-												</div>
+												<Badge
+													name={badge.name}
+													text={badge.text}
+													color={badge.color}
+													size="lg"
+													showTooltip={true}
+												/>
 												<div>
 													<p className="text-sm font-medium text-slate-200">
 														{badge.name}
