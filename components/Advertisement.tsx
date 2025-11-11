@@ -57,7 +57,7 @@ export default function Advertisement() {
 	}
 
 	const content = (
-		<div className="relative mx-auto w-full max-w-[90%] lg:max-w-[800px] aspect-[16/9]">
+		<div className="relative mx-auto w-full max-w-[90%] lg:max-w-[800px] aspect-[4/1]">
 			<Image
 				src={advertisement.imageUrl}
 				alt="Advertisement"
