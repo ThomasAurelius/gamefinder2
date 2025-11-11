@@ -4,6 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
+// Helper function to calculate luminance from hex color
+function getLuminance(hexColor: string): number {
+	const hex = hexColor.replace('#', '');
+	const r = parseInt(hex.substring(0, 2), 16);
+	const g = parseInt(hex.substring(2, 4), 16);
+	const b = parseInt(hex.substring(4, 6), 16);
+	return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+
 export default function SettingsPage() {
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [announcement, setAnnouncement] = useState("");
@@ -47,8 +56,8 @@ export default function SettingsPage() {
 			id: string;
 			name: string;
 			description: string;
-			imageUrl: string;
-			color?: string;
+			text: string;
+			color: string;
 			isSelfAssignable?: boolean;
 		}>
 	>([]);
@@ -58,8 +67,8 @@ export default function SettingsPage() {
 			badgeId: string;
 			name: string;
 			description: string;
-			imageUrl: string;
-			color?: string;
+			text: string;
+			color: string;
 			awardedAt: Date;
 			isDisplayed: boolean;
 		}>
@@ -69,12 +78,11 @@ export default function SettingsPage() {
 		id?: string;
 		name: string;
 		description: string;
-		imageUrl: string;
+		text: string;
 		color: string;
 		isSelfAssignable: boolean;
 	} | null>(null);
 	const [savingBadge, setSavingBadge] = useState(false);
-	const [uploadingBadgeImage, setUploadingBadgeImage] = useState(false);
 	const [badgeMessage, setBadgeMessage] = useState("");
 	const [searchUsername, setSearchUsername] = useState("");
 	const [searchedUser, setSearchedUser] = useState<{
@@ -382,45 +390,6 @@ export default function SettingsPage() {
 		}
 	}
 
-	const handleBadgeImageUpload = async (
-		e: React.ChangeEvent<HTMLInputElement>
-	) => {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		setUploadingBadgeImage(true);
-		setBadgeMessage("");
-
-		try {
-			const formData = new FormData();
-			formData.append("file", file);
-			formData.append("type", "badge");
-
-			const response = await fetch("/api/upload", {
-				method: "POST",
-				body: formData,
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json();
-				throw new Error(errorData.error || "Failed to upload image");
-			}
-
-			const { url } = await response.json();
-			if (editingBadge) {
-				setEditingBadge({ ...editingBadge, imageUrl: url });
-			}
-			setBadgeMessage("Image uploaded successfully!");
-			setTimeout(() => setBadgeMessage(""), 3000);
-		} catch (err) {
-			const errorMessage =
-				err instanceof Error ? err.message : "Failed to upload image";
-			setBadgeMessage(errorMessage);
-		} finally {
-			setUploadingBadgeImage(false);
-		}
-	};
-
 	const handleSaveBadge = async () => {
 		if (!editingBadge) return;
 
@@ -434,14 +403,14 @@ export default function SettingsPage() {
 						id: editingBadge.id,
 						name: editingBadge.name,
 						description: editingBadge.description,
-						imageUrl: editingBadge.imageUrl,
+						text: editingBadge.text,
 						color: editingBadge.color,
 						isSelfAssignable: editingBadge.isSelfAssignable,
 					}
 				: {
 						name: editingBadge.name,
 						description: editingBadge.description,
-						imageUrl: editingBadge.imageUrl,
+						text: editingBadge.text,
 						color: editingBadge.color,
 						isSelfAssignable: editingBadge.isSelfAssignable,
 					};
@@ -1188,7 +1157,25 @@ export default function SettingsPage() {
 
 										<div className="space-y-2">
 											<label className="block text-sm font-medium text-slate-200">
-												Color (hex code, optional)
+												Badge Text
+											</label>
+											<input
+												type="text"
+												value={editingBadge.text}
+												onChange={(e) =>
+													setEditingBadge({
+														...editingBadge,
+														text: e.target.value,
+													})
+												}
+												placeholder="e.g., VIP, PRO, GM"
+												className="w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="block text-sm font-medium text-slate-200">
+												Color (hex code)
 											</label>
 											<input
 												type="text"
@@ -1202,7 +1189,30 @@ export default function SettingsPage() {
 												placeholder="#94a3b8"
 												className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
 											/>
+											<p className="text-xs text-slate-500">
+												This will be used for background and border colors
+											</p>
 										</div>
+
+										{editingBadge.text && editingBadge.color && (
+											<div className="space-y-2">
+												<label className="block text-sm font-medium text-slate-200">
+													Preview
+												</label>
+												<div className="flex items-center gap-2">
+													<span
+														className="inline-block rounded-full border px-3 py-1 text-sm font-medium"
+														style={{
+															backgroundColor: `${editingBadge.color}33`,
+															color: getLuminance(editingBadge.color) > 0.5 ? '#1e293b' : '#f1f5f9',
+															borderColor: `${editingBadge.color}4D`,
+														}}
+													>
+														{editingBadge.text}
+													</span>
+												</div>
+											</div>
+										)}
 
 										<div className="flex items-center gap-2">
 											<input
@@ -1225,42 +1235,6 @@ export default function SettingsPage() {
 											</label>
 										</div>
 
-										{editingBadge.imageUrl && (
-											<div className="flex items-center gap-3">
-												<div className="relative h-16 w-16 overflow-hidden rounded-lg border border-slate-700">
-													<Image
-														src={editingBadge.imageUrl}
-														alt="Badge preview"
-														fill
-														className="object-cover"
-													/>
-												</div>
-											</div>
-										)}
-
-										<div className="space-y-2">
-											<label
-												htmlFor="badge-image-upload"
-												className="inline-block cursor-pointer rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
-											>
-												{uploadingBadgeImage
-													? "Uploading..."
-													: "Upload Badge Image"}
-											</label>
-											<input
-												id="badge-image-upload"
-												type="file"
-												accept="image/jpeg,image/png,image/webp,image/gif"
-												onChange={handleBadgeImageUpload}
-												disabled={uploadingBadgeImage}
-												className="hidden"
-											/>
-											<p className="text-xs text-slate-500">
-												Recommended: square image, 64x64 to 256x256
-												pixels
-											</p>
-										</div>
-
 										<div className="flex gap-2">
 											<button
 												onClick={handleSaveBadge}
@@ -1268,7 +1242,8 @@ export default function SettingsPage() {
 													savingBadge ||
 													!editingBadge.name ||
 													!editingBadge.description ||
-													!editingBadge.imageUrl
+													!editingBadge.text ||
+													!editingBadge.color
 												}
 												className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
 											>
@@ -1290,8 +1265,8 @@ export default function SettingsPage() {
 											setEditingBadge({
 												name: "",
 												description: "",
-												imageUrl: "",
-												color: "",
+												text: "",
+												color: "#94a3b8",
 												isSelfAssignable: false,
 											})
 										}
@@ -1322,14 +1297,16 @@ export default function SettingsPage() {
 													className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-950/60 p-3"
 												>
 													<div className="flex items-center gap-3">
-														<div className="relative h-10 w-10 overflow-hidden">
-															<Image
-																src={badge.imageUrl}
-																alt={badge.name}
-																fill
-																className="object-cover"
-															/>
-														</div>
+														<span
+															className="inline-block rounded-full border px-3 py-1 text-sm font-medium"
+															style={{
+																backgroundColor: `${badge.color}33`,
+																color: getLuminance(badge.color) > 0.5 ? '#1e293b' : '#f1f5f9',
+																borderColor: `${badge.color}4D`,
+															}}
+														>
+															{badge.text}
+														</span>
 														<div>
 															<p className="text-sm font-medium text-slate-200">
 																{badge.name}
@@ -1347,8 +1324,8 @@ export default function SettingsPage() {
 																	name: badge.name,
 																	description:
 																		badge.description,
-																	imageUrl: badge.imageUrl,
-																	color: badge.color || "",
+																	text: badge.text,
+																	color: badge.color,
 																	isSelfAssignable:
 																		badge.isSelfAssignable ||
 																		false,

@@ -37,7 +37,7 @@ export async function GET(request: Request) {
         badgeId: badge._id?.toString(),
         name: badge.name,
         description: badge.description,
-        imageUrl: badge.imageUrl,
+        text: badge.text,
         color: badge.color,
         awardedAt: userBadge.awardedAt,
         isDisplayed: userBadge.isDisplayed,

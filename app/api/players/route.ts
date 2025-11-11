@@ -16,8 +16,8 @@ export type PlayerSearchResult = {
   isGM?: boolean; // Whether user is a Game Master / Dungeon Master
   badges?: Array<{
     name: string;
-    imageUrl: string;
-    color?: string;
+    text: string;
+    color: string;
   }>;
 };
 
@@ -143,7 +143,7 @@ export async function GET(request: Request) {
             userId,
             userBadges.map(({ badge }) => ({
               name: badge.name,
-              imageUrl: badge.imageUrl,
+              text: badge.text,
               color: badge.color,
             }))
           );
