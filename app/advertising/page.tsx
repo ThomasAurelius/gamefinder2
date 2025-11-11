@@ -61,7 +61,7 @@ function ChartIcon({ className }: { className?: string }) {
 }
 
 const keyFeatures = [
-	"2:1 Aspect Ratio Images (800x400px recommended) that auto-scale for mobile",
+	"4:1 Aspect Ratio Images (800x200px recommended) that auto-scale for mobile",
 	"Location-Based Targeting that reaches users within 50 miles of your chosen zip code",
 	"Smart competition handling so the closest ad is shown when multiple target the same area",
 	"Clickable ads with a URL that opens in a new window",
@@ -82,7 +82,7 @@ const howItWorks = [
 	{
 		title: "Responsive Design",
 		description:
-			"Your 2:1 artwork scales seamlessly from desktop monitors to phones. On smaller screens, ads resize to 90% width for clear, legible messaging.",
+			"Your 4:1 artwork scales seamlessly from desktop monitors to phones. On smaller screens, ads resize to 90% width for clear, legible messaging.",
 	},
 	{
 		title: "Click-Through Actions",
@@ -256,7 +256,7 @@ export default function AdvertisingPage() {
 							<div className="flex justify-between">
 								<dt className="text-slate-400">Image Dimensions</dt>
 								<dd className="font-medium text-slate-100">
-									800×400 (2:1)
+									800×200 (4:1)
 								</dd>
 							</div>
 							<div className="flex justify-between">
