@@ -1180,22 +1180,35 @@ export default function SettingsPage() {
 
 										<div className="space-y-2">
 											<label className="block text-sm font-medium text-slate-200">
-												Color (hex code)
+												Color
 											</label>
-											<input
-												type="text"
-												value={editingBadge.color}
-												onChange={(e) =>
-													setEditingBadge({
-														...editingBadge,
-														color: e.target.value,
-													})
-												}
-												placeholder="#94a3b8"
-												className="w-full max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-											/>
+											<div className="flex items-center gap-3">
+												<input
+													type="color"
+													value={editingBadge.color}
+													onChange={(e) =>
+														setEditingBadge({
+															...editingBadge,
+															color: e.target.value,
+														})
+													}
+													className="h-10 w-20 cursor-pointer rounded-lg border border-slate-700 bg-slate-950/60 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/40"
+												/>
+												<input
+													type="text"
+													value={editingBadge.color}
+													onChange={(e) =>
+														setEditingBadge({
+															...editingBadge,
+															color: e.target.value,
+														})
+													}
+													placeholder="#94a3b8"
+													className="flex-1 max-w-xs rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+												/>
+											</div>
 											<p className="text-xs text-slate-500">
-												This will be used for background and border colors
+												Pick a color or enter a hex code. This will be used for background and border colors.
 											</p>
 										</div>
 
