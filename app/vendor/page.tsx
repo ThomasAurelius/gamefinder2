@@ -541,9 +541,9 @@ function VendorManagementContent() {
 									required
 								>
 									<option value="">Select a state</option>
-									{US_STATES.map((stateName) => (
-										<option key={stateName} value={stateName}>
-											{stateName}
+									{US_STATES.map((state) => (
+										<option key={state.code} value={state.code}>
+											{state.name}
 										</option>
 									))}
 								</select>
