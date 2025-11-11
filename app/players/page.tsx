@@ -72,7 +72,7 @@ function PlayerCard({ player }: { player: Player }) {
 					)}
 					{/* Badges column on far left */}
 					{player.badges && player.badges.length > 0 && (
-						<div className="flex pt-2 flex-col gap-1">
+						<div className="flex pt-2 flex-col gap-1 items-start">
 							{player.badges.map((badge) => (
 								<Badge
 									key={`${player.id}-${badge.name}-${badge.text}`}
