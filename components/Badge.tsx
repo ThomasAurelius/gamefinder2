@@ -36,7 +36,12 @@ export default function Badge({ name, text, color, size = "md", showTooltip = tr
 }
 
 // Helper function to determine appropriate text color based on background color
-function getTextColorFromHex(hexColor: string): string {
+function getTextColorFromHex(hexColor: string | null | undefined): string {
+  // Return default color if hexColor is null or undefined
+  if (!hexColor) {
+    return '#f1f5f9';
+  }
+  
   // Remove # if present
   const hex = hexColor.replace('#', '');
   
