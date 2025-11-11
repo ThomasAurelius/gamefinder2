@@ -132,7 +132,7 @@ export async function GET(request: Request) {
 
     // Fetch badges for all players
     const userIds = players.map(p => p.id);
-    const badgesMap = new Map<string, Array<{ name: string; imageUrl: string; color?: string }>>();
+    const badgesMap = new Map<string, Array<{ name: string; text: string; color: string }>>();
     
     // Fetch badges in parallel for all users
     await Promise.all(
