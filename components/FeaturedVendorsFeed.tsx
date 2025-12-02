@@ -68,7 +68,7 @@ export default function FeaturedVendorsFeed() {
 	});
 
 	return (
-		<aside className="hidden 3xl:block w-64 ml-8 space-y-4 sticky top-4 self-start max-h-[calc(100vh-2rem)] overflow-y-auto">
+		<aside className="hidden 3xl:block w-64 ml-8 space-y-4 sticky top-4 self-start">
 			<div className="space-y-3">
 				<h2 className="text-lg font-semibold text-slate-300 px-2">
 					{isNearbyVendors ? "Nearby Venues" : "All Venues"}

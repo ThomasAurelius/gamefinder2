@@ -70,9 +70,9 @@ export default function RootLayout({
                                 <StructuredData />
                                 <IdleRecoveryHandler />
                                 <Navbar />
-				<div className="mx-auto max-w-[1800px] px-4 py-10 sm:px-6 flex">
+				<div className="mx-auto max-w-[1800px] px-4 py-10 sm:px-6 flex justify-center">
 					<DashboardSidebar />
-					<main className="flex-1 justify-center mx-auto max-w-[900px] min-w-0">
+					<main className="flex-1 max-w-[900px] min-w-0">
 						{children}
 					</main>
 					<FeaturedVendorsFeed />
